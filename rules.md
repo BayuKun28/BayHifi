@@ -12,12 +12,24 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
 
 ---
 
-## 2. Pedoman Desain Antarmuka (Material 3 Expressive)
+## 2. Pedoman Desain Antarmuka (Material 3 Expressive & Namida Architecture)
 
-### 2.1 Sistem Warna & Theming
-- **Base Theme**: Default Dark Studio Obsidian (`#0F1115`) dengan kontras tinggi untuk studio audio.
+### 2.1 Sistem Warna & Theming (Namida Custom Palette Engine)
+- **Theme Modes (Dark / Light / System)**:
+  - `ThemeMode.dark`: Studio Dark Obsidian (`#0D0F14`) atau *True OLED Black* (`#000000`).
+  - `ThemeMode.light`: Clean Studio Light / Champagne (`#F5F7FA`) dengan kontras teks tinggi.
+  - `ThemeMode.system`: Mengikuti preferensi tema perangkat (OS) secara otomatis.
+- **Namida Dynamic Palette & Custom Colors**:
+  - UI secara dinamis mengekstrak palet warna dari Album Art lagu aktif menggunakan `palette_generator`.
+  - Pilihan preset palet audio studio terkurasi:
+    - *Obsidian Cyan* (Namida Cyber Neon `#00F0FF`)
+    - *Amber Tube Glow* (Warm Analog Tube `#FF9F0A`)
+    - *Emerald HiFi* (Mint Studio Precision `#00E676`)
+    - *Electric Purple* (Audiophile Violet `#BF5AF2`)
+    - *Crimson Passion* (Mastering Red `#FF3B30`)
+    - *True OLED Black* (0% battery consumption AMOLED)
+  - Pengguna bebas memilih Accent Color custom (HEX / Swatch) untuk slider, indikator node, dan kurva glow.
 - **Surface Elevation**: Gunakan tonal elevation Material 3 (`#161920`, `#1C202A`, `#242A38`), jangan gunakan drop shadow kasar.
-- **Dynamic Palette (Monet / Material You)**: UI harus mampu mengekstrak warna dominan & aksen dari Album Art lagu yang sedang diputar.
 - **Neon Glow Palette**:
   - `EQ Curve`: Amber Warmth (`#FF9F0A`) dengan translusen glow.
   - `Driver FR`: Cyan Neon (`#00F0FF`).
@@ -42,6 +54,21 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
 - **Logarithmic Math Caching**: Nilai mapping koordinat piksel ke frekuensi logaritmik ($20\text{ Hz} \leftrightarrow 20,000\text{ Hz}$) harus diprekomputasi atau menggunakan lookup table saat resize canvas.
 
 ---
+
+### 2.4 Arsitektur MiniPlayer & Navigasi (Namida-Inspired Expandable Player)
+- **Tanpa Tab Khusus Player**:
+  - Layar pemutar musik utama (*Now Playing*) **tidak** menggunakan tab mandiri di Bottom Navigation Bar.
+  - Tab utama aplikasi Baydev HiFi terdiri dari 4 tab:
+    1. **Dashboard** (Index 0): Status engine SoLoud, DAC indicator, launcher Pro-Q, statistik library.
+    2. **DSP Rack** (Index 1): 10+ modul mastering (Tube Exciter, Compressor, Crossfeed, Limiter).
+    3. **Library** (Index 2): Pustaka terpadu offline lokal dan cloud Navidrome.
+    4. **Settings** (Index 3): Kustomisasi tema, custom palette, dark/light/system, visualizer, dan DAC.
+- **Omnipresent Expandable MiniPlayer**:
+  - MiniPlayer selalu melayang (*docked*) tepat di atas Bottom Navigation Bar (atau di bagian bawah layar saat navigasi tersembunyi).
+  - Menampilkan thumbnail album art (squircle rounded), judul lagu bergeser halus (*marquee* jika panjang), nama artist, tombol Play/Pause, tombol Next, dan progress bar tipis 2.5px di bagian bawah.
+  - **Fluid Gestures & Spring Physics**:
+    - Ketukan (*tap*) atau gesekan ke atas (*swipe up*) membuka layar **NowPlayingScreen** secara penuh dengan transisi bottom-sheet / sliding panel.
+    - Gesekan ke bawah (*swipe down*) atau tombol chevron collapse mengembalikan player ke bentuk MiniPlayer tanpa menghentikan pemutaran audio.
 
 ## 3. Standar Koding & Pembuatan Fungsi
 

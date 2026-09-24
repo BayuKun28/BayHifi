@@ -6,8 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## 📊 Status Dashboard
 - **Total Fase**: 5 Fase
-- **Total Tugas**: 36 Sub-tugas
-- **Status Proyek**: 🟢 *Phase 1, 2, & 3 Completed — Ready for Phase 4 (Mastering DSP Studio Rack)*
+- **Total Tugas**: 40 Sub-tugas
+- **Arsitektur UI**: ✨ *Namida-Inspired Expandable MiniPlayer & Custom Palette Engine (Dark/Light/System)*
+- **Status Proyek**: 🟢 *Phase 1, 2, & 3 Completed — Executing Namida UI & Expandable MiniPlayer Navigation*
 
 ---
 
@@ -146,8 +147,21 @@ Rantai pemrosesan audio kelas profesional untuk mastering dan personalisasi kara
 
 ---
 
-## ☁️ Fase 5: Unified Library (Offline + Navidrome Cloud), Studio Dashboard & Settings
-Integrasi sumber audio lengkap ke dalam satu Library terpadu dengan filter, landing Dashboard saat aplikasi dibuka, dan kustomisasi estetika Material 3 Expressive.
+## ☁️ Fase 5: Namida Architecture, Expandable MiniPlayer, Custom Palette, Unified Library & Settings
+Integrasi antarmuka elegan berbasis referensi Namida: Expandable MiniPlayer tanpa tab player khusus, tema kustom multi-palet (Dark/Light/Follow System), Dashboard audiophile, Library terpadu offline + Navidrome, dan DSP Mastering Rack.
+
+- [ ] **5.0 Namida-Inspired Expandable MiniPlayer & Navigation Restructure**
+  - [ ] Hapus tab khusus "Player" dari Bottom Navigation Bar (kini terdiri dari 4 tab: Dashboard, DSP Rack, Library, Settings)
+  - [ ] Implementasikan persistent MiniPlayer melayang tepat di atas Bottom Navigation Bar
+  - [ ] MiniPlayer menampilkan: cover squircle, judul lagu & artist, badge Hi-Res, tombol Play/Pause & Next, serta micro progress bar
+  - [ ] Gestur interaktif: Tap atau swipe-up untuk expand ke full NowPlayingScreen dengan spring physics
+  - [ ] Gestur swipe-down atau tombol chevron untuk collapse kembali ke MiniPlayer tanpa interupsi audio
+- [ ] **5.1 Namida Theming & Custom Palette Engine**
+  - [ ] State Provider untuk ThemeMode: `ThemeMode.dark`, `ThemeMode.light`, dan `ThemeMode.system`
+  - [ ] Ekstraksi warna dinamis dari Album Art lagu aktif (`palette_generator`) dengan transisi fluida
+  - [ ] Pilihan preset palet studio: *Obsidian Cyan (Namida Neon)*, *Amber Tube Glow*, *Emerald HiFi*, *Electric Purple*, *Crimson Passion*, *True OLED Black*, *Champagne Light*
+  - [ ] Custom Accent Color picker untuk aksen slider, knop, dan neon glow kurva EQ
+  - [ ] Halaman Settings terintegrasi dengan live preview tema dan palet warna
 
 - [ ] **5.0 Studio Hub & Audiophile Dashboard (Screen Pembuka Aplikasi)**
   - [ ] Dashboard otomatis menjadi menu pertama saat aplikasi dibuka (Default Tab Index 0)

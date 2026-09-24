@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../app/theme/app_colors.dart';
-import '../app/theme/color_schemes.dart';
+import '../app/theme/theme_mode_controller.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/library/presentation/unified_library_screen.dart';
-import '../features/player/presentation/now_playing_screen.dart';
-import '../features/pro_q_studio/presentation/pro_q_studio_screen.dart';
+import '../features/player/presentation/controllers/player_expansion_controller.dart';
+import '../features/player/presentation/widgets/namida_expandable_miniplayer.dart';
+import '../features/settings/presentation/settings_screen.dart';
 
 class BaydevHiFiApp extends ConsumerStatefulWidget {
   const BaydevHiFiApp({super.key});
@@ -15,76 +15,88 @@ class BaydevHiFiApp extends ConsumerStatefulWidget {
 }
 
 class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
-  int _selectedNavIndex = 0; // Default index 0: Dashboard saat aplikasi pertama dibuka
+  int _selectedNavIndex = 0; // Default: Dashboard (Index 0)
 
   @override
   Widget build(BuildContext context) {
+    final themeState = ref.watch(themeControllerProvider);
+
     return MaterialApp(
       title: 'Baydev HiFi',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkStudioTheme,
+      themeMode: themeState.themeMode.mode,
+      theme: AppThemeBuilder.buildTheme(themeState.currentPalette, isDark: false),
+      darkTheme: AppThemeBuilder.buildTheme(themeState.currentPalette, isDark: true),
       home: LayoutBuilder(
         builder: (context, constraints) {
           final isMobile = constraints.maxWidth < 650;
+          final theme = Theme.of(context);
 
+          // 4 Tab Utama (Tanpa Tab Khusus Player, sesuai arsitektur Namida)
           final pages = [
             DashboardScreen(
-              onNavigateToPlayer: () => setState(() => _selectedNavIndex = 1),
-              onNavigateToLibrary: () => setState(() => _selectedNavIndex = 3),
-              onNavigateToDsp: () => setState(() => _selectedNavIndex = 2),
+              onNavigateToPlayer: () =>
+                  ref.read(playerExpansionProvider.notifier).expand(),
+              onNavigateToLibrary: () => setState(() => _selectedNavIndex = 2),
+              onNavigateToDsp: () => setState(() => _selectedNavIndex = 1),
             ),
-            NowPlayingScreen(
-              onOpenProQStudio: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ProQStudioScreen()),
-                );
-              },
+            _buildPlaceholderScreen(
+              'DSP MASTERING RACK',
+              'Tube Exciter, Dynamic Compressor, Binaural Crossfeed & Limiter',
+              theme,
             ),
-            _buildPlaceholderScreen('DSP MASTERING RACK', 'Tube Exciter, Compressor, Binaural & Limiter'),
             const UnifiedLibraryScreen(),
-            _buildPlaceholderScreen('SETTINGS', 'Theme Colors, Waveforms, Album Art & DAC'),
+            const SettingsScreen(),
           ];
 
           if (isMobile) {
-            return Scaffold(
-              backgroundColor: AppColors.background,
-              body: IndexedStack(
-                index: _selectedNavIndex,
-                children: pages,
-              ),
-              bottomNavigationBar: NavigationBar(
-                backgroundColor: AppColors.surface,
-                indicatorColor: AppColors.amberEq.withValues(alpha: 0.2),
-                selectedIndex: _selectedNavIndex,
-                onDestinationSelected: (idx) => setState(() => _selectedNavIndex = idx),
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.dashboard_outlined),
-                    selectedIcon: Icon(Icons.dashboard, color: AppColors.amberEq),
-                    label: 'Dashboard',
+            return Stack(
+              children: [
+                // Layer 1: Scaffold Utama dengan NavigationBar
+                Scaffold(
+                  backgroundColor: theme.scaffoldBackgroundColor,
+                  body: Padding(
+                    padding: const EdgeInsets.only(bottom: 74.0),
+                    child: IndexedStack(
+                      index: _selectedNavIndex,
+                      children: pages,
+                    ),
                   ),
-                  NavigationDestination(
-                    icon: Icon(Icons.music_note_outlined),
-                    selectedIcon: Icon(Icons.music_note, color: AppColors.amberEq),
-                    label: 'Player',
+                  bottomNavigationBar: NavigationBar(
+                    backgroundColor: theme.colorScheme.surface,
+                    selectedIndex: _selectedNavIndex,
+                    onDestinationSelected: (idx) =>
+                        setState(() => _selectedNavIndex = idx),
+                    destinations: const [
+                      NavigationDestination(
+                        icon: Icon(Icons.dashboard_outlined),
+                        selectedIcon: Icon(Icons.dashboard_rounded),
+                        label: 'Dashboard',
+                      ),
+                      NavigationDestination(
+                        icon: Icon(Icons.tune_outlined),
+                        selectedIcon: Icon(Icons.tune_rounded),
+                        label: 'DSP Rack',
+                      ),
+                      NavigationDestination(
+                        icon: Icon(Icons.library_music_outlined),
+                        selectedIcon: Icon(Icons.library_music_rounded),
+                        label: 'Library',
+                      ),
+                      NavigationDestination(
+                        icon: Icon(Icons.settings_outlined),
+                        selectedIcon: Icon(Icons.settings_rounded),
+                        label: 'Settings',
+                      ),
+                    ],
                   ),
-                  NavigationDestination(
-                    icon: Icon(Icons.tune_outlined),
-                    selectedIcon: Icon(Icons.tune, color: AppColors.amberEq),
-                    label: 'DSP Rack',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.library_music_outlined),
-                    selectedIcon: Icon(Icons.library_music, color: AppColors.amberEq),
-                    label: 'Library',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.settings_outlined),
-                    selectedIcon: Icon(Icons.settings, color: AppColors.amberEq),
-                    label: 'Settings',
-                  ),
-                ],
-              ),
+                ),
+
+                // Layer 2: Namida Omnipresent Expandable MiniPlayer (menutupi seluruh layar saat di-expand)
+                const NamidaExpandableMiniPlayer(
+                  collapsedBottomOffset: 88.0,
+                ),
+              ],
             );
           }
 
@@ -92,69 +104,83 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
           final isShortHeight = constraints.maxHeight < 550;
 
           return Scaffold(
-            backgroundColor: AppColors.background,
-            body: Row(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            body: Stack(
               children: [
-                NavigationRail(
-                  backgroundColor: AppColors.surface,
-                  selectedIndex: _selectedNavIndex,
-                  onDestinationSelected: (idx) => setState(() => _selectedNavIndex = idx),
-                  labelType: isShortHeight
-                      ? NavigationRailLabelType.none
-                      : NavigationRailLabelType.all,
-                  leading: Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: isShortHeight ? 6.0 : 16.0,
-                    ),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.amberEq.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.amberEq.withValues(alpha: 0.5)),
+                Row(
+                  children: [
+                    NavigationRail(
+                      backgroundColor: theme.colorScheme.surface,
+                      selectedIndex: _selectedNavIndex,
+                      onDestinationSelected: (idx) =>
+                          setState(() => _selectedNavIndex = idx),
+                      labelType: isShortHeight
+                          ? NavigationRailLabelType.none
+                          : NavigationRailLabelType.all,
+                      leading: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isShortHeight ? 6.0 : 16.0,
+                        ),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.graphic_eq,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.graphic_eq,
-                        color: AppColors.amberEq,
-                        size: 20,
+                      destinations: const [
+                        NavigationRailDestination(
+                          icon: Icon(Icons.dashboard_outlined),
+                          selectedIcon: Icon(Icons.dashboard_rounded),
+                          label: Text('Dashboard', style: TextStyle(fontSize: 11)),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.tune_outlined),
+                          selectedIcon: Icon(Icons.tune_rounded),
+                          label: Text('DSP Rack', style: TextStyle(fontSize: 11)),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.library_music_outlined),
+                          selectedIcon: Icon(Icons.library_music_rounded),
+                          label: Text('Library', style: TextStyle(fontSize: 11)),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.settings_outlined),
+                          selectedIcon: Icon(Icons.settings_rounded),
+                          label: Text('Settings', style: TextStyle(fontSize: 11)),
+                        ),
+                      ],
+                    ),
+                    VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: theme.dividerColor,
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 74.0),
+                        child: IndexedStack(
+                          index: _selectedNavIndex,
+                          children: pages,
+                        ),
                       ),
-                    ),
-                  ),
-                  destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.dashboard_outlined),
-                      selectedIcon: Icon(Icons.dashboard, color: AppColors.amberEq),
-                      label: Text('Dashboard', style: TextStyle(fontSize: 11)),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.music_note_outlined),
-                      selectedIcon: Icon(Icons.music_note, color: AppColors.amberEq),
-                      label: Text('Player', style: TextStyle(fontSize: 11)),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.tune_outlined),
-                      selectedIcon: Icon(Icons.tune, color: AppColors.amberEq),
-                      label: Text('DSP Rack', style: TextStyle(fontSize: 11)),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.library_music_outlined),
-                      selectedIcon: Icon(Icons.library_music, color: AppColors.amberEq),
-                      label: Text('Library', style: TextStyle(fontSize: 11)),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.settings_outlined),
-                      selectedIcon: Icon(Icons.settings, color: AppColors.amberEq),
-                      label: Text('Settings', style: TextStyle(fontSize: 11)),
                     ),
                   ],
                 ),
-                const VerticalDivider(width: 1, thickness: 1, color: AppColors.surfaceBorder),
-                Expanded(
-                  child: IndexedStack(
-                    index: _selectedNavIndex,
-                    children: pages,
-                  ),
+
+                // Namida Expandable MiniPlayer on Desktop/Tablet
+                const NamidaExpandableMiniPlayer(
+                  collapsedBottomOffset: 12.0,
                 ),
               ],
             ),
@@ -164,24 +190,31 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
     );
   }
 
-  Widget _buildPlaceholderScreen(String title, String subtitle) {
+  Widget _buildPlaceholderScreen(
+    String title,
+    String subtitle,
+    ThemeData theme,
+  ) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
-              color: AppColors.amberEq,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              fontSize: 14,
+            ),
           ),
         ],
       ),

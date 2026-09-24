@@ -59,4 +59,15 @@ class AppTypography {
         fontFeatures: audioFigures,
         color: color,
       );
+  static TextTheme textTheme({required bool isDark}) {
+    final color = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
+    final secondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    return TextTheme(
+      displayLarge: display(color),
+      titleLarge: title(color),
+      titleMedium: subtitle(color),
+      bodyLarge: body(color),
+      bodyMedium: body(secondary),
+    );
+  }
 }

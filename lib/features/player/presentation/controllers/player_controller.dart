@@ -105,6 +105,26 @@ class PlayerController extends StateNotifier<PlaybackState> {
     state = state.copyWith(isLooping: next);
   }
 
+  void skipNext() {
+    if (state.duration > Duration.zero) {
+      final newPos = state.position + const Duration(seconds: 15);
+      if (newPos < state.duration) {
+        seek(newPos);
+      } else {
+        seek(Duration.zero);
+      }
+    }
+  }
+
+  void skipPrevious() {
+    if (state.position.inSeconds > 3) {
+      seek(Duration.zero);
+    } else {
+      final newPos = state.position - const Duration(seconds: 15);
+      seek(newPos > Duration.zero ? newPos : Duration.zero);
+    }
+  }
+
   @override
   void dispose() {
     _posSub?.cancel();

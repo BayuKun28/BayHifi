@@ -10,10 +10,12 @@ import '../../pro_q_studio/presentation/pro_q_studio_screen.dart';
 
 class NowPlayingScreen extends ConsumerStatefulWidget {
   final VoidCallback onOpenProQStudio;
+  final VoidCallback? onCollapse;
 
   const NowPlayingScreen({
     super.key,
     required this.onOpenProQStudio,
+    this.onCollapse,
   });
 
   @override
@@ -72,22 +74,30 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     final track = playback.currentTrack;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             children: [
-              // Header
+              // Header with Namida Collapse Button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  if (widget.onCollapse != null)
+                    IconButton(
+                      onPressed: widget.onCollapse,
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
+                      tooltip: 'Tutup Player ke MiniPlayer',
+                    )
+                  else
+                    const SizedBox(width: 48),
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         'BAYDEV HIFI',
-                        style: AppTypography.badge(color: AppColors.amberEq),
+                        style: AppTypography.badge(color: Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(height: 2),
                       Text(
