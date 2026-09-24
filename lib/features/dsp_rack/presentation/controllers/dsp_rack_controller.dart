@@ -16,6 +16,9 @@ class DspRackController extends StateNotifier<DspRackState> {
     _syncWithEngine();
   }
 
+  @override
+  DspRackState get state => super.state;
+
   /// Sinkronisasi parameter DSP ke low-level C++ filter engine SoLoud
   void _syncWithEngine() {
     try {

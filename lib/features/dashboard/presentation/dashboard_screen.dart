@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../library/presentation/controllers/library_controller.dart';
+import '../../navidrome/domain/subsonic_models.dart';
 import '../../player/presentation/controllers/player_controller.dart';
 import '../../pro_q_studio/presentation/pro_q_studio_screen.dart';
 
@@ -21,6 +23,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final playback = ref.watch(playerControllerProvider);
     final track = playback.currentTrack;
+    final libraryState = ref.watch(unifiedLibraryProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -302,47 +305,92 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 16),
 
               // 4. Unified Library & Quick Stats Card
-              InkWell(
-                onTap: onNavigateToLibrary,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF10141C),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF222936)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10141C),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF222936)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: onNavigateToLibrary,
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'UNIFIED MUSIC LIBRARY',
-                            style: TextStyle(
-                              color: Color(0xFF90A4AE),
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.8,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'UNIFIED MUSIC LIBRARY',
+                                style: TextStyle(
+                                  color: Color(0xFF90A4AE),
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${libraryState.totalTracksCount} Lagu Tersedia (${libraryState.hiResTracksCount} Hi-Res FLAC)',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF90A4AE)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              ref.read(unifiedLibraryProvider.notifier).setFilter(LibrarySourceFilter.all);
+                              onNavigateToLibrary();
+                            },
+                            child: _buildFilterChip('All Sources (${libraryState.totalTracksCount})', true),
+                          ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () {
+                              ref.read(unifiedLibraryProvider.notifier).setFilter(LibrarySourceFilter.offline);
+                              onNavigateToLibrary();
+                            },
+                            child: _buildFilterChip('Offline (${libraryState.offlineTracksCount})', false),
+                          ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () {
+                              ref.read(unifiedLibraryProvider.notifier).setFilter(LibrarySourceFilter.navidrome);
+                              onNavigateToLibrary();
+                            },
+                            child: _buildFilterChip(
+                              'Navidrome (${libraryState.navidromeConnectionStatus == NavidromeConnectionStatus.connected ? "Connected" : "Offline"})',
+                              libraryState.navidromeConnectionStatus == NavidromeConnectionStatus.connected,
                             ),
                           ),
-                          const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFF90A4AE)),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () {
+                              ref.read(unifiedLibraryProvider.notifier).setFilter(LibrarySourceFilter.hiRes);
+                              onNavigateToLibrary();
+                            },
+                            child: _buildFilterChip('Hi-Res 24-bit (${libraryState.hiResTracksCount})', false),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          _buildFilterChip('All Sources', true),
-                          const SizedBox(width: 6),
-                          _buildFilterChip('Offline Local', false),
-                          const SizedBox(width: 6),
-                          _buildFilterChip('Navidrome Cloud', false),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],

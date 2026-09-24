@@ -45,72 +45,72 @@ void main() {
 
       // Test Preamp
       controller.setPreamp(6.0);
-      expect(controller.debugState.preampDb, 6.0);
+      expect(controller.state.preampDb, 6.0);
       controller.setPreamp(-40.0); // should clamp to -24.0
-      expect(controller.debugState.preampDb, -24.0);
+      expect(controller.state.preampDb, -24.0);
 
       // Test Dynamic Bass Boost
       controller.toggleBassBoost();
-      expect(controller.debugState.bassBoostEnabled, true);
+      expect(controller.state.bassBoostEnabled, true);
       controller.setBassBoostAmount(4.5);
-      expect(controller.debugState.bassBoostAmount, 4.5);
+      expect(controller.state.bassBoostAmount, 4.5);
 
       // Test Tube Exciter
       controller.toggleTubeExciter();
-      expect(controller.debugState.tubeExciterEnabled, true);
+      expect(controller.state.tubeExciterEnabled, true);
       controller.setTubeDrive(3.5);
-      expect(controller.debugState.tubeDrive, 3.5);
+      expect(controller.state.tubeDrive, 3.5);
       controller.setTubeWarmth(0.7);
-      expect(controller.debugState.tubeWarmth, 0.7);
+      expect(controller.state.tubeWarmth, 0.7);
 
       // Test Dynamic Compressor
       controller.toggleCompressor();
-      expect(controller.debugState.compressorEnabled, true);
+      expect(controller.state.compressorEnabled, true);
       controller.setCompThreshold(-18.0);
-      expect(controller.debugState.compThreshold, -18.0);
+      expect(controller.state.compThreshold, -18.0);
       controller.setCompRatio(4.0);
-      expect(controller.debugState.compRatio, 4.0);
+      expect(controller.state.compRatio, 4.0);
 
       // Test Stereo Width Matrix
       controller.toggleStereoWidth();
-      expect(controller.debugState.stereoWidthEnabled, true);
+      expect(controller.state.stereoWidthEnabled, true);
       controller.setStereoWidth(1.8);
-      expect(controller.debugState.stereoWidth, 1.8);
+      expect(controller.state.stereoWidth, 1.8);
 
       // Test Binaural Crossfeed
       controller.toggleCrossfeed();
-      expect(controller.debugState.crossfeedEnabled, true);
+      expect(controller.state.crossfeedEnabled, true);
       controller.setCrossfeedCutoff(650.0);
-      expect(controller.debugState.crossfeedCutoff, 650.0);
+      expect(controller.state.crossfeedCutoff, 650.0);
 
       // Test Freeverb Spatial Reverb
       controller.toggleReverb();
-      expect(controller.debugState.reverbEnabled, true);
+      expect(controller.state.reverbEnabled, true);
       controller.setReverbRoomSize(0.65);
-      expect(controller.debugState.reverbRoomSize, 0.65);
+      expect(controller.state.reverbRoomSize, 0.65);
 
       // Test Granular Pitch Shifter
       controller.togglePitchShift();
-      expect(controller.debugState.pitchShiftEnabled, true);
+      expect(controller.state.pitchShiftEnabled, true);
       controller.setPitchSemitones(2.0);
-      expect(controller.debugState.pitchSemitones, 2.0);
+      expect(controller.state.pitchSemitones, 2.0);
 
       // Test Peak Brickwall Limiter
       controller.setLimiterCeiling(-0.5);
-      expect(controller.debugState.limiterOutputCeiling, -0.5);
+      expect(controller.state.limiterOutputCeiling, -0.5);
 
       // Test Master Bypass A/B Comparison
       controller.toggleBypass();
-      expect(controller.debugState.isBypassed, true);
+      expect(controller.state.isBypassed, true);
       controller.toggleBypass();
-      expect(controller.debugState.isBypassed, false);
+      expect(controller.state.isBypassed, false);
 
       // Test Reset Rack
       controller.resetToDefaults();
-      expect(controller.debugState.bassBoostEnabled, false);
-      expect(controller.debugState.tubeExciterEnabled, false);
-      expect(controller.debugState.preampDb, 0.0);
-      expect(controller.debugState.limiterEnabled, true);
+      expect(controller.state.bassBoostEnabled, false);
+      expect(controller.state.tubeExciterEnabled, false);
+      expect(controller.state.preampDb, 0.0);
+      expect(controller.state.limiterEnabled, true);
     });
 
     test('4.10 Presets Application and override tracking', () {
@@ -118,14 +118,14 @@ void main() {
       final tubePreset = DspPreset.studioPresets.firstWhere((p) => p.id == 'warm_tube');
 
       controller.applyPreset(tubePreset);
-      expect(controller.debugState.activePresetId, 'warm_tube');
-      expect(controller.debugState.tubeExciterEnabled, true);
-      expect(controller.debugState.tubeDrive, 2.8);
+      expect(controller.state.activePresetId, 'warm_tube');
+      expect(controller.state.tubeExciterEnabled, true);
+      expect(controller.state.tubeDrive, 2.8);
 
       // Modifying a parameter should clear active preset identifier
       controller.setTubeDrive(5.0);
-      expect(controller.debugState.activePresetId, isNull);
-      expect(controller.debugState.tubeDrive, 5.0);
+      expect(controller.state.activePresetId, isNull);
+      expect(controller.state.tubeDrive, 5.0);
     });
   });
 

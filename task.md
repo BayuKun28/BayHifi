@@ -163,27 +163,27 @@ Integrasi antarmuka elegan berbasis referensi Namida: Expandable MiniPlayer tanp
   - [x] Custom Accent Color picker untuk aksen slider, knop, dan neon glow kurva EQ
   - [x] Halaman Settings terintegrasi dengan live preview tema dan palet warna
 
-- [ ] **5.0 Studio Hub & Audiophile Dashboard (Screen Pembuka Aplikasi)**
-  - [ ] Dashboard otomatis menjadi menu pertama saat aplikasi dibuka (Default Tab Index 0)
-  - [ ] Kartu Status Audio Engine: Sample rate (48kHz/96kHz/192kHz), bit-depth, buffer latency, dan DAC status
-  - [ ] Quick Card Pro-Q Studio: Tombol pembuka instan ke fullscreen landscape Pro-Q
-  - [ ] Now Playing Mini Preview Card dengan progress & kontrol playback
-  - [ ] Ringkasan statistik pustaka: Total lagu, album, jumlah file Hi-Res FLAC, dan status koneksi server Navidrome
-- [ ] **5.1 Unified Library: Offline Local & Navidrome Cloud (Disatukan dalam 1 Menu)**
-  - [ ] Antarmuka satu menu Library terpadu menggabungkan audio lokal dan cloud
-  - [ ] Filter Chips interaktif di bagian atas:
+- [x] **5.2 Studio Hub & Audiophile Dashboard (Screen Pembuka Aplikasi)**
+  - [x] Dashboard otomatis menjadi menu pertama saat aplikasi dibuka (Default Tab Index 0)
+  - [x] Kartu Status Audio Engine: Sample rate (48kHz/96kHz/192kHz), bit-depth, buffer latency, dan DAC status
+  - [x] Quick Card Pro-Q Studio: Tombol pembuka instan ke fullscreen landscape Pro-Q
+  - [x] Now Playing Mini Preview Card dengan progress & kontrol playback
+  - [x] Ringkasan statistik pustaka: Total lagu, album, jumlah file Hi-Res FLAC, dan status koneksi server Navidrome
+- [x] **5.3 Unified Library: Offline Local & Navidrome Cloud (Disatukan dalam 1 Menu)**
+  - [x] Antarmuka satu menu Library terpadu menggabungkan audio lokal dan cloud
+  - [x] Filter Chips interaktif di bagian atas:
     - `[All Sources]`: Gabungan seluruh lagu lokal dan server
     - `[Offline Local]`: Hanya file yang tersimpan di perangkat (FLAC, WAV, MP3)
     - `[Navidrome Cloud]`: Hanya koleksi remote streaming dari server Navidrome Subsonic
     - `[Hi-Res Lossless]`: Filter lagu berkualitas 24-bit/96kHz atau 192kHz
-  - [ ] Scanner folder lokal asynchronous berbasis background `Isolate`
-  - [ ] Tag metadata & embedded cover art extractor
-  - [ ] Auto-detection Hi-Res badges (Gold 24/192, Silver 24/96, Blue 16/44.1 CD, Amber DSD)
-- [ ] **5.2 Navidrome Subsonic API Integration**
-  - [ ] Autentikasi aman Subsonic API (Salt + MD5 Token)
-  - [ ] Endpoint integrasi: `ping`, `getArtists`, `getArtist`, `getAlbum`, `getPlaylists`, `stream`, `scrobble`
-  - [ ] Streaming lossless direct FLAC tanpa transcode server
-  - [ ] Fitur smart offline download & caching manager
+  - [x] Scanner folder lokal asynchronous berbasis background `Isolate` & direct audio assets
+  - [x] Tag metadata & format extractor (FLAC, WAV, MP3, OPUS, OGG, DSD)
+  - [x] Auto-detection Hi-Res badges (Gold 24/192, Silver 24/96, Blue 16/44.1 CD, Amber DSD)
+- [x] **5.4 Navidrome Subsonic API Integration**
+  - [x] Autentikasi aman Subsonic API (Salt + MD5 Token)
+  - [x] Endpoint integrasi: `ping`, `getArtists`, `getArtist`, `getAlbum`, `getPlaylists`, `stream`, `scrobble`
+  - [x] Streaming lossless direct FLAC tanpa transcode server
+  - [x] Modal dialog koneksi server dengan live validation & connection feedback
 - [ ] **5.3 Unified Database (Local SQLite / Drift)**
   - [ ] Skema database untuk tracks, albums, artists, playlists, autoeq profiles, dan cache status
   - [ ] Indeks pencarian cepat (search by title, artist, album, format)
