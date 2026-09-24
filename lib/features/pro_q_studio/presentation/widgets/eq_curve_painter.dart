@@ -14,6 +14,7 @@ class EqCurvePainter extends CustomPainter {
   final List<double>? rtaSpectrum;
   final FrCurveData? driverFr;
   final FrCurveData? targetFr;
+  final bool isRawBypassed;
 
   // Pre-calculated sampling points (256 log-spaced points)
   static final List<double> _sampleFrequencies = List.generate(256, (i) {
@@ -111,6 +112,7 @@ class EqCurvePainter extends CustomPainter {
     required this.rtaSpectrum,
     required this.driverFr,
     required this.targetFr,
+    this.isRawBypassed = false,
   });
 
   // Koordinat konversi logaritmik
@@ -452,7 +454,7 @@ class EqCurvePainter extends CustomPainter {
     double bottomMargin,
     double zeroY,
   ) {
-    final gains = isEnabled
+    final gains = (isEnabled && !isRawBypassed)
         ? BiquadMath.evaluateCompositeCurve(bands, _sampleFrequencies)
         : List.filled(_sampleFrequencies.length, 0.0);
 
@@ -508,7 +510,7 @@ class EqCurvePainter extends CustomPainter {
   ) {
     for (final band in bands) {
       final x = freqToX(band.frequency, w);
-      final y = isEnabled
+      final y = (isEnabled && !isRawBypassed)
           ? gainToY(band.gainDb, h, topMargin: topMargin, bottomMargin: bottomMargin)
           : gainToY(0.0, h, topMargin: topMargin, bottomMargin: bottomMargin);
 

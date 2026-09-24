@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/theme/app_colors.dart';
 import '../app/theme/color_schemes.dart';
+import '../features/dashboard/presentation/dashboard_screen.dart';
+import '../features/library/presentation/unified_library_screen.dart';
 import '../features/player/presentation/now_playing_screen.dart';
 import '../features/pro_q_studio/presentation/pro_q_studio_screen.dart';
 
@@ -13,7 +15,7 @@ class BaydevHiFiApp extends ConsumerStatefulWidget {
 }
 
 class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
-  int _selectedNavIndex = 0;
+  int _selectedNavIndex = 0; // Default index 0: Dashboard saat aplikasi pertama dibuka
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +28,20 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
           final isMobile = constraints.maxWidth < 650;
 
           final pages = [
-            NowPlayingScreen(
-              onOpenProQStudio: () => setState(() => _selectedNavIndex = 1),
+            DashboardScreen(
+              onNavigateToPlayer: () => setState(() => _selectedNavIndex = 1),
+              onNavigateToLibrary: () => setState(() => _selectedNavIndex = 3),
+              onNavigateToDsp: () => setState(() => _selectedNavIndex = 2),
             ),
-            const ProQStudioScreen(),
-            _buildPlaceholderScreen('DSP MASTERING RACK', 'Tube, Compressor, Binaural & Limiter'),
-            _buildPlaceholderScreen('LOCAL LIBRARY', 'Tracks, Albums & Hi-Res Metadata'),
-            _buildPlaceholderScreen('NAVIDROME CLOUD', 'Subsonic Lossless Streaming & Offline Sync'),
+            NowPlayingScreen(
+              onOpenProQStudio: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ProQStudioScreen()),
+                );
+              },
+            ),
+            _buildPlaceholderScreen('DSP MASTERING RACK', 'Tube Exciter, Compressor, Binaural & Limiter'),
+            const UnifiedLibraryScreen(),
             _buildPlaceholderScreen('SETTINGS', 'Theme Colors, Waveforms, Album Art & DAC'),
           ];
 
@@ -50,29 +59,24 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                 onDestinationSelected: (idx) => setState(() => _selectedNavIndex = idx),
                 destinations: const [
                   NavigationDestination(
+                    icon: Icon(Icons.dashboard_outlined),
+                    selectedIcon: Icon(Icons.dashboard, color: AppColors.amberEq),
+                    label: 'Dashboard',
+                  ),
+                  NavigationDestination(
                     icon: Icon(Icons.music_note_outlined),
                     selectedIcon: Icon(Icons.music_note, color: AppColors.amberEq),
                     label: 'Player',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.equalizer_outlined),
-                    selectedIcon: Icon(Icons.equalizer, color: AppColors.amberEq),
-                    label: 'Pro-Q',
-                  ),
-                  NavigationDestination(
                     icon: Icon(Icons.tune_outlined),
                     selectedIcon: Icon(Icons.tune, color: AppColors.amberEq),
-                    label: 'DSP',
+                    label: 'DSP Rack',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.folder_outlined),
-                    selectedIcon: Icon(Icons.folder, color: AppColors.amberEq),
+                    icon: Icon(Icons.library_music_outlined),
+                    selectedIcon: Icon(Icons.library_music, color: AppColors.amberEq),
                     label: 'Library',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.cloud_outlined),
-                    selectedIcon: Icon(Icons.cloud, color: AppColors.amberEq),
-                    label: 'Cloud',
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.settings_outlined),
@@ -119,14 +123,14 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                   ),
                   destinations: const [
                     NavigationRailDestination(
+                      icon: Icon(Icons.dashboard_outlined),
+                      selectedIcon: Icon(Icons.dashboard, color: AppColors.amberEq),
+                      label: Text('Dashboard', style: TextStyle(fontSize: 11)),
+                    ),
+                    NavigationRailDestination(
                       icon: Icon(Icons.music_note_outlined),
                       selectedIcon: Icon(Icons.music_note, color: AppColors.amberEq),
                       label: Text('Player', style: TextStyle(fontSize: 11)),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.equalizer_outlined),
-                      selectedIcon: Icon(Icons.equalizer, color: AppColors.amberEq),
-                      label: Text('Pro-Q', style: TextStyle(fontSize: 11)),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.tune_outlined),
@@ -134,14 +138,9 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                       label: Text('DSP Rack', style: TextStyle(fontSize: 11)),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.folder_outlined),
-                      selectedIcon: Icon(Icons.folder, color: AppColors.amberEq),
+                      icon: Icon(Icons.library_music_outlined),
+                      selectedIcon: Icon(Icons.library_music, color: AppColors.amberEq),
                       label: Text('Library', style: TextStyle(fontSize: 11)),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.cloud_outlined),
-                      selectedIcon: Icon(Icons.cloud, color: AppColors.amberEq),
-                      label: Text('Navidrome', style: TextStyle(fontSize: 11)),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.settings_outlined),

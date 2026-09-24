@@ -1,15 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'controllers/eq_controller.dart';
 import 'controllers/eq_state.dart';
 import 'widgets/band_strip_bar.dart';
+import '../domain/auto_eq_optimizer.dart';
+import 'widgets/auto_eq_modal_dialog.dart';
 import 'widgets/interactive_eq_canvas.dart';
 
-class ProQStudioScreen extends ConsumerWidget {
+class ProQStudioScreen extends ConsumerStatefulWidget {
   const ProQStudioScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProQStudioScreen> createState() => _ProQStudioScreenState();
+}
+
+class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Kunci orientasi ke landscape dan masuk ke mode fullscreen imersif
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  @override
+  void dispose() {
+    // Kembalikan orientasi layar dan navigasi sistem UI saat keluar dari Pro-Q Studio
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final eqState = ref.watch(eqControllerProvider);
     final notifier = ref.read(eqControllerProvider.notifier);
 
@@ -18,8 +49,8 @@ class ProQStudioScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // 1. Top Studio Toolbar & Legend
-            _buildTopBar(context, ref, eqState, notifier),
+            // 1. Top Studio Toolbar & Legend dengan Tombol Exit (Kiri) dan Power (Kanan) Terfiksasi
+            _buildTopBar(context, eqState, notifier),
 
             // 2. Interactive Pro-Q Studio Canvas
             const Expanded(
@@ -36,13 +67,12 @@ class ProQStudioScreen extends ConsumerWidget {
 
   Widget _buildTopBar(
     BuildContext context,
-    WidgetRef ref,
     EqState state,
     EqController notifier,
   ) {
     return Container(
-      height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: const BoxDecoration(
         color: Color(0xFF0D0F14),
         border: Border(
@@ -52,210 +82,263 @@ class ProQStudioScreen extends ConsumerWidget {
           ),
         ),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // Title: PRO-Q STUDIO (?)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.tune,
-                  size: 16,
-                  color: Color(0xFFFF9F0A),
+      child: Row(
+        children: [
+          // ─── 1. FIXED LEFT: Tombol Keluar (<) & Title ──────────────────────
+          InkWell(
+            onTap: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
+            },
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xFF141820),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFF2C3542), width: 1.0),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                size: 14,
+                color: Color(0xFFFFB74D),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.tune,
+                size: 15,
+                color: Color(0xFFFF9F0A),
+              ),
+              const SizedBox(width: 6),
+              const Text(
+                'PRO-Q STUDIO',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                  fontSize: 12.5,
                 ),
-                const SizedBox(width: 6),
-                const Text(
-                  'PRO-Q STUDIO',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                    fontSize: 13,
+              ),
+              const SizedBox(width: 4),
+              Tooltip(
+                message: 'Studio Parametric Equalizer with Biquad IIR Engine',
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF546E7A), width: 1),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Tooltip(
-                  message: 'Studio Parametric Equalizer with Biquad IIR Engine',
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF546E7A), width: 1),
-                    ),
-                    child: const Icon(
-                      Icons.question_mark,
-                      size: 9,
-                      color: Color(0xFF90A4AE),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(width: 16),
-
-            // Legend Items: — EQ, -- Driver FR, -- Target, [x HIDE FR], — RTA
-            _buildLegendItem(
-              label: 'EQ',
-              color: const Color(0xFFFFA726),
-              isDashed: false,
-            ),
-            const SizedBox(width: 10),
-            _buildLegendItem(
-              label: 'Driver FR',
-              color: const Color(0xFF29B6F6),
-              isDashed: true,
-            ),
-            const SizedBox(width: 10),
-            _buildLegendItem(
-              label: 'Target',
-              color: const Color(0xFF00E676),
-              isDashed: true,
-            ),
-            const SizedBox(width: 8),
-
-            // [x HIDE FR] / [SHOW FR] Toggle Button
-            InkWell(
-              onTap: () => notifier.toggleFrCurves(),
-              borderRadius: BorderRadius.circular(4),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: state.showFrCurves
-                      ? const Color(0xFF19202A)
-                      : const Color(0xFF14171D),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                    color: state.showFrCurves
-                        ? const Color(0xFF37474F)
-                        : const Color(0xFF263238),
-                    width: 0.8,
-                  ),
-                ),
-                child: Text(
-                  state.showFrCurves ? '✕ HIDE FR' : '👁 SHOW FR',
-                  style: TextStyle(
-                    color: state.showFrCurves
-                        ? const Color(0xFFB0BEC5)
-                        : const Color(0xFF78909C),
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w600,
+                  child: const Icon(
+                    Icons.question_mark,
+                    size: 8.5,
+                    color: Color(0xFF90A4AE),
                   ),
                 ),
               ),
-            ),
+            ],
+          ),
 
-            const SizedBox(width: 10),
+          const SizedBox(width: 12),
 
-            _buildLegendItem(
-              label: 'RTA',
-              color: const Color(0xFF00E5FF),
-              isDashed: false,
-            ),
-
-            const SizedBox(width: 16),
-
-            // [∿ RTA] Button
-            _buildToolbarButton(
-              icon: Icons.graphic_eq,
-              label: 'RTA',
-              color: const Color(0xFF00E5FF),
-              isActive: state.isRtaEnabled,
-              onTap: () => notifier.toggleRta(),
-            ),
-
-            const SizedBox(width: 8),
-
-            // [✨ AUTO EQ •] Button
-            _buildToolbarButton(
-              icon: Icons.auto_awesome,
-              label: 'AUTO EQ •',
-              color: const Color(0xFF00E676),
-              isActive: true,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('AutoEQ: Target matching profile loaded (KZ Castor → HBB Target).'),
-                    duration: Duration(seconds: 2),
-                    backgroundColor: Color(0xFF1E2836),
+          // ─── 2. SCROLLABLE CENTER: Legend & Toolbar Actions ────────────────
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildLegendItem(
+                    label: 'EQ',
+                    color: const Color(0xFFFFA726),
+                    isDashed: false,
                   ),
-                );
-              },
-            ),
+                  const SizedBox(width: 8),
+                  _buildLegendItem(
+                    label: 'Driver FR',
+                    color: const Color(0xFF29B6F6),
+                    isDashed: true,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildLegendItem(
+                    label: 'Target',
+                    color: const Color(0xFF00E676),
+                    isDashed: true,
+                  ),
+                  const SizedBox(width: 6),
 
-            const SizedBox(width: 8),
-
-            // [🔖 PRESETS] Popup Button
-            PopupMenuButton<String>(
-              color: const Color(0xFF141820),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Color(0xFF263238), width: 1),
-              ),
-              onSelected: (val) => notifier.applyPreset(val),
-              itemBuilder: (context) => [
-                'Default 10-Band',
-                'Flat',
-                'Bass Boost',
-                'V-Shape',
-                'Vocal Clarity',
-                'Treble Tamer',
-              ].map((p) {
-                final isCurr = state.activePresetName == p;
-                return PopupMenuItem(
-                  value: p,
-                  child: Row(
-                    children: [
-                      Icon(
-                        isCurr ? Icons.check_circle : Icons.circle_outlined,
-                        size: 14,
-                        color: isCurr ? const Color(0xFFBA68C8) : const Color(0xFF546E7A),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        p,
-                        style: TextStyle(
-                          color: isCurr ? Colors.white : const Color(0xFFCFD8DC),
-                          fontSize: 12,
-                          fontWeight: isCurr ? FontWeight.bold : FontWeight.normal,
+                  // [x HIDE FR] / [SHOW FR] Toggle Button
+                  InkWell(
+                    onTap: () => notifier.toggleFrCurves(),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: state.showFrCurves
+                            ? const Color(0xFF19202A)
+                            : const Color(0xFF14171D),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: state.showFrCurves
+                              ? const Color(0xFF37474F)
+                              : const Color(0xFF263238),
+                          width: 0.8,
                         ),
                       ),
-                    ],
+                      child: Text(
+                        state.showFrCurves ? '✕ HIDE FR' : '👁 SHOW FR',
+                        style: TextStyle(
+                          color: state.showFrCurves
+                              ? const Color(0xFFB0BEC5)
+                              : const Color(0xFF78909C),
+                          fontSize: 9.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
-                );
-              }).toList(),
-              child: _buildToolbarButton(
-                icon: Icons.bookmark_border,
-                label: 'PRESETS',
-                color: const Color(0xFFBA68C8),
-                isActive: false,
-                onTap: null, // PopupMenuButton handles it
+
+                  const SizedBox(width: 8),
+
+                  _buildLegendItem(
+                    label: 'RTA',
+                    color: const Color(0xFF00E5FF),
+                    isDashed: false,
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // [∿ RTA] Button
+                  _buildToolbarButton(
+                    icon: Icons.graphic_eq,
+                    label: 'RTA',
+                    color: const Color(0xFF00E5FF),
+                    isActive: state.isRtaEnabled,
+                    onTap: () => notifier.toggleRta(),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  // [✨ AUTO EQ •] Button
+                  _buildToolbarButton(
+                    icon: Icons.auto_awesome,
+                    label: 'AUTO EQ •',
+                    color: const Color(0xFF00E676),
+                    isActive: true,
+                    onTap: () => AutoEqModalDialog.show(context),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  // [🎚️ A/B] Quick Comparison Button
+                  _buildToolbarButton(
+                    icon: Icons.compare_arrows,
+                    label: state.abMode == AbComparisonMode.aRaw ? 'A: RAW' : 'B: ACTIVE',
+                    color: state.abMode == AbComparisonMode.aRaw
+                        ? const Color(0xFF29B6F6)
+                        : const Color(0xFF00E676),
+                    isActive: true,
+                    onTap: () {
+                      final next = state.abMode == AbComparisonMode.aRaw
+                          ? AbComparisonMode.bActive
+                          : AbComparisonMode.aRaw;
+                      notifier.setAbComparison(next);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            next == AbComparisonMode.aRaw
+                                ? 'A/B: Switched to [A: RAW Direct Audiophile Bypass]'
+                                : 'A/B: Switched to [B: ACTIVE Target Tuned Equalizer]',
+                          ),
+                          duration: const Duration(seconds: 1),
+                          backgroundColor: const Color(0xFF1E2836),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  // [🔖 PRESETS] Popup Button
+                  PopupMenuButton<String>(
+                    color: const Color(0xFF141820),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: const BorderSide(color: Color(0xFF263238), width: 1),
+                    ),
+                    onSelected: (val) => notifier.applyPreset(val),
+                    itemBuilder: (context) => [
+                      'Default 10-Band',
+                      'Flat',
+                      'Bass Boost',
+                      'V-Shape',
+                      'Vocal Clarity',
+                      'Treble Tamer',
+                    ].map((p) {
+                      final isCurr = state.activePresetName == p;
+                      return PopupMenuItem(
+                        value: p,
+                        child: Row(
+                          children: [
+                            Icon(
+                              isCurr ? Icons.check_circle : Icons.circle_outlined,
+                              size: 14,
+                              color: isCurr ? const Color(0xFFBA68C8) : const Color(0xFF546E7A),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              p,
+                              style: TextStyle(
+                                color: isCurr ? Colors.white : const Color(0xFFCFD8DC),
+                                fontSize: 12,
+                                fontWeight: isCurr ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    child: _buildToolbarButton(
+                      icon: Icons.bookmark_border,
+                      label: 'PRESETS',
+                      color: const Color(0xFFBA68C8),
+                      isActive: false,
+                      onTap: null,
+                    ),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  // [🔄 RESET] Button
+                  _buildToolbarButton(
+                    icon: Icons.refresh,
+                    label: 'RESET',
+                    color: const Color(0xFFEF5350),
+                    isActive: false,
+                    onTap: () => notifier.resetToDefault(),
+                  ),
+                ],
               ),
             ),
+          ),
 
-            const SizedBox(width: 8),
+          const SizedBox(width: 10),
 
-            // [🔄 RESET] Button
-            _buildToolbarButton(
-              icon: Icons.refresh,
-              label: 'RESET',
-              color: const Color(0xFFEF5350),
-              isActive: false,
-              onTap: () => notifier.resetToDefault(),
-            ),
-
-            const SizedBox(width: 16),
-
-            // Power Bypass Button [ ⏻ ]
-            InkWell(
+          // ─── 3. FIXED RIGHT: Tombol Power ON/OFF (Selalu Terlihat) ───────────
+          Tooltip(
+            message: state.isEnabled ? 'Bypass EQ (Turn OFF)' : 'Enable EQ (Turn ON)',
+            child: InkWell(
               onTap: () => notifier.togglePower(),
               borderRadius: BorderRadius.circular(16),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 32,
-                height: 32,
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: state.isEnabled
@@ -285,8 +368,8 @@ class ProQStudioScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -300,15 +383,15 @@ class ProQStudioScreen extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         CustomPaint(
-          size: const Size(16, 2),
+          size: const Size(14, 2),
           painter: _LegendLinePainter(color: color, isDashed: isDashed),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 4),
         Text(
           label,
           style: TextStyle(
             color: color,
-            fontSize: 10.5,
+            fontSize: 10.0,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -327,7 +410,7 @@ class ProQStudioScreen extends ConsumerWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
         decoration: BoxDecoration(
           color: isActive ? color.withValues(alpha: 0.12) : const Color(0xFF141820),
           borderRadius: BorderRadius.circular(6),
@@ -349,7 +432,7 @@ class ProQStudioScreen extends ConsumerWidget {
           children: [
             Icon(
               icon,
-              size: 13,
+              size: 12,
               color: color,
             ),
             const SizedBox(width: 4),
@@ -357,9 +440,9 @@ class ProQStudioScreen extends ConsumerWidget {
               label,
               style: TextStyle(
                 color: color,
-                fontSize: 10,
+                fontSize: 9.5,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
+                letterSpacing: 0.3,
               ),
             ),
           ],

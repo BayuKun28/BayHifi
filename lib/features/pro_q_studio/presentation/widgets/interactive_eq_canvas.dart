@@ -50,6 +50,7 @@ class _InteractiveEqCanvasState extends ConsumerState<InteractiveEqCanvas> {
                     rtaSpectrum: rtaSpectrum,
                     driverFr: eqState.driverFr,
                     targetFr: eqState.targetFr,
+                    isRawBypassed: eqState.isRawBypassed,
                   ),
                 ),
               ),
@@ -146,6 +147,40 @@ class _InteractiveEqCanvasState extends ConsumerState<InteractiveEqCanvas> {
                 ),
               ),
             ),
+
+            // Overlay indicator if A: RAW BYPASSED is active
+            if (eqState.isRawBypassed)
+              Positioned(
+                top: 42,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xE61A222D),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFF0288D1), width: 1.0),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.tune, size: 12, color: Color(0xFF29B6F6)),
+                        SizedBox(width: 6),
+                        Text(
+                          'A: RAW AUDIOPHILE DIRECT (EQ BYPASSED)',
+                          style: TextStyle(
+                            color: Color(0xFF29B6F6),
+                            fontSize: 10.0,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
             // 3. Floating HUD Tooltip when dragging
             if (_draggedBandIndex != null && selectedBand != null && _dragPosition != null)

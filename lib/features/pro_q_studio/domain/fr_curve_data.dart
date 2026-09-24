@@ -14,6 +14,20 @@ class FrCurveData {
     this.referenceSpl1kHz = 0.0,
   });
 
+  FrCurveData copyWith({
+    String? name,
+    List<double>? frequencies,
+    List<double>? splDb,
+    double? referenceSpl1kHz,
+  }) {
+    return FrCurveData(
+      name: name ?? this.name,
+      frequencies: frequencies ?? this.frequencies,
+      splDb: splDb ?? this.splDb,
+      referenceSpl1kHz: referenceSpl1kHz ?? this.referenceSpl1kHz,
+    );
+  }
+
   /// Mengambil nilai SPL ternormalisasi (0 dB pada 1000 Hz) pada frekuensi f dengan interpolasi logaritmik
   double interpolateSpl(double freq) {
     if (frequencies.isEmpty) return 0.0;
@@ -51,7 +65,7 @@ class FrCurveData {
 
     for (final rawLine in lines) {
       final line = rawLine.trim();
-      if (line.isEmpty || line.startsWith('*') || line.startsWith('#')) {
+      if (line.isEmpty || line.startsWith('*') || line.startsWith('#') || line.startsWith(';')) {
         continue;
       }
 
@@ -86,11 +100,13 @@ class FrCurveData {
 
     for (final rawLine in lines) {
       final line = rawLine.trim();
-      if (line.isEmpty || line.startsWith('*') || line.startsWith('#')) {
+      if (line.isEmpty || line.startsWith('*') || line.startsWith('#') || line.startsWith(';')) {
         continue;
       }
 
-      final parts = line.split(',');
+      // Deteksi separator koma atau semicolon
+      final delimiter = line.contains(';') ? ';' : ',';
+      final parts = line.split(delimiter);
       if (parts.length >= 2) {
         final f = double.tryParse(parts[0].trim());
         final spl = double.tryParse(parts[1].trim());
@@ -108,6 +124,21 @@ class FrCurveData {
       splDb: spls,
       referenceSpl1kHz: ref1k,
     );
+  }
+
+  /// Otomatis deteksi format (REW V5 whitespace vs CSV Squiglink)
+  static FrCurveData autoDetectAndParse(String content, {String name = 'Measurement'}) {
+    final lines = content.split('\n');
+    for (final rawLine in lines) {
+      final line = rawLine.trim();
+      if (line.isEmpty || line.startsWith('*') || line.startsWith('#')) continue;
+      if (line.contains(',') || line.contains(';')) {
+        return parseSquiglinkCsv(content, name: name);
+      } else {
+        return parseRewV5(content, name: name);
+      }
+    }
+    return parseRewV5(content, name: name);
   }
 
   static double _findSplAt1k(List<double> freqs, List<double> spls) {

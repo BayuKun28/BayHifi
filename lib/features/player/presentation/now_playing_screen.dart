@@ -6,6 +6,7 @@ import '../../../app/theme/app_typography.dart';
 import '../domain/track.dart';
 import 'controllers/player_controller.dart';
 import 'widgets/spectrum_visualizer.dart';
+import '../../pro_q_studio/presentation/pro_q_studio_screen.dart';
 
 class NowPlayingScreen extends ConsumerStatefulWidget {
   final VoidCallback onOpenProQStudio;
@@ -95,24 +96,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      IconButton.filledTonal(
-                        onPressed: widget.onOpenProQStudio,
-                        icon: const Icon(Icons.equalizer, size: 20),
-                        tooltip: 'Buka Pro-Q Studio',
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.amberEq.withValues(alpha: 0.15),
-                          foregroundColor: AppColors.amberEq,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filledTonal(
-                        onPressed: _pickAndPlayFile,
-                        icon: const Icon(Icons.file_open, size: 20),
-                        tooltip: 'Pilih File Audio Lokal',
-                      ),
-                    ],
+                  IconButton.filledTonal(
+                    onPressed: _pickAndPlayFile,
+                    icon: const Icon(Icons.file_open, size: 20),
+                    tooltip: 'Pilih File Audio Lokal',
                   ),
                 ],
               ),
@@ -151,7 +138,82 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
+
+              // Tombol Pro-Q Studio di Bawah Cover Media Player
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ProQStudioScreen(),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF141922),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.amberEq.withValues(alpha: 0.5),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.amberEq.withValues(alpha: 0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.amberEq,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.equalizer, size: 16, color: AppColors.amberEq),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'PRO-Q STUDIO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.amberEq.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          '10-Band Biquad',
+                          style: TextStyle(
+                            color: AppColors.amberEq,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward_ios, size: 10, color: AppColors.amberEq),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 14),
 
               // Title, Artist, & Hi-Res Badge
               Column(

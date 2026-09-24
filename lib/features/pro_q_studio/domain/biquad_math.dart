@@ -133,6 +133,15 @@ class BiquadMath {
     );
   }
 
+  /// Menghitung total gain gabungan seluruh band aktif pada frekuensi tunggal
+  static double calculateCompositeGainDb(
+    List<EqBand> bands,
+    double freq, {
+    double sampleRate = 48000.0,
+  }) {
+    return evaluateCompositeCurve(bands, [freq], sampleRate: sampleRate).first;
+  }
+
   /// Menghitung kurva gabungan seluruh band aktif pada daftar frekuensi
   static List<double> evaluateCompositeCurve(
     List<EqBand> bands,

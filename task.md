@@ -7,7 +7,7 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 ## 📊 Status Dashboard
 - **Total Fase**: 5 Fase
 - **Total Tugas**: 36 Sub-tugas
-- **Status Proyek**: 🟢 *Phase 1 & 2 Completed — Ready for Phase 3 (AutoEQ & Squiglink Import Engine)*
+- **Status Proyek**: 🟢 *Phase 1, 2, & 3 Completed — Ready for Phase 4 (Mastering DSP Studio Rack)*
 
 ---
 
@@ -85,33 +85,33 @@ Implementasi antarmuka Parametric EQ studio presisi tinggi sesuai tangkapan laya
 ## 🎯 Fase 3: AutoEQ & Squiglink Import Engine
 Modul kalkulasi pencocokan respons frekuensi IEM/headphone terhadap kurva target (Harman/HBB) dan impor format Squiglink.
 
-- [ ] **3.1 Parser Universal File Pengukuran Driver**
-  - [ ] Implementasikan parser REW V5 untuk membaca `KZ CASTOR BLACK DUDU R.txt`
-  - [ ] Ekstraksi titik data frekuensi ($f$) dan tingkat tekanan suara ($SPL$)
-  - [ ] Sanitasi data: Abaikan komentar header (`*` atau `#`) dan tangani delimiter whitespace/tab
-- [ ] **3.2 Parser Universal File Target Respon**
-  - [ ] Implementasikan parser Squiglink CSV untuk membaca `HBB Target.txt`
-  - [ ] Ekstraksi titik pasangan `Freq,SPL` dari file target
-- [ ] **3.3 Normalisasi 1 kHz & Kalkulator Selisih $\Delta SPL$**
-  - [ ] Sejajarkan kedua kurva pada frekuensi referensi $1,000\text{ Hz}$ ($SPL_{norm} = SPL - SPL_{1kHz}$)
-  - [ ] Hitung kurva deviasi: $\Delta SPL(f) = SPL_{\text{Target}}(f) - SPL_{\text{Driver}}(f)$
-- [ ] **3.4 AutoEQ Biquad Optimizer Solver**
-  - [ ] Algoritma deteksi titik resonansi puncak dan lembah pada $\Delta SPL(f)$
-  - [ ] Generator konfigurasi filter sesuai pilihan resolusi band: `5 B`, `10 B`, `16 B`, `20 B`, `32 B`
-  - [ ] Terapkan hasil optimasi langsung ke node Pro-Q Canvas dan filter engine
-- [ ] **3.5 Modal Dialog "Auto EQ Studio & Target Matching" (Sesuai Screenshot 2)**
-  - [ ] Dropdown seleksi Driver (misal: "KZ CASTOR BLACK DUDU R") + tombol Hapus
-  - [ ] Dropdown seleksi Target (misal: "HBB%20Target") + tombol Hapus
-  - [ ] Tombol aksi samping: `[🎧 IMPORT DRIVER]`, `[🎯 IMPORT TARGET]`, `[✨ SQUIGLINK EQ]`
-  - [ ] Pilihan tombol Band Resolution (`5 B`, `10 B`, `16 B`, `20 B`, `32 B`)
-  - [ ] Pilihan Tuning Mode (`⚡ Normal` vs `🛡️ Safe`)
-  - [ ] Tombol eksekusi utama: `[📊 APPLY TO DSP]` (warna emerald menyala)
-- [ ] **3.6 Parser & Exporter Teks Squiglink EQ**
-  - [ ] Parsing format teks Squiglink (`Filter 1: ON PK Fc 63 Hz Gain -1.1 dB Q 1.414`)
-  - [ ] Ekspor konfigurasi EQ saat ini ke format teks Squiglink / Wavelet
-- [ ] **3.7 Fitur A/B Comparison Switch**
-  - [ ] Tombol instan beralih antara `[A: RAW]` (audio murni) dan `[B: ACTIVE]` (audio ber-tuning)
-  - [ ] Transisi crossfade halus (10ms) untuk mencegah bunyi *pop/click* saat switching
+- [x] **3.1 Parser Universal File Pengukuran Driver**
+  - [x] Implementasikan parser REW V5 untuk membaca `KZ CASTOR BLACK DUDU R.txt`
+  - [x] Ekstraksi titik data frekuensi ($f$) dan tingkat tekanan suara ($SPL$)
+  - [x] Sanitasi data: Abaikan komentar header (`*` atau `#`) dan tangani delimiter whitespace/tab
+- [x] **3.2 Parser Universal File Target Respon**
+  - [x] Implementasikan parser Squiglink CSV untuk membaca `HBB Target.txt`
+  - [x] Ekstraksi titik pasangan `Freq,SPL` dari file target
+- [x] **3.3 Normalisasi 1 kHz & Kalkulator Selisih $\Delta SPL$**
+  - [x] Sejajarkan kedua kurva pada frekuensi referensi $1,000\text{ Hz}$ ($SPL_{norm} = SPL - SPL_{1kHz}$)
+  - [x] Hitung kurva deviasi: $\Delta SPL(f) = SPL_{\text{Target}}(f) - SPL_{\text{Driver}}(f)$
+- [x] **3.4 AutoEQ Biquad Optimizer Solver**
+  - [x] Algoritma deteksi titik resonansi puncak dan lembah pada $\Delta SPL(f)$
+  - [x] Generator konfigurasi filter sesuai pilihan resolusi band: `5 B`, `10 B`, `16 B`, `20 B`, `32 B`
+  - [x] Terapkan hasil optimasi langsung ke node Pro-Q Canvas dan filter engine
+- [x] **3.5 Modal Dialog "Auto EQ Studio & Target Matching" (Sesuai Screenshot 2)**
+  - [x] Dropdown seleksi Driver (misal: "KZ CASTOR BLACK DUDU R") + tombol Hapus
+  - [x] Dropdown seleksi Target (misal: "HBB%20Target") + tombol Hapus
+  - [x] Tombol aksi samping: `[🎧 IMPORT DRIVER]`, `[🎯 IMPORT TARGET]`, `[✨ SQUIGLINK EQ]`
+  - [x] Pilihan tombol Band Resolution (`5 B`, `10 B`, `16 B`, `20 B`, `32 B`)
+  - [x] Pilihan Tuning Mode (`⚡ Normal` vs `🛡️ Safe`)
+  - [x] Tombol eksekusi utama: `[📊 APPLY TO DSP]` (warna emerald menyala)
+- [x] **3.6 Parser & Exporter Teks Squiglink EQ**
+  - [x] Parsing format teks Squiglink (`Filter 1: ON PK Fc 63 Hz Gain -1.1 dB Q 1.414`)
+  - [x] Ekspor konfigurasi EQ saat ini ke format teks Squiglink / Wavelet
+- [x] **3.7 Fitur A/B Comparison Switch**
+  - [x] Tombol instan beralih antara `[A: RAW]` (audio murni) dan `[B: ACTIVE]` (audio ber-tuning)
+  - [x] Transisi crossfade halus (10ms) untuk mencegah bunyi *pop/click* saat switching
 
 ---
 
@@ -146,36 +146,38 @@ Rantai pemrosesan audio kelas profesional untuk mastering dan personalisasi kara
 
 ---
 
-## ☁️ Fase 5: Local Offline Library, Navidrome & Expressive Settings
-Integrasi sumber audio lengkap, sinkronisasi cloud, dan kustomisasi estetika Material 3 Expressive.
+## ☁️ Fase 5: Unified Library (Offline + Navidrome Cloud), Studio Dashboard & Settings
+Integrasi sumber audio lengkap ke dalam satu Library terpadu dengan filter, landing Dashboard saat aplikasi dibuka, dan kustomisasi estetika Material 3 Expressive.
 
-- [ ] **5.1 Local File Scanner & Hi-Res Badging Engine**
+- [ ] **5.0 Studio Hub & Audiophile Dashboard (Screen Pembuka Aplikasi)**
+  - [ ] Dashboard otomatis menjadi menu pertama saat aplikasi dibuka (Default Tab Index 0)
+  - [ ] Kartu Status Audio Engine: Sample rate (48kHz/96kHz/192kHz), bit-depth, buffer latency, dan DAC status
+  - [ ] Quick Card Pro-Q Studio: Tombol pembuka instan ke fullscreen landscape Pro-Q
+  - [ ] Now Playing Mini Preview Card dengan progress & kontrol playback
+  - [ ] Ringkasan statistik pustaka: Total lagu, album, jumlah file Hi-Res FLAC, dan status koneksi server Navidrome
+- [ ] **5.1 Unified Library: Offline Local & Navidrome Cloud (Disatukan dalam 1 Menu)**
+  - [ ] Antarmuka satu menu Library terpadu menggabungkan audio lokal dan cloud
+  - [ ] Filter Chips interaktif di bagian atas:
+    - `[All Sources]`: Gabungan seluruh lagu lokal dan server
+    - `[Offline Local]`: Hanya file yang tersimpan di perangkat (FLAC, WAV, MP3)
+    - `[Navidrome Cloud]`: Hanya koleksi remote streaming dari server Navidrome Subsonic
+    - `[Hi-Res Lossless]`: Filter lagu berkualitas 24-bit/96kHz atau 192kHz
   - [ ] Scanner folder lokal asynchronous berbasis background `Isolate`
-  - [ ] Pembaca tag metadata (Title, Artist, Album, Year, Genre, Track Number)
-  - [ ] Ekstraktor embedded Cover Art resolusi tinggi
-  - [ ] Auto-detection Hi-Res badge:
-    - Gold Badge: `FLAC 24-bit / 192 kHz`
-    - Silver Badge: `FLAC 24-bit / 96 kHz`
-    - Blue Badge: `FLAC 16-bit / 44.1 kHz (CD Quality)`
-    - Amber Badge: `DSD64 / DSD128`
-    - Grey Badge: `MP3 320 kbps / AAC`
-- [ ] **5.2 Unified SQLite / Drift Database**
-  - [ ] Skema database untuk tracks, albums, artists, playlists, autoeq profiles, dan cache status
-  - [ ] Indeks pencarian cepat (search by title, artist, album, format)
-- [ ] **5.3 Navidrome Subsonic Client Integration**
+  - [ ] Tag metadata & embedded cover art extractor
+  - [ ] Auto-detection Hi-Res badges (Gold 24/192, Silver 24/96, Blue 16/44.1 CD, Amber DSD)
+- [ ] **5.2 Navidrome Subsonic API Integration**
   - [ ] Autentikasi aman Subsonic API (Salt + MD5 Token)
   - [ ] Endpoint integrasi: `ping`, `getArtists`, `getArtist`, `getAlbum`, `getPlaylists`, `stream`, `scrobble`
   - [ ] Streaming lossless direct FLAC tanpa transcode server
-  - [ ] Sinkronisasi "Now Playing" dan scrobble status ke server Navidrome
-- [ ] **5.4 Smart Offline Download & Caching Manager**
-  - [ ] Tombol unduh per lagu, album, atau playlist
-  - [ ] Manajer antrian download di background dengan progress bar
-  - [ ] Integrasi otomatis file hasil unduhan ke dalam Local Library offline
-- [ ] **5.5 Material 3 Expressive Theming & Dynamic Palette**
+  - [ ] Fitur smart offline download & caching manager
+- [ ] **5.3 Unified Database (Local SQLite / Drift)**
+  - [ ] Skema database untuk tracks, albums, artists, playlists, autoeq profiles, dan cache status
+  - [ ] Indeks pencarian cepat (search by title, artist, album, format)
+- [ ] **5.4 Material 3 Expressive Theming & Dynamic Palette**
   - [ ] Ekstraksi warna otomatis dari Album Art lagu yang aktif menggunakan `palette_generator`
   - [ ] Animasi transisi perubahan warna tema secara fluida (500ms easing)
   - [ ] Pilihan Studio Curated Themes: *Dark Studio Obsidian*, *Amber Tube Glow*, *Cyber Neon Blue*, *Retro HiFi Champagne*, *True OLED Black*
-- [ ] **5.6 Halaman Pengaturan Lengkap (Settings & Personalization)**
+- [ ] **5.5 Halaman Pengaturan Lengkap (Settings & Personalization)**
   - [ ] **Theme Colors**: Palette source selector & dark/light/true black toggle
   - [ ] **Accents Color**: Color picker aksen slider/knop & pengaturan intensitas neon glow
   - [ ] **Waveform & Visualizer**: Pilihan gaya (*Spectrum Bars*, *Spline Waveform*, *Dual VU Meters*, *Circular Halo*), FFT bins (256–2048), dan decay speed

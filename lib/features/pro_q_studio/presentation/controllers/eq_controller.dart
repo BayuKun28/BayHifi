@@ -1,9 +1,11 @@
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../audio_engine/soloud_controller.dart';
+import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/biquad_math.dart';
 import '../../domain/eq_band.dart';
 import '../../domain/fr_curve_data.dart';
+import '../../domain/squiglink_parser.dart';
 import 'eq_state.dart';
 
 final eqControllerProvider =
@@ -28,15 +30,26 @@ class EqController extends StateNotifier<EqState> {
       final targetText =
           await rootBundle.loadString('assets/samples/targets/HBB_Target.txt');
 
-      final driver = FrCurveData.parseRewV5(driverText, name: 'KZ Castor Black');
-      final target = FrCurveData.parseSquiglinkCsv(targetText, name: 'HBB Target');
+      final driver = FrCurveData.parseRewV5(
+        driverText,
+        name: 'KZ CASTOR BLACK DUDU R',
+      );
+      final target = FrCurveData.parseSquiglinkCsv(
+        targetText,
+        name: 'HBB%20Target',
+      );
+
+      final drivers = [driver];
+      final targets = [target];
 
       state = state.copyWith(
         driverFr: () => driver,
         targetFr: () => target,
+        availableDrivers: drivers,
+        availableTargets: targets,
       );
     } catch (e) {
-      // Abaikan jika running di test environment tanpa rootBundle
+      // Graceful fallback jika running di test tanpa rootBundle
     }
   }
 
@@ -126,10 +139,8 @@ class EqController extends StateNotifier<EqState> {
     );
 
     final updated = [...state.bands, newBand];
-    // Urutkan band berdasarkan frekuensi
     updated.sort((a, b) => a.frequency.compareTo(b.frequency));
 
-    // Re-index agar urut 1..N
     final reindexed = <EqBand>[];
     for (int i = 0; i < updated.length; i++) {
       reindexed.add(updated[i].copyWith(
@@ -145,7 +156,6 @@ class EqController extends StateNotifier<EqState> {
     if (state.bands.length <= 1) return; // Sisakan minimal 1 band
 
     final updated = state.bands.where((b) => b.index != index).toList();
-    // Re-index
     final reindexed = <EqBand>[];
     for (int i = 0; i < updated.length; i++) {
       reindexed.add(updated[i].copyWith(
@@ -162,14 +172,17 @@ class EqController extends StateNotifier<EqState> {
   }
 
   void resetToDefault() {
-    _updateBands(EqBand.default10Bands,
-        selectedIdx: 2, presetName: 'Default 10-Band');
+    _updateBands(
+      EqBand.default10Bands,
+      selectedIdx: 2,
+      presetName: 'Default 10-Band',
+    );
   }
 
   void togglePower() {
     final nextState = !state.isEnabled;
     state = state.copyWith(isEnabled: nextState);
-    if (!nextState) {
+    if (!nextState || state.isRawBypassed) {
       SoLoudController.instance.setPreamp(0.0);
     } else {
       SoLoudController.instance.setPreamp(state.safePreampDb);
@@ -184,12 +197,135 @@ class EqController extends StateNotifier<EqState> {
     state = state.copyWith(showFrCurves: !state.showFrCurves);
   }
 
-  void setDriverFr(FrCurveData driver) {
-    state = state.copyWith(driverFr: () => driver);
+  // ─── AutoEQ & Target Matching Controls ────────────────────────────────────
+
+  void setTuningMode(TuningMode mode) {
+    state = state.copyWith(tuningMode: mode);
   }
 
-  void setTargetFr(FrCurveData target) {
-    state = state.copyWith(targetFr: () => target);
+  void setBandResolution(BandResolution res) {
+    state = state.copyWith(bandResolution: res);
+  }
+
+  void setAbComparison(AbComparisonMode mode) {
+    state = state.copyWith(abMode: mode);
+    if (mode == AbComparisonMode.aRaw) {
+      // Audio murni (bypass EQ)
+      SoLoudController.instance.setPreamp(0.0);
+    } else {
+      // Audio ber-tuning aktif
+      if (state.isEnabled && state.autoPreampEnabled) {
+        SoLoudController.instance.setPreamp(state.safePreampDb);
+      }
+    }
+  }
+
+  void selectDriver(FrCurveData driver) {
+    state = state.copyWith(driverFr: () => driver, showFrCurves: true);
+  }
+
+  void selectTarget(FrCurveData target) {
+    state = state.copyWith(targetFr: () => target, showFrCurves: true);
+  }
+
+  void deleteDriver() {
+    state = state.copyWith(driverFr: () => null);
+  }
+
+  void deleteTarget() {
+    state = state.copyWith(targetFr: () => null);
+  }
+
+  void clearFrCurves() {
+    state = state.copyWith(
+      driverFr: () => null,
+      targetFr: () => null,
+      showFrCurves: false,
+    );
+  }
+
+  void importDriver(FrCurveData driver) {
+    final currentList = List<FrCurveData>.from(state.availableDrivers);
+    currentList.removeWhere((d) => d.name == driver.name);
+    currentList.add(driver);
+
+    state = state.copyWith(
+      availableDrivers: currentList,
+      driverFr: () => driver,
+      showFrCurves: true,
+    );
+  }
+
+  void importTarget(FrCurveData target) {
+    final currentList = List<FrCurveData>.from(state.availableTargets);
+    currentList.removeWhere((t) => t.name == target.name);
+    currentList.add(target);
+
+    state = state.copyWith(
+      availableTargets: currentList,
+      targetFr: () => target,
+      showFrCurves: true,
+    );
+  }
+
+  bool applyAutoEq() {
+    final driver = state.driverFr;
+    final target = state.targetFr;
+
+    if (driver == null || target == null) {
+      return false;
+    }
+
+    final result = AutoEqOptimizer.optimize(
+      driverFr: driver,
+      targetFr: target,
+      resolution: state.bandResolution,
+      mode: state.tuningMode,
+    );
+
+    _updateBands(
+      result.bands,
+      selectedIdx: result.bands.isNotEmpty ? result.bands[0].index : 1,
+      presetName: 'AutoEQ: ${driver.name} → ${target.name}',
+    );
+
+    state = state.copyWith(
+      isAutoEqActive: true,
+      abMode: AbComparisonMode.bActive,
+      safePreampDb: result.safePreampDb,
+    );
+
+    return true;
+  }
+
+  bool importSquiglinkText(String text) {
+    final result = SquiglinkParser.parse(text);
+    if (result.bands.isEmpty) return false;
+
+    final safePreamp = result.preampDb ?? BiquadMath.calculateSafePreamp(result.bands);
+    _updateBands(
+      result.bands,
+      selectedIdx: result.bands.first.index,
+      presetName: 'Imported Squiglink EQ',
+    );
+
+    state = state.copyWith(
+      safePreampDb: safePreamp,
+      abMode: AbComparisonMode.bActive,
+    );
+
+    return true;
+  }
+
+  String exportSquiglinkText() {
+    return SquiglinkParser.exportToSquiglink(
+      state.bands,
+      preampDb: state.safePreampDb,
+    );
+  }
+
+  String exportWaveletText() {
+    return SquiglinkParser.exportToWavelet(state.bands);
   }
 
   void applyPreset(String presetName) {
@@ -243,7 +379,7 @@ class EqController extends StateNotifier<EqState> {
       activePresetName: presetName ?? (state.activePresetName == 'Default 10-Band' ? 'Custom' : state.activePresetName),
     );
 
-    if (state.isEnabled && state.autoPreampEnabled) {
+    if (state.isEnabled && state.autoPreampEnabled && !state.isRawBypassed) {
       SoLoudController.instance.setPreamp(safePreamp);
     }
   }
@@ -251,7 +387,7 @@ class EqController extends StateNotifier<EqState> {
   void _recalculateSafePreamp() {
     final safePreamp = BiquadMath.calculateSafePreamp(state.bands);
     state = state.copyWith(safePreampDb: safePreamp);
-    if (state.isEnabled && state.autoPreampEnabled) {
+    if (state.isEnabled && state.autoPreampEnabled && !state.isRawBypassed) {
       SoLoudController.instance.setPreamp(safePreamp);
     }
   }
