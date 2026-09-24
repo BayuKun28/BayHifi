@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/theme/theme_mode_controller.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
+import '../features/dsp_rack/presentation/dsp_rack_screen.dart';
 import '../features/library/presentation/unified_library_screen.dart';
 import '../features/player/presentation/controllers/player_expansion_controller.dart';
 import '../features/player/presentation/widgets/namida_expandable_miniplayer.dart';
@@ -40,11 +41,7 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
               onNavigateToLibrary: () => setState(() => _selectedNavIndex = 2),
               onNavigateToDsp: () => setState(() => _selectedNavIndex = 1),
             ),
-            _buildPlaceholderScreen(
-              'DSP MASTERING RACK',
-              'Tube Exciter, Dynamic Compressor, Binaural Crossfeed & Limiter',
-              theme,
-            ),
+            const DspRackScreen(),
             const UnifiedLibraryScreen(),
             const SettingsScreen(),
           ];
@@ -186,37 +183,6 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderScreen(
-    String title,
-    String subtitle,
-    ThemeData theme,
-  ) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              fontSize: 14,
-            ),
-          ),
-        ],
       ),
     );
   }

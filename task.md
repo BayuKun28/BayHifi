@@ -119,49 +119,49 @@ Modul kalkulasi pencocokan respons frekuensi IEM/headphone terhadap kurva target
 ## 🎛️ Fase 4: Mastering DSP Studio Rack (10+ Modul)
 Rantai pemrosesan audio kelas profesional untuk mastering dan personalisasi karakter suara.
 
-- [ ] **4.1 Pre-Amp Gain Stage**
-  - [ ] Slider headroom input (-24 dB s/d +12 dB) dengan visualizer level meter
-- [ ] **4.2 Dynamic Bass Boost**
-  - [ ] Peningkatan frekuensi sub-bass (40–160 Hz) dengan harmonik psychoacoustic
-- [ ] **4.3 Tube Exciter / Triode Saturation**
-  - [ ] Algoritma nonlinearitas analog ($y = \tanh(k \cdot x)$) untuk distorsi harmonik genap (*even harmonics*)
-  - [ ] Kontrol Drive/Warmth, Harmonics Blend, dan Tube Bias
-- [ ] **4.4 Dynamic Compressor**
-  - [ ] Implementasi parameter: Threshold (-60 s/d 0 dB), Ratio (1:1 s/d 20:1), Attack (0.1–100ms), Release (10–1000ms), Makeup Gain
-  - [ ] Visualizer gain reduction (GR Meter)
-- [ ] **4.5 Stereo Width (Mid-Side Matrix)**
-  - [ ] Dekomposisi sinyal ke $M = (L+R)/2$ dan $S = (L-R)/2$
-  - [ ] Kontrol pelebaran soundstage (0% Mono s/d 200% Super-Wide)
-- [ ] **4.6 Binaural Crossfeed (Meier / Chu-Moy Algorithm)**
-  - [ ] Simulasi tata letak speaker stereo untuk headphone guna mengurangi kelelahan telinga (*listener fatigue*)
-  - [ ] Kontrol Cutoff Frequency (650 Hz) dan Crossfeed Level (-3 dB s/d -9 dB)
-- [ ] **4.7 Spatial Studio Reverb**
-  - [ ] Algoritma Freeverb stereo: Room Size, Damping, Width, Predelay, dan Decay Time
-- [ ] **4.8 Pitch Shifter Engine**
-  - [ ] Pengubah nada granular tanpa mengubah tempo: Semitones (-12 s/d +12) dan Fine Cents (-50 s/d +50)
-- [ ] **4.9 Peak Brickwall Limiter**
-  - [ ] Zero-overshoot lookahead limiter untuk memastikan sinyal tidak pernah melampaui 0 dBFS
-- [ ] **4.10 Master Wet/Dry Matrix & DSP Presets**
-  - [ ] Kontrol perbandingan sinyal terproses vs sinyal asli (0% – 100%)
-  - [ ] Manajemen preset DSP: Audiophile Pure, Warm Tube Acoustic, Deep Bass Impact, Spacious Cinema, Vocal Clarity
+- [x] **4.1 Pre-Amp Gain Stage**
+  - [x] Slider headroom input (-24 dB s/d +12 dB) dengan visualizer level meter
+- [x] **4.2 Dynamic Bass Boost**
+  - [x] Peningkatan frekuensi sub-bass (40–160 Hz) dengan harmonik psychoacoustic
+- [x] **4.3 Tube Exciter / Triode Saturation**
+  - [x] Algoritma nonlinearitas analog ($y = \tanh(k \cdot x)$) untuk distorsi harmonik genap (*even harmonics*)
+  - [x] Kontrol Drive/Warmth, Harmonics Blend, dan Tube Bias
+- [x] **4.4 Dynamic Compressor**
+  - [x] Implementasi parameter: Threshold (-60 s/d 0 dB), Ratio (1:1 s/d 20:1), Attack (0.1–100ms), Release (10–1000ms), Makeup Gain
+  - [x] Visualizer gain reduction (GR Meter)
+- [x] **4.5 Stereo Width (Mid-Side Matrix)**
+  - [x] Dekomposisi sinyal ke $M = (L+R)/2$ dan $S = (L-R)/2$
+  - [x] Kontrol pelebaran soundstage (0% Mono s/d 200% Super-Wide)
+- [x] **4.6 Binaural Crossfeed (Meier / Chu-Moy Algorithm)**
+  - [x] Simulasi tata letak speaker stereo untuk headphone guna mengurangi kelelahan telinga (*listener fatigue*)
+  - [x] Kontrol Cutoff Frequency (650 Hz) dan Crossfeed Level (-3 dB s/d -9 dB)
+- [x] **4.7 Spatial Studio Reverb**
+  - [x] Algoritma Freeverb stereo: Room Size, Damping, Width, Predelay, dan Decay Time
+- [x] **4.8 Pitch Shifter Engine**
+  - [x] Pengubah nada granular tanpa mengubah tempo: Semitones (-12 s/d +12) dan Fine Cents (-50 s/d +50)
+- [x] **4.9 Peak Brickwall Limiter**
+  - [x] Zero-overshoot lookahead limiter untuk memastikan sinyal tidak pernah melampaui 0 dBFS
+- [x] **4.10 Master Wet/Dry Matrix & DSP Presets**
+  - [x] Kontrol perbandingan sinyal terproses vs sinyal asli (0% – 100%)
+  - [x] Manajemen preset DSP: Audiophile Pure, Warm Tube Acoustic, Deep Bass Impact, Spacious Cinema, Vocal Clarity
 
 ---
 
 ## ☁️ Fase 5: Namida Architecture, Expandable MiniPlayer, Custom Palette, Unified Library & Settings
 Integrasi antarmuka elegan berbasis referensi Namida: Expandable MiniPlayer tanpa tab player khusus, tema kustom multi-palet (Dark/Light/Follow System), Dashboard audiophile, Library terpadu offline + Navidrome, dan DSP Mastering Rack.
 
-- [ ] **5.0 Namida-Inspired Expandable MiniPlayer & Navigation Restructure**
-  - [ ] Hapus tab khusus "Player" dari Bottom Navigation Bar (kini terdiri dari 4 tab: Dashboard, DSP Rack, Library, Settings)
-  - [ ] Implementasikan persistent MiniPlayer melayang tepat di atas Bottom Navigation Bar
-  - [ ] MiniPlayer menampilkan: cover squircle, judul lagu & artist, badge Hi-Res, tombol Play/Pause & Next, serta micro progress bar
-  - [ ] Gestur interaktif: Tap atau swipe-up untuk expand ke full NowPlayingScreen dengan spring physics
-  - [ ] Gestur swipe-down atau tombol chevron untuk collapse kembali ke MiniPlayer tanpa interupsi audio
-- [ ] **5.1 Namida Theming & Custom Palette Engine**
-  - [ ] State Provider untuk ThemeMode: `ThemeMode.dark`, `ThemeMode.light`, dan `ThemeMode.system`
-  - [ ] Ekstraksi warna dinamis dari Album Art lagu aktif (`palette_generator`) dengan transisi fluida
-  - [ ] Pilihan preset palet studio: *Obsidian Cyan (Namida Neon)*, *Amber Tube Glow*, *Emerald HiFi*, *Electric Purple*, *Crimson Passion*, *True OLED Black*, *Champagne Light*
-  - [ ] Custom Accent Color picker untuk aksen slider, knop, dan neon glow kurva EQ
-  - [ ] Halaman Settings terintegrasi dengan live preview tema dan palet warna
+- [x] **5.0 Namida-Inspired Expandable MiniPlayer & Navigation Restructure**
+  - [x] Hapus tab khusus "Player" dari Bottom Navigation Bar (kini terdiri dari 4 tab: Dashboard, DSP Rack, Library, Settings)
+  - [x] Implementasikan persistent MiniPlayer melayang tepat di atas Bottom Navigation Bar
+  - [x] MiniPlayer menampilkan: cover squircle, judul lagu & artist, badge Hi-Res, tombol Play/Pause & Next, serta micro progress bar
+  - [x] Gestur interaktif: Tap atau swipe-up untuk expand ke full NowPlayingScreen dengan spring physics
+  - [x] Gestur swipe-down atau tombol chevron untuk collapse kembali ke MiniPlayer tanpa interupsi audio
+- [x] **5.1 Namida Theming & Custom Palette Engine**
+  - [x] State Provider untuk ThemeMode: `ThemeMode.dark`, `ThemeMode.light`, dan `ThemeMode.system`
+  - [x] Ekstraksi warna dinamis dari Album Art lagu aktif (`palette_generator`) dengan transisi fluida
+  - [x] Pilihan preset palet studio: *Obsidian Cyan (Namida Neon)*, *Amber Tube Glow*, *Emerald HiFi*, *Electric Purple*, *Crimson Passion*, *True OLED Black*, *Champagne Light*
+  - [x] Custom Accent Color picker untuk aksen slider, knop, dan neon glow kurva EQ
+  - [x] Halaman Settings terintegrasi dengan live preview tema dan palet warna
 
 - [ ] **5.0 Studio Hub & Audiophile Dashboard (Screen Pembuka Aplikasi)**
   - [ ] Dashboard otomatis menjadi menu pertama saat aplikasi dibuka (Default Tab Index 0)
