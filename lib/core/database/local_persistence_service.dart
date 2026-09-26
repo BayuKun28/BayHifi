@@ -274,6 +274,54 @@ class LocalPersistenceService {
     _cache['saved_music_folders'] = folders;
     await _save();
   }
+
+  // ─── 7. AUTOEQ CLOUD PRESETS & OFFLINE FR CURVES ───────────────────────────
+  List<Map<String, dynamic>> getSavedFrCurves() {
+    final list = _cache['saved_fr_curves'];
+    if (list is List) {
+      return list.whereType<Map<String, dynamic>>().toList();
+    }
+    return [];
+  }
+
+  Future<void> saveFrCurve(Map<String, dynamic> curveMap) async {
+    final list = getSavedFrCurves();
+    final name = curveMap['name'] as String?;
+    if (name == null || name.trim().isEmpty) return;
+
+    // Replace if exists, or append
+    final updated = list.where((c) => c['name'] != name).toList();
+    updated.add(curveMap);
+    _cache['saved_fr_curves'] = updated;
+    await _save();
+  }
+
+  Future<void> deleteFrCurve(String name) async {
+    final list = getSavedFrCurves();
+    _cache['saved_fr_curves'] = list.where((c) => c['name'] != name).toList();
+    await _save();
+  }
+
+  List<String> getDownloadedAutoEqIds() {
+    final list = _cache['autoeq_downloaded_ids'];
+    if (list is List) {
+      return list.map((e) => e.toString()).toList();
+    }
+    return [
+      'target_harman_ie_2019v2',
+      'target_hbb_bad_guy',
+      'target_ief_neutral_2023',
+      'iem_kz_castor_bass_enhanced',
+      'iem_moondrop_chu2',
+      'hp_sennheiser_hd600',
+    ];
+  }
+
+  Future<void> saveDownloadedAutoEqIds(Set<String> ids) async {
+    _cache['autoeq_downloaded_ids'] = ids.toList();
+    await _save();
+  }
 }
+
 
 

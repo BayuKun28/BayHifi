@@ -648,18 +648,22 @@ class AutoEqCloudService {
       rawContent = '''20 85.0\n100 83.0\n1000 75.0\n3000 85.0\n10000 76.0''';
     }
 
-    // Simpan ke daftar downloaded persisten
-    final storage = LocalPersistenceService.instance;
-    final downloaded = _getDownloadedIds().toSet();
-    downloaded.add(item.id);
-    storage.saveSetting('autoeq_downloaded_ids', downloaded.toList());
-
     // Parse data mentah menjadi FrCurveData
     final curve = FrCurveData.autoDetectAndParse(
       rawContent,
       name: item.name,
     );
-    debugPrint('[AutoEqCloudService] Successfully downloaded/cached: ${item.name}');
+
+    // Simpan kurva persisten offline ke storage
+    final storage = LocalPersistenceService.instance;
+    await storage.saveFrCurve(curve.toMap(category: item.category.name));
+
+    // Simpan ke daftar downloaded persisten
+    final downloaded = _getDownloadedIds().toSet();
+    downloaded.add(item.id);
+    await storage.saveDownloadedAutoEqIds(downloaded);
+
+    debugPrint('[AutoEqCloudService] Successfully downloaded and cached offline: ${item.name}');
     return curve;
   }
 
@@ -683,6 +687,8 @@ class AutoEqCloudService {
         throw Exception('Empty content from URL: $url');
       }
       final curve = FrCurveData.autoDetectAndParse(content, name: name);
+      final storage = LocalPersistenceService.instance;
+      await storage.saveFrCurve(curve.toMap(category: 'driver'));
       return curve;
     } catch (e) {
       debugPrint('[AutoEqCloudService] Failed to fetch remote URL: $e');
@@ -692,14 +698,6 @@ class AutoEqCloudService {
 
   List<String> _getDownloadedIds() {
     final storage = LocalPersistenceService.instance;
-    final list = storage.getSetting<List<dynamic>>('autoeq_downloaded_ids', [
-      'target_harman_ie_2019v2',
-      'target_hbb_bad_guy',
-      'target_ief_neutral_2023',
-      'iem_kz_castor_bass_enhanced',
-      'iem_moondrop_chu2',
-      'hp_sennheiser_hd600',
-    ]);
-    return list?.map((e) => e.toString()).toList() ?? [];
+    return storage.getDownloadedAutoEqIds();
   }
 }

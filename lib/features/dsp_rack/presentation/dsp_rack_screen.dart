@@ -135,6 +135,25 @@ class DspRackScreen extends ConsumerWidget {
                   onChanged: (val) => controller.setPreamp(val),
                   accentColor: const Color(0xFF00E676),
                 ),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildQuickGainChip(context, '-12 dB', -12.0, dspState.preampDb, controller),
+                      const SizedBox(width: 6),
+                      _buildQuickGainChip(context, '-6 dB', -6.0, dspState.preampDb, controller),
+                      const SizedBox(width: 6),
+                      _buildQuickGainChip(context, '-3 dB', -3.0, dspState.preampDb, controller),
+                      const SizedBox(width: 6),
+                      _buildQuickGainChip(context, '-1 dB', -1.0, dspState.preampDb, controller),
+                      const SizedBox(width: 6),
+                      _buildQuickGainChip(context, '0 dB (Flat)', 0.0, dspState.preampDb, controller),
+                      const SizedBox(width: 6),
+                      _buildQuickGainChip(context, '+3 dB', 3.0, dspState.preampDb, controller),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -945,6 +964,49 @@ class DspRackScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuickGainChip(
+    BuildContext context,
+    String label,
+    double gainDb,
+    double currentDb,
+    DspRackController controller,
+  ) {
+    final isSelected = (currentDb - gainDb).abs() < 0.05;
+    final theme = Theme.of(context);
+    final accent = const Color(0xFF00E676);
+
+    return InkWell(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        controller.setPreamp(gainDb);
+      },
+      borderRadius: BorderRadius.circular(6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? accent.withValues(alpha: 0.18)
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? accent : theme.dividerColor.withValues(alpha: 0.3),
+            width: isSelected ? 1.2 : 0.8,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? accent : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+            fontSize: 10,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
       ),
     );
   }

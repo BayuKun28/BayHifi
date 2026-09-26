@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/database/local_persistence_service.dart';
 import '../../../../audio_engine/virtual_dsp_service.dart';
 import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/biquad_math.dart';
@@ -18,10 +19,34 @@ class EqController extends StateNotifier<EqState> {
       : super(EqState(
           bands: EqBand.default10Bands,
           selectedBandIndex: 2, // Selected on B2 by default
+          safePreampDb: VirtualDspService.instance.preampGain != 0.0
+              ? VirtualDspService.instance.preampGain
+              : -4.3,
         )) {
     _loadSampleCurves();
     _recalculateSafePreamp();
     _syncWithVirtualDsp();
+    VirtualDspService.instance.addListener(_onDspServiceChanged);
+  }
+
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    VirtualDspService.instance.removeListener(_onDspServiceChanged);
+    super.dispose();
+  }
+
+  void _onDspServiceChanged() {
+    if (_isDisposed || !mounted) return;
+    final enginePreamp = VirtualDspService.instance.preampGain;
+    if ((state.safePreampDb - enginePreamp).abs() > 0.01) {
+      Future.microtask(() {
+        if (_isDisposed || !mounted) return;
+        state = state.copyWith(safePreampDb: enginePreamp);
+      });
+    }
   }
 
   void _syncWithVirtualDsp() {
@@ -44,6 +69,9 @@ class EqController extends StateNotifier<EqState> {
   }
 
   Future<void> _loadSampleCurves() async {
+    final drivers = <FrCurveData>[];
+    final targets = <FrCurveData>[];
+
     try {
       final driverText = await rootBundle
           .loadString('assets/samples/drivers/KZ_CASTOR_BLACK_DUDU_R.txt');
@@ -56,21 +84,40 @@ class EqController extends StateNotifier<EqState> {
       );
       final target = FrCurveData.parseSquiglinkCsv(
         targetText,
-        name: 'HBB%20Target',
+        name: 'HBB Target',
       );
 
-      final drivers = [driver];
-      final targets = [target];
-
-      state = state.copyWith(
-        driverFr: () => driver,
-        targetFr: () => target,
-        availableDrivers: drivers,
-        availableTargets: targets,
-      );
-    } catch (e) {
+      drivers.add(driver);
+      targets.add(target);
+    } catch (_) {
       // Graceful fallback jika running di test tanpa rootBundle
     }
+
+    // Hydrate persistent offline saved curves from LocalPersistenceService
+    try {
+      final savedMaps = LocalPersistenceService.instance.getSavedFrCurves();
+      for (final map in savedMaps) {
+        final curve = FrCurveData.fromMap(map);
+        final category = map['category'] as String?;
+        if (category == 'target' || curve.name.toLowerCase().contains('target')) {
+          if (!targets.any((t) => t.name == curve.name)) {
+            targets.add(curve);
+          }
+        } else {
+          if (!drivers.any((d) => d.name == curve.name)) {
+            drivers.add(curve);
+          }
+        }
+      }
+    } catch (_) {}
+
+    if (_isDisposed || !mounted) return;
+    state = state.copyWith(
+      driverFr: () => state.driverFr ?? (drivers.isNotEmpty ? drivers.first : null),
+      targetFr: () => state.targetFr ?? (targets.isNotEmpty ? targets.first : null),
+      availableDrivers: drivers,
+      availableTargets: targets,
+    );
   }
 
   void selectBand(int? index) {
@@ -252,10 +299,32 @@ class EqController extends StateNotifier<EqState> {
     );
   }
 
+  void setPreamp(double gainDb, {bool isAuto = false}) {
+    final clamped = gainDb.clamp(-24.0, 24.0);
+    state = state.copyWith(
+      safePreampDb: clamped,
+      autoPreampEnabled: isAuto,
+    );
+    VirtualDspService.instance.setPreampGain(clamped);
+  }
+
+  void toggleAutoPreamp() {
+    final nextAuto = !state.autoPreampEnabled;
+    state = state.copyWith(autoPreampEnabled: nextAuto);
+    if (nextAuto) {
+      _recalculateSafePreamp();
+    }
+  }
+
   void importDriver(FrCurveData driver) {
     final currentList = List<FrCurveData>.from(state.availableDrivers);
     currentList.removeWhere((d) => d.name == driver.name);
     currentList.add(driver);
+
+    // Save offline to persistence
+    try {
+      LocalPersistenceService.instance.saveFrCurve(driver.toMap(category: 'driver'));
+    } catch (_) {}
 
     state = state.copyWith(
       availableDrivers: currentList,
@@ -268,6 +337,11 @@ class EqController extends StateNotifier<EqState> {
     final currentList = List<FrCurveData>.from(state.availableTargets);
     currentList.removeWhere((t) => t.name == target.name);
     currentList.add(target);
+
+    // Save offline to persistence
+    try {
+      LocalPersistenceService.instance.saveFrCurve(target.toMap(category: 'target'));
+    } catch (_) {}
 
     state = state.copyWith(
       availableTargets: currentList,
@@ -379,7 +453,9 @@ class EqController extends StateNotifier<EqState> {
   }
 
   void _updateBands(List<EqBand> bands, {int? selectedIdx, String? presetName}) {
-    final safePreamp = BiquadMath.calculateSafePreamp(bands);
+    final safePreamp = state.autoPreampEnabled
+        ? BiquadMath.calculateSafePreamp(bands)
+        : state.safePreampDb;
     state = state.copyWith(
       bands: bands,
       selectedBandIndex: selectedIdx != null ? () => selectedIdx : null,
@@ -391,8 +467,10 @@ class EqController extends StateNotifier<EqState> {
   }
 
   void _recalculateSafePreamp() {
-    final safePreamp = BiquadMath.calculateSafePreamp(state.bands);
-    state = state.copyWith(safePreampDb: safePreamp);
-    _syncWithVirtualDsp();
+    if (state.autoPreampEnabled) {
+      final safePreamp = BiquadMath.calculateSafePreamp(state.bands);
+      state = state.copyWith(safePreampDb: safePreamp);
+      _syncWithVirtualDsp();
+    }
   }
 }

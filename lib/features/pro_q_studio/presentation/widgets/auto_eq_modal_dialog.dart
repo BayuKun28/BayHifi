@@ -92,8 +92,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width < 400 ? 12 : 16,
-        vertical: MediaQuery.of(context).size.height * 0.03,
+        horizontal: MediaQuery.of(context).size.width < 400 ? 10 : 16,
+        vertical: MediaQuery.of(context).size.height * 0.02,
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -101,7 +101,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
             width: double.infinity,
             constraints: BoxConstraints(
               maxWidth: 560,
-              maxHeight: MediaQuery.of(context).size.height * 0.88,
+              maxHeight: MediaQuery.of(context).size.height * 0.90,
             ),
             decoration: BoxDecoration(
               color: const Color(0xFF111620),
@@ -116,7 +116,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                 ),
               ],
             ),
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,13 +548,17 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF90A4AE),
-            fontSize: 9.5,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.5,
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF90A4AE),
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         if (hasRemove)
@@ -828,21 +832,20 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: borderColor, width: 1.0),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
           children: [
             HugeIcon(icon: icon, size: 12, color: color),
-            const SizedBox(width: 4),
+            const SizedBox(width: 3),
             Flexible(
               child: Text(
                 label,
                 style: TextStyle(
                   color: color,
-                  fontSize: 9.5,
+                  fontSize: 8.5,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.3,
+                  letterSpacing: 0.1,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

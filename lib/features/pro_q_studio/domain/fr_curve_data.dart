@@ -156,4 +156,33 @@ class FrCurveData {
 
     return spls[closestIdx];
   }
+
+  Map<String, dynamic> toMap({String? category}) {
+    final map = <String, dynamic>{
+      'name': name,
+      'frequencies': frequencies,
+      'splDb': splDb,
+      'referenceSpl1kHz': referenceSpl1kHz,
+    };
+    if (category != null) {
+      map['category'] = category;
+    }
+    return map;
+  }
+
+  factory FrCurveData.fromMap(Map<String, dynamic> map) {
+    return FrCurveData(
+      name: map['name'] as String? ?? 'Curve',
+      frequencies: (map['frequencies'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          [],
+      splDb: (map['splDb'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          [],
+      referenceSpl1kHz: (map['referenceSpl1kHz'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
 }
+

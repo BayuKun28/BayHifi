@@ -507,8 +507,30 @@ Ergonomi navigasi antrean putar dengan auto-fokus di tengah dan scrollbar kontek
   - [x] Navigasi instan via tap & drag dengan haptic feedback halus (`HapticFeedback.selectionClick()`), pencocokan huruf otomatis, sinkronisasi highlighting huruf aktif saat scroll normal, dan indikator huruf mengambang (*floating studio bubble indicator*).
 - [x] **23.4 Fallback Scrollbar Standar untuk Pengurutan Non-Alfabetis**
   - [x] Saat library diurutkan berdasarkan kriteria non-alfabetis (`SortField.duration`, `SortField.dateAdded`, `SortField.hiRes`), sistem otomatis menampilkan standard Studio Material 3 `Scrollbar`.
-- [x] **23.5 Dedicated Tests Validation**
-  - [x] Unit & widget tests di `queue_and_library_scrollers_test.dart` (6 tests mencakup ekstraksi huruf alfabet/numerik/simbol, rendering rel A-Z, fallback scrollbar, auto-centering queue sheet, dan contextual scroller switcher di library dengan total 193/193 passing tests).
+---
+
+## Fase 24: RYNLABS DSP Parity, Bidirectional Pro-Q Sync & Offline AutoEQ Caching
+Sinkronisasi mendalam arsitektur DSP Rack dengan RYNLABS_HIFI, sinkronisasi dua arah PreAmp dengan Pro-Q Studio, penyimpanan offline otomatis kurva AutoEQ / target / driver, dan optimalisasi UI/UX layar DSP Rack dan modal dialog portrait.
+
+- [x] **24.1 RYNLABS DSP Mathematical & Logic Parity (`VirtualDspService`)**
+  - [x] Verifikasi 100% keselarasan rumus dan arsitektur pemrosesan audio C++ mastering chain dengan `/mnt/01DC9A2666E1A190/Other/PROJECTS/DSP/RYNLABS_HIFI` (Master Bypass deactivation tanpa kehilangan parameter, Freeverb volume compensation formula $-1.0 \times (\text{wet} \times 0.75)\text{ dB}$, Tube warmth & drive scaling, dynamic compressor lookahead, limiter true peak output ceiling, dan biquad filter transfer function).
+- [x] **24.2 Bidirectional PreAmp & Headroom Synchronization**
+  - [x] Integrasi sinkronisasi dua arah (*bidirectional sync*) Pre-Amp gain antara `DspRackController`, `EqController`, dan `VirtualDspService` (Single Source of Truth).
+  - [x] Modifikasi PreAmp di Unit 01 DSP Rack langsung memutasi headroom dan safe preamp di Pro-Q Studio, dan sebaliknya perubahan PreAmp atau Auto-Headroom di Pro-Q Studio langsung memperbarui slider PreAmp dan level meter di DSP Rack.
+  - [x] Pembuatan komponen interaktif `_PreampBox` pada `BandStripBar` di Pro-Q Studio yang membuka *Material 3 Studio PreAmp & Headroom bottom sheet* lengkap dengan slider input gain, toggle auto-headroom protection, dan quick gain preset chips (`-12 dB`, `-6 dB`, `-3 dB`, `-1 dB`, `0 dB FLAT`, `+3 dB`).
+- [x] **24.3 Automatic Persistent Offline Storage for AutoEQ Cloud Presets & Target Curves**
+  - [x] Penambahan serialisasi dan deserialisasi `FrCurveData.toMap()` / `FrCurveData.fromMap()`.
+  - [x] Penambahan metode `saveFrCurve()`, `getSavedFrCurves()`, `deleteFrCurve()`, `saveDownloadedAutoEqIds()`, dan `getDownloadedAutoEqIds()` di `LocalPersistenceService`.
+  - [x] Saat pengguna mengunduh kurva target atau pengukuran IEM/headphone via `AutoEqCloudService.downloadItem()` atau mengimpor URL Squiglink, kurva tersebut secara otomatis disimpan ke penyimpanan offline persisten dan langsung terhidrasi ke daftar target/driver di `EqController`.
+- [x] **24.4 UI/UX Optimization for DSP Rack & Compact Mobile Portrait Viewports (360x780)**
+  - [x] Penambahan baris *Quick Gain Selector Chips* pada Unit 01 Pre-Amp Gain Stage di `DspRackScreen` (`-12 dB`, `-6 dB`, `-3 dB`, `-1 dB`, `0 dB Flat`, `+3 dB`).
+  - [x] Optimalisasi tata letak responsif `AutoEqCloudBrowserDialog` dengan `LayoutBuilder` (tampilan 2-tier stacked cards yang nyaman pada layar portrait sempit 360px tanpa overlap / overflow).
+  - [x] Optimalisasi `SquiglinkDialog` dan `AutoEqModalDialog` dengan pembungkus `Wrap` dan `BoxConstraints` fleksibel, mengeliminasi seluruh risiko `RenderFlex` overflow pada mode portrait.
+- [x] **24.5 Comprehensive Test Suite & Static Analysis Validation**
+  - [x] Pembuatan dedicated unit & widget test suite di `test/dsp_rack_and_pro_q_sync_test.dart` (12 tests mencakup PreAmp bidirectional sync, auto-headroom clipping safety, FrCurveData persistence, AutoEQ offline caching, RYNLABS DSP math, and portrait dialog rendering).
+  - [x] Eksekusi seluruh rangkaian test suite (`flutter test`): **205/205 tests passed (100%)**.
+  - [x] Eksekusi static analysis (`flutter analyze`): **No issues found (0 errors, 0 warnings)**.
+
 
 
 

@@ -50,10 +50,11 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Container(
-        width: 580,
-        height: 380,
+        constraints: const BoxConstraints(maxWidth: 580, maxHeight: 440),
+        width: double.infinity,
+        height: 400,
         decoration: BoxDecoration(
           color: const Color(0xFF131822),
           borderRadius: BorderRadius.circular(16),
@@ -78,16 +79,20 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   color: Color(0xFFCE93D8),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'SQUIGLINK & EQUALIZER APO ENGINE',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
+                const Expanded(
+                  child: Text(
+                    'SQUIGLINK & EQUALIZER APO ENGINE',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 InkWell(
                   onTap: () => Navigator.pop(context),
                   borderRadius: BorderRadius.circular(4),
@@ -188,7 +193,11 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
           ),
         ),
         const SizedBox(height: 10),
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
@@ -204,11 +213,10 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               },
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedFile01, size: 13, color: Color(0xFF90A4AE)),
               label: const Text(
-                'LOAD DEMO TEXT',
+                'LOAD DEMO',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
-            const SizedBox(width: 8),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF29B6F6),
@@ -228,11 +236,10 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               },
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedClipboard, size: 13, color: Color(0xFF29B6F6)),
               label: const Text(
-                'PASTE CLIPBOARD',
+                'PASTE',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
-            const Spacer(),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00E676),
@@ -304,7 +311,9 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
           ),
         ),
         const SizedBox(height: 10),
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
           children: [
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -327,11 +336,10 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               },
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 13, color: Colors.white),
               label: const Text(
-                'COPY SQUIGLINK TEXT',
+                'COPY SQUIGLINK',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
-            const SizedBox(width: 8),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF00E676),
@@ -353,7 +361,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               },
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 13, color: Color(0xFF00E676)),
               label: const Text(
-                'COPY WAVELET FORMAT',
+                'COPY WAVELET',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),

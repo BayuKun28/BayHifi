@@ -61,7 +61,7 @@ void main() {
 
       // Verify Tabs
       expect(find.text('ALL'), findsOneWidget);
-      expect(find.text('TARGET CURVES'), findsOneWidget);
+      expect(find.text('TARGETS'), findsOneWidget);
       expect(find.text('IEMs'), findsOneWidget);
       expect(find.text('HEADPHONES'), findsOneWidget);
       expect(find.text('DOWNLOADED'), findsOneWidget);

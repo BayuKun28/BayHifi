@@ -11,8 +11,32 @@ final dspRackControllerProvider =
 /// Controller StateNotifier untuk memanipulasi rantai DSP Mastering Rack.
 /// Terintegrasi secara seamless dengan VirtualDspService (Single Source of Truth).
 class DspRackController extends StateNotifier<DspRackState> {
-  DspRackController() : super(const DspRackState()) {
+  DspRackController()
+      : super(DspRackState(
+          preampDb: VirtualDspService.instance.preampGain,
+        )) {
     _syncWithEngine();
+    VirtualDspService.instance.addListener(_onEngineChanged);
+  }
+
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    VirtualDspService.instance.removeListener(_onEngineChanged);
+    super.dispose();
+  }
+
+  void _onEngineChanged() {
+    if (_isDisposed || !mounted) return;
+    final dsp = VirtualDspService.instance;
+    if ((state.preampDb - dsp.preampGain).abs() > 0.01) {
+      Future.microtask(() {
+        if (_isDisposed || !mounted) return;
+        state = state.copyWith(preampDb: dsp.preampGain);
+      });
+    }
   }
 
   @override
