@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'controllers/eq_controller.dart';
 import 'controllers/eq_state.dart';
 import 'widgets/band_strip_bar.dart';
 import '../domain/auto_eq_optimizer.dart';
+import 'widgets/auto_eq_cloud_browser_dialog.dart';
 import 'widgets/auto_eq_modal_dialog.dart';
 import 'widgets/interactive_eq_canvas.dart';
 
@@ -19,7 +21,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
   @override
   void initState() {
     super.initState();
-    // Kunci orientasi ke landscape dan masuk ke mode fullscreen imersif
+    // Lock orientation to landscape and enter immersive fullscreen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -29,7 +31,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
   @override
   void dispose() {
-    // Kembalikan orientasi layar dan navigasi sistem UI saat keluar dari Pro-Q Studio
+    // Restore orientation and system UI when exiting Pro-Q Studio
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
@@ -49,7 +51,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 1. Top Studio Toolbar & Legend dengan Tombol Exit (Kiri) dan Power (Kanan) Terfiksasi
+            // 1. Top Studio Toolbar & Legend with Exit (Left) and Power (Right) Fixed
             _buildTopBar(context, eqState, notifier),
 
             // 2. Interactive Pro-Q Studio Canvas
@@ -84,7 +86,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
       ),
       child: Row(
         children: [
-          // ─── 1. FIXED LEFT: Tombol Keluar (<) & Title ──────────────────────
+          // ─── 1. FIXED LEFT: Exit Button (<) & Title ────────────────────────
           InkWell(
             onTap: () {
               if (Navigator.of(context).canPop()) {
@@ -100,10 +102,12 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: const Color(0xFF2C3542), width: 1.0),
               ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                size: 14,
-                color: Color(0xFFFFB74D),
+              child: const Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowLeft01,
+                  size: 15,
+                  color: Color(0xFFFFB74D),
+                ),
               ),
             ),
           ),
@@ -111,8 +115,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.tune,
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedSlidersVertical,
                 size: 15,
                 color: Color(0xFFFF9F0A),
               ),
@@ -135,9 +139,9 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: const Color(0xFF546E7A), width: 1),
                   ),
-                  child: const Icon(
-                    Icons.question_mark,
-                    size: 8.5,
+                  child: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedHelpCircle,
+                    size: 9.0,
                     color: Color(0xFF90A4AE),
                   ),
                 ),
@@ -191,7 +195,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                         ),
                       ),
                       child: Text(
-                        state.showFrCurves ? '✕ HIDE FR' : '👁 SHOW FR',
+                        state.showFrCurves ? 'HIDE FR' : 'SHOW FR',
                         style: TextStyle(
                           color: state.showFrCurves
                               ? const Color(0xFFB0BEC5)
@@ -215,7 +219,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   // [∿ RTA] Button
                   _buildToolbarButton(
-                    icon: Icons.graphic_eq,
+                    icon: HugeIcons.strokeRoundedAudioWaveform,
                     label: 'RTA',
                     color: const Color(0xFF00E5FF),
                     isActive: state.isRtaEnabled,
@@ -224,9 +228,9 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   const SizedBox(width: 6),
 
-                  // [✨ AUTO EQ •] Button
+                  // [AUTO EQ] Button
                   _buildToolbarButton(
-                    icon: Icons.auto_awesome,
+                    icon: HugeIcons.strokeRoundedSparkles,
                     label: 'AUTO EQ •',
                     color: const Color(0xFF00E676),
                     isActive: true,
@@ -235,9 +239,20 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   const SizedBox(width: 6),
 
-                  // [🎚️ A/B] Quick Comparison Button
+                  // [CLOUD DB] Button
                   _buildToolbarButton(
-                    icon: Icons.compare_arrows,
+                    icon: HugeIcons.strokeRoundedCloudDownload,
+                    label: 'CLOUD DB',
+                    color: const Color(0xFF00E5FF),
+                    isActive: true,
+                    onTap: () => AutoEqCloudBrowserDialog.show(context),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  // [A/B] Quick Comparison Button
+                  _buildToolbarButton(
+                    icon: HugeIcons.strokeRoundedExchange01,
                     label: state.abMode == AbComparisonMode.aRaw ? 'A: RAW' : 'B: ACTIVE',
                     color: state.abMode == AbComparisonMode.aRaw
                         ? const Color(0xFF29B6F6)
@@ -264,7 +279,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   const SizedBox(width: 6),
 
-                  // [🔖 PRESETS] Popup Button
+                  // [PRESETS] Popup Button
                   PopupMenuButton<String>(
                     color: const Color(0xFF141820),
                     shape: RoundedRectangleBorder(
@@ -285,8 +300,10 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                         value: p,
                         child: Row(
                           children: [
-                            Icon(
-                              isCurr ? Icons.check_circle : Icons.circle_outlined,
+                            HugeIcon(
+                              icon: isCurr
+                                  ? HugeIcons.strokeRoundedCheckmarkCircle02
+                                  : HugeIcons.strokeRoundedCircle,
                               size: 14,
                               color: isCurr ? const Color(0xFFBA68C8) : const Color(0xFF546E7A),
                             ),
@@ -304,7 +321,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                       );
                     }).toList(),
                     child: _buildToolbarButton(
-                      icon: Icons.bookmark_border,
+                      icon: HugeIcons.strokeRoundedBookmark02,
                       label: 'PRESETS',
                       color: const Color(0xFFBA68C8),
                       isActive: false,
@@ -314,9 +331,9 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   const SizedBox(width: 6),
 
-                  // [🔄 RESET] Button
+                  // [RESET] Button
                   _buildToolbarButton(
-                    icon: Icons.refresh,
+                    icon: HugeIcons.strokeRoundedRefresh,
                     label: 'RESET',
                     color: const Color(0xFFEF5350),
                     isActive: false,
@@ -329,7 +346,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
           const SizedBox(width: 10),
 
-          // ─── 3. FIXED RIGHT: Tombol Power ON/OFF (Selalu Terlihat) ───────────
+          // ─── 3. FIXED RIGHT: Tombol Power ON/OFF (Always Visible) ────────────
           Tooltip(
             message: state.isEnabled ? 'Bypass EQ (Turn OFF)' : 'Enable EQ (Turn ON)',
             child: InkWell(
@@ -359,12 +376,14 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                         ]
                       : null,
                 ),
-                child: Icon(
-                  Icons.power_settings_new,
-                  size: 16,
-                  color: state.isEnabled
-                      ? const Color(0xFF00E5FF)
-                      : const Color(0xFF78909C),
+                child: Center(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedPower,
+                    size: 16,
+                    color: state.isEnabled
+                        ? const Color(0xFF00E5FF)
+                        : const Color(0xFF78909C),
+                  ),
                 ),
               ),
             ),
@@ -400,7 +419,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
   }
 
   Widget _buildToolbarButton({
-    required IconData icon,
+    required dynamic icon,
     required String label,
     required Color color,
     required bool isActive,
@@ -430,8 +449,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
+            HugeIcon(
+              icon: icon,
               size: 12,
               color: color,
             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../audio_engine/soloud_controller.dart';
+import '../../../../audio_engine/virtual_dsp_service.dart';
 import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/biquad_math.dart';
 import '../../domain/eq_band.dart';
@@ -21,6 +21,26 @@ class EqController extends StateNotifier<EqState> {
         )) {
     _loadSampleCurves();
     _recalculateSafePreamp();
+    _syncWithVirtualDsp();
+  }
+
+  void _syncWithVirtualDsp() {
+    final dsp = VirtualDspService.instance;
+    final isEqActive = state.isEnabled && !state.isRawBypassed;
+    dsp.toggleEq(isEqActive);
+
+    final gains = state.bands.map((b) => b.isEnabled ? b.gainDb : 0.0).toList();
+    final freqs = state.bands.map((b) => b.frequency).toList();
+    final qs = state.bands.map((b) => b.q).toList();
+    final types = state.bands.map((b) => b.type.name).toList();
+
+    dsp.setAllEqBands(
+      gains: gains,
+      freqs: freqs,
+      qs: qs,
+      types: types,
+      autoHeadroom: state.autoPreampEnabled,
+    );
   }
 
   Future<void> _loadSampleCurves() async {
@@ -182,11 +202,7 @@ class EqController extends StateNotifier<EqState> {
   void togglePower() {
     final nextState = !state.isEnabled;
     state = state.copyWith(isEnabled: nextState);
-    if (!nextState || state.isRawBypassed) {
-      SoLoudController.instance.setPreamp(0.0);
-    } else {
-      SoLoudController.instance.setPreamp(state.safePreampDb);
-    }
+    _syncWithVirtualDsp();
   }
 
   void toggleRta() {
@@ -209,15 +225,7 @@ class EqController extends StateNotifier<EqState> {
 
   void setAbComparison(AbComparisonMode mode) {
     state = state.copyWith(abMode: mode);
-    if (mode == AbComparisonMode.aRaw) {
-      // Audio murni (bypass EQ)
-      SoLoudController.instance.setPreamp(0.0);
-    } else {
-      // Audio ber-tuning aktif
-      if (state.isEnabled && state.autoPreampEnabled) {
-        SoLoudController.instance.setPreamp(state.safePreampDb);
-      }
-    }
+    _syncWithVirtualDsp();
   }
 
   void selectDriver(FrCurveData driver) {
@@ -379,16 +387,12 @@ class EqController extends StateNotifier<EqState> {
       activePresetName: presetName ?? (state.activePresetName == 'Default 10-Band' ? 'Custom' : state.activePresetName),
     );
 
-    if (state.isEnabled && state.autoPreampEnabled && !state.isRawBypassed) {
-      SoLoudController.instance.setPreamp(safePreamp);
-    }
+    _syncWithVirtualDsp();
   }
 
   void _recalculateSafePreamp() {
     final safePreamp = BiquadMath.calculateSafePreamp(state.bands);
     state = state.copyWith(safePreampDb: safePreamp);
-    if (state.isEnabled && state.autoPreampEnabled && !state.isRawBypassed) {
-      SoLoudController.instance.setPreamp(safePreamp);
-    }
+    _syncWithVirtualDsp();
   }
 }

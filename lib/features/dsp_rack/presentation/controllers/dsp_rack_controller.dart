@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_soloud/flutter_soloud.dart';
-import '../../../../audio_engine/soloud_controller.dart';
+import '../../../../audio_engine/virtual_dsp_service.dart';
 import '../../domain/dsp_models.dart';
 
 final dspRackControllerProvider =
@@ -9,131 +8,107 @@ final dspRackControllerProvider =
   return DspRackController();
 });
 
-/// Controller StateNotifier untuk memanipulasi rantai DSP Mastering Rack
+/// Controller StateNotifier untuk memanipulasi rantai DSP Mastering Rack.
+/// Terintegrasi secara seamless dengan VirtualDspService (Single Source of Truth).
 class DspRackController extends StateNotifier<DspRackState> {
   DspRackController() : super(const DspRackState()) {
-    // Initial sync with audio engine if already running
     _syncWithEngine();
   }
 
   @override
   DspRackState get state => super.state;
 
-  /// Sinkronisasi parameter DSP ke low-level C++ filter engine SoLoud
+  /// Sinkronisasi parameter DSP ke VirtualDspService (RYNLABS_HIFI Master Chain)
   void _syncWithEngine() {
     try {
-      if (!SoLoudController.instance.isInitialized) return;
+      final dsp = VirtualDspService.instance;
 
-      // 1. Preamp Stage
-      final effectivePreamp = state.isBypassed ? 0.0 : state.preampDb;
-      SoLoudController.instance.setPreamp(effectivePreamp);
-
-      final filters = SoLoud.instance.filters;
-
-      // If master bypassed, turn off all DSP filters
       if (state.isBypassed) {
-        if (filters.bassBoostFilter.isActive) filters.bassBoostFilter.deactivate();
-        if (filters.tubeExciterFilter.isActive) filters.tubeExciterFilter.deactivate();
-        if (filters.stereoWidthFilter.isActive) filters.stereoWidthFilter.deactivate();
-        if (filters.crossfeedFilter.isActive) filters.crossfeedFilter.deactivate();
-        if (filters.freeverbFilter.isActive) filters.freeverbFilter.deactivate();
-        if (filters.pitchShiftFilter.isActive) filters.pitchShiftFilter.deactivate();
-        if (filters.compressorFilter.isActive) filters.compressorFilter.deactivate();
-        if (filters.limiterFilter.isActive) filters.limiterFilter.deactivate();
+        dsp.setMasterEnabled(false);
         return;
       }
 
-      // Order of activation:
-      // Tone Shaping -> Spatial Enhancement -> Dynamics/Limiter
+      dsp.setMasterEnabled(true);
+      dsp.setPreampGain(state.preampDb);
+
       // 1. Dynamic Bass Boost
+      dsp.toggleBassBoost(state.bassBoostEnabled);
       if (state.bassBoostEnabled) {
-        if (!filters.bassBoostFilter.isActive) filters.bassBoostFilter.activate();
-        filters.bassBoostFilter.boost.value = state.bassBoostAmount;
-        filters.bassBoostFilter.wet.value = (state.bassBoostWet * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.bassBoostFilter.isActive) {
-        filters.bassBoostFilter.deactivate();
+        dsp.setBassBoostValue(state.bassBoostAmount);
       }
 
       // 2. Tube Harmonic Exciter
+      dsp.toggleTubeExciter(state.tubeExciterEnabled);
       if (state.tubeExciterEnabled) {
-        if (!filters.tubeExciterFilter.isActive) filters.tubeExciterFilter.activate();
-        filters.tubeExciterFilter.drive.value = state.tubeDrive;
-        filters.tubeExciterFilter.warmth.value = state.tubeWarmth;
-        filters.tubeExciterFilter.mix.value = (state.tubeMix * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.tubeExciterFilter.isActive) {
-        filters.tubeExciterFilter.deactivate();
+        dsp.setTubeParams(
+          drive: state.tubeDrive,
+          warmth: state.tubeWarmth,
+          mix: state.tubeMix * state.masterWet,
+        );
       }
 
       // 3. Stereo Width Matrix
+      dsp.toggleStereoWidth(state.stereoWidthEnabled);
       if (state.stereoWidthEnabled) {
-        if (!filters.stereoWidthFilter.isActive) filters.stereoWidthFilter.activate();
-        filters.stereoWidthFilter.width.value = state.stereoWidth;
-        filters.stereoWidthFilter.midGain.value = state.stereoMidGain;
-        filters.stereoWidthFilter.wet.value = (state.stereoWet * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.stereoWidthFilter.isActive) {
-        filters.stereoWidthFilter.deactivate();
+        dsp.setStereoWidthParams(
+          factor: state.stereoWidth,
+          midGain: state.stereoMidGain,
+          wet: state.stereoWet * state.masterWet,
+        );
       }
 
       // 4. Binaural Crossfeed
+      dsp.toggleCrossfeed(state.crossfeedEnabled);
       if (state.crossfeedEnabled) {
-        if (!filters.crossfeedFilter.isActive) filters.crossfeedFilter.activate();
-        filters.crossfeedFilter.cutoff.value = state.crossfeedCutoff;
-        filters.crossfeedFilter.feed.value = state.crossfeedFeed;
-        filters.crossfeedFilter.delayMs.value = state.crossfeedDelayMs;
-        filters.crossfeedFilter.wet.value = (state.crossfeedWet * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.crossfeedFilter.isActive) {
-        filters.crossfeedFilter.deactivate();
+        dsp.setCrossfeedParams(
+          cutoff: state.crossfeedCutoff,
+          feed: state.crossfeedFeed,
+          delayMs: state.crossfeedDelayMs,
+          wet: state.crossfeedWet * state.masterWet,
+        );
       }
 
       // 5. Spatial Studio Reverb
+      dsp.toggleReverb(state.reverbEnabled);
       if (state.reverbEnabled) {
-        if (!filters.freeverbFilter.isActive) filters.freeverbFilter.activate();
-        filters.freeverbFilter.roomSize.value = state.reverbRoomSize;
-        filters.freeverbFilter.damp.value = state.reverbDamp;
-        filters.freeverbFilter.width.value = state.reverbWidth;
-        filters.freeverbFilter.freeze.value = state.reverbFreeze ? 1.0 : 0.0;
-        filters.freeverbFilter.wet.value = (state.reverbWet * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.freeverbFilter.isActive) {
-        filters.freeverbFilter.deactivate();
+        dsp.setReverbParams(
+          roomSize: state.reverbRoomSize,
+          damp: state.reverbDamp,
+          wet: state.reverbWet * state.masterWet,
+          width: state.reverbWidth,
+        );
       }
 
       // 6. Pitch Shifter
+      dsp.togglePitchShift(state.pitchShiftEnabled);
       if (state.pitchShiftEnabled) {
-        if (!filters.pitchShiftFilter.isActive) filters.pitchShiftFilter.activate();
-        filters.pitchShiftFilter.semitones.value = state.pitchSemitones;
-        filters.pitchShiftFilter.wet.value = (state.pitchWet * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.pitchShiftFilter.isActive) {
-        filters.pitchShiftFilter.deactivate();
+        dsp.setPitchValue(state.pitchSemitones);
       }
 
-      // 7. Dynamic Compressor (gain reduction before limiter)
+      // 7. Dynamic Compressor
+      dsp.toggleCompressor(state.compressorEnabled);
       if (state.compressorEnabled) {
-        if (!filters.compressorFilter.isActive) filters.compressorFilter.activate();
-        filters.compressorFilter.threshold.value = state.compThreshold;
-        filters.compressorFilter.ratio.value = state.compRatio;
-        filters.compressorFilter.attackTime.value = state.compAttack;
-        filters.compressorFilter.releaseTime.value = state.compRelease;
-        filters.compressorFilter.makeupGain.value = state.compMakeup;
-        filters.compressorFilter.kneeWidth.value = state.compKnee;
-        filters.compressorFilter.wet.value = (state.compWet * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.compressorFilter.isActive) {
-        filters.compressorFilter.deactivate();
+        dsp.setCompressorParams(
+          threshold: state.compThreshold,
+          ratio: state.compRatio,
+          attackMs: state.compAttack,
+          releaseMs: state.compRelease,
+          knee: state.compKnee,
+          makeup: state.compMakeup,
+        );
       }
 
-      // 8. Peak Brickwall Limiter (always last to guarantee zero-overshoot protection)
+      // 8. Peak Brickwall Limiter (Always active with hard ceiling -1.3 dBFS)
+      dsp.toggleLimiter(state.limiterEnabled);
       if (state.limiterEnabled) {
-        if (!filters.limiterFilter.isActive) filters.limiterFilter.activate();
-        filters.limiterFilter.threshold.value = state.limiterThreshold;
-        filters.limiterFilter.outputCeiling.value = state.limiterOutputCeiling;
-        filters.limiterFilter.attackTime.value = state.limiterAttack;
-        filters.limiterFilter.releaseTime.value = state.limiterRelease;
-        filters.limiterFilter.kneeWidth.value = state.limiterKnee;
-        filters.limiterFilter.wet.value = (state.limiterWet * state.masterWet).clamp(0.0, 1.0);
-      } else if (filters.limiterFilter.isActive) {
-        filters.limiterFilter.deactivate();
+        dsp.setLimiterParams(
+          threshold: state.limiterThreshold,
+          attackMs: state.limiterAttack,
+          releaseMs: state.limiterRelease,
+        );
       }
     } catch (e) {
-      debugPrint('[DspRackController] Non-fatal sync error (e.g. mock test environment): $e');
+      debugPrint('[DspRackController] Non-fatal sync error: $e');
     }
   }
 
@@ -425,6 +400,7 @@ class DspRackController extends StateNotifier<DspRackState> {
 
   void resetToDefaults() {
     state = const DspRackState();
+    VirtualDspService.instance.resetToFlatReference();
     _syncWithEngine();
   }
 }

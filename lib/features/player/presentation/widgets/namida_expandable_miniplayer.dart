@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
+import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../domain/track.dart';
 import '../controllers/player_controller.dart';
 import '../controllers/player_expansion_controller.dart';
 import '../now_playing_screen.dart';
 import '../../../pro_q_studio/presentation/pro_q_studio_screen.dart';
+import '../../../library/domain/library_collection_models.dart';
+import '../../../library/presentation/controllers/library_controller.dart';
+import '../../../library/presentation/playlists_screen.dart';
 
 /// Namida-inspired Expandable MiniPlayer
 /// Melayang tepat di atas Bottom Navigation Bar dan dapat di-expand secara mulus ke full NowPlayingScreen.
 class NamidaExpandableMiniPlayer extends ConsumerStatefulWidget {
   final double collapsedBottomOffset;
+  final bool isLibraryTab;
 
   const NamidaExpandableMiniPlayer({
     super.key,
     this.collapsedBottomOffset = 86.0,
+    this.isLibraryTab = false,
   });
 
   @override
@@ -27,6 +35,7 @@ class _NamidaExpandableMiniPlayerState
     with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
   late final Animation<double> _expandAnimation;
+  bool _isCategoryDockExpanded = false;
 
   @override
   void initState() {
@@ -43,17 +52,36 @@ class _NamidaExpandableMiniPlayerState
   }
 
   @override
+  void didUpdateWidget(covariant NamidaExpandableMiniPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isLibraryTab && !widget.isLibraryTab && _isCategoryDockExpanded) {
+      _isCategoryDockExpanded = false;
+    }
+  }
+
+  @override
   void dispose() {
     _animController.dispose();
     super.dispose();
   }
 
   void _onExpand() {
+    setState(() => _isCategoryDockExpanded = false);
     ref.read(playerExpansionProvider.notifier).expand();
   }
 
   void _onCollapse() {
     ref.read(playerExpansionProvider.notifier).collapse();
+  }
+
+  dynamic _getTabIcon(CollectionTab tab) {
+    return switch (tab) {
+      CollectionTab.tracks => HugeIcons.strokeRoundedMusicNote01,
+      CollectionTab.albums => HugeIcons.strokeRoundedAlbum01,
+      CollectionTab.artists => HugeIcons.strokeRoundedUser,
+      CollectionTab.genres => HugeIcons.strokeRoundedTag01,
+      CollectionTab.folders => HugeIcons.strokeRoundedFolder01,
+    };
   }
 
   @override
@@ -76,7 +104,7 @@ class _NamidaExpandableMiniPlayerState
     final currentTrack = track ??
         const Track(
           id: 'demo_track',
-          title: 'Ketuk untuk Memutar Audio',
+          title: 'Tap to Play Audio',
           artist: 'Baydev HiFi Audiophile Player',
           album: 'Studio Engine Ready',
           duration: Duration(minutes: 3, seconds: 45),
@@ -85,13 +113,27 @@ class _NamidaExpandableMiniPlayerState
           bitDepth: 24,
         );
 
-    return AnimatedBuilder(
-      animation: _expandAnimation,
-      builder: (context, child) {
+    return PopScope(
+      canPop: !isExpanded && !_isCategoryDockExpanded,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_isCategoryDockExpanded) {
+          setState(() => _isCategoryDockExpanded = false);
+          return;
+        }
+        if (isExpanded) {
+          _onCollapse();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _expandAnimation,
+        builder: (context, child) {
         final progress = _expandAnimation.value;
 
-        // Animasikan bottom offset: dari collapsedBottomOffset (86px) ke 0px
-        final double currentBottom = (1.0 - progress) * widget.collapsedBottomOffset;
+        // Animasikan bottom offset: dari collapsedBottomOffset + safe area bottom ke 0px
+        final double baseBottomOffset =
+            widget.collapsedBottomOffset + mediaQuery.padding.bottom;
+        final double currentBottom = (1.0 - progress) * baseBottomOffset;
 
         // Animasikan tinggi: dari 66px ke screenHeight
         const double miniPlayerHeight = 66.0;
@@ -102,88 +144,312 @@ class _NamidaExpandableMiniPlayerState
         final double horizontalMargin = (1.0 - progress) * 10.0;
         final double borderRadius = (1.0 - progress) * 16.0;
 
-        return Positioned(
-          left: horizontalMargin,
-          right: horizontalMargin,
-          bottom: currentBottom,
-          height: currentHeight,
-          child: GestureDetector(
-            onVerticalDragUpdate: (details) {
-              if (details.primaryDelta != null) {
-                if (details.primaryDelta! < -6 && !isExpanded) {
-                  _onExpand();
-                } else if (details.primaryDelta! > 6 && isExpanded) {
-                  _onCollapse();
-                }
-              }
-            },
-            child: Material(
-              color: Colors.transparent,
-              elevation: progress > 0.05 ? 24 : 10,
-              borderRadius: BorderRadius.circular(borderRadius),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(borderRadius),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(borderRadius),
-                    border: Border.all(
-                      color: theme.dividerColor.withValues(alpha: (1.0 - progress * 0.8)),
-                      width: 1.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      // Layer 1: Full NowPlayingScreen (Fade in saat di-expand)
-                      if (progress > 0.01)
-                        Positioned.fill(
-                          child: Opacity(
-                            opacity: progress.clamp(0.0, 1.0),
-                            child: NowPlayingScreen(
-                              onCollapse: _onCollapse,
-                              onOpenProQStudio: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const ProQStudioScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
+        // Jika di Library tab, miniplayer menyisakan ruang 66px di kanan untuk tombol Category FAB
+        final double miniPlayerRight =
+            (1.0 - progress) * (widget.isLibraryTab ? 76.0 : 10.0);
 
-                      // Layer 2: Collapsed MiniPlayer Bar (Fade out saat di-expand)
-                      if (progress < 0.99)
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: miniPlayerHeight,
-                          child: Opacity(
-                            opacity: (1.0 - progress * 2.0).clamp(0.0, 1.0),
-                            child: _buildMiniPlayerContent(
-                              context,
-                              currentTrack,
-                              playback,
-                              theme,
-                            ),
-                          ),
+        return Stack(
+          children: [
+            // ─── 0. DISMISS BACKDROP SAAT CATEGORY DOCK EXPANDED ────────────
+            if (_isCategoryDockExpanded && widget.isLibraryTab && progress < 0.1)
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => setState(() => _isCategoryDockExpanded = false),
+                  child: const ColoredBox(color: Colors.transparent),
+                ),
+              ),
+
+            // ─── 1. FLOATING SECONDARY CATEGORY DOCK POPUP ───────────────────
+            if (_isCategoryDockExpanded && widget.isLibraryTab && progress < 0.1)
+              Positioned(
+                right: 10,
+                bottom: currentBottom + miniPlayerHeight + 8.0,
+                child: _buildFloatingCategoryDock(context, theme),
+              ),
+
+            // ─── 2. MAIN EXPANDABLE MINIPLAYER ──────────────────────────────
+            Positioned(
+              left: horizontalMargin,
+              right: miniPlayerRight,
+              bottom: currentBottom,
+              height: currentHeight,
+              child: GestureDetector(
+                onVerticalDragUpdate: (details) {
+                  if (details.primaryDelta != null) {
+                    if (details.primaryDelta! < -6 && !isExpanded) {
+                      _onExpand();
+                    } else if (details.primaryDelta! > 6 && isExpanded) {
+                      _onCollapse();
+                    }
+                  }
+                },
+                child: Material(
+                  color: Colors.transparent,
+                  elevation: progress > 0.05 ? 24 : 10,
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(borderRadius),
+                        border: Border.all(
+                          color: theme.dividerColor.withValues(alpha: (1.0 - progress * 0.8)),
+                          width: 1.0,
                         ),
-                    ],
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          // Layer 1: Full NowPlayingScreen (Fade in saat di-expand)
+                          if (progress > 0.01)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              width: mediaQuery.size.width,
+                              height: screenHeight,
+                              child: Opacity(
+                                opacity: progress.clamp(0.0, 1.0),
+                                child: NowPlayingScreen(
+                                  onCollapse: _onCollapse,
+                                  onOpenProQStudio: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const ProQStudioScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+
+                          // Layer 2: Collapsed MiniPlayer Bar (Fade out saat di-expand)
+                          if (progress < 0.99)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: miniPlayerHeight,
+                              child: Opacity(
+                                opacity: (1.0 - progress * 2.0).clamp(0.0, 1.0),
+                                child: _buildMiniPlayerContent(
+                                  context,
+                                  currentTrack,
+                                  playback,
+                                  theme,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+
+            // ─── 3. CATEGORY FAB (SEJAJAR DI KANAN MINIPLAYER) ───────────────
+            if (widget.isLibraryTab && progress < 0.95)
+              Positioned(
+                right: 10,
+                bottom: currentBottom,
+                width: 58,
+                height: miniPlayerHeight,
+                child: Opacity(
+                  opacity: (1.0 - progress * 3.0).clamp(0.0, 1.0),
+                  child: _buildCategoryFab(context, theme),
+                ),
+              ),
+          ],
         );
       },
+    ),
+  );
+}
+
+  Widget _buildCategoryFab(BuildContext context, ThemeData theme) {
+    final libraryState = ref.watch(unifiedLibraryProvider);
+    final primary = theme.colorScheme.primary;
+
+    return Tooltip(
+      message: 'Switch Library Category',
+      child: Material(
+        color: Colors.transparent,
+        elevation: 10,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            setState(() => _isCategoryDockExpanded = !_isCategoryDockExpanded);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: 58,
+            height: 66,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _isCategoryDockExpanded
+                    ? primary
+                    : theme.dividerColor,
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                HugeIcon(
+                  icon: _getTabIcon(libraryState.currentTab),
+                  size: 20,
+                  color: primary,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  libraryState.currentTab.label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingCategoryDock(BuildContext context, ThemeData theme) {
+    final libraryState = ref.watch(unifiedLibraryProvider);
+    final primary = theme.colorScheme.primary;
+
+    return Material(
+      color: Colors.transparent,
+      elevation: 16,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: theme.dividerColor.withValues(alpha: 0.8),
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...CollectionTab.values.map((tab) {
+              final isSelected = libraryState.currentTab == tab;
+              return InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(unifiedLibraryProvider.notifier).setTab(tab);
+                  setState(() => _isCategoryDockExpanded = false);
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? primary.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: isSelected
+                        ? Border.all(
+                            color: primary.withValues(alpha: 0.5),
+                            width: 1.0,
+                          )
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: _getTabIcon(tab),
+                        size: 16,
+                        color: isSelected ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        tab.label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                          color: isSelected ? primary : theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 4),
+            Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.4)),
+            const SizedBox(height: 4),
+            InkWell(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _isCategoryDockExpanded = false);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PlaylistsScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlayList,
+                      size: 16,
+                      color: theme.colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Playlists',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -196,20 +462,25 @@ class _NamidaExpandableMiniPlayerState
     final isPlaying = playback.isPlaying as bool;
     final position = playback.position as Duration;
     final duration = playback.duration as Duration;
-
     final progressRatio = duration.inMilliseconds > 0
         ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
         : 0.0;
 
-    return InkWell(
-      onTap: _onExpand,
-      borderRadius: BorderRadius.circular(16),
-      child: Stack(
-        children: [
-          // Bar Content Row
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-            child: Row(
+    return GestureDetector(
+      onVerticalDragEnd: (details) {
+        if (details.primaryVelocity != null && details.primaryVelocity! < -200) {
+          _onExpand();
+        }
+      },
+      child: InkWell(
+        onTap: _onExpand,
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // Bar Content Row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+              child: Row(
               children: [
                 // Squircle Album Art Thumbnail
                 Hero(
@@ -235,14 +506,12 @@ class _NamidaExpandableMiniPlayerState
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
-                      child: Center(
-                        child: Icon(
-                          Icons.album,
-                          size: 26,
-                          color: isPlaying
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                        ),
+                      child: StudioArtworkWidget(
+                        track: track,
+                        fallbackIconSize: 22,
+                        fallbackColor: isPlaying
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -334,10 +603,12 @@ class _NamidaExpandableMiniPlayerState
                           ),
                         ],
                       ),
-                      child: Icon(
-                        isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                        color: theme.colorScheme.onPrimary,
-                        size: 22,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                          color: theme.colorScheme.onPrimary,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
@@ -354,10 +625,10 @@ class _NamidaExpandableMiniPlayerState
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(6),
-                      child: Icon(
-                        Icons.skip_next_rounded,
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedNext,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                        size: 22,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -371,10 +642,10 @@ class _NamidaExpandableMiniPlayerState
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.keyboard_arrow_up_rounded,
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowUp01,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                        size: 22,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -399,6 +670,7 @@ class _NamidaExpandableMiniPlayerState
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

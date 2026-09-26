@@ -1,4 +1,4 @@
-# 📐 Baydev HiFi — Engineering & Design Rules (`rules.md`)
+# Baydev HiFi — Engineering & Design Rules (rules.md)
 
 Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuka **Material 3 Expressive**, dan struktur folder profesional untuk pengembangan pemutar musik audiophile **Baydev HiFi**.
 
@@ -20,22 +20,32 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
   - `ThemeMode.light`: Clean Studio Light / Champagne (`#F5F7FA`) dengan kontras teks tinggi.
   - `ThemeMode.system`: Mengikuti preferensi tema perangkat (OS) secara otomatis.
 - **Namida Dynamic Palette & Custom Colors**:
-  - UI secara dinamis mengekstrak palet warna dari Album Art lagu aktif menggunakan `palette_generator`.
-  - Pilihan preset palet audio studio terkurasi:
-    - *Obsidian Cyan* (Namida Cyber Neon `#00F0FF`)
-    - *Amber Tube Glow* (Warm Analog Tube `#FF9F0A`)
-    - *Emerald HiFi* (Mint Studio Precision `#00E676`)
-    - *Electric Purple* (Audiophile Violet `#BF5AF2`)
-    - *Crimson Passion* (Mastering Red `#FF3B30`)
-    - *True OLED Black* (0% battery consumption AMOLED)
+  - UI secara dinamis mengekstrak palet warna dari Album Art lagu aktif menggunakan `palette_generator` yang diselaraskan secara halus dan proporsional.
+  - Pilihan preset palet audio studio terkurasi (Non-Neon & Restrained Studio Tones):
+    - *Obsidian Cyan* (Refined Sky Studio `#38BDF8` / `#0284C7`)
+    - *Amber Tube Glow* (Warm Analog Tube `#F59E0B` / `#D97706`)
+    - *Emerald HiFi* (Studio Precision Mint `#10B981` / `#059669`)
+    - *Electric Purple* (Studio Violet `#A855F7` / `#7C3AED`)
+    - *Crimson Passion* (Mastering Rose Crimson `#F43F5E` / `#E11D48`)
+    - *True OLED Black* (0% battery consumption AMOLED with `#38BDF8` precision accent)
   - Pengguna bebas memilih Accent Color custom (HEX / Swatch) untuk slider, indikator node, dan kurva glow.
 - **Surface Elevation**: Gunakan tonal elevation Material 3 (`#161920`, `#1C202A`, `#242A38`), jangan gunakan drop shadow kasar.
-- **Neon Glow Palette**:
-  - `EQ Curve`: Amber Warmth (`#FF9F0A`) dengan translusen glow.
-  - `Driver FR`: Cyan Neon (`#00F0FF`).
-  - `Target FR`: Mint Emerald (`#00FFA3`).
-  - `Active Selection`: Electric Purple (`#BF5AF2`) atau Emerald (`#10B981`).
-  - `Danger / Peak Clipping`: Crimson Red (`#FF3B30`).
+- **Zero-Neon & Restrained Palette Policy (Strictly Enforced)**:
+  - DILARANG KERAS menggunakan warna neon menyala atau saturasi berlebihan yang menyilaukan mata (seperti neon green `#00FF00`, neon cyan `#00F0FF`, atau garish blinding neons).
+  - Seluruh warna kurva EQ, grafis RTA, kartu bento, status badge, dan tombol aksi wajib menggunakan warna studio terkalibrasi, berkelas, dan nyaman di mata dalam sesi mendengarkan yang panjang.
+  - `EQ Curve`: Amber Warmth (`#F59E0B`) dengan soft subtle glow.
+  - `Driver FR`: Muted Sky Blue (`#38BDF8`).
+  - `Target FR`: Soft Mint Emerald (`#10B981`).
+  - `Active Selection`: Studio Violet (`#A855F7`) atau Precision Mint (`#10B981`).
+  - `Danger / Peak Clipping`: Soft Studio Red (`#F43F5E`).
+- **Solid Surfaces & Minimal Restrained Gradients Policy (Strictly Enforced)**:
+  - DILARANG KERAS menggunakan warna gradasi dekoratif/berlebihan pada komponen UI seperti cards, container bento, hero banners, list tiles, dialog, panel, atau settings overview.
+  - Semua komponen UI wajib menggunakan warna **solid** murni yang bersumber langsung dari `Theme.of(context).colorScheme` dan `AppPalette` aktif (`theme.colorScheme.surface`, `surfaceContainer`, `surfaceContainerHighest`, `surfaceContainerLow`).
+  - Penggunaan gradien HANYA diperbolehkan jika ultra-minimal dan murni fungsional, yaitu:
+    1. Area fill di bawah kurva DSP / RTA spectrum analyzer (fade dari warna aksen ke transparan untuk visualisasi pembacaan data frekuensi).
+    2. ShaderMask edge fade pada synchronized lyrics / list edge (agar teks memudar halus di batas atas/bawah layar).
+    3. Sheen refleksi minimal pada vinyl disc animation.
+    Di luar ketiga kebutuhan fungsional tersebut, seluruh kartu bento, overview, dan banner WAJIB menggunakan latar belakang warna solid dengan 1px crisp outline border.
 
 ### 2.2 Bentuk (Shapes) & Tipografi
 - **Expressive Shapes**: Gunakan squircle dan rounded shape Material 3:
@@ -70,7 +80,63 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
     - Ketukan (*tap*) atau gesekan ke atas (*swipe up*) membuka layar **NowPlayingScreen** secara penuh dengan transisi bottom-sheet / sliding panel.
     - Gesekan ke bawah (*swipe down*) atau tombol chevron collapse mengembalikan player ke bentuk MiniPlayer tanpa menghentikan pemutaran audio.
 
+---
+
+### 2.5 Standar Ikonografi Modern (`hugeicons`), Floating Dock & Anti-AI-Slop UI
+- **Zero-Emoji Policy (Strictly Enforced)**:
+  - DILARANG KERAS menggunakan emoji di seluruh komponen UI (widget, button label, title dialog, badge, snackbar, status text), kode sumber, komentar kode, maupun dokumentasi.
+  - Seluruh visualisasi simbolis WAJIB menggunakan library ikon resmi (`hugeicons` via `HugeIcons.strokeRounded...` atau `HugeIcons.solidRounded...`).
+- **Mandatory Icon Package (`hugeicons`)**:
+  - Seluruh ikon di dalam aplikasi **wajib** menggunakan `HugeIcons` (stroke rounded style `HugeIcons.strokeRounded...` atau solid `HugeIcons.solidRounded...`).
+  - **Dilarang keras** mencampur ikon generic Material 1/2 (`Icons.xxx`).
+- **Floating Rounded Dock**:
+  - Bottom navigation bar diimplementasikan sebagai **Floating Capsule Dock** (`borderRadius: BorderRadius.circular(26)`), melayang di atas safe area dengan elevasi halus, batas border 1px, dan indikator pill aktif beranimasi.
+- **Anti-AI-Slop UI Philosophy**:
+  - Pertahankan *high information density* ala studio hardware (FabFilter, Universal Audio, Namida).
+  - Gunakan *tabular figures* (`FontFeature.tabularFigures()`) pada semua display angka audio (frekuensi, gain, durasi, bitrate, preamp).
+  - Hindari efek *frosted glass* buram berlebihan yang merusak keterbacaan teks.
+  - Hindari penumpukan gradien neon secara acak tanpa konteks fungsional audio.
+
+### 2.6 Konsistensi Desain Antarmuka & Referensi UI Fidelity
+- **Kepatuhan Desain Referensi**:
+  - Setiap penambahan screen, modal, bottom sheet, atau komponen baru **wajib konsisten** dengan desain yang telah ada (`collection_dark`, `collection_light`, `customization_settings`, `yt_miniplayer`, `pro_q_studio`).
+  - Gunakan komponen dasar yang seragam: squircle rounded borders (`8px`, `12px`, `16px`, `24px`), dark studio surface containers, 1px crisp outline border (`Border.all(color: theme.dividerColor, width: 1.0)`).
+  - **100% English Language Policy**: Seluruh teks antarmuka pengguna (title, label, button, tooltip, snackbar, modal dialog) wajib menggunakan Bahasa Inggris formal.
+  - **Tactile Micro-interactions**: Berikan haptic feedback halus (`HapticFeedback.selectionClick()`) dan transisi animasi halus (150-250ms) pada interaksi tombol, reordering, dan switching.
+
+### 2.7 Standar Arsitektur Material 3 Expressive & Pure Theme Palettes System
+- **Pure Material 3 Expressive Semi-Minimalist Aesthetics**:
+  - Terapkan tata letak antarmuka yang bersih, elegan, dan **semi-minimalist** (tidak terlalu ramai/padat/cluttered).
+  - Berikan *breathing room* yang proporsional, struktur kartu yang fokus dan lapang, serta hindari penumpukan badge dekoratif yang tidak esensial.
+  - Standar squircle tokens:
+    - `XS: 8px` (Chips, mini tags, status dots)
+    - `S: 12px` (Action buttons, quick metric items)
+    - `M: 16px` (Standard Bento cards, dialogs, sliders)
+    - `L: 20px` (Feature cards, DSP tiles)
+    - `XL: 28px` (Hero containers, album art, bottom sheets)
+    - `Pill: 999px` (Status badges, active pills, capsule docks)
+  - 1px crisp studio borders (`Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1.0)`) tanpa shadow buram berlebihan.
+- **Strict Color Theming Palette Adherence (Zero Hardcoded Random Colors)**:
+  - **DILARANG KERAS** menggunakan warna hardcoded arbitrer di luar palet tema aktif (seperti hardcoded `0xFFFF9F0A`, `0xFF00F0FF`, `0xFFBF5AF2`, dll pada komponen kartu dan teks).
+  - Seluruh komponen antarmuka, kartu, kurva visual, teks, border, dan icon **WAJIB** mengambil nilai warna dari `Theme.of(context).colorScheme` dan `AppPalette` aktif:
+    - `colorScheme.primary`: Aksen utama kartu aktif, kurva EQ, highlight, dan indikator status.
+    - `colorScheme.secondary`: Aksen sekunder dan badge pelengkap.
+    - `colorScheme.tertiary`: Aksen tersier / target curve.
+    - `colorScheme.surface`: Latar belakang kontainer dasar.
+    - `colorScheme.surfaceContainer`: Kontainer elevasi sedang.
+    - `colorScheme.outline`: Warna garis border 1px yang bersih.
+    - `colorScheme.onSurface` & `colorScheme.onSurfaceVariant`: Tipografi judul dan teks sekunder.
+  - Komponen harus beradaptasi secara otomatis 100% harmonis saat pengguna berganti palet warna di Pengaturan (*Obsidian Cyan*, *Amber Tube Glow*, *Emerald HiFi*, *Electric Purple*, *Crimson Passion*, *True OLED Black*, *Champagne Light*).
+- **Expressive Motion & Spring Physics**:
+  - Gunakan kurva gerak pegas ekspresif (`Curves.easeOutBack`, `Curves.fastEaseInToSlowEase`, `Curves.easeOutCubic`).
+  - Manfaatkan `flutter_animate` untuk *staggered entrance animations* (fade & slide-in dengan delay bertahap 40-60ms per tile).
+  - Berikan haptic micro-feedback (`HapticFeedback.lightImpact()` atau `HapticFeedback.selectionClick()`) pada setiap interaksi pengguna.
+- **High Information Density & Tabular Figures**:
+  - Tampilkan data audio secara bersih dan presisi (sample rate, buffer latency, bit depth, total listening hours, format).
+  - Wajib menerapkan `FontFeature.tabularFigures()` pada semua angka numerik dinamis agar tampilan tidak jittering saat data ter-refresh.
+
 ## 3. Standar Koding & Pembuatan Fungsi
+
 
 ### 3.1 Aturan Penulisan Fungsi & Clean Code
 - **Single Responsibility Principle (SRP)**: Satu fungsi hanya melakukan satu tugas spesifik. Panjang fungsi tidak boleh melebihi 40 baris kode jika memungkinkan.
@@ -97,6 +163,11 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
 - **No Swallowed Exceptions**: Dilarang menggunakan blok `catch (e) {}` kosong. Setiap error harus dicatat ke logger dan disajikan ke UI dengan pesan bersahabat.
 - **Type-safe Results**: Gunakan tipe `Result<T, Failure>` untuk operasi I/O (Navidrome API, file import, codec decoding).
 - **Audio Engine Resilience**: Jika format file audio gagal di-decode, player tidak boleh crash; harus otomatis memicu event `PlaybackError` dan memberikan opsi skip ke track berikutnya.
+
+### 3.4 Aturan Pengujian Otomatis & Test Files Mandate
+- **Mandatory Test Files**: Setiap penambahan fitur baru, perbaikan bug (*bugfix*), refaktorisasi UI/UX, dan state controller **wajib** disertai file pengujian (`test/..._test.dart`).
+- **Regression Protection**: Setiap bug yang ditemukan pengguna harus memiliki test case spesifik yang memvalidasi bahwa bug tersebut telah teratasi dan tidak akan kambuh (*zero regression*).
+- **Automated Verification**: Setiap selesai melakukan perubahan kode, wajib menjalankan `flutter test` dan `flutter analyze` dengan target 100% kelulusan (0 errors, 0 warnings).
 
 ---
 
@@ -207,6 +278,45 @@ lib/
 
 ---
 
-## 6. Ringkasan Eksekusi
-Aturan di atas berlaku untuk seluruh penulisan kode pada project **Baydev HiFi**. Setiap perubahan atau penambahan modul baru wajib mematuhi pemisahan layer, penamaan konsisten, pengujian matematika DSP, dan performa tinggi pada rendering antarmuka.
+## 7. Mandat Khusus DSP Audio Engine: Adopsi Penuh Logika RYNLABS_HIFI
+
+### 7.1 Single Source of Truth (`VirtualDspService`)
+- Seluruh kontrol filter SoLoud C++ native WAJIB dikonsolidasikan ke dalam satu servis tunggal (`VirtualDspService`) yang mengelola status aktivasi, kalkulasi transfer function, dan pembaruan parameter pada master bus.
+- Dilarang keras memecah aktivasi filter SoLoud ke dalam controller UI independen tanpa sinkronisasi terpusat.
+
+### 7.2 Parameter Unit Scaling Presisi (Anti-Distorsi)
+- **Kompresor & Limiter**: Parameter waktu `attackTime` dan `releaseTime` WAJIB dikalikan `1000.0` ke satuan milidetik (`attackTime.value = compAttack * 1000.0`), bukan detik mentah.
+- **Output Ceiling Limiter**: Parameter `outputCeiling` pada brickwall limiter WAJIB dikunci pada `-1.3 dBFS` untuk melindungi sinyal audio dari inter-sample peak distortion.
+- **Auto-Headroom Safe Preamp**: Atenuasi pre-amp dihitung secara dinamis dari nilai penguatan positif puncak kurva EQ:
+  $$\text{Preamp} = -\max(0, \max(\text{EQ Curve})) - 0.5\text{ dB}$$
+  Dilarang mengalikan volume linier hingga > 1.0 pada `SoLoud.instance.setVolume()` karena akan langsung meng-overdrive mixer internal SoLoud.
+
+### 7.3 Rantai Filter Deterministik (10 Modul Master Bus)
+Urutan filter pada master audio bus wajib deterministik:
+$$\text{Preamp Gain} \rightarrow \text{Parametric EQ} \rightarrow \text{Bass Boost} \rightarrow \text{Tube Exciter} \rightarrow \text{Compressor} \rightarrow \text{Stereo Widener} \rightarrow \text{Crossfeed} \rightarrow \text{Reverb} \rightarrow \text{Pitch Shift} \rightarrow \text{Limiter (-1.3 dBFS)}$$
+
+---
+
+## 8. Standar Fitur & Kustomisasi Namida Suite
+
+### 8.1 Sistem Kustomisasi Visual, Parallax & Performa
+- **Parallax 3D Motion**: Album art merespons gestur geser (*drag/scroll*) dengan transformasi matriks 3D yang halus.
+- **Dynamic Backdrop Blur & Ambient Glow**: Blur terisolasi pada bottom sheets & capsule dock serta dynamic glow halus di sekeliling album art dari warna yang diekstrak secara otomatis.
+- **Performance Mode Presets**: Menyediakan opsi `Studio HiFi (120fps)`, `Balanced (60fps)`, `Battery Saver`, dan `Custom`.
+- **Artwork & Track Tile Gestures**: Handler interaktif untuk tap, double-tap, long-press, dan swipe actions pada item musik.
+
+### 8.2 Smart Playlists & Dynamic Rules
+- Generator playlist berbasis filter kondisi: Teks (`contains`, `regex`), Angka (`=`, `>`, `<`, `range`), Tanggal (`inLastNDays`), dan Boolean (`isFavorite`, `isHiRes`) dengan limit trek.
+
+### 8.3 Physical Metadata Tagger
+- Pembacaan dan penulisan tag fisik langsung ke berkas audio lokal (ID3v2, Vorbis Comments, MP4 Atoms) termasuk cover art.
+
+### 8.4 East Asian Lyrics & Metadata Romanizer
+- Transliterasi otomatis karakter Jepang (Romaji), Korea (Romaja), dan Mandarin (Pinyin) untuk lirik dan judul lagu.
+
+---
+
+## 9. Ringkasan Eksekusi
+Aturan di atas berlaku untuk seluruh penulisan kode pada project **Baydev HiFi**. Setiap penambahan atau pembaruan modul wajib mematuhi pemisahan layer, penamaan konsisten, presisi matematika DSP RYNLABS_HIFI, dan standar antarmuka Material 3 Expressive.
+
 

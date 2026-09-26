@@ -1,20 +1,109 @@
 import 'dart:async';
+import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 import '../../../../audio_engine/soloud_controller.dart';
+import '../../../../core/audio_engine/audio_interruption_manager.dart';
+import '../../../../core/audio_engine/replay_gain_service.dart';
+import '../../../../core/audio_service/baydev_audio_handler.dart';
+import '../../../../core/database/local_persistence_service.dart';
+import '../../../settings/domain/player_playback_settings.dart';
+import '../../../settings/presentation/controllers/playback_settings_controller.dart';
 import '../../domain/playback_state.dart';
 import '../../domain/track.dart';
 
 final playerControllerProvider =
     StateNotifierProvider<PlayerController, PlaybackState>((ref) {
-  return PlayerController(SoLoudController.instance);
+  final controller = PlayerController(SoLoudController.instance);
+  ref.listen<PlayerPlaybackSettings>(playbackSettingsProvider, (_, next) {
+    controller.updatePlaybackSettings(next);
+  });
+  return controller;
 });
 
 class PlayerController extends StateNotifier<PlaybackState> {
   final SoLoudController _audioEngine;
   StreamSubscription<Duration>? _posSub;
+  bool _isAdvancing = false;
+  PlayerPlaybackSettings _playbackSettings = const PlayerPlaybackSettings();
 
   PlayerController(this._audioEngine) : super(const PlaybackState()) {
+    _loadPlaybackSettings();
     _initListener();
+    _initAudioServiceCallbacks();
+    _restoreSession();
+  }
+
+  void _loadPlaybackSettings() {
+    try {
+      final db = LocalPersistenceService.instance;
+      final saved = db.getSetting<Map<String, dynamic>>('player_playback_settings');
+      if (saved != null) {
+        _playbackSettings = PlayerPlaybackSettings.fromMap(saved);
+        state = state.copyWith(
+          playbackSpeed: _playbackSettings.playbackSpeed,
+          pitchSemitones: _playbackSettings.pitchSemitones,
+          pitchFineCents: _playbackSettings.pitchFineCents,
+          linkSpeedAndPitch: _playbackSettings.linkSpeedAndPitch,
+          timeDisplayMode: _playbackSettings.timeDisplayMode,
+        );
+      }
+    } catch (e) {
+      debugPrint('[PlayerController] Error loading playback settings: $e');
+    }
+  }
+
+  void updatePlaybackSettings(PlayerPlaybackSettings settings) {
+    _playbackSettings = settings;
+    state = state.copyWith(
+      playbackSpeed: settings.playbackSpeed,
+      pitchSemitones: settings.pitchSemitones,
+      pitchFineCents: settings.pitchFineCents,
+      linkSpeedAndPitch: settings.linkSpeedAndPitch,
+      timeDisplayMode: settings.timeDisplayMode,
+    );
+    _audioEngine.setPlaybackSpeed(settings.playbackSpeed);
+    _applyPitchAndSpeedCoupling();
+    if (state.currentTrack != null) {
+      final rgDb = ReplayGainService.instance.calculateEffectiveGainDb(
+        track: state.currentTrack,
+        mode: settings.replayGainMode,
+        preampDb: settings.replayGainPreampDb,
+        preventClipping: settings.replayGainPreventClipping,
+      );
+      _audioEngine.setReplayGainDb(rgDb);
+      state = state.copyWith(effectiveReplayGainDb: rgDb);
+    }
+  }
+
+  void _initAudioServiceCallbacks() {
+    try {
+      final handler = BaydevAudioHandler.instance;
+      handler.onPlayCallback = () => resume();
+      handler.onPauseCallback = () => pause();
+      handler.onSkipNextCallback = () => skipNext();
+      handler.onSkipPreviousCallback = () => skipPrevious();
+      handler.onSeekCallback = (pos) async => seek(pos);
+      handler.onStopCallback = () => stop();
+    } catch (e) {
+      debugPrint('[PlayerController] AudioHandler callback init error: $e');
+    }
+  }
+
+  void _syncAudioHandler() {
+    try {
+      BaydevAudioHandler.instance.syncPlaybackState(
+        currentTrack: state.currentTrack,
+        isPlaying: state.isPlaying,
+        position: state.position,
+        duration: state.duration,
+        currentQueue: state.queue,
+        currentQueueIndex: state.queueIndex,
+      );
+    } catch (e) {
+      debugPrint('[PlayerController] Error syncing audio handler: $e');
+    }
   }
 
   void _initListener() {
@@ -24,11 +113,273 @@ class PlayerController extends StateNotifier<PlaybackState> {
           position: pos,
           duration: _audioEngine.duration,
         );
+        _syncAudioHandler();
+
+        // Check if track has finished playing
+        final dur = _audioEngine.duration;
+        if (dur > Duration.zero &&
+            pos >= dur - const Duration(milliseconds: 350) &&
+            !_isAdvancing) {
+          _onTrackEnded();
+        }
       }
     });
   }
 
-  /// Memutar objek Track (bisa file lokal atau remote url)
+  /// Restore state from the previous session
+  Future<void> _restoreSession() async {
+    try {
+      final db = LocalPersistenceService.instance;
+      if (!db.isInitialized) {
+        await db.init();
+      }
+
+      final session = db.getLastSessionState();
+      if (session != null) {
+        Track? track;
+        if (session['lastTrack'] is Map<String, dynamic>) {
+          track = Track.fromMap(session['lastTrack'] as Map<String, dynamic>);
+        }
+
+        List<Track> queue = [];
+        if (session['queue'] is List) {
+          queue = (session['queue'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map(Track.fromMap)
+              .toList();
+        }
+
+        List<Track> originalQueue = [];
+        if (session['originalQueue'] is List) {
+          originalQueue = (session['originalQueue'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map(Track.fromMap)
+              .toList();
+        } else if (queue.isNotEmpty) {
+          originalQueue = List<Track>.from(queue);
+        }
+
+        final queueIdx = (session['queueIndex'] as num?)?.toInt() ?? 0;
+        final vol = (session['volume'] as num?)?.toDouble() ?? 1.0;
+        final preAmp = (session['preAmpDb'] as num?)?.toDouble() ?? 0.0;
+        final isShuffle = session['isShuffle'] as bool? ?? false;
+        final repeatStr = session['repeatMode'] as String? ?? 'off';
+        final repeatMode = PlaybackRepeatMode.values.firstWhere(
+          (e) => e.name == repeatStr,
+          orElse: () => PlaybackRepeatMode.off,
+        );
+        final posMs = (session['positionMs'] as num?)?.toInt() ?? 0;
+
+        _audioEngine.setVolume(vol);
+        _audioEngine.setPreamp(preAmp);
+
+        state = state.copyWith(
+          currentTrack: track ?? (queue.isNotEmpty ? queue[queueIdx.clamp(0, queue.length - 1)] : null),
+          queue: queue,
+          originalQueue: originalQueue.isNotEmpty ? originalQueue : queue,
+          queueIndex: queue.isNotEmpty ? queueIdx.clamp(0, queue.length - 1) : 0,
+          volume: vol,
+          preAmpDb: preAmp,
+          isShuffle: isShuffle,
+          repeatMode: repeatMode,
+          position: Duration(milliseconds: posMs),
+        );
+      }
+    } catch (e) {
+      debugPrint('[PlayerController] Error restoring session: $e');
+    }
+  }
+
+  void _saveSession() {
+    try {
+      final db = LocalPersistenceService.instance;
+      if (!db.isInitialized) return;
+
+      db.saveLastSessionState({
+        'lastTrack': state.currentTrack?.toMap(),
+        'queue': state.queue.map((t) => t.toMap()).toList(),
+        'originalQueue': state.originalQueue.map((t) => t.toMap()).toList(),
+        'queueIndex': state.queueIndex,
+        'volume': state.volume,
+        'preAmpDb': state.preAmpDb,
+        'isShuffle': state.isShuffle,
+        'repeatMode': state.repeatMode.name,
+        'positionMs': state.position.inMilliseconds,
+      });
+    } catch (e) {
+      debugPrint('[PlayerController] Error saving session: $e');
+    }
+  }
+
+  /// Sets a new playback queue and optionally begins playback at [initialIndex]
+  Future<void> setQueue(
+    List<Track> tracks, {
+    int initialIndex = 0,
+    bool autoPlay = true,
+  }) async {
+    if (tracks.isEmpty) return;
+
+    final targetIndex = initialIndex.clamp(0, tracks.length - 1);
+    final selectedTrack = tracks[targetIndex];
+
+    if (state.isShuffle && tracks.length > 1) {
+      final remaining = tracks.where((t) => t.id != selectedTrack.id).toList();
+      remaining.shuffle(math.Random());
+      final shuffledQueue = [selectedTrack, ...remaining];
+
+      state = state.copyWith(
+        originalQueue: List<Track>.from(tracks),
+        queue: shuffledQueue,
+        queueIndex: 0,
+        currentTrack: selectedTrack,
+      );
+    } else {
+      state = state.copyWith(
+        originalQueue: List<Track>.from(tracks),
+        queue: List<Track>.from(tracks),
+        queueIndex: targetIndex,
+        currentTrack: selectedTrack,
+      );
+    }
+
+    _saveSession();
+
+    if (autoPlay) {
+      await playTrack(selectedTrack);
+    }
+  }
+
+  /// Appends a track to the end of the queue
+  void addToQueue(Track track) {
+    final updatedQueue = List<Track>.from(state.queue)..add(track);
+    final updatedOriginal = List<Track>.from(
+      state.originalQueue.isNotEmpty ? state.originalQueue : state.queue,
+    )..add(track);
+    state = state.copyWith(
+      queue: updatedQueue,
+      originalQueue: updatedOriginal,
+    );
+    _saveSession();
+  }
+
+  /// Inserts a track directly after the currently playing track
+  void playNext(Track track) {
+    final updatedQueue = List<Track>.from(state.queue);
+    final updatedOriginal = List<Track>.from(
+      state.originalQueue.isNotEmpty ? state.originalQueue : state.queue,
+    );
+
+    if (state.queue.isEmpty) {
+      updatedQueue.add(track);
+      updatedOriginal.add(track);
+      state = state.copyWith(
+        queue: updatedQueue,
+        originalQueue: updatedOriginal,
+        queueIndex: 0,
+      );
+    } else {
+      final insertIndex = (state.queueIndex + 1).clamp(0, updatedQueue.length);
+      updatedQueue.insert(insertIndex, track);
+
+      // Also insert in original queue after current track if found
+      final current = state.currentTrack;
+      final origIdx = current != null ? updatedOriginal.indexWhere((t) => t.id == current.id) : -1;
+      if (origIdx != -1) {
+        updatedOriginal.insert(origIdx + 1, track);
+      } else {
+        updatedOriginal.add(track);
+      }
+
+      state = state.copyWith(
+        queue: updatedQueue,
+        originalQueue: updatedOriginal,
+      );
+    }
+    _saveSession();
+  }
+
+  /// Reorders a track within the queue
+  void reorderQueue(int oldIndex, int newIndex) {
+    if (oldIndex < 0 || oldIndex >= state.queue.length) return;
+    if (newIndex < 0 || newIndex > state.queue.length) return;
+
+    final updated = List<Track>.from(state.queue);
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = updated.removeAt(oldIndex);
+    updated.insert(newIndex, item);
+
+    // Update currentQueueIndex if the moving item is active or surrounding it
+    int newQueueIndex = state.queueIndex;
+    if (state.queueIndex == oldIndex) {
+      newQueueIndex = newIndex;
+    } else if (state.queueIndex > oldIndex && state.queueIndex <= newIndex) {
+      newQueueIndex -= 1;
+    } else if (state.queueIndex < oldIndex && state.queueIndex >= newIndex) {
+      newQueueIndex += 1;
+    }
+
+    state = state.copyWith(
+      queue: updated,
+      originalQueue: state.isShuffle ? state.originalQueue : updated,
+      queueIndex: newQueueIndex,
+    );
+    _saveSession();
+  }
+
+  /// Removes a track from the queue at [index]
+  void removeFromQueue(int index) {
+    if (index < 0 || index >= state.queue.length) return;
+
+    final removedTrack = state.queue[index];
+    final updated = List<Track>.from(state.queue)..removeAt(index);
+    final updatedOriginal = List<Track>.from(
+      state.originalQueue.isNotEmpty ? state.originalQueue : state.queue,
+    )..removeWhere((t) => t.id == removedTrack.id);
+    int newQueueIndex = state.queueIndex;
+
+    if (index < state.queueIndex) {
+      newQueueIndex = (state.queueIndex - 1).clamp(0, updated.length - 1);
+    } else if (index == state.queueIndex) {
+      newQueueIndex = state.queueIndex.clamp(0, math.max(0, updated.length - 1));
+    }
+
+    state = state.copyWith(
+      queue: updated,
+      originalQueue: updatedOriginal,
+      queueIndex: updated.isEmpty ? 0 : newQueueIndex,
+    );
+    _saveSession();
+  }
+
+  /// Clears all tracks from queue except the active track
+  void clearQueue() {
+    if (state.currentTrack != null) {
+      state = state.copyWith(
+        queue: [state.currentTrack!],
+        originalQueue: [state.currentTrack!],
+        queueIndex: 0,
+      );
+    } else {
+      state = state.copyWith(
+        queue: const [],
+        originalQueue: const [],
+        queueIndex: 0,
+      );
+    }
+    _saveSession();
+  }
+
+  /// Jumps directly to a track at [index] in the queue
+  Future<void> skipToQueueIndex(int index) async {
+    if (index < 0 || index >= state.queue.length) return;
+    final targetTrack = state.queue[index];
+    state = state.copyWith(queueIndex: index);
+    await playTrack(targetTrack);
+  }
+
+  /// Plays a track (local audio file or remote stream URL)
   Future<void> playTrack(Track track) async {
     state = state.copyWith(
       status: PlaybackStatus.loading,
@@ -36,26 +387,82 @@ class PlayerController extends StateNotifier<PlaybackState> {
       errorMessage: null,
     );
 
+    // If queue doesn't contain this track, ensure queue has it
+    if (!state.queue.contains(track)) {
+      final newQueue = List<Track>.from(state.queue)..add(track);
+      state = state.copyWith(
+        queue: newQueue,
+        queueIndex: newQueue.length - 1,
+      );
+    } else {
+      final idx = state.queue.indexOf(track);
+      if (idx != -1) {
+        state = state.copyWith(queueIndex: idx);
+      }
+    }
+
     try {
+      // Calculate ReplayGain if enabled
+      final rgDb = ReplayGainService.instance.calculateEffectiveGainDb(
+        track: track,
+        mode: _playbackSettings.replayGainMode,
+        preampDb: _playbackSettings.replayGainPreampDb,
+        preventClipping: _playbackSettings.replayGainPreventClipping,
+      );
+      _audioEngine.setReplayGainDb(rgDb);
+      _audioEngine.setPlaybackSpeed(state.playbackSpeed);
+      _applyPitchAndSpeedCoupling();
+
+      final enableFade = _playbackSettings.enableSmoothFade;
+      final fadeDuration = Duration(milliseconds: _playbackSettings.fadeInDurationMs);
+
       if (track.filePath != null && track.filePath!.isNotEmpty) {
-        await _audioEngine.playFile(track.filePath!);
+        await _audioEngine.playFile(track.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
       } else if (track.remoteUrl != null && track.remoteUrl!.isNotEmpty) {
-        await _audioEngine.playUrl(track.remoteUrl!);
+        await _audioEngine.playUrl(track.remoteUrl!, fadeIn: enableFade, fadeDuration: fadeDuration);
       } else {
-        throw ArgumentError('Track tidak memiliki filePath maupun remoteUrl valid');
+        throw ArgumentError('Track does not have a valid filePath or remoteUrl');
       }
 
       state = state.copyWith(
         status: PlaybackStatus.playing,
         duration: _audioEngine.duration,
         position: Duration.zero,
+        effectiveReplayGainDb: rgDb,
       );
+
+      // Log to playback history database
+      LocalPersistenceService.instance.logTrackPlayback(track.toMap());
+
+      _saveSession();
+      _syncAudioHandler();
     } catch (e) {
       state = state.copyWith(
         status: PlaybackStatus.error,
-        errorMessage: 'Gagal memutar track: $e',
+        errorMessage: 'Failed to play track: $e',
       );
+      _syncAudioHandler();
     }
+  }
+
+  /// Handle track ending naturally
+  Future<void> _onTrackEnded() async {
+    _isAdvancing = true;
+
+    if (state.repeatMode == PlaybackRepeatMode.one) {
+      seek(Duration.zero);
+      resume();
+      _isAdvancing = false;
+      return;
+    }
+
+    if (state.hasQueue) {
+      await skipNext();
+    } else {
+      await stop();
+    }
+
+    _isAdvancing = false;
   }
 
   /// Toggle play / pause
@@ -64,17 +471,31 @@ class PlayerController extends StateNotifier<PlaybackState> {
       pause();
     } else if (state.isPaused) {
       resume();
+    } else if (state.currentTrack != null) {
+      playTrack(state.currentTrack!);
     }
   }
 
   void pause() {
-    _audioEngine.pause();
+    if (_playbackSettings.enableSmoothFade && _playbackSettings.fadeOutDurationMs > 0) {
+      _audioEngine.pauseWithFade(duration: Duration(milliseconds: _playbackSettings.fadeOutDurationMs));
+    } else {
+      _audioEngine.pause();
+    }
     state = state.copyWith(status: PlaybackStatus.paused);
+    _saveSession();
+    _syncAudioHandler();
   }
 
   void resume() {
-    _audioEngine.resume();
+    if (_playbackSettings.enableSmoothFade && _playbackSettings.fadeInDurationMs > 0) {
+      _audioEngine.resumeWithFade(duration: Duration(milliseconds: _playbackSettings.fadeInDurationMs));
+    } else {
+      _audioEngine.resume();
+    }
     state = state.copyWith(status: PlaybackStatus.playing);
+    _saveSession();
+    _syncAudioHandler();
   }
 
   Future<void> stop() async {
@@ -83,45 +504,327 @@ class PlayerController extends StateNotifier<PlaybackState> {
       status: PlaybackStatus.stopped,
       position: Duration.zero,
     );
+    _saveSession();
+    _syncAudioHandler();
   }
 
   void seek(Duration position) {
     _audioEngine.seek(position);
     state = state.copyWith(position: position);
+    _saveSession();
+    _syncAudioHandler();
+  }
+
+  /// Lompat maju dengan langkah custom stepper (detik konstan / persentase durasi)
+  void seekForward() {
+    final Duration step;
+    if (_playbackSettings.seekStepMode == SeekStepMode.percentage) {
+      final ms = (state.duration.inMilliseconds * _playbackSettings.seekStepPercent).toInt();
+      step = Duration(milliseconds: math.max(1000, ms));
+    } else {
+      step = Duration(seconds: _playbackSettings.seekStepSeconds);
+    }
+    final target = state.position + step;
+    seek(target < state.duration ? target : state.duration);
+  }
+
+  /// Lompat mundur dengan langkah custom stepper (detik konstan / persentase durasi)
+  void seekBackward() {
+    final Duration step;
+    if (_playbackSettings.seekStepMode == SeekStepMode.percentage) {
+      final ms = (state.duration.inMilliseconds * _playbackSettings.seekStepPercent).toInt();
+      step = Duration(milliseconds: math.max(1000, ms));
+    } else {
+      step = Duration(seconds: _playbackSettings.seekStepSeconds);
+    }
+    final target = state.position - step;
+    seek(target > Duration.zero ? target : Duration.zero);
+  }
+
+  /// Mengatur kecepatan pemutaran (0.25x s/d 3.0x)
+  void setPlaybackSpeed(double speed) {
+    final clamped = speed.clamp(0.25, 3.0);
+    _audioEngine.setPlaybackSpeed(clamped);
+    state = state.copyWith(playbackSpeed: clamped);
+    _applyPitchAndSpeedCoupling();
+    _saveSession();
+  }
+
+  /// Mengatur pergeseran nada (Pitch Semitones & Fine Cents)
+  void setPitch(double semitones, {double cents = 0.0}) {
+    state = state.copyWith(
+      pitchSemitones: semitones.clamp(-12.0, 12.0),
+      pitchFineCents: cents.clamp(-50.0, 50.0),
+    );
+    _applyPitchAndSpeedCoupling();
+    _saveSession();
+  }
+
+  /// Toggle penguncian Pitch dengan Speed
+  void toggleLinkSpeedAndPitch() {
+    state = state.copyWith(linkSpeedAndPitch: !state.linkSpeedAndPitch);
+    _applyPitchAndSpeedCoupling();
+    _saveSession();
+  }
+
+  void _applyPitchAndSpeedCoupling() {
+    try {
+      if (!SoLoud.instance.isInitialized) return;
+      if (!state.linkSpeedAndPitch) {
+        // Mode Time-Stretch independen: kompensasi pitch shift filter
+        final semitonesTotal = state.pitchSemitones + (state.pitchFineCents / 100.0);
+        final targetPitchRatio = math.pow(2.0, semitonesTotal / 12.0).toDouble();
+        final filterCompensation = targetPitchRatio / state.playbackSpeed;
+        final filter = SoLoud.instance.filters.pitchShiftFilter;
+        if (!filter.isActive) filter.activate();
+        filter.shift.value = filterCompensation.clamp(0.05, 3.0);
+      } else {
+        // Mode Terkunci: pitch naturally mengikuti speed melalui resampling SoLoud
+        final filter = SoLoud.instance.filters.pitchShiftFilter;
+        if (filter.isActive) filter.shift.value = 1.0;
+      }
+    } catch (e) {
+      debugPrint('[PlayerController] Pitch coupling adjustment: $e');
+    }
+  }
+
+  /// Toggle tampilan waktu sisa (Remaining) vs total durasi
+  void toggleTimeDisplayMode() {
+    final next = state.timeDisplayMode == TimeDisplayMode.remaining
+        ? TimeDisplayMode.total
+        : TimeDisplayMode.remaining;
+    state = state.copyWith(timeDisplayMode: next);
+    _saveSession();
+  }
+
+  void setTimeDisplayMode(TimeDisplayMode mode) {
+    state = state.copyWith(timeDisplayMode: mode);
+    _saveSession();
+  }
+
+  /// Handler interupsi saat headphone / DAC dicopot
+  void onHeadphoneUnplugged() {
+    AudioInterruptionManager.instance.handleHeadphoneUnplugged(
+      isCurrentlyPlaying: state.isPlaying,
+      onPause: () => pause(),
+      pauseEnabled: _playbackSettings.pauseOnHeadphoneUnplug,
+    );
+  }
+
+  /// Handler saat headphone / DAC dicolok kembali
+  void onHeadphonePlugged() {
+    AudioInterruptionManager.instance.handleHeadphonePlugged(
+      onResume: () => resume(),
+      resumeEnabled: _playbackSettings.resumeOnHeadphonePlug,
+      timeoutSeconds: _playbackSettings.headphoneReconnectTimeoutSec,
+    );
+  }
+
+  /// Handler saat volume sistem berubah
+  void onDeviceVolumeChanged(double volume) {
+    AudioInterruptionManager.instance.handleVolumeChanged(
+      volume: volume,
+      isCurrentlyPlaying: state.isPlaying,
+      onPause: () => pause(),
+      pauseOnZeroEnabled: _playbackSettings.pauseOnZeroVolume,
+    );
   }
 
   void setVolume(double volume) {
     _audioEngine.setVolume(volume);
     state = state.copyWith(volume: volume);
+    _saveSession();
   }
 
   void setPreamp(double preampDb) {
     _audioEngine.setPreamp(preampDb);
     state = state.copyWith(preAmpDb: preampDb);
+    _saveSession();
   }
 
-  void toggleLoop() {
-    final next = !state.isLooping;
-    state = state.copyWith(isLooping: next);
+  /// Shuffles active queue tracks, preserving originalQueue for unshuffle restoration
+  void shuffleQueue({bool keepCurrentTrackFirst = true}) {
+    if (state.queue.isEmpty) return;
+
+    final orig = state.originalQueue.isNotEmpty
+        ? state.originalQueue
+        : List<Track>.from(state.queue);
+    final current = state.currentTrack ??
+        (state.queue.isNotEmpty ? state.queue[state.queueIndex] : null);
+
+    if (current == null || orig.length <= 1) {
+      state = state.copyWith(
+        originalQueue: orig,
+        isShuffle: true,
+      );
+      _saveSession();
+      _syncAudioHandler();
+      return;
+    }
+
+    final remaining = orig.where((t) => t.id != current.id).toList();
+    remaining.shuffle(math.Random());
+
+    final newQueue = keepCurrentTrackFirst
+        ? [current, ...remaining]
+        : (List<Track>.from(orig)..shuffle(math.Random()));
+
+    final newIndex = keepCurrentTrackFirst ? 0 : newQueue.indexOf(current);
+
+    state = state.copyWith(
+      originalQueue: orig,
+      queue: newQueue,
+      queueIndex: newIndex >= 0 ? newIndex : 0,
+      isShuffle: true,
+    );
+    _saveSession();
+    _syncAudioHandler();
   }
 
-  void skipNext() {
-    if (state.duration > Duration.zero) {
-      final newPos = state.position + const Duration(seconds: 15);
-      if (newPos < state.duration) {
-        seek(newPos);
-      } else {
-        seek(Duration.zero);
-      }
+  void toggleShuffle() {
+    if (!state.isShuffle) {
+      shuffleQueue(keepCurrentTrackFirst: true);
+    } else {
+      // Unshuffle: restore pristine original queue order
+      final orig = state.originalQueue.isNotEmpty
+          ? state.originalQueue
+          : state.queue;
+      final current = state.currentTrack ??
+          (state.queue.isNotEmpty ? state.queue[state.queueIndex] : null);
+      final origIndex = current != null
+          ? orig.indexWhere((t) => t.id == current.id)
+          : 0;
+
+      state = state.copyWith(
+        queue: List<Track>.from(orig),
+        queueIndex: origIndex >= 0 ? origIndex : 0,
+        isShuffle: false,
+      );
+      _saveSession();
+      _syncAudioHandler();
     }
   }
 
-  void skipPrevious() {
+  void toggleRepeatMode() {
+    final next = switch (state.repeatMode) {
+      PlaybackRepeatMode.off => PlaybackRepeatMode.all,
+      PlaybackRepeatMode.all => PlaybackRepeatMode.one,
+      PlaybackRepeatMode.one => PlaybackRepeatMode.off,
+    };
+    state = state.copyWith(repeatMode: next);
+    _saveSession();
+  }
+
+  void setRepeatMode(PlaybackRepeatMode mode) {
+    state = state.copyWith(repeatMode: mode);
+    _saveSession();
+  }
+
+  Future<void> skipNext() async {
+    if (state.queue.isEmpty) {
+      if (state.duration > Duration.zero) {
+        final newPos = state.position + const Duration(seconds: 15);
+        if (newPos < state.duration) {
+          seek(newPos);
+        } else {
+          seek(Duration.zero);
+        }
+      }
+      return;
+    }
+
+    if (state.queueIndex < state.queue.length - 1) {
+      await skipToQueueIndex(state.queueIndex + 1);
+    } else if (state.repeatMode == PlaybackRepeatMode.all) {
+      await skipToQueueIndex(0);
+    } else {
+      // Reached the end of queue
+      await stop();
+    }
+  }
+
+  Future<void> skipPrevious() async {
     if (state.position.inSeconds > 3) {
       seek(Duration.zero);
-    } else {
+      return;
+    }
+
+    if (state.queue.isEmpty) {
       final newPos = state.position - const Duration(seconds: 15);
       seek(newPos > Duration.zero ? newPos : Duration.zero);
+      return;
+    }
+
+    if (state.queueIndex > 0) {
+      await skipToQueueIndex(state.queueIndex - 1);
+    } else if (state.repeatMode == PlaybackRepeatMode.all) {
+      await skipToQueueIndex(state.queue.length - 1);
+    } else {
+      seek(Duration.zero);
+    }
+  }
+
+  /// Update track metadata in the active player state and queue if present
+  void updateTrackMetadata(Track updatedTrack) {
+    bool changed = false;
+    Track? current = state.currentTrack;
+    if (current != null && current.id == updatedTrack.id) {
+      current = updatedTrack;
+      changed = true;
+    }
+
+    List<Track> queue = state.queue;
+    final qIdx = queue.indexWhere((t) => t.id == updatedTrack.id);
+    if (qIdx != -1) {
+      queue = List<Track>.from(queue);
+      queue[qIdx] = updatedTrack;
+      changed = true;
+    }
+
+    if (changed) {
+      state = state.copyWith(
+        currentTrack: current,
+        queue: queue,
+      );
+      _syncAudioHandler();
+      _saveSession();
+    }
+  }
+
+  /// Update multiple tracks metadata in the active player state and queue
+  void updateBatchTracksMetadata(List<Track> updatedTracks) {
+    if (updatedTracks.isEmpty) return;
+    final map = {for (final t in updatedTracks) t.id: t};
+
+    bool changed = false;
+    Track? current = state.currentTrack;
+    if (current != null && map.containsKey(current.id)) {
+      current = map[current.id]!;
+      changed = true;
+    }
+
+    List<Track> queue = state.queue;
+    bool queueModified = false;
+    final newQueue = queue.map((t) {
+      if (map.containsKey(t.id)) {
+        queueModified = true;
+        return map[t.id]!;
+      }
+      return t;
+    }).toList();
+
+    if (queueModified) {
+      queue = newQueue;
+      changed = true;
+    }
+
+    if (changed) {
+      state = state.copyWith(
+        currentTrack: current,
+        queue: queue,
+      );
+      _syncAudioHandler();
+      _saveSession();
     }
   }
 
@@ -131,3 +834,4 @@ class PlayerController extends StateNotifier<PlaybackState> {
     super.dispose();
   }
 }
+

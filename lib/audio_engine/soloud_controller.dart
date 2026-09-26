@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
+import 'virtual_dsp_service.dart';
 
 /// Wrapper Singleton untuk SoLoud Engine — Mengontrol pemutaran, buffer, FFT stream, dan DSP filter.
 class SoLoudController {
@@ -20,11 +21,15 @@ class SoLoudController {
 
   double _volume = 1.0;
   double _preampDb = 0.0;
+  double _replayGainDb = 0.0;
+  double _playbackSpeed = 1.0;
 
   SoundHandle? get currentHandle => _currentHandle;
   AudioSource? get currentSource => _currentSource;
   double get volume => _volume;
   double get preampDb => _preampDb;
+  double get replayGainDb => _replayGainDb;
+  double get playbackSpeed => _playbackSpeed;
 
   /// Inisialisasi engine audio SoLoud native dengan sample rate audiophile
   Future<void> init({
@@ -54,6 +59,10 @@ class SoLoudController {
 
       _isInitialized = true;
       _startPositionTracking();
+
+      // Inisialisasi rantai DSP tunggal
+      VirtualDspService.instance.init();
+
       debugPrint('[SoLoudController] Audio engine initialized @ $sampleRate Hz');
     } catch (e, stack) {
       debugPrint('[SoLoudController] Initialization error: $e\n$stack');
@@ -62,7 +71,11 @@ class SoLoudController {
   }
 
   /// Memulai pemutaran audio dari path file lokal
-  Future<SoundHandle> playFile(String filePath) async {
+  Future<SoundHandle> playFile(
+    String filePath, {
+    bool fadeIn = false,
+    Duration fadeDuration = const Duration(milliseconds: 300),
+  }) async {
     if (!_isInitialized) await init();
 
     await stop();
@@ -74,11 +87,20 @@ class SoLoudController {
       );
       _currentSource = source;
 
+      final initialVolume = fadeIn ? 0.001 : effectiveVolume;
       final handle = SoLoud.instance.play(
         source,
-        volume: _effectiveVolume,
+        volume: initialVolume,
+        scale: _playbackSpeed.clamp(0.05, 5.0),
       );
       _currentHandle = handle;
+
+      if (fadeIn && fadeDuration > Duration.zero) {
+        SoLoud.instance.fadeVolume(handle, effectiveVolume, fadeDuration);
+      }
+
+      // Pastikan rantai filter DSP terpasang di bus audio
+      VirtualDspService.instance.init();
 
       return handle;
     } catch (e, stack) {
@@ -88,7 +110,11 @@ class SoLoudController {
   }
 
   /// Memutar audio dari URL streaming (Navidrome / remote)
-  Future<SoundHandle> playUrl(String url) async {
+  Future<SoundHandle> playUrl(
+    String url, {
+    bool fadeIn = false,
+    Duration fadeDuration = const Duration(milliseconds: 300),
+  }) async {
     if (!_isInitialized) await init();
 
     await stop();
@@ -100,11 +126,20 @@ class SoLoudController {
       );
       _currentSource = source;
 
+      final initialVolume = fadeIn ? 0.001 : effectiveVolume;
       final handle = SoLoud.instance.play(
         source,
-        volume: _effectiveVolume,
+        volume: initialVolume,
+        scale: _playbackSpeed.clamp(0.05, 5.0),
       );
       _currentHandle = handle;
+
+      if (fadeIn && fadeDuration > Duration.zero) {
+        SoLoud.instance.fadeVolume(handle, effectiveVolume, fadeDuration);
+      }
+
+      // Pastikan rantai filter DSP terpasang di bus audio
+      VirtualDspService.instance.init();
 
       return handle;
     } catch (e, stack) {
@@ -121,7 +156,7 @@ class SoLoudController {
     }
   }
 
-  /// Pause pemutaran
+  /// Pause pemutaran (langsung tanpa fade)
   void pause() {
     final handle = _currentHandle;
     if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
@@ -131,12 +166,56 @@ class SoLoudController {
     }
   }
 
-  /// Resume pemutaran
+  /// Pause pemutaran dengan smooth fade-out (Namida Flow)
+  Future<void> pauseWithFade({Duration duration = const Duration(milliseconds: 300)}) async {
+    final handle = _currentHandle;
+    if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
+      if (!SoLoud.instance.getPause(handle)) {
+        if (duration <= Duration.zero) {
+          pause();
+          return;
+        }
+        try {
+          SoLoud.instance.fadeVolume(handle, 0.001, duration);
+          SoLoud.instance.schedulePause(handle, duration);
+          // Tunggu hingga fade selesai sebelum mereset target volume pada voice
+          await Future<void>.delayed(duration);
+        } catch (e) {
+          debugPrint('[SoLoudController] pauseWithFade error: $e');
+          pause();
+        }
+      }
+    }
+  }
+
+  /// Resume pemutaran (langsung tanpa fade)
   void resume() {
     final handle = _currentHandle;
     if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
       if (SoLoud.instance.getPause(handle)) {
         SoLoud.instance.pauseSwitch(handle);
+        updateEffectiveVolume();
+      }
+    }
+  }
+
+  /// Resume pemutaran dengan smooth fade-in (Namida Flow)
+  void resumeWithFade({Duration duration = const Duration(milliseconds: 300)}) {
+    final handle = _currentHandle;
+    if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
+      if (SoLoud.instance.getPause(handle)) {
+        if (duration <= Duration.zero) {
+          resume();
+          return;
+        }
+        try {
+          SoLoud.instance.setVolume(handle, 0.001);
+          SoLoud.instance.pauseSwitch(handle); // unpause
+          SoLoud.instance.fadeVolume(handle, effectiveVolume, duration);
+        } catch (e) {
+          debugPrint('[SoLoudController] resumeWithFade error: $e');
+          resume();
+        }
       }
     }
   }
@@ -167,25 +246,55 @@ class SoLoudController {
   /// Mengatur volume utama (0.0 s/d 1.0)
   void setVolume(double vol) {
     _volume = vol.clamp(0.0, 1.0);
-    _applyEffectiveVolume();
+    updateEffectiveVolume();
   }
 
   /// Mengatur gain pre-amp dalam dB (-24 dB s/d +12 dB)
   void setPreamp(double preampDb) {
     _preampDb = preampDb;
-    _applyEffectiveVolume();
+    VirtualDspService.instance.setPreampGain(preampDb);
+    updateEffectiveVolume();
   }
 
-  double get _effectiveVolume {
-    // linear = 10^(dB / 20) * master_volume
-    final linearPreamp = math.pow(10.0, _preampDb / 20.0).toDouble();
-    return (_volume * linearPreamp).clamp(0.0, 2.0);
+  /// Mengatur penyesuaian ReplayGain dalam dB (Fase 16)
+  void setReplayGainDb(double gainDb) {
+    _replayGainDb = gainDb;
+    updateEffectiveVolume();
   }
 
-  void _applyEffectiveVolume() {
+  /// Mengatur kecepatan playback (0.05x s/d 5.0x) (Fase 16)
+  void setPlaybackSpeed(double speed) {
+    _playbackSpeed = speed.clamp(0.05, 5.0);
     final handle = _currentHandle;
     if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
-      SoLoud.instance.setVolume(handle, _effectiveVolume);
+      try {
+        SoLoud.instance.setRelativePlaySpeed(handle, _playbackSpeed);
+      } catch (e) {
+        debugPrint('[SoLoudController] Playback speed error: $e');
+      }
+    }
+  }
+
+  /// Perhitungan volume efektif aman (RYNLABS_HIFI & Namida Flow)
+  double get effectiveVolume {
+    final dsp = VirtualDspService.instance;
+    final activePreamp = dsp.preampGain;
+    final reverbComp = dsp.reverbVolumeCompensationDb;
+    final totalDb = activePreamp + reverbComp + _replayGainDb;
+    final totalLinear = math.pow(10.0, totalDb / 20.0).toDouble();
+    // Clamp maksimal 1.5 untuk menghindari software mixer overflow
+    return (_volume * totalLinear).clamp(0.0, 1.5);
+  }
+
+  /// Memperbarui volume pada handle aktif secara real-time
+  void updateEffectiveVolume() {
+    final handle = _currentHandle;
+    if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
+      try {
+        SoLoud.instance.setVolume(handle, effectiveVolume);
+      } catch (e) {
+        debugPrint('[SoLoudController] Volume update error: $e');
+      }
     }
   }
 

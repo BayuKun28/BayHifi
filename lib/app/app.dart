@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../app/theme/theme_mode_controller.dart';
+import '../core/widgets/floating_rounded_dock.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dsp_rack/presentation/dsp_rack_screen.dart';
+import '../features/library/presentation/playlists_screen.dart';
 import '../features/library/presentation/unified_library_screen.dart';
+import '../features/player/presentation/controllers/player_controller.dart';
 import '../features/player/presentation/controllers/player_expansion_controller.dart';
 import '../features/player/presentation/widgets/namida_expandable_miniplayer.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -22,6 +26,13 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeControllerProvider);
 
+    // Automatically update dynamic palette when current track changes
+    ref.listen(playerControllerProvider.select((s) => s.currentTrack), (previous, current) {
+      if (current != null) {
+        ref.read(themeControllerProvider.notifier).updateDynamicPaletteFromTrack(current);
+      }
+    });
+
     return MaterialApp(
       title: 'Baydev HiFi',
       debugShowCheckedModeBanner: false,
@@ -33,7 +44,7 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
           final isMobile = constraints.maxWidth < 650;
           final theme = Theme.of(context);
 
-          // 4 Tab Utama (Tanpa Tab Khusus Player, sesuai arsitektur Namida)
+          // 5 Main Studio Tabs
           final pages = [
             DashboardScreen(
               onNavigateToPlayer: () =>
@@ -43,57 +54,44 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
             ),
             const DspRackScreen(),
             const UnifiedLibraryScreen(),
+            const PlaylistsScreen(),
             const SettingsScreen(),
           ];
 
           if (isMobile) {
-            return Stack(
-              children: [
-                // Layer 1: Scaffold Utama dengan NavigationBar
-                Scaffold(
-                  backgroundColor: theme.scaffoldBackgroundColor,
-                  body: Padding(
-                    padding: const EdgeInsets.only(bottom: 74.0),
+            return Scaffold(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              resizeToAvoidBottomInset: false,
+              body: Stack(
+                children: [
+                  // Layer 1: Page Content
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 80.0),
                     child: IndexedStack(
                       index: _selectedNavIndex,
                       children: pages,
                     ),
                   ),
-                  bottomNavigationBar: NavigationBar(
-                    backgroundColor: theme.colorScheme.surface,
-                    selectedIndex: _selectedNavIndex,
-                    onDestinationSelected: (idx) =>
-                        setState(() => _selectedNavIndex = idx),
-                    destinations: const [
-                      NavigationDestination(
-                        icon: Icon(Icons.dashboard_outlined),
-                        selectedIcon: Icon(Icons.dashboard_rounded),
-                        label: 'Dashboard',
-                      ),
-                      NavigationDestination(
-                        icon: Icon(Icons.tune_outlined),
-                        selectedIcon: Icon(Icons.tune_rounded),
-                        label: 'DSP Rack',
-                      ),
-                      NavigationDestination(
-                        icon: Icon(Icons.library_music_outlined),
-                        selectedIcon: Icon(Icons.library_music_rounded),
-                        label: 'Library',
-                      ),
-                      NavigationDestination(
-                        icon: Icon(Icons.settings_outlined),
-                        selectedIcon: Icon(Icons.settings_rounded),
-                        label: 'Settings',
-                      ),
-                    ],
-                  ),
-                ),
 
-                // Layer 2: Namida Omnipresent Expandable MiniPlayer (menutupi seluruh layar saat di-expand)
-                const NamidaExpandableMiniPlayer(
-                  collapsedBottomOffset: 88.0,
-                ),
-              ],
+                  // Layer 2: Floating Rounded Dock
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: FloatingRoundedDock(
+                      selectedIndex: _selectedNavIndex,
+                      onItemSelected: (idx) =>
+                          setState(() => _selectedNavIndex = idx),
+                    ),
+                  ),
+
+                  // Layer 3: Namida Omnipresent Expandable MiniPlayer
+                  NamidaExpandableMiniPlayer(
+                    collapsedBottomOffset: 78.0,
+                    isLibraryTab: _selectedNavIndex == 2,
+                  ),
+                ],
+              ),
             );
           }
 
@@ -119,42 +117,89 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                           vertical: isShortHeight ? 6.0 : 16.0,
                         ),
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          width: 38,
+                          height: 38,
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.4),
                             ),
                           ),
-                          child: Icon(
-                            Icons.graphic_eq,
-                            color: theme.colorScheme.primary,
-                            size: 20,
+                          child: Center(
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedAudioWaveform,
+                              color: theme.colorScheme.primary,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
-                      destinations: const [
+                      destinations: [
                         NavigationRailDestination(
-                          icon: Icon(Icons.dashboard_outlined),
-                          selectedIcon: Icon(Icons.dashboard_rounded),
-                          label: Text('Dashboard', style: TextStyle(fontSize: 11)),
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedDashboardSquare01,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            size: 22,
+                          ),
+                          selectedIcon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedDashboardSquare01,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
+                          label: const Text('Dashboard', style: TextStyle(fontSize: 11)),
                         ),
                         NavigationRailDestination(
-                          icon: Icon(Icons.tune_outlined),
-                          selectedIcon: Icon(Icons.tune_rounded),
-                          label: Text('DSP Rack', style: TextStyle(fontSize: 11)),
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSlidersVertical,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            size: 22,
+                          ),
+                          selectedIcon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSlidersVertical,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
+                          label: const Text('DSP Rack', style: TextStyle(fontSize: 11)),
                         ),
                         NavigationRailDestination(
-                          icon: Icon(Icons.library_music_outlined),
-                          selectedIcon: Icon(Icons.library_music_rounded),
-                          label: Text('Library', style: TextStyle(fontSize: 11)),
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedMusicNote01,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            size: 22,
+                          ),
+                          selectedIcon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedMusicNote01,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
+                          label: const Text('Library', style: TextStyle(fontSize: 11)),
                         ),
                         NavigationRailDestination(
-                          icon: Icon(Icons.settings_outlined),
-                          selectedIcon: Icon(Icons.settings_rounded),
-                          label: Text('Settings', style: TextStyle(fontSize: 11)),
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedPlayList,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            size: 22,
+                          ),
+                          selectedIcon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedPlayList,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
+                          label: const Text('Playlists', style: TextStyle(fontSize: 11)),
+                        ),
+                        NavigationRailDestination(
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSettings01,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            size: 22,
+                          ),
+                          selectedIcon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSettings01,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
+                          label: const Text('Settings', style: TextStyle(fontSize: 11)),
                         ),
                       ],
                     ),
@@ -176,8 +221,9 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                 ),
 
                 // Namida Expandable MiniPlayer on Desktop/Tablet
-                const NamidaExpandableMiniPlayer(
+                NamidaExpandableMiniPlayer(
                   collapsedBottomOffset: 12.0,
+                  isLibraryTab: _selectedNavIndex == 2,
                 ),
               ],
             ),
@@ -187,3 +233,4 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
     );
   }
 }
+

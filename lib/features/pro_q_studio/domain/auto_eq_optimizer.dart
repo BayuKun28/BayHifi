@@ -1,3 +1,5 @@
+import 'dart:isolate';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'biquad_math.dart';
 import 'eq_band.dart';
@@ -18,8 +20,8 @@ enum BandResolution {
 
 /// Mode tuning: Normal (full dynamics) vs Safe (batasi boost untuk cegah distorsi)
 enum TuningMode {
-  normal('⚡ Normal', 'Full range compensation up to +12 dB boost'),
-  safe('🛡️ Safe', 'Conservative compensation clamped at +6 dB boost');
+  normal('Normal', 'Full range compensation up to +12 dB boost'),
+  safe('Safe', 'Conservative compensation clamped at +6 dB boost');
 
   final String label;
   final String description;
@@ -28,8 +30,8 @@ enum TuningMode {
 
 /// Mode perbandingan A/B: A (suara murni headphone tanpa EQ) vs B (suara dengan EQ aktif)
 enum AbComparisonMode {
-  aRaw('🎚️ A: RAW', 'Bypassed flat audio (direct driver sound)'),
-  bActive('🎚️ B: ACTIVE', 'Equalized tuned audio (target compensation)');
+  aRaw('A: RAW', 'Bypassed flat audio (direct driver sound)'),
+  bActive('B: ACTIVE', 'Equalized tuned audio (target compensation)');
 
   final String label;
   final String description;
@@ -44,6 +46,8 @@ class AutoEqResult {
   final double maxBoostDb;
   final double maxCutDb;
   final double target1kHzReference;
+  final double weightedRmseBefore;
+  final double weightedRmseAfter;
 
   const AutoEqResult({
     required this.bands,
@@ -51,10 +55,13 @@ class AutoEqResult {
     required this.maxBoostDb,
     required this.maxCutDb,
     required this.target1kHzReference,
+    this.weightedRmseBefore = 0.0,
+    this.weightedRmseAfter = 0.0,
   });
 }
 
-/// Engine pengoptimalan biquad filter untuk mencocokkan kurva driver IEM ke kurva target
+/// Engine pengoptimalan biquad filter untuk mencocokkan kurva driver IEM ke kurva target.
+/// Mengadopsi algoritma RYNLABS_HIFI dengan eksekusi background isolate & pembobotan RMSE.
 class AutoEqOptimizer {
   // Frekuensi standar ISO center frequencies untuk masing-masing resolusi
   static const List<double> centers5B = [63.0, 250.0, 1000.0, 4000.0, 12000.0];
@@ -89,6 +96,23 @@ class AutoEqOptimizer {
     final driverNorm = driverFr.interpolateSpl(freq);
     final targetNorm = targetFr.interpolateSpl(freq);
     return targetNorm - driverNorm;
+  }
+
+  /// Eksekusi non-blocking di background worker isolate
+  static Future<AutoEqResult> optimizeInIsolate({
+    required FrCurveData driverFr,
+    required FrCurveData targetFr,
+    required BandResolution resolution,
+    required TuningMode mode,
+  }) async {
+    return await Isolate.run(() {
+      return optimize(
+        driverFr: driverFr,
+        targetFr: targetFr,
+        resolution: resolution,
+        mode: mode,
+      );
+    });
   }
 
   /// Menjalankan optimasi AutoEQ
@@ -136,6 +160,14 @@ class AutoEqOptimizer {
       final roundedGain = (clampedGain * 10.0).round() / 10.0;
       final roundedFreq = (optimalFreq * 10.0).round() / 10.0;
 
+      // Smart filter type: shelf untuk ujung frekuensi, peaking untuk midrange
+      FilterType type = FilterType.peaking;
+      if (i == 0 && roundedFreq <= 80.0) {
+        type = FilterType.lowShelf;
+      } else if (i == baseCenters.length - 1 && roundedFreq >= 10000.0) {
+        type = FilterType.highShelf;
+      }
+
       if (roundedGain > actualMaxBoost) actualMaxBoost = roundedGain;
       if (roundedGain < actualMaxCut) actualMaxCut = roundedGain;
 
@@ -146,7 +178,7 @@ class AutoEqOptimizer {
         frequency: roundedFreq,
         gainDb: roundedGain,
         q: defaultQ,
-        type: FilterType.peaking,
+        type: type,
         color: color,
         isEnabled: true,
       ));
@@ -154,12 +186,21 @@ class AutoEqOptimizer {
 
     final safePreamp = BiquadMath.calculateSafePreamp(bands);
 
+    // Hitung weighted RMSE sebelum dan sesudah optimasi
+    final (rmseBefore, rmseAfter) = _calculateRmse(
+      driverFr: driverFr,
+      targetFr: targetFr,
+      bands: bands,
+    );
+
     return AutoEqResult(
       bands: bands,
       safePreampDb: safePreamp,
       maxBoostDb: actualMaxBoost,
       maxCutDb: actualMaxCut,
       target1kHzReference: targetFr.referenceSpl1kHz,
+      weightedRmseBefore: rmseBefore,
+      weightedRmseAfter: rmseAfter,
     );
   }
 
@@ -169,7 +210,6 @@ class AutoEqOptimizer {
     required FrCurveData driverFr,
     required FrCurveData targetFr,
   }) {
-    // Cari 5 titik sampling di sekitar baseFreq: 0.92, 0.96, 1.0, 1.04, 1.08
     final ratios = [0.92, 0.96, 1.0, 1.04, 1.08];
     double bestFreq = baseFreq;
     double maxDeviation = calculateDeltaSpl(baseFreq, driverFr: driverFr, targetFr: targetFr);
@@ -185,5 +225,43 @@ class AutoEqOptimizer {
     }
 
     return (bestFreq, maxDeviation);
+  }
+
+  /// Evaluasi Weighted Root Mean Square Error (RMSE) pada rentang pendengaran manusia
+  static (double before, double after) _calculateRmse({
+    required FrCurveData driverFr,
+    required FrCurveData targetFr,
+    required List<EqBand> bands,
+  }) {
+    const numPoints = 64;
+    double sumSqBefore = 0.0;
+    double sumSqAfter = 0.0;
+    double totalWeight = 0.0;
+
+    for (int i = 0; i < numPoints; i++) {
+      final f = 20.0 * math.pow(1000.0, i / numPoints);
+      final rawDelta = calculateDeltaSpl(f, driverFr: driverFr, targetFr: targetFr);
+
+      // Bobot lebih tinggi di daerah sensitif 500 Hz - 4 kHz
+      double weight = 1.0;
+      if (f >= 500.0 && f <= 4000.0) {
+        weight = 2.0;
+      }
+
+      final eqCorrection = BiquadMath.calculateCompositeGainDb(bands, f);
+      final correctedDelta = rawDelta - eqCorrection;
+
+      sumSqBefore += weight * rawDelta * rawDelta;
+      sumSqAfter += weight * correctedDelta * correctedDelta;
+      totalWeight += weight;
+    }
+
+    final rmseBefore = totalWeight > 0 ? math.sqrt(sumSqBefore / totalWeight) : 0.0;
+    final rmseAfter = totalWeight > 0 ? math.sqrt(sumSqAfter / totalWeight) : 0.0;
+
+    return (
+      (rmseBefore * 100).round() / 100.0,
+      (rmseAfter * 100).round() / 100.0,
+    );
   }
 }

@@ -9,16 +9,18 @@ void main() {
         child: BaydevHiFiApp(),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    // Verify 4 Namida navigation tabs exist (without dedicated player tab)
+    // Verify 5 Namida navigation tabs exist
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('DSP Rack'), findsWidgets);
     expect(find.text('Library'), findsWidgets);
+    expect(find.text('Playlists'), findsWidgets);
     expect(find.text('Settings'), findsWidgets);
 
-    // Verify Dashboard header & Pro-Q card render
+    // Verify Dashboard header & Dynamic Studio Mixes Carousel render
     expect(find.text('BAYDEV HIFI STUDIO'), findsOneWidget);
-    expect(find.text('PRO-Q STUDIO'), findsOneWidget);
+    expect(find.text('DYNAMIC STUDIO MIXES'), findsOneWidget);
+    expect(find.text('Add Music to Generate Mixes'), findsOneWidget);
   });
 }

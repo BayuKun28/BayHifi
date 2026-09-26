@@ -2,10 +2,12 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/fr_curve_data.dart';
 import '../controllers/eq_controller.dart';
 import '../controllers/eq_state.dart';
+import 'auto_eq_cloud_browser_dialog.dart';
 import 'squiglink_dialog.dart';
 
 /// Modal dialog utama "Auto EQ Studio & Target Matching"
@@ -29,7 +31,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
   // Built-in presets untuk kemudahan switching langsung
   static final List<FrCurveData> _defaultTargets = [
     FrCurveData(
-      name: 'HBB%20Target',
+      name: 'HBB Target',
       frequencies: const [20, 100, 1000, 3000, 8000, 20000],
       splDb: const [107.5, 105.0, 95.0, 102.5, 96.0, 90.0],
       referenceSpl1kHz: 95.0,
@@ -69,6 +71,16 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     ),
   ];
 
+  // Helper to decode URL-encoded and underscore names for clean UI display
+  String _cleanName(String? s) {
+    if (s == null || s.trim().isEmpty) return '';
+    try {
+      return Uri.decodeComponent(s).replaceAll('%20', ' ').replaceAll('_', ' ');
+    } catch (_) {
+      return s.replaceAll('%20', ' ').replaceAll('_', ' ');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final eqState = ref.watch(eqControllerProvider);
@@ -79,256 +91,240 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Container(
-        width: 650,
-        constraints: const BoxConstraints(maxHeight: 385),
-        decoration: BoxDecoration(
-          color: const Color(0xFF131822),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF242F3C), width: 1.2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.65),
-              blurRadius: 28,
-              spreadRadius: 6,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width < 400 ? 12 : 16,
+        vertical: MediaQuery.of(context).size.height * 0.03,
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Container(
+            width: double.infinity,
+            constraints: BoxConstraints(
+              maxWidth: 560,
+              maxHeight: MediaQuery.of(context).size.height * 0.88,
             ),
-          ],
-        ),
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Draggable Grabber Handle
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF374151),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Header Row: Sparkle + Title & Subtitle + Close Button
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.auto_awesome,
-                  size: 17,
-                  color: Color(0xFF00E676),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text(
-                        'AUTO EQ STUDIO & TARGET MATCHING',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Match headphone driver FR against target curve or import Squiglink EQ files',
-                        style: TextStyle(
-                          color: Color(0xFF8899A6),
-                          fontSize: 10.0,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                InkWell(
-                  onTap: () => Navigator.pop(context),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    child: const Icon(
-                      Icons.close,
-                      size: 16,
-                      color: Color(0xFF8899A6),
-                    ),
-                  ),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111620),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFF222C3A), width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.7),
+                  blurRadius: 32,
+                  spreadRadius: 6,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Draggable Grabber Handle
+                Center(
+                  child: Container(
+                    width: 38,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF374151),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
 
-            // Main Two-Column Layout
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ─── LEFT COLUMN: Driver, Target, Bands, Modes, Clear ───────
-                  Expanded(
-                    flex: 14,
+                // Header Row: Sparkle + Title & Subtitle + Close Button
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00E676).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedSparkles,
+                        size: 18,
+                        color: Color(0xFF00E676),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            'AUTO EQ STUDIO & TARGET MATCHING',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Match headphone driver FR against target curve or import Squiglink files',
+                            style: TextStyle(
+                              color: Color(0xFF8899A6),
+                              fontSize: 10.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedCancel01,
+                        size: 18,
+                        color: Color(0xFF8899A6),
+                      ),
+                      tooltip: 'Close',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Main Content Body (Scrollable to prevent any screen overflow)
+                Flexible(
+                  child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Section 1: HEADPHONE / SPEAKER DRIVER
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'HEADPHONE / SPEAKER DRIVER',
-                                  style: TextStyle(
-                                    color: Color(0xFF90A4AE),
-                                    fontSize: 9.0,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                if (selectedDriver != null)
-                                  InkWell(
-                                    onTap: () => notifier.deleteDriver(),
-                                    child: Row(
-                                      children: const [
-                                        Icon(
-                                          Icons.delete_outline,
-                                          size: 11,
-                                          color: Color(0xFFEF5350),
-                                        ),
-                                        SizedBox(width: 2),
-                                        Text(
-                                          'HAPUS',
-                                          style: TextStyle(
-                                            color: Color(0xFFEF5350),
-                                            fontSize: 9.0,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            _buildDriverDropdown(eqState, notifier),
-                          ],
+                        // ─── SECTION 1: DRIVER PROFILE ──────────────────────────
+                        _buildSectionHeader(
+                          title: 'HEADPHONE / SPEAKER DRIVER',
+                          hasRemove: selectedDriver != null,
+                          onRemove: () => notifier.deleteDriver(),
                         ),
-
-                        // Section 2: TARGET RESPONSE CURVE
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'TARGET RESPONSE CURVE',
-                                  style: TextStyle(
-                                    color: Color(0xFF90A4AE),
-                                    fontSize: 9.0,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                if (selectedTarget != null)
-                                  InkWell(
-                                    onTap: () => notifier.deleteTarget(),
-                                    child: Row(
-                                      children: const [
-                                        Icon(
-                                          Icons.delete_outline,
-                                          size: 11,
-                                          color: Color(0xFFEF5350),
-                                        ),
-                                        SizedBox(width: 2),
-                                        Text(
-                                          'HAPUS',
-                                          style: TextStyle(
-                                            color: Color(0xFFEF5350),
-                                            fontSize: 9.0,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            _buildTargetDropdown(eqState, notifier),
-                          ],
+                        const SizedBox(height: 5),
+                        _buildDriverDropdown(eqState, notifier),
+                        const SizedBox(height: 6),
+                        _buildActionOutlinedButton(
+                          icon: HugeIcons.strokeRoundedHeadphones,
+                          label: 'IMPORT DRIVER FR (TXT/CSV)',
+                          borderColor: const Color(0xFF0288D1),
+                          color: const Color(0xFF29B6F6),
+                          bgColor: const Color(0xFF131D28),
+                          onTap: () => _handleImportDriver(context, notifier),
                         ),
+                        const SizedBox(height: 10),
 
-                        // Section 3: BAND RESOLUTION
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        // ─── SECTION 2: TARGET CURVE ────────────────────────────
+                        _buildSectionHeader(
+                          title: 'TARGET RESPONSE CURVE',
+                          hasRemove: selectedTarget != null,
+                          onRemove: () => notifier.deleteTarget(),
+                        ),
+                        const SizedBox(height: 5),
+                        _buildTargetDropdown(eqState, notifier),
+                        const SizedBox(height: 6),
+                        Row(
                           children: [
-                            const Text(
-                              'BAND RESOLUTION',
-                              style: TextStyle(
-                                color: Color(0xFF90A4AE),
-                                fontSize: 9.0,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
+                            Expanded(
+                              child: _buildActionOutlinedButton(
+                                icon: HugeIcons.strokeRoundedTarget02,
+                                label: 'IMPORT TARGET',
+                                borderColor: const Color(0xFF00897B),
+                                color: const Color(0xFF00E676),
+                                bgColor: const Color(0xFF132620),
+                                onTap: () => _handleImportTarget(context, notifier),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: BandResolution.values.map((res) {
-                                final isSelected = eqState.bandResolution == res;
-                                return Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                    child: InkWell(
-                                      onTap: () => notifier.setBandResolution(res),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: _buildActionOutlinedButton(
+                                icon: HugeIcons.strokeRoundedCloudDownload,
+                                label: 'CLOUD DB',
+                                borderColor: const Color(0xFF00ACC1),
+                                color: const Color(0xFF00E5FF),
+                                bgColor: const Color(0xFF0E222B),
+                                onTap: () => AutoEqCloudBrowserDialog.show(context),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: _buildActionOutlinedButton(
+                                icon: HugeIcons.strokeRoundedSparkles,
+                                label: 'SQUIGLINK',
+                                borderColor: const Color(0xFF7B1FA2),
+                                color: const Color(0xFFCE93D8),
+                                bgColor: const Color(0xFF22162A),
+                                onTap: () {
+                                  showDialog<void>(
+                                    context: context,
+                                    builder: (context) => const SquiglinkDialog(),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+
+                        // ─── SECTION 3: BAND RESOLUTION ─────────────────────────
+                        const Text(
+                          'BAND RESOLUTION',
+                          style: TextStyle(
+                            color: Color(0xFF90A4AE),
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: BandResolution.values.map((res) {
+                            final isSelected = eqState.bandResolution == res;
+                            return Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                child: InkWell(
+                                  onTap: () => notifier.setBandResolution(res),
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    height: 30,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? const Color(0xFF132A20)
+                                          : const Color(0xFF161D27),
                                       borderRadius: BorderRadius.circular(6),
-                                      child: Container(
-                                        height: 28,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? const Color(0xFF132A20)
-                                              : const Color(0xFF161D27),
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? const Color(0xFF00E676)
-                                                : const Color(0xFF26323F),
-                                            width: isSelected ? 1.2 : 0.8,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          res.label,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? const Color(0xFF00E676)
-                                                : const Color(0xFF90A4AE),
-                                            fontSize: 10.0,
-                                            fontWeight: isSelected
-                                                ? FontWeight.w900
-                                                : FontWeight.w600,
-                                          ),
-                                        ),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? const Color(0xFF00E676)
+                                            : const Color(0xFF26323F),
+                                        width: isSelected ? 1.2 : 0.8,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      res.label,
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? const Color(0xFF00E676)
+                                            : const Color(0xFF90A4AE),
+                                        fontSize: 10.5,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w900
+                                            : FontWeight.w600,
                                       ),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
-                          ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
+                        const SizedBox(height: 12),
 
-                        // Section 4: TUNING MODE & A/B COMPARISON
+                        // ─── SECTION 4: TUNING & A/B COMPARISON ──────────────────
                         Row(
                           children: [
                             // Tuning Mode
@@ -348,7 +344,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                   ),
                                   const SizedBox(height: 4),
                                   Container(
-                                    height: 28,
+                                    height: 30,
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF161D27),
                                       borderRadius: BorderRadius.circular(6),
@@ -360,12 +356,12 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                     child: Row(
                                       children: [
                                         _buildTuningModeChip(
-                                          label: '⚡ Normal',
+                                          label: 'Normal',
                                           isSelected: eqState.tuningMode == TuningMode.normal,
                                           onTap: () => notifier.setTuningMode(TuningMode.normal),
                                         ),
                                         _buildTuningModeChip(
-                                          label: '🛡️ Safe',
+                                          label: 'Safe',
                                           isSelected: eqState.tuningMode == TuningMode.safe,
                                           onTap: () => notifier.setTuningMode(TuningMode.safe),
                                         ),
@@ -375,7 +371,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
 
                             // A/B Comparison
                             Expanded(
@@ -394,7 +390,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                   ),
                                   const SizedBox(height: 4),
                                   Container(
-                                    height: 28,
+                                    height: 30,
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF161D27),
                                       borderRadius: BorderRadius.circular(6),
@@ -406,13 +402,13 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                     child: Row(
                                       children: [
                                         _buildAbChip(
-                                          label: '🎚️ A: RAW',
+                                          label: 'A: RAW',
                                           isSelected: eqState.abMode == AbComparisonMode.aRaw,
                                           activeColor: const Color(0xFF29B6F6),
                                           onTap: () => notifier.setAbComparison(AbComparisonMode.aRaw),
                                         ),
                                         _buildAbChip(
-                                          label: '🎚️ B: ACTIVE',
+                                          label: 'B: ACTIVE',
                                           isSelected: eqState.abMode == AbComparisonMode.bActive,
                                           activeColor: const Color(0xFF00E676),
                                           onTap: () => notifier.setAbComparison(AbComparisonMode.bActive),
@@ -425,101 +421,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 14),
 
-                        // Section 5: Clear Curves Action
-                        InkWell(
-                          onTap: () {
-                            notifier.clearFrCurves();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Visualizer FR curves cleared from canvas.'),
-                                duration: Duration(seconds: 2),
-                                backgroundColor: Color(0xFF263238),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2.0),
-                            child: Row(
-                              children: const [
-                                Icon(
-                                  Icons.block,
-                                  size: 12,
-                                  color: Color(0xFFEF5350),
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'CLEAR VISUALIZER FR CURVES',
-                                  style: TextStyle(
-                                    color: Color(0xFFEF5350),
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.4,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  // ─── RIGHT COLUMN: Action Buttons & APPLY TO DSP ───────────
-                  Expanded(
-                    flex: 9,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'ACTIONS & IMPORTS',
-                          style: TextStyle(
-                            color: Color(0xFF90A4AE),
-                            fontSize: 9.0,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-
-                        // Button 1: [🎧 IMPORT DRIVER]
-                        _buildActionOutlinedButton(
-                          icon: Icons.headphones,
-                          label: 'IMPORT DRIVER',
-                          borderColor: const Color(0xFF0288D1),
-                          color: const Color(0xFF29B6F6),
-                          bgColor: const Color(0xFF131D28),
-                          onTap: () => _handleImportDriver(context, notifier),
-                        ),
-
-                        // Button 2: [🎯 IMPORT TARGET]
-                        _buildActionOutlinedButton(
-                          icon: Icons.adjust,
-                          label: 'IMPORT TARGET',
-                          borderColor: const Color(0xFF00897B),
-                          color: const Color(0xFF00E676),
-                          bgColor: const Color(0xFF132620),
-                          onTap: () => _handleImportTarget(context, notifier),
-                        ),
-
-                        // Button 3: [✨ SQUIGLINK EQ]
-                        _buildActionOutlinedButton(
-                          icon: Icons.auto_awesome,
-                          label: 'SQUIGLINK EQ',
-                          borderColor: const Color(0xFF7B1FA2),
-                          color: const Color(0xFFCE93D8),
-                          bgColor: const Color(0xFF22162A),
-                          onTap: () {
-                            showDialog<void>(
-                              context: context,
-                              builder: (context) => const SquiglinkDialog(),
-                            );
-                          },
-                        ),
-
-                        // Button 4: [📊 APPLY TO DSP] (Big emerald button)
+                        // ─── SECTION 5: APPLY TO DSP BUTTON ─────────────────────
                         Material(
                           color: Colors.transparent,
                           child: InkWell(
@@ -530,7 +434,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'AutoEQ Applied! Fitted ${eqState.bandResolution.count} biquads (${selectedDriver?.name ?? "Driver"} → ${selectedTarget?.name ?? "Target"}). Preamp: ${eqState.safePreampDb.toStringAsFixed(1)} dB',
+                                      'AutoEQ Applied! Fitted ${eqState.bandResolution.count} biquads (${_cleanName(selectedDriver?.name) != "" ? _cleanName(selectedDriver?.name) : "Driver"} → ${_cleanName(selectedTarget?.name) != "" ? _cleanName(selectedTarget?.name) : "Target"}). Preamp: ${eqState.safePreampDb.toStringAsFixed(1)} dB',
                                     ),
                                     backgroundColor: const Color(0xFF1B5E20),
                                     duration: const Duration(seconds: 3),
@@ -548,7 +452,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             },
                             borderRadius: BorderRadius.circular(10),
                             child: Container(
-                              height: 60,
+                              height: 44,
                               decoration: BoxDecoration(
                                 color: const Color(0xFF00E676),
                                 borderRadius: BorderRadius.circular(10),
@@ -560,22 +464,63 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                   ),
                                 ],
                               ),
-                              child: Column(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: const [
-                                  Icon(
-                                    Icons.bar_chart,
+                                  HugeIcon(
+                                    icon: HugeIcons.strokeRoundedChartBarLine,
                                     size: 20,
                                     color: Color(0xFF091A10),
                                   ),
-                                  SizedBox(height: 2),
+                                  SizedBox(width: 8),
                                   Text(
                                     'APPLY TO DSP',
                                     style: TextStyle(
                                       color: Color(0xFF091A10),
-                                      fontSize: 11.5,
+                                      fontSize: 12.5,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 0.8,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Section 6: Clear Visualizer Curves
+                        Center(
+                          child: InkWell(
+                            onTap: () {
+                              notifier.clearFrCurves();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Visualizer FR curves cleared from canvas.'),
+                                  duration: Duration(seconds: 2),
+                                  backgroundColor: Color(0xFF263238),
+                                ),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(6),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCancelSquare,
+                                    size: 13,
+                                    color: Color(0xFFEF5350),
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'CLEAR VISUALIZER FR CURVES',
+                                    style: TextStyle(
+                                      color: Color(0xFFEF5350),
+                                      fontSize: 10.0,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.4,
                                     ),
                                   ),
                                 ],
@@ -586,12 +531,60 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                       ],
                     ),
                   ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required String title,
+    required bool hasRemove,
+    required VoidCallback onRemove,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFF90A4AE),
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+          ),
+        ),
+        if (hasRemove)
+          InkWell(
+            onTap: onRemove,
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedDelete02,
+                    size: 12,
+                    color: Color(0xFFEF5350),
+                  ),
+                  SizedBox(width: 3),
+                  Text(
+                    'REMOVE',
+                    style: TextStyle(
+                      color: Color(0xFFEF5350),
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 
@@ -615,20 +608,22 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
           value: d,
           child: Row(
             children: [
-              Icon(
-                Icons.headphones,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedHeadphones,
                 size: 14,
                 color: isSelected ? const Color(0xFF29B6F6) : const Color(0xFF90A4AE),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  d.name,
+                  _cleanName(d.name),
                   style: TextStyle(
                     color: isSelected ? const Color(0xFF29B6F6) : Colors.white,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 11,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -645,15 +640,15 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.cloud_outlined,
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedCloud,
               size: 15,
               color: Color(0xFF29B6F6),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                driver?.name ?? 'Select Headphone Driver...',
+                driver != null ? _cleanName(driver.name) : 'Select Headphone Driver...',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 11.0,
@@ -663,9 +658,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Icon(
-              Icons.arrow_drop_down,
-              size: 18,
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowDown01,
+              size: 16,
               color: Color(0xFF90A4AE),
             ),
           ],
@@ -694,20 +689,22 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
           value: t,
           child: Row(
             children: [
-              Icon(
-                Icons.adjust,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedTarget02,
                 size: 14,
                 color: isSelected ? const Color(0xFF00E676) : const Color(0xFF90A4AE),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  t.name,
+                  _cleanName(t.name),
                   style: TextStyle(
                     color: isSelected ? const Color(0xFF00E676) : Colors.white,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 11,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -724,15 +721,15 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.cloud_outlined,
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedCloud,
               size: 15,
               color: Color(0xFF00E676),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                target?.name ?? 'Select Target Response...',
+                target != null ? _cleanName(target.name) : 'Select Target Response...',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 11.0,
@@ -742,9 +739,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Icon(
-              Icons.arrow_drop_down,
-              size: 18,
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowDown01,
+              size: 16,
               color: Color(0xFF90A4AE),
             ),
           ],
@@ -814,7 +811,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
   }
 
   Widget _buildActionOutlinedButton({
-    required IconData icon,
+    required dynamic icon,
     required String label,
     required Color borderColor,
     required Color color,
@@ -825,25 +822,30 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        height: 33,
+        height: 32,
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: borderColor, width: 1.0),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 13, color: color),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 10.0,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
+            HugeIcon(icon: icon, size: 12, color: color),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

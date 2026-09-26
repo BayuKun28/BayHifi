@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
+
 import '../domain/dsp_models.dart';
 import 'controllers/dsp_rack_controller.dart';
+import '../../pro_q_studio/presentation/pro_q_studio_screen.dart';
 import 'widgets/gain_reduction_meter.dart';
 import 'widgets/rack_knob_slider.dart';
 import 'widgets/rack_unit_card.dart';
@@ -32,38 +36,52 @@ class DspRackScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
               ),
-              child: Icon(Icons.tune_rounded, color: primaryColor, size: 20),
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedSlidersVertical,
+                color: primaryColor,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'MASTERING DSP RACK',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'MASTERING DSP RACK',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  'C++ Low-Latency Processing Engine',
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  Text(
+                    'C++ Low-Latency Processing Engine',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
         actions: [
-          // Reset Rack Button
+          // Reset Rack Button with Confirmation Modal
           IconButton(
-            icon: const Icon(Icons.restart_alt_rounded),
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedRefresh,
+              size: 20,
+              color: null,
+            ),
             tooltip: 'Reset to Flat Reference',
-            onPressed: () => controller.resetToDefaults(),
+            onPressed: () => _showResetConfirmationDialog(context, controller),
           ),
           const SizedBox(width: 8),
         ],
@@ -71,6 +89,9 @@ class DspRackScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
+          // 0. PRO-Q STUDIO EQ LAUNCHER BANNER
+          _buildProQStudioBanner(context),
+
           // 1. MASTER HEADER & A/B COMPARISON STRIP
           _buildMasterSection(context, dspState, controller),
           const SizedBox(height: 16),
@@ -89,7 +110,11 @@ class DspRackScreen extends ConsumerWidget {
             accentColor: const Color(0xFF00E676),
             headerTrailing: TextButton.icon(
               onPressed: () => controller.setPreamp(0.0),
-              icon: const Icon(Icons.refresh, size: 14),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedRefresh,
+                size: 14,
+                color: null,
+              ),
               label: const Text('0 dB', style: TextStyle(fontSize: 11)),
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
             ),
@@ -105,7 +130,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.preampDb,
                   min: -24.0,
                   max: 12.0,
-                  formattedValue: '${dspState.preampDb >= 0 ? '+' : ''}${dspState.preampDb.toStringAsFixed(1)} dB',
+                  formattedValue:
+                      '${dspState.preampDb >= 0 ? '+' : ''}${dspState.preampDb.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setPreamp(val),
                   accentColor: const Color(0xFF00E676),
                 ),
@@ -129,7 +155,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.bassBoostAmount,
                   min: 0.0,
                   max: 10.0,
-                  formattedValue: '${dspState.bassBoostAmount.toStringAsFixed(1)}x',
+                  formattedValue:
+                      '${dspState.bassBoostAmount.toStringAsFixed(1)}x',
                   onChanged: (val) => controller.setBassBoostAmount(val),
                   accentColor: const Color(0xFF00F0FF),
                 ),
@@ -209,7 +236,8 @@ class DspRackScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 GainReductionMeter(
-                  gainReductionDb: (!dspState.isBypassed && dspState.compressorEnabled)
+                  gainReductionDb:
+                      (!dspState.isBypassed && dspState.compressorEnabled)
                       ? (dspState.compThreshold * 0.4).clamp(-20.0, 0.0)
                       : 0.0,
                   isActive: !dspState.isBypassed && dspState.compressorEnabled,
@@ -220,7 +248,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.compThreshold,
                   min: -80.0,
                   max: 0.0,
-                  formattedValue: '${dspState.compThreshold.toStringAsFixed(1)} dB',
+                  formattedValue:
+                      '${dspState.compThreshold.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setCompThreshold(val),
                   accentColor: const Color(0xFFFFB300),
                 ),
@@ -243,7 +272,8 @@ class DspRackScreen extends ConsumerWidget {
                         value: dspState.compAttack,
                         min: 0.1,
                         max: 100.0,
-                        formattedValue: '${dspState.compAttack.toStringAsFixed(0)} ms',
+                        formattedValue:
+                            '${dspState.compAttack.toStringAsFixed(0)} ms',
                         onChanged: (val) => controller.setCompAttack(val),
                         accentColor: const Color(0xFFFFB300),
                       ),
@@ -255,7 +285,8 @@ class DspRackScreen extends ConsumerWidget {
                         value: dspState.compRelease,
                         min: 10.0,
                         max: 1000.0,
-                        formattedValue: '${dspState.compRelease.toStringAsFixed(0)} ms',
+                        formattedValue:
+                            '${dspState.compRelease.toStringAsFixed(0)} ms',
                         onChanged: (val) => controller.setCompRelease(val),
                         accentColor: const Color(0xFFFFB300),
                       ),
@@ -268,7 +299,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.compMakeup,
                   min: -40.0,
                   max: 40.0,
-                  formattedValue: '${dspState.compMakeup >= 0 ? '+' : ''}${dspState.compMakeup.toStringAsFixed(1)} dB',
+                  formattedValue:
+                      '${dspState.compMakeup >= 0 ? '+' : ''}${dspState.compMakeup.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setCompMakeup(val),
                   accentColor: const Color(0xFFFFB300),
                 ),
@@ -331,7 +363,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.crossfeedCutoff,
                   min: 200.0,
                   max: 2000.0,
-                  formattedValue: '${dspState.crossfeedCutoff.toStringAsFixed(0)} Hz',
+                  formattedValue:
+                      '${dspState.crossfeedCutoff.toStringAsFixed(0)} Hz',
                   onChanged: (val) => controller.setCrossfeedCutoff(val),
                   accentColor: const Color(0xFF00E676),
                 ),
@@ -341,7 +374,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.crossfeedFeed,
                   min: -24.0,
                   max: 0.0,
-                  formattedValue: '${dspState.crossfeedFeed.toStringAsFixed(1)} dB',
+                  formattedValue:
+                      '${dspState.crossfeedFeed.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setCrossfeedFeed(val),
                   accentColor: const Color(0xFF00E676),
                 ),
@@ -351,7 +385,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.crossfeedDelayMs,
                   min: 0.05,
                   max: 1.0,
-                  formattedValue: '${(dspState.crossfeedDelayMs * 1000).toStringAsFixed(0)} µs',
+                  formattedValue:
+                      '${(dspState.crossfeedDelayMs * 1000).toStringAsFixed(0)} µs',
                   onChanged: (val) => controller.setCrossfeedDelay(val),
                   accentColor: const Color(0xFF00E676),
                 ),
@@ -413,7 +448,11 @@ class DspRackScreen extends ConsumerWidget {
             accentColor: const Color(0xFFE040FB),
             headerTrailing: TextButton.icon(
               onPressed: () => controller.setPitchSemitones(0.0),
-              icon: const Icon(Icons.refresh, size: 14),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedRefresh,
+                size: 14,
+                color: Color(0xFFE040FB),
+              ),
               label: const Text('Reset', style: TextStyle(fontSize: 11)),
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
             ),
@@ -426,7 +465,8 @@ class DspRackScreen extends ConsumerWidget {
                   min: -12.0,
                   max: 12.0,
                   divisions: 24,
-                  formattedValue: '${dspState.pitchSemitones >= 0 ? '+' : ''}${dspState.pitchSemitones.toStringAsFixed(1)} st',
+                  formattedValue:
+                      '${dspState.pitchSemitones >= 0 ? '+' : ''}${dspState.pitchSemitones.toStringAsFixed(1)} st',
                   onChanged: (val) => controller.setPitchSemitones(val),
                   accentColor: const Color(0xFFE040FB),
                 ),
@@ -450,7 +490,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.limiterThreshold,
                   min: -60.0,
                   max: 0.0,
-                  formattedValue: '${dspState.limiterThreshold.toStringAsFixed(1)} dB',
+                  formattedValue:
+                      '${dspState.limiterThreshold.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setLimiterThreshold(val),
                   accentColor: const Color(0xFFFF3B30),
                 ),
@@ -460,7 +501,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.limiterOutputCeiling,
                   min: -60.0,
                   max: 0.0,
-                  formattedValue: '${dspState.limiterOutputCeiling.toStringAsFixed(1)} dBFS',
+                  formattedValue:
+                      '${dspState.limiterOutputCeiling.toStringAsFixed(1)} dBFS',
                   onChanged: (val) => controller.setLimiterCeiling(val),
                   accentColor: const Color(0xFFFF3B30),
                 ),
@@ -470,7 +512,8 @@ class DspRackScreen extends ConsumerWidget {
                   value: dspState.limiterRelease,
                   min: 1.0,
                   max: 1000.0,
-                  formattedValue: '${dspState.limiterRelease.toStringAsFixed(0)} ms',
+                  formattedValue:
+                      '${dspState.limiterRelease.toStringAsFixed(0)} ms',
                   onChanged: (val) => controller.setLimiterRelease(val),
                   accentColor: const Color(0xFFFF3B30),
                 ),
@@ -489,20 +532,26 @@ class DspRackScreen extends ConsumerWidget {
     DspRackController controller,
   ) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final primaryColor = theme.colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF161A22) : const Color(0xFFE9EDF5),
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: state.isBypassed
-              ? (isDark ? Colors.white10 : Colors.black12)
+              ? theme.dividerColor.withValues(alpha: 0.5)
               : primaryColor.withValues(alpha: 0.5),
-          width: 1.5,
+          width: 1.0,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -530,8 +579,8 @@ class DspRackScreen extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 11,
                         color: state.isBypassed
-                            ? Colors.orangeAccent
-                            : const Color(0xFF00E676),
+                            ? theme.colorScheme.secondary
+                            : primaryColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -539,39 +588,50 @@ class DspRackScreen extends ConsumerWidget {
                 ),
               ),
 
-              // A/B Comparison Switch
+              // Master DSP Status & Bypass Switch
               InkWell(
                 onTap: () => controller.toggleBypass(),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: state.isBypassed
-                        ? Colors.orange.withValues(alpha: 0.15)
-                        : const Color(0xFF00E676).withValues(alpha: 0.15),
+                        ? const Color(0xFFFF3B30).withValues(alpha: 0.12)
+                        : const Color(0xFF34C759).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: state.isBypassed
-                          ? Colors.orangeAccent
-                          : const Color(0xFF00E676),
-                      width: 1.5,
+                          ? const Color(0xFFFF3B30).withValues(alpha: 0.6)
+                          : const Color(0xFF34C759).withValues(alpha: 0.6),
+                      width: 1.0,
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        state.isBypassed ? Icons.block_rounded : Icons.check_circle_rounded,
+                      HugeIcon(
+                        icon: state.isBypassed
+                            ? HugeIcons.strokeRoundedCancel01
+                            : HugeIcons.strokeRoundedCheckmarkCircle01,
                         size: 16,
-                        color: state.isBypassed ? Colors.orangeAccent : const Color(0xFF00E676),
+                        color: state.isBypassed
+                            ? const Color(0xFFFF3B30)
+                            : const Color(0xFF34C759),
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        state.isBypassed ? 'A: RAW (BYPASSED)' : 'B: DSP ACTIVE',
+                        state.isBypassed
+                            ? 'BYPASSED (FLAT)'
+                            : 'DSP ACTIVE',
                         style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.bold,
-                          color: state.isBypassed ? Colors.orangeAccent : const Color(0xFF00E676),
+                          color: state.isBypassed
+                              ? const Color(0xFFFF3B30)
+                              : const Color(0xFF34C759),
                         ),
                       ),
                     ],
@@ -611,8 +671,8 @@ class DspRackScreen extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.auto_awesome,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedSparkles,
               size: 14,
               color: theme.colorScheme.primary,
             ),
@@ -647,7 +707,9 @@ class DspRackScreen extends ConsumerWidget {
                         : theme.colorScheme.onSurface.withValues(alpha: 0.75),
                   ),
                   onSelected: (_) => controller.applyPreset(p),
-                  selectedColor: theme.colorScheme.primary.withValues(alpha: 0.25),
+                  selectedColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.25,
+                  ),
                   side: BorderSide(
                     color: isSelected
                         ? theme.colorScheme.primary
@@ -659,6 +721,231 @@ class DspRackScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildProQStudioBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.dividerColor.withValues(alpha: 0.6),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ProQStudioScreen()));
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: primary.withValues(alpha: 0.4),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedSlidersVertical,
+                      color: primary,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'PRO-Q STUDIO EQ',
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '10-Band Biquad Parametric Equalizer',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: primary.withValues(alpha: 0.4),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'OPEN',
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowRight01,
+                        size: 13,
+                        color: primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showResetConfirmationDialog(
+    BuildContext context,
+    DspRackController controller,
+  ) {
+    final theme = Theme.of(context);
+
+    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: theme.dividerColor.withValues(alpha: 0.6),
+            width: 1.0,
+          ),
+        ),
+        icon: const HugeIcon(
+          icon: HugeIcons.strokeRoundedAlert02,
+          size: 28,
+          color: Color(0xFFFF9500),
+        ),
+        title: Text(
+          'RESET DSP RACK',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.8,
+            color: theme.colorScheme.onSurface,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: Text(
+          'Are you sure you want to reset all 10+ mastering modules (Pre-Amp, Tube Exciter, Dynamic Compressor, Bass Boost, Crossfeed, Limiter) back to 0 dB flat studio reference?',
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+            height: 1.4,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              side: BorderSide(color: theme.dividerColor, width: 1.0),
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9500),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              Navigator.of(dialogCtx).pop();
+              controller.resetToDefaults();
+            },
+            child: const Text(
+              'RESET ALL',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

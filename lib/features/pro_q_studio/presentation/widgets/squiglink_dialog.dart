@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../controllers/eq_controller.dart';
 
-/// Modal dialog untuk Import dan Export konfigurasi EQ dalam format teks Squiglink / Equalizer APO / Wavelet
+/// Modal dialog for Importing and Exporting EQ configuration in Squiglink / Equalizer APO / Wavelet format
 class SquiglinkDialog extends ConsumerStatefulWidget {
   const SquiglinkDialog({super.key});
 
@@ -71,8 +72,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             // Header
             Row(
               children: [
-                const Icon(
-                  Icons.auto_awesome,
+                const HugeIcon(
+                  icon: HugeIcons.strokeRoundedSparkles,
                   size: 16,
                   color: Color(0xFFCE93D8),
                 ),
@@ -92,8 +93,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   borderRadius: BorderRadius.circular(4),
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    child: const Icon(
-                      Icons.close,
+                    child: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedCancel01,
                       size: 16,
                       color: Color(0xFF90A4AE),
                     ),
@@ -125,8 +126,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   letterSpacing: 0.5,
                 ),
                 tabs: const [
-                  Tab(text: '📥 IMPORT / PASTE'),
-                  Tab(text: '📤 EXPORT PRESET'),
+                  Tab(text: 'IMPORT / PASTE'),
+                  Tab(text: 'EXPORT PRESET'),
                 ],
               ),
             ),
@@ -201,7 +202,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               onPressed: () {
                 _importTextController.text = _demoSquiglinkText;
               },
-              icon: const Icon(Icons.description, size: 13),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedFile01, size: 13, color: Color(0xFF90A4AE)),
               label: const Text(
                 'LOAD DEMO TEXT',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -225,7 +226,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   });
                 }
               },
-              icon: const Icon(Icons.paste, size: 13),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedClipboard, size: 13, color: Color(0xFF29B6F6)),
               label: const Text(
                 'PASTE CLIPBOARD',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -265,7 +266,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   );
                 }
               },
-              icon: const Icon(Icons.check, size: 14),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle02, size: 14, color: Color(0xFF091A10)),
               label: const Text(
                 'APPLY FILTERS',
                 style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w900),
@@ -324,7 +325,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   ),
                 );
               },
-              icon: const Icon(Icons.copy, size: 13),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 13, color: Colors.white),
               label: const Text(
                 'COPY SQUIGLINK TEXT',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -350,7 +351,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   ),
                 );
               },
-              icon: const Icon(Icons.waves, size: 13),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 13, color: Color(0xFF00E676)),
               label: const Text(
                 'COPY WAVELET FORMAT',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),

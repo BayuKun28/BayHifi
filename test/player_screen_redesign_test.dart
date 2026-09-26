@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:baydev_hifi/features/player/presentation/now_playing_screen.dart';
+
+void main() {
+  testWidgets('NowPlayingScreen has minimalist top bar with sleep timer, AutoEQ badge, bottom action strip, and DSP Rack button', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(400, 850);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: NowPlayingScreen(
+            onOpenProQStudio: () {},
+            onCollapse: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 1. Verify Minimalist Top Bar with NOW PLAYING
+    expect(find.text('NOW PLAYING'), findsOneWidget);
+
+    // 2. Verify AutoEQ Profile Badge is present above DSP Rack
+    expect(find.textContaining('DRIVER:'), findsOneWidget);
+    expect(find.textContaining('TARGET:'), findsOneWidget);
+
+    // 3. Verify Mastering DSP Rack shortcut is present
+    expect(find.text('MASTERING DSP RACK'), findsOneWidget);
+
+    // 4. Verify Pre-Amp and Volume panels are NOT present on player screen
+    expect(find.text('PRE-AMP'), findsNothing);
+    expect(find.text('PRE'), findsNothing);
+
+    // 5. Verify Bottom Studio Action Strip items in exact requested order:
+    // [Open], [Desk Mode], [Lyric], [Queue], [Spec]
+    expect(find.text('Open'), findsOneWidget);
+    expect(find.text('Desk Mode'), findsOneWidget);
+    expect(find.text('Lyric'), findsOneWidget);
+    expect(find.text('Queue'), findsOneWidget);
+    expect(find.text('Spec'), findsOneWidget);
+  });
+}

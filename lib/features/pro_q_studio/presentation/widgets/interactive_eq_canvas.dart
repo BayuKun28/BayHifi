@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../audio_engine/fft_processor.dart';
 import '../../domain/eq_band.dart';
 import '../controllers/eq_controller.dart';
@@ -165,7 +166,11 @@ class _InteractiveEqCanvasState extends ConsumerState<InteractiveEqCanvas> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.tune, size: 12, color: Color(0xFF29B6F6)),
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedSlidersVertical,
+                          size: 12,
+                          color: Color(0xFF29B6F6),
+                        ),
                         SizedBox(width: 6),
                         Text(
                           'A: RAW AUDIOPHILE DIRECT (EQ BYPASSED)',

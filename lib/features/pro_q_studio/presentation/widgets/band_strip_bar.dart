@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../domain/eq_band.dart';
 import '../controllers/eq_controller.dart';
 
@@ -59,14 +60,14 @@ class BandStripBar extends ConsumerWidget {
                   child: Row(
                     children: [
                       _ActionButton(
-                        icon: Icons.add,
+                        icon: HugeIcons.strokeRoundedAdd01,
                         tooltip: 'Add Band',
                         color: const Color(0xFF00E5FF),
                         onPressed: () => notifier.addBand(),
                       ),
                       const SizedBox(width: 4),
                       _ActionButton(
-                        icon: Icons.delete_outline,
+                        icon: HugeIcons.strokeRoundedDelete02,
                         tooltip: 'Delete Selected Band',
                         color: const Color(0xFFEF5350),
                         onPressed: selectedBand != null && eqState.bands.length > 1
@@ -75,7 +76,7 @@ class BandStripBar extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       _ActionButton(
-                        icon: Icons.refresh,
+                        icon: HugeIcons.strokeRoundedRefresh,
                         tooltip: 'Reset Active Band Gain',
                         color: const Color(0xFF90A4AE),
                         onPressed: selectedBand != null ? () => notifier.resetActiveBand() : null,
@@ -147,16 +148,16 @@ class BandStripBar extends ConsumerWidget {
 
               const SizedBox(width: 10),
 
-              // 2. Action Buttons: [+] [🗑] [↺]
+              // 2. Action Buttons: Add, Delete, Reset
               _ActionButton(
-                icon: Icons.add,
+                icon: HugeIcons.strokeRoundedAdd01,
                 tooltip: 'Add Band',
                 color: const Color(0xFF00E5FF),
                 onPressed: () => notifier.addBand(),
               ),
               const SizedBox(width: 6),
               _ActionButton(
-                icon: Icons.delete_outline,
+                icon: HugeIcons.strokeRoundedDelete02,
                 tooltip: 'Delete Selected Band',
                 color: const Color(0xFFEF5350),
                 onPressed: selectedBand != null && eqState.bands.length > 1
@@ -165,7 +166,7 @@ class BandStripBar extends ConsumerWidget {
               ),
               const SizedBox(width: 6),
               _ActionButton(
-                icon: Icons.refresh,
+                icon: HugeIcons.strokeRoundedRefresh,
                 tooltip: 'Reset Active Band Gain',
                 color: const Color(0xFF90A4AE),
                 onPressed: selectedBand != null ? () => notifier.resetActiveBand() : null,
@@ -277,8 +278,8 @@ class _BandPill extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        width: compact ? 62 : 68,
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+        width: compact ? 68 : 74,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFF1C222B)
@@ -305,6 +306,7 @@ class _BandPill extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 5,
@@ -315,7 +317,7 @@ class _BandPill extends StatelessWidget {
                     borderRadius: BorderRadius.circular(1),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 3),
                 Text(
                   'B${band.index}',
                   style: TextStyle(
@@ -327,30 +329,35 @@ class _BandPill extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  band.formattedFreq,
-                  style: const TextStyle(
-                    color: Color(0xFF90A4AE),
-                    fontSize: 9.0,
-                    fontFeatures: [FontFeature.tabularFigures()],
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    band.formattedFreq,
+                    style: const TextStyle(
+                      color: Color(0xFF90A4AE),
+                      fontSize: 9.0,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 3),
-                Text(
-                  band.formattedGain,
-                  style: TextStyle(
-                    color: band.gainDb > 0
-                        ? const Color(0xFF00E676)
-                        : (band.gainDb < 0 ? const Color(0xFFFFB74D) : const Color(0xFF78909C)),
-                    fontSize: 9.0,
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: [FontFeature.tabularFigures()],
+                  const SizedBox(width: 2),
+                  Text(
+                    band.formattedGain,
+                    style: TextStyle(
+                      color: band.gainDb > 0
+                          ? const Color(0xFF00E676)
+                          : (band.gainDb < 0 ? const Color(0xFFFFB74D) : const Color(0xFF78909C)),
+                      fontSize: 9.0,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -360,7 +367,7 @@ class _BandPill extends StatelessWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  final IconData icon;
+  final dynamic icon;
   final String tooltip;
   final Color color;
   final VoidCallback? onPressed;
@@ -394,10 +401,12 @@ class _ActionButton extends StatelessWidget {
               width: 1.0,
             ),
           ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: isEnabled ? color : const Color(0xFF546E7A),
+          child: Center(
+            child: HugeIcon(
+              icon: icon,
+              size: 16,
+              color: isEnabled ? color : const Color(0xFF546E7A),
+            ),
           ),
         ),
       ),

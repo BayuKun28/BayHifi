@@ -45,14 +45,21 @@ dependencies:
   dio: ^5.7.0
   crypto: ^3.0.6
 
-  # Storage & File Picker
+  # Storage, File Picker, Permissions & Metadata
   path_provider: ^2.1.5
   file_picker: ^13.1.0
+  permission_handler: ^11.3.1
+  audio_metadata_reader: ^1.8.0
 
   # UI Animation & Utilities
   flutter_animate: ^4.5.2
   intl: ^0.20.2
   cupertino_icons: ^1.0.8
+  hugeicons: ^1.2.0
+
+  # Background Audio Service & System Notification
+  audio_service: ^0.18.18
+  audiotags: ^1.4.5
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +80,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/images/
     - assets/audio/
     - assets/samples/drivers/
     - assets/samples/targets/

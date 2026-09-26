@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:palette_generator/palette_generator.dart';
+import '../../core/database/local_persistence_service.dart';
+import '../../core/widgets/studio_artwork_widget.dart';
+import '../../features/player/domain/track.dart';
 import 'app_typography.dart';
 
-/// Pilihan Mode Tema
+/// App Theme Mode Selection
 enum AppThemeMode {
-  system(ThemeMode.system, 'System', 'Mengikuti preferensi sistem OS', Icons.brightness_auto),
-  light(ThemeMode.light, 'Light', 'Studio Clean Light Champagne', Icons.light_mode_outlined),
-  dark(ThemeMode.dark, 'Dark', 'Studio Dark Obsidian / OLED', Icons.dark_mode_outlined);
+  system(ThemeMode.system, 'System', 'Follows operating system preferences', HugeIcons.strokeRoundedComputer),
+  light(ThemeMode.light, 'Light', 'Studio Clean Light Champagne', HugeIcons.strokeRoundedSun01),
+  dark(ThemeMode.dark, 'Dark', 'Studio Dark Obsidian / OLED', HugeIcons.strokeRoundedMoon02);
 
   final ThemeMode mode;
   final String label;
   final String description;
-  final IconData icon;
+  final dynamic icon;
   const AppThemeMode(this.mode, this.label, this.description, this.icon);
 }
 
-/// Model Palet Warna Kustom Terinspirasi Namida
+/// Audiophile Studio Custom Palette Model
 @immutable
 class AppPalette {
   final String id;
@@ -84,15 +89,15 @@ class AppPalette {
     );
   }
 
-  // ─── Curated Presets ────────────────────────────────────────────────────────
+  // ─── Curated Presets (Strict Non-Neon Studio Palettes) ───────────────────────
 
   static const AppPalette namidaCyan = AppPalette(
-    id: 'namida_cyan',
-    name: 'Namida Obsidian Cyan',
-    description: 'Namida cyber-neon cyan dengan latar studio obsidian pekat',
-    primary: Color(0xFF00E5FF),
-    secondary: Color(0xFF0288D1),
-    accent: Color(0xFF00E5FF),
+    id: 'obsidian_cyan',
+    name: 'Obsidian Cyan',
+    description: 'Refined sky cyan with deep obsidian studio background',
+    primary: Color(0xFF38BDF8),
+    secondary: Color(0xFF0284C7),
+    accent: Color(0xFF38BDF8),
     backgroundDark: Color(0xFF0D0F14),
     backgroundLight: Color(0xFFF4F6F9),
     surfaceDark: Color(0xFF141922),
@@ -104,10 +109,10 @@ class AppPalette {
   static const AppPalette amberTube = AppPalette(
     id: 'amber_tube',
     name: 'Amber Tube Glow',
-    description: 'Kehangatan lampu tabung analog triode dan aksen amber bersinar',
-    primary: Color(0xFFFF9F0A),
-    secondary: Color(0xFFFF6D00),
-    accent: Color(0xFFFF9F0A),
+    description: 'Warmth of analog triode tube glow and radiant amber accents',
+    primary: Color(0xFFF59E0B),
+    secondary: Color(0xFFD97706),
+    accent: Color(0xFFF59E0B),
     backgroundDark: Color(0xFF100D0A),
     backgroundLight: Color(0xFFFAF7F2),
     surfaceDark: Color(0xFF1A1612),
@@ -119,10 +124,10 @@ class AppPalette {
   static const AppPalette emeraldHiFi = AppPalette(
     id: 'emerald_hifi',
     name: 'Emerald HiFi',
-    description: 'Warna mint emerald presisi khas instrumen audio mastering',
-    primary: Color(0xFF00E676),
-    secondary: Color(0xFF00BFA5),
-    accent: Color(0xFF00E676),
+    description: 'Precision emerald mint aesthetic of mastering hardware instruments',
+    primary: Color(0xFF10B981),
+    secondary: Color(0xFF059669),
+    accent: Color(0xFF10B981),
     backgroundDark: Color(0xFF09120D),
     backgroundLight: Color(0xFFF2FAF5),
     surfaceDark: Color(0xFF101E17),
@@ -133,11 +138,11 @@ class AppPalette {
 
   static const AppPalette electricPurple = AppPalette(
     id: 'electric_purple',
-    name: 'Electric Purple',
-    description: 'Nuansa studio ungu elektrik modern berenergi tinggi',
-    primary: Color(0xFFBF5AF2),
-    secondary: Color(0xFF7B1FA2),
-    accent: Color(0xFFCE93D8),
+    name: 'Studio Violet',
+    description: 'Modern studio violet and lavender mastering aesthetic',
+    primary: Color(0xFFA855F7),
+    secondary: Color(0xFF7E22CE),
+    accent: Color(0xFFC084FC),
     backgroundDark: Color(0xFF110A18),
     backgroundLight: Color(0xFFF8F2FC),
     surfaceDark: Color(0xFF1B1226),
@@ -149,10 +154,10 @@ class AppPalette {
   static const AppPalette crimsonPassion = AppPalette(
     id: 'crimson_passion',
     name: 'Crimson Passion',
-    description: 'Aksen merah audiophile berani dengan kontras tinggi',
-    primary: Color(0xFFFF3B30),
-    secondary: Color(0xFFC62828),
-    accent: Color(0xFFFF5252),
+    description: 'Bold audiophile crimson red with ultra-high contrast',
+    primary: Color(0xFFF43F5E),
+    secondary: Color(0xFFBE123C),
+    accent: Color(0xFFFB7185),
     backgroundDark: Color(0xFF140A0B),
     backgroundLight: Color(0xFFFCF3F3),
     surfaceDark: Color(0xFF201113),
@@ -164,10 +169,10 @@ class AppPalette {
   static const AppPalette trueOledBlack = AppPalette(
     id: 'true_oled',
     name: 'True OLED Black',
-    description: 'Hitam murni 100% untuk layar AMOLED tanpa konsumsi baterai',
-    primary: Color(0xFF00E5FF),
-    secondary: Color(0xFF00B0FF),
-    accent: Color(0xFF00FFA3),
+    description: 'Pure 100% OLED black for AMOLED displays with zero battery drain',
+    primary: Color(0xFF38BDF8),
+    secondary: Color(0xFF0284C7),
+    accent: Color(0xFF34D399),
     backgroundDark: Color(0xFF000000),
     backgroundLight: Color(0xFFF8F9FA),
     surfaceDark: Color(0xFF0A0A0A),
@@ -177,8 +182,104 @@ class AppPalette {
     isOledBlack: true,
   );
 
+  static const AppPalette pastelLavender = AppPalette(
+    id: 'pastel_lavender',
+    name: 'Pastel Lavender',
+    description: 'Soothing studio pastel lavender with soft calming tones',
+    primary: Color(0xFFB8A9E8),
+    secondary: Color(0xFF9D8BC9),
+    accent: Color(0xFFB8A9E8),
+    backgroundDark: Color(0xFF121118),
+    backgroundLight: Color(0xFFF7F6FB),
+    surfaceDark: Color(0xFF1A1824),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF242232),
+    surfaceContainerLight: Color(0xFFECEAF5),
+  );
+
+  static const AppPalette pastelSage = AppPalette(
+    id: 'pastel_sage',
+    name: 'Pastel Sage Mint',
+    description: 'Muted tranquil pastel sage green for relaxed studio listening',
+    primary: Color(0xFF93D5C0),
+    secondary: Color(0xFF72B8A2),
+    accent: Color(0xFF93D5C0),
+    backgroundDark: Color(0xFF0E1412),
+    backgroundLight: Color(0xFFF4FAF7),
+    surfaceDark: Color(0xFF151E1B),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF1F2B27),
+    surfaceContainerLight: Color(0xFFE8F4EE),
+  );
+
+  static const AppPalette pastelSky = AppPalette(
+    id: 'pastel_sky',
+    name: 'Pastel Powder Sky',
+    description: 'Airy and luminous soft pastel blue studio aesthetic',
+    primary: Color(0xFF9AC8EB),
+    secondary: Color(0xFF74ABD4),
+    accent: Color(0xFF9AC8EB),
+    backgroundDark: Color(0xFF0E1318),
+    backgroundLight: Color(0xFFF4F8FC),
+    surfaceDark: Color(0xFF141C24),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF1D2833),
+    surfaceContainerLight: Color(0xFFE7F0F9),
+  );
+
+  static const AppPalette pastelPeach = AppPalette(
+    id: 'pastel_peach',
+    name: 'Pastel Soft Peach',
+    description: 'Warm and gentle acoustic pastel apricot and peach glow',
+    primary: Color(0xFFF7B297),
+    secondary: Color(0xFFDE9173),
+    accent: Color(0xFFF7B297),
+    backgroundDark: Color(0xFF16110F),
+    backgroundLight: Color(0xFFFAF5F2),
+    surfaceDark: Color(0xFF211A16),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF2E2420),
+    surfaceContainerLight: Color(0xFFF7ECE6),
+  );
+
+  static const AppPalette pastelBlush = AppPalette(
+    id: 'pastel_blush',
+    name: 'Pastel Blush Rose',
+    description: 'Soft studio blush rose with delicate acoustic warmth',
+    primary: Color(0xFFF2A7B5),
+    secondary: Color(0xFFD78494),
+    accent: Color(0xFFF2A7B5),
+    backgroundDark: Color(0xFF160F12),
+    backgroundLight: Color(0xFFFAF4F6),
+    surfaceDark: Color(0xFF22161A),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF301F25),
+    surfaceContainerLight: Color(0xFFF7EAEF),
+  );
+
+  static const AppPalette pastelButter = AppPalette(
+    id: 'pastel_butter',
+    name: 'Pastel Butter Cream',
+    description: 'Velvety warm studio cream with muted vintage gold touch',
+    primary: Color(0xFFE8D18C),
+    secondary: Color(0xFFCDB367),
+    accent: Color(0xFFE8D18C),
+    backgroundDark: Color(0xFF14130C),
+    backgroundLight: Color(0xFFFAF9F2),
+    surfaceDark: Color(0xFF1E1C12),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF2B281B),
+    surfaceContainerLight: Color(0xFFF5F3E4),
+  );
+
   static const List<AppPalette> allPresets = [
     namidaCyan,
+    pastelLavender,
+    pastelSage,
+    pastelSky,
+    pastelPeach,
+    pastelBlush,
+    pastelButter,
     amberTube,
     emeraldHiFi,
     electricPurple,
@@ -198,7 +299,7 @@ class ThemeSettingsState {
   const ThemeSettingsState({
     this.themeMode = AppThemeMode.dark,
     this.currentPalette = AppPalette.namidaCyan,
-    this.customAccentColor = const Color(0xFF00E5FF),
+    this.customAccentColor = const Color(0xFF38BDF8),
     this.dynamicAlbumArtEnabled = false,
   });
 
@@ -219,10 +320,61 @@ class ThemeSettingsState {
 
 /// Controller untuk Theme Mode dan Custom Palette
 class ThemeController extends StateNotifier<ThemeSettingsState> {
-  ThemeController() : super(const ThemeSettingsState());
+  ThemeController() : super(_loadInitialState());
+
+  static ThemeSettingsState _loadInitialState() {
+    try {
+      final saved = LocalPersistenceService.instance.getThemeSettings();
+      final paletteId = saved['palette_id'] as String? ?? 'obsidian_cyan';
+      final modeIndex = saved['theme_mode'] as int? ?? AppThemeMode.dark.index;
+      final accentVal = saved['custom_accent'] as int? ?? 0xFF38BDF8;
+      final dynamicArt = saved['dynamic_album_art'] as bool? ?? false;
+
+      final themeMode = (modeIndex >= 0 && modeIndex < AppThemeMode.values.length)
+          ? AppThemeMode.values[modeIndex]
+          : AppThemeMode.dark;
+
+      final palette = AppPalette.allPresets.firstWhere(
+        (p) => p.id == paletteId,
+        orElse: () => AppPalette.namidaCyan,
+      );
+
+      final customColor = Color(accentVal);
+
+      return ThemeSettingsState(
+        themeMode: themeMode,
+        currentPalette: palette,
+        customAccentColor: customColor,
+        dynamicAlbumArtEnabled: dynamicArt,
+      );
+    } catch (e) {
+      debugPrint('[ThemeController] Error loading initial theme state: $e');
+      return const ThemeSettingsState();
+    }
+  }
+
+  void _persist() {
+    try {
+      final paletteId = state.currentPalette.isDynamic ? 'obsidian_cyan' : state.currentPalette.id;
+      final accentValue = state.customAccentColor.toARGB32();
+      LocalPersistenceService.instance.saveThemeSettings(
+        paletteId: paletteId,
+        themeModeIndex: state.themeMode.index,
+        customAccentColorValue: accentValue,
+        dynamicAlbumArtEnabled: state.dynamicAlbumArtEnabled,
+      );
+    } catch (e) {
+      debugPrint('[ThemeController] Error persisting theme settings: $e');
+    }
+  }
+
+  void reloadPersistedTheme() {
+    state = _loadInitialState();
+  }
 
   void setThemeMode(AppThemeMode mode) {
     state = state.copyWith(themeMode: mode);
+    _persist();
   }
 
   void setPalette(AppPalette palette) {
@@ -231,6 +383,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       customAccentColor: palette.primary,
       dynamicAlbumArtEnabled: false,
     );
+    _persist();
   }
 
   void setCustomAccent(Color color) {
@@ -241,6 +394,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
         accent: color,
       ),
     );
+    _persist();
   }
 
   void setDynamicAlbumArt(Color dominant, Color vibrant) {
@@ -268,8 +422,41 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
     );
   }
 
-  void toggleDynamicAlbumArt(bool enabled) {
+  Future<void> updateDynamicPaletteFromTrack(Track? track) async {
+    if (!state.dynamicAlbumArtEnabled || track == null) return;
+
+    final provider = StudioArtworkWidget.getImageProvider(track);
+    if (provider == null) return;
+
+    try {
+      final generator = await PaletteGenerator.fromImageProvider(
+        provider,
+        maximumColorCount: 16,
+      );
+
+      final vibrant = generator.vibrantColor?.color ??
+          generator.dominantColor?.color ??
+          generator.lightVibrantColor?.color ??
+          generator.mutedColor?.color ??
+          state.customAccentColor;
+
+      final dominant = generator.dominantColor?.color ??
+          generator.darkVibrantColor?.color ??
+          generator.darkMutedColor?.color ??
+          const Color(0xFF14171E);
+
+      setDynamicAlbumArt(dominant, vibrant);
+    } catch (e) {
+      debugPrint('[ThemeController] Dynamic palette extraction error: $e');
+    }
+  }
+
+  void toggleDynamicAlbumArt(bool enabled, [Track? currentTrack]) {
     state = state.copyWith(dynamicAlbumArtEnabled: enabled);
+    _persist();
+    if (enabled && currentTrack != null) {
+      updateDynamicPaletteFromTrack(currentTrack);
+    }
   }
 }
 

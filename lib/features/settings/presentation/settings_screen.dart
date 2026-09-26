@@ -1,62 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../app/theme/theme_mode_controller.dart';
-import '../../../app/theme/app_typography.dart';
+import '../../../core/database/local_persistence_service.dart';
+import 'sub_screens/audio_hardware_settings_screen.dart';
+import 'sub_screens/backup_restore_settings_screen.dart';
+import 'sub_screens/docking_settings_screen.dart';
+import 'sub_screens/gestures_settings_screen.dart';
+import 'sub_screens/library_scanner_settings_screen.dart';
+import 'sub_screens/playback_engine_settings_screen.dart';
+import 'sub_screens/storage_cache_settings_screen.dart';
+import 'sub_screens/theming_settings_screen.dart';
+import 'sub_screens/visualizer_settings_screen.dart';
 
-/// Halaman Pengaturan (Settings & Personalization)
-/// Terinspirasi dari Namida dengan kustomisasi palet warna, ThemeMode (Dark/Light/System),
-/// dan konfigurasi audio engine.
+/// Studio Settings & Personalization Screen (Categorized Hub)
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
-
-  static const List<Color> _accentOptions = [
-    Color(0xFF00E5FF), // Namida Cyan
-    Color(0xFFFF9F0A), // Tube Amber
-    Color(0xFF00E676), // Mint Emerald
-    Color(0xFFBF5AF2), // Electric Purple
-    Color(0xFFFF3B30), // Crimson Red
-    Color(0xFFFFD60A), // HiFi Gold
-    Color(0xFFFF2D55), // Hot Pink
-    Color(0xFF29B6F6), // Sky Blue
-    Color(0xFF00FFA3), // Neon Mint
-    Color(0xFFE040FB), // Magenta
-  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeControllerProvider);
-    final themeNotifier = ref.read(themeControllerProvider.notifier);
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('PENGATURAN & PERSONALISASI'),
+        title: const Text('SETTINGS & PREFERENCES'),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(6),
+              color: primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                color: primary.withValues(alpha: 0.35),
                 width: 0.8,
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.palette_outlined,
-                  size: 13,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
+                HugeIcon(icon: HugeIcons.strokeRoundedColorPicker, size: 13, color: primary),
+                const SizedBox(width: 6),
                 Text(
                   themeState.currentPalette.name,
                   style: TextStyle(
-                    color: theme.colorScheme.primary,
+                    color: primary,
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                   ),
@@ -67,475 +58,493 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96), // Extra bottom padding for floating miniplayer
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120), // Extra bottom padding for floating dock & miniplayer
         children: [
-          // ─── 1. LIVE PREVIEW CARD ─────────────────────────────────────────
-          _buildSectionHeader(context, 'PREVIEW TEMA AKTIF', Icons.visibility_outlined),
-          const SizedBox(height: 8),
-          _buildLiveThemePreview(context, themeState),
+          // ─── 1. STUDIO CONFIGURATION STATUS HERO ─────────────────────────
+          _buildStudioOverviewHero(context, themeState),
           const SizedBox(height: 20),
 
-          // ─── 2. THEME MODE (SYSTEM / LIGHT / DARK) ────────────────────────
-          _buildSectionHeader(context, 'MODE TAMPILAN (THEME MODE)', Icons.brightness_6_outlined),
-          const SizedBox(height: 8),
-          _buildThemeModeSelector(context, themeState, themeNotifier),
-          const SizedBox(height: 20),
-
-          // ─── 3. NAMIDA CUSTOM PALETTES ────────────────────────────────────
-          _buildSectionHeader(context, 'PALET WARNA STUDIO (NAMIDA PRESETS)', Icons.color_lens_outlined),
-          const SizedBox(height: 8),
-          _buildPalettesGrid(context, themeState, themeNotifier),
-          const SizedBox(height: 20),
-
-          // ─── 4. CUSTOM ACCENT COLOR PICKER ────────────────────────────────
-          _buildSectionHeader(context, 'WARNA AKSEN KUSTOM (ACCENT COLOR)', Icons.colorize_outlined),
-          const SizedBox(height: 8),
-          _buildAccentPicker(context, themeState, themeNotifier),
-          const SizedBox(height: 20),
-
-          // ─── 5. DYNAMIC ALBUM ART MONET THEME ─────────────────────────────
-          _buildSectionHeader(context, 'DYNAMIC ALBUM ART PALETTE', Icons.auto_awesome),
-          const SizedBox(height: 8),
-          _buildDynamicAlbumArtTile(context, themeState, themeNotifier),
-          const SizedBox(height: 20),
-
-          // ─── 6. HARDWARE AUDIO & BIT-PERFECT DAC ──────────────────────────
-          _buildSectionHeader(context, 'AUDIO ENGINE & HARDWARE DAC', Icons.memory),
-          const SizedBox(height: 8),
-          _buildAudioEngineCard(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 15, color: theme.colorScheme.primary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-            fontSize: 11.5,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.6,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLiveThemePreview(BuildContext context, ThemeSettingsState state) {
-    final theme = Theme.of(context);
-    final palette = state.currentPalette;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          // ─── SECTION HEADER ──────────────────────────────────────────────
           Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: palette.primary,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: palette.primary.withValues(alpha: 0.4),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.music_note, color: Colors.black, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Hotel California (Hi-Res Master)',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Eagles • FLAC 24-bit / 96 kHz Studio Lossless',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: palette.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: palette.primary, width: 0.8),
-                ),
-                child: Text(
-                  'ACTIVE',
-                  style: TextStyle(
-                    color: palette.primary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 9.5,
-                  ),
+              HugeIcon(icon: HugeIcons.strokeRoundedGrid, size: 15, color: primary),
+              const SizedBox(width: 8),
+              Text(
+                'SETTINGS CATEGORIES',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.6,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          // Sample Slider
-          SliderTheme(
-            data: theme.sliderTheme,
-            child: Slider(
-              value: 0.65,
-              onChanged: (_) {},
-            ),
+
+          // ─── 1. THEMING & COLOR PALETTES ─────────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedLayers01,
+            accentColor: primary,
+            title: 'THEMING & COLOR PALETTES',
+            subtitle: '7 Studio Palettes, Light/Dark/System Mode, Custom Neon Accents & Dynamic Monet Palette',
+            badgeText: '${themeState.currentPalette.name} • ${themeState.themeMode.label}',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ThemingSettingsScreen()),
+              );
+            },
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '03:45',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontSize: 10,
-                  fontFeatures: AppTypography.audioFigures,
-                ),
-              ),
-              Text(
-                '06:30',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontSize: 10,
-                  fontFeatures: AppTypography.audioFigures,
-                ),
-              ),
-            ],
+          const SizedBox(height: 12),
+
+          // ─── 2. VISUALIZER & DISPLAY ──────────────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedAudioWaveform,
+            accentColor: theme.colorScheme.secondary,
+            title: 'VISUALIZER & DISPLAY',
+            subtitle: '120fps HiFi Profile, 3D Parallax, Gaussian Blur, Ambient Glow, Spectrum Bars & Vinyl Disc',
+            badgeText: '3D Parallax • Ambient Glow',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const VisualizerSettingsScreen()),
+              );
+            },
           ),
+          const SizedBox(height: 12),
+
+          // ─── 3. GESTURES & TRACK TILES ────────────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedActivity01,
+            accentColor: const Color(0xFF00E5FF),
+            title: 'GESTURES & TRACK TILES',
+            subtitle: 'Artwork tap triggers (Lyrics, Fav, Inspector), swipe-to-queue/favorite & track tile layout options',
+            badgeText: 'Touch Gestures • Swipe Actions',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const GesturesSettingsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ─── 3. STUDIO WORKSTATION & CAR DOCK ────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedCar01,
+            accentColor: theme.colorScheme.tertiary,
+            title: 'STUDIO WORKSTATION & CAR DOCK',
+            subtitle: 'High-contrast studio clock, dual analog VU level meters & extra-large buttons for desk & car stands',
+            badgeText: 'Fullscreen Stand Mode',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DockingSettingsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ─── 4. AUDIO HARDWARE & DAC ENGINE ──────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedCpu,
+            accentColor: primary,
+            title: 'AUDIO HARDWARE & DAC ENGINE',
+            subtitle: 'SoLoud C++ Engine, Bit-Perfect DAC Direct Bypass, Output Audio Devices & Latency Buffer Tuning',
+            badgeText: 'Bit-Perfect PCM Ready',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AudioHardwareSettingsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ─── 5. ADVANCED PLAYBACK & INTERRUPTION ────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedDashboardSpeed01,
+            accentColor: primary,
+            title: 'ADVANCED PLAYBACK & INTERRUPTION',
+            subtitle: 'Smooth volume fades, headphone unplug guard, speed/pitch semitones, ReplayGain & seek stepper',
+            badgeText: 'Engine Transitions & Policies',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PlaybackEngineSettingsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ─── 6. LIBRARY SCANNER & SLEEP TIMER ────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedFolder01,
+            accentColor: theme.colorScheme.secondary,
+            title: 'LIBRARY SCANNER & SLEEP TIMER',
+            subtitle: 'Automated 15s volume attenuation sleep timer, startup library scan & short clip duration filters',
+            badgeText: 'Scanner Rules Active',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const LibraryScannerSettingsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ─── 7. STORAGE & CACHE QUOTA ──────────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedDatabase,
+            accentColor: const Color(0xFF00E5FF),
+            title: 'STORAGE & CACHE QUOTA',
+            subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & duplicate resolver',
+            badgeText: 'Cache & Integrity',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const StorageCacheSettingsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ─── 8. BACKUP & RESTORE ARCHIVE ────────────────────────────────
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedCloudSync,
+            accentColor: primary,
+            title: 'BACKUP & RESTORE ARCHIVE',
+            subtitle: 'Export and import portable .bayhifi JSON snapshots containing playlists, smart rules & presets',
+            badgeText: '.bayhifi Snapshot Engine',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const BackupRestoreSettingsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 28),
+
+          // ─── 6. BAYDEV STUDIO WATERMARK ─────────────────────────────────
+          _buildBaydevWatermark(context, theme, primary),
         ],
       ),
     );
   }
 
-  Widget _buildThemeModeSelector(
-    BuildContext context,
-    ThemeSettingsState state,
-    ThemeController notifier,
-  ) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
-      ),
-      child: Row(
-        children: AppThemeMode.values.map((mode) {
-          final isSelected = state.themeMode == mode;
-          return Expanded(
-            child: InkWell(
-              onTap: () => notifier.setThemeMode(mode),
-              borderRadius: BorderRadius.circular(9),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? theme.colorScheme.primary.withValues(alpha: 0.18)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(9),
-                  border: isSelected
-                      ? Border.all(color: theme.colorScheme.primary, width: 1.2)
-                      : null,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      mode.icon,
-                      size: 18,
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      mode.label,
-                      style: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                        fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
+  Widget _buildBaydevWatermark(BuildContext context, ThemeData theme, Color primary) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: theme.dividerColor.withValues(alpha: 0.5),
+                  width: 0.8,
                 ),
               ),
+              child: Image.asset(
+                'assets/images/baydev_logo.png',
+                fit: BoxFit.contain,
+              ),
             ),
-          );
-        }).toList(),
+            const SizedBox(height: 10),
+            Text(
+              'BAYDEV HIFI STUDIO',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              'Version 1.0.0 • Pure Audiophile Lossless Engine',
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Crafted by Baydev Studio',
+              style: TextStyle(
+                fontSize: 9.5,
+                fontWeight: FontWeight.w600,
+                color: primary.withValues(alpha: 0.8),
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPalettesGrid(
-    BuildContext context,
-    ThemeSettingsState state,
-    ThemeController notifier,
-  ) {
+  Widget _buildStudioOverviewHero(BuildContext context, ThemeSettingsState themeState) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final storage = LocalPersistenceService.instance;
+    final isBitPerfect = storage.getSetting<bool>('bit_perfect', true) ?? true;
+    final visualizerStyle = storage.getSetting<String>('visualizer_style', 'Spectrum Bars') ?? 'Spectrum Bars';
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: 2.1,
-      ),
-      itemCount: AppPalette.allPresets.length,
-      itemBuilder: (context, index) {
-        final pal = AppPalette.allPresets[index];
-        final isSelected = state.currentPalette.id == pal.id;
-
-        return InkWell(
-          onTap: () => notifier.setPalette(pal),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? pal.primary.withValues(alpha: 0.12)
-                  : theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? pal.primary : theme.dividerColor,
-                width: isSelected ? 1.5 : 1.0,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        pal.name,
-                        style: TextStyle(
-                          color: isSelected ? pal.primary : theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11.5,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (isSelected)
-                      Icon(Icons.check_circle, size: 14, color: pal.primary),
-                  ],
-                ),
-                Row(
-                  children: [
-                    _buildColorDot(pal.primary),
-                    const SizedBox(width: 4),
-                    _buildColorDot(pal.secondary),
-                    const SizedBox(width: 4),
-                    _buildColorDot(pal.accent),
-                    const Spacer(),
-                    if (pal.isOledBlack)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.white24, width: 0.6),
-                        ),
-                        child: const Text(
-                          'OLED',
-                          style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.dividerColor.withValues(alpha: 0.6),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildColorDot(Color color) {
-    return Container(
-      width: 14,
-      height: 14,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.black26, width: 0.8),
-      ),
-    );
-  }
-
-  Widget _buildAccentPicker(
-    BuildContext context,
-    ThemeSettingsState state,
-    ThemeController notifier,
-  ) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 12,
-            runSpacing: 10,
-            children: _accentOptions.map((accentColor) {
-              final isSelected = state.customAccentColor.toARGB32() == accentColor.toARGB32();
-              return InkWell(
-                onTap: () => notifier.setCustomAccent(accentColor),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      if (isSelected)
-                        BoxShadow(
-                          color: accentColor.withValues(alpha: 0.5),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                        ),
-                    ],
-                    border: Border.all(
-                      color: isSelected ? Colors.white : Colors.transparent,
-                      width: 2.2,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: primary,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  child: isSelected
-                      ? const Icon(Icons.check, size: 16, color: Colors.black)
-                      : null,
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDynamicAlbumArtTile(
-    BuildContext context,
-    ThemeSettingsState state,
-    ThemeController notifier,
-  ) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.dividerColor, width: 1.0),
-      ),
-      child: SwitchListTile(
-        value: state.dynamicAlbumArtEnabled,
-        onChanged: (val) => notifier.toggleDynamicAlbumArt(val),
-        title: const Text(
-          'Monet Dynamic Palette',
-          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-        ),
-        subtitle: const Text(
-          'Ekstrak palet warna primer & aksen otomatis dari cover lagu yang aktif',
-          style: TextStyle(fontSize: 10.5),
-        ),
-        activeThumbColor: theme.colorScheme.primary, activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
-      ),
-    );
-  }
-
-  Widget _buildAudioEngineCard(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'SoLoud C++ Audio Engine',
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+                  const SizedBox(width: 8),
+                  Text(
+                    'STUDIO SYSTEM PROFILE',
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFF00E676), width: 0.8),
+                  color: primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: primary.withValues(alpha: 0.4), width: 0.8),
                 ),
-                child: const Text(
-                  'ONLINE',
+                child: Text(
+                  '48kHz SOLOUD ONLINE',
                   style: TextStyle(
-                    color: Color(0xFF00E676),
-                    fontWeight: FontWeight.w900,
+                    color: primary,
                     fontSize: 9,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
-            '• Engine Architecture: Native C++ libsoloud with miniaudio backend\n• Native Decoder: dr_flac (24-bit/192kHz), dr_mp3, dr_wav\n• Resampling Mode: Bit-Perfect Native (Automatic DAC Match)\n• Headroom Attenuator: Automatic Anti-Clipping Preamp',
-            style: TextStyle(fontSize: 10.5, height: 1.45, color: Colors.grey),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _buildHeroMetric(
+                context,
+                label: 'THEME',
+                value: themeState.currentPalette.name,
+                accent: primary,
+              ),
+              const SizedBox(width: 16),
+              _buildHeroMetric(
+                context,
+                label: 'DAC ENGINE',
+                value: isBitPerfect ? 'Bit-Perfect' : 'Standard PCM',
+                accent: const Color(0xFF00E676),
+              ),
+              const SizedBox(width: 16),
+              _buildHeroMetric(
+                context,
+                label: 'RTA DISPLAY',
+                value: visualizerStyle,
+                accent: const Color(0xFF00E5FF),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeroMetric(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required Color accent,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF90A4AE),
+              fontSize: 9.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: TextStyle(
+              color: accent,
+              fontSize: 11.5,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(
+    BuildContext context, {
+    required dynamic icon,
+    required Color accentColor,
+    required String title,
+    required String subtitle,
+    required String badgeText,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.dividerColor,
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: accentColor.withValues(alpha: 0.4),
+                  width: 1.0,
+                ),
+              ),
+              child: Center(
+                child: HugeIcon(
+                  icon: icon,
+                  size: 22,
+                  color: accentColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      fontSize: 11,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.3),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      badgeText,
+                      style: TextStyle(
+                        color: accentColor,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
+              size: 18,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+            ),
+          ],
+        ),
       ),
     );
   }

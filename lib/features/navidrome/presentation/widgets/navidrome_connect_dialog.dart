@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../domain/subsonic_models.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 
-/// Modal dialog untuk konfigurasi koneksi server Navidrome / Subsonic
+/// Modal dialog for Navidrome / Subsonic Server Connection Configuration
 class NavidromeConnectDialog extends ConsumerStatefulWidget {
   const NavidromeConnectDialog({super.key});
 
@@ -64,7 +65,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                       color: primaryColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.cloud_sync_rounded, color: primaryColor, size: 24),
+                    child: HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, color: primaryColor, size: 24),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -90,7 +91,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, size: 20),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20, color: Color(0xFF90A4AE)),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -112,8 +113,8 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      isConnected ? Icons.cloud_done : Icons.cloud_off,
+                    HugeIcon(
+                      icon: isConnected ? HugeIcons.strokeRoundedCloudCheck : HugeIcons.strokeRoundedCloudOff,
                       size: 16,
                       color: isConnected ? const Color(0xFF00E676) : Colors.orangeAccent,
                     ),
@@ -121,8 +122,8 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                     Expanded(
                       child: Text(
                         isConnected
-                            ? 'Terhubung: ${libraryState.navidromeConfig?.serverUrl}'
-                            : 'Belum Terhubung ke Server',
+                            ? 'Connected: ${libraryState.navidromeConfig?.serverUrl}'
+                            : 'Not Connected to Server',
                         style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.bold,
@@ -141,11 +142,11 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                 decoration: InputDecoration(
                   labelText: 'Server URL',
                   hintText: 'http://192.168.1.100:4533',
-                  prefixIcon: const Icon(Icons.dns_outlined, size: 20),
+                  prefixIcon: const HugeIcon(icon: HugeIcons.strokeRoundedServer, size: 20, color: Color(0xFF90A4AE)),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'URL Server wajib diisi' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'Server URL is required' : null,
               ),
               const SizedBox(height: 12),
 
@@ -154,11 +155,11 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: 'Username',
-                  prefixIcon: const Icon(Icons.person_outline, size: 20),
+                  prefixIcon: const HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 20, color: Color(0xFF90A4AE)),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Username wajib diisi' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'Username is required' : null,
               ),
               const SizedBox(height: 12),
 
@@ -168,15 +169,19 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                  prefixIcon: const HugeIcon(icon: HugeIcons.strokeRoundedLockPassword, size: 20, color: Color(0xFF90A4AE)),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 18),
+                    icon: HugeIcon(
+                      icon: _obscurePassword ? HugeIcons.strokeRoundedViewOffSlash : HugeIcons.strokeRoundedView,
+                      size: 18,
+                      color: const Color(0xFF90A4AE),
+                    ),
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
-                validator: (val) => val == null || val.isEmpty ? 'Password wajib diisi' : null,
+                validator: (val) => val == null || val.isEmpty ? 'Password is required' : null,
               ),
               const SizedBox(height: 22),
 
@@ -196,7 +201,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text('Putuskan'),
+                        child: const Text('Disconnect'),
                       ),
                     ),
                   if (isConnected) const SizedBox(width: 12),
@@ -225,8 +230,8 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.link, size: 18),
-                      label: Text(isConnecting ? 'Menghubungkan...' : (isConnected ? 'Sinkron Ulang' : 'Hubungkan')),
+                          : const HugeIcon(icon: HugeIcons.strokeRoundedLink01, size: 18, color: Colors.black),
+                      label: Text(isConnecting ? 'Connecting...' : (isConnected ? 'Re-Sync' : 'Connect')),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: Colors.black,

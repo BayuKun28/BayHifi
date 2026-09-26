@@ -152,7 +152,7 @@ void main() {
       // Verify Header & Master Section
       expect(find.text('MASTERING DSP RACK'), findsOneWidget);
       expect(find.text('MASTER DSP CHAIN'), findsOneWidget);
-      expect(find.text('B: DSP ACTIVE'), findsOneWidget);
+      expect(find.text('DSP ACTIVE'), findsOneWidget);
 
       // Verify Rack Units
       expect(find.text('01'), findsOneWidget); // Pre-Amp
@@ -175,10 +175,10 @@ void main() {
       await tester.tap(find.text('Warm Analog Tube Acoustic'));
       await tester.pumpAndSettle();
 
-      // Tap A/B comparison switch
-      await tester.tap(find.text('B: DSP ACTIVE'));
+      // Tap bypass comparison switch
+      await tester.tap(find.text('DSP ACTIVE'));
       await tester.pumpAndSettle();
-      expect(find.text('A: RAW (BYPASSED)'), findsOneWidget);
+      expect(find.text('BYPASSED (FLAT)'), findsOneWidget);
     });
   });
 }
