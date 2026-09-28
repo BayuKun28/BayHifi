@@ -61,6 +61,9 @@ dependencies:
   audio_service: ^0.18.18
   audiotags: ^1.4.5
 
+  # YouTube & YouTube Music Streaming Engine
+  youtube_explode_dart: ^2.3.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

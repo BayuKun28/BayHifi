@@ -66,11 +66,13 @@ class _NamidaExpandableMiniPlayerState
   }
 
   void _onExpand() {
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _isCategoryDockExpanded = false);
     ref.read(playerExpansionProvider.notifier).expand();
   }
 
   void _onCollapse() {
+    FocusManager.instance.primaryFocus?.unfocus();
     ref.read(playerExpansionProvider.notifier).collapse();
   }
 
@@ -80,6 +82,7 @@ class _NamidaExpandableMiniPlayerState
       CollectionTab.albums => HugeIcons.strokeRoundedAlbum01,
       CollectionTab.artists => HugeIcons.strokeRoundedUser,
       CollectionTab.genres => HugeIcons.strokeRoundedTag01,
+      CollectionTab.youtube => HugeIcons.strokeRoundedPlayList,
       CollectionTab.folders => HugeIcons.strokeRoundedFolder01,
     };
   }
@@ -604,11 +607,20 @@ class _NamidaExpandableMiniPlayerState
                         ],
                       ),
                       child: Center(
-                        child: HugeIcon(
-                          icon: isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
-                          color: theme.colorScheme.onPrimary,
-                          size: 20,
-                        ),
+                        child: playback.isLoading
+                            ? SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                                ),
+                              )
+                            : HugeIcon(
+                                icon: isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                                color: theme.colorScheme.onPrimary,
+                                size: 20,
+                              ),
                       ),
                     ),
                   ),

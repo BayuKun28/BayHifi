@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../audio_engine/virtual_dsp_service.dart';
+import '../../../../core/database/local_persistence_service.dart';
 import '../../domain/dsp_models.dart';
 
 final dspRackControllerProvider =
@@ -15,17 +16,50 @@ class DspRackController extends StateNotifier<DspRackState> {
       : super(DspRackState(
           preampDb: VirtualDspService.instance.preampGain,
         )) {
-    _syncWithEngine();
+    _hydrateState();
+    _loadCustomPresets();
     VirtualDspService.instance.addListener(_onEngineChanged);
   }
 
   bool _isDisposed = false;
+  List<DspPreset> _customPresets = [];
+
+  List<DspPreset> get customPresets => List.unmodifiable(_customPresets);
 
   @override
   void dispose() {
     _isDisposed = true;
     VirtualDspService.instance.removeListener(_onEngineChanged);
     super.dispose();
+  }
+
+  void _hydrateState() {
+    try {
+      final saved = LocalPersistenceService.instance.getDspRackState();
+      if (saved != null && saved.isNotEmpty) {
+        state = DspRackState.fromMap(saved);
+      }
+    } catch (e) {
+      debugPrint('[DspRackController] Error hydrating DSP state: $e');
+    }
+    _syncWithEngine();
+  }
+
+  void _loadCustomPresets() {
+    try {
+      final list = LocalPersistenceService.instance.getCustomDspProfiles();
+      _customPresets = list.map((m) => DspPreset.fromMap(m)).toList();
+    } catch (e) {
+      debugPrint('[DspRackController] Error loading custom presets: $e');
+    }
+  }
+
+  void _persistState() {
+    try {
+      LocalPersistenceService.instance.saveDspRackState(state.toMap());
+    } catch (e) {
+      debugPrint('[DspRackController] Error saving DSP state: $e');
+    }
   }
 
   void _onEngineChanged() {
@@ -35,6 +69,7 @@ class DspRackController extends StateNotifier<DspRackState> {
       Future.microtask(() {
         if (_isDisposed || !mounted) return;
         state = state.copyWith(preampDb: dsp.preampGain);
+        _persistState();
       });
     }
   }
@@ -131,6 +166,7 @@ class DspRackController extends StateNotifier<DspRackState> {
           releaseMs: state.limiterRelease,
         );
       }
+      _persistState();
     } catch (e) {
       debugPrint('[DspRackController] Non-fatal sync error: $e');
     }
@@ -420,6 +456,35 @@ class DspRackController extends StateNotifier<DspRackState> {
   void applyPreset(DspPreset preset) {
     state = preset.state.copyWith(activePresetId: preset.id);
     _syncWithEngine();
+  }
+
+  Future<void> saveCustomProfile(String name, {String description = ''}) async {
+    final newPreset = DspPreset(
+      id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
+      name: name.trim().isEmpty ? 'Custom Preset' : name.trim(),
+      description: description,
+      state: state,
+    );
+    _customPresets.add(newPreset);
+    state = state.copyWith(activePresetId: newPreset.id);
+    await LocalPersistenceService.instance.saveCustomDspProfiles(
+      _customPresets.map((p) => p.toMap()).toList(),
+    );
+    _persistState();
+  }
+
+  Future<void> deleteCustomProfile(String id) async {
+    _customPresets.removeWhere((p) => p.id == id);
+    if (state.activePresetId == id) {
+      state = state.copyWith(clearPreset: true);
+    }
+    await LocalPersistenceService.instance.saveCustomDspProfiles(
+      _customPresets.map((p) => p.toMap()).toList(),
+    );
+  }
+
+  void loadCustomProfile(DspPreset preset) {
+    applyPreset(preset);
   }
 
   void resetToDefaults() {

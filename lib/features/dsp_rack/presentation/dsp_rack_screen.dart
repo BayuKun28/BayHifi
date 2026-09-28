@@ -73,6 +73,16 @@ class DspRackScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // Save Custom DSP Profile Button
+          IconButton(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedFloppyDisk,
+              size: 20,
+              color: primaryColor,
+            ),
+            tooltip: 'Save Custom DSP Profile',
+            onPressed: () => _showSaveProfileDialog(context, controller),
+          ),
           // Reset Rack Button with Confirmation Modal
           IconButton(
             icon: const HugeIcon(
@@ -675,71 +685,450 @@ class DspRackScreen extends ConsumerWidget {
     );
   }
 
-  /// Preset selector horizontal chips
+  /// Preset selector Studio Combo Box / Dropdown
   Widget _buildPresetsSelector(
     BuildContext context,
     DspRackState state,
     DspRackController controller,
   ) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final presets = DspPreset.studioPresets;
+    final studioPresets = DspPreset.studioPresets;
+    final customPresets = controller.customPresets;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedSparkles,
-              size: 14,
-              color: theme.colorScheme.primary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'STUDIO PRESETS',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+    // Find active preset if any
+    DspPreset? activePreset;
+    for (final p in customPresets) {
+      if (p.id == state.activePresetId) {
+        activePreset = p;
+        break;
+      }
+    }
+    if (activePreset == null) {
+      for (final p in studioPresets) {
+        if (p.id == state.activePresetId) {
+          activePreset = p;
+          break;
+        }
+      }
+    }
+
+    final isCustomActive = activePreset != null &&
+        customPresets.any((p) => p.id == activePreset!.id);
+
+    final displayName = activePreset?.name ?? 'Manual Tuning (Customized)';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          width: 1.0,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedSparkles,
+                      size: 15,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'MASTERING PRESET & PROFILE',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () => _showSaveProfileDialog(context, controller),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedFloppyDisk,
+                        size: 13,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'SAVE PROFILE',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // COMBO BOX / DROPDOWN SELECTOR
+          PopupMenuButton<dynamic>(
+            color: theme.colorScheme.surfaceContainerHighest,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                width: 1.0,
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: presets.map((p) {
-              final isSelected = state.activePresetId == p.id;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  selected: isSelected,
-                  label: Text(p.name),
-                  labelStyle: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected
-                        ? (isDark ? Colors.white : Colors.black)
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                  ),
-                  onSelected: (_) => controller.applyPreset(p),
-                  selectedColor: theme.colorScheme.primary.withValues(
-                    alpha: 0.25,
-                  ),
-                  side: BorderSide(
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : (isDark ? Colors.white12 : Colors.black12),
+            elevation: 8,
+            offset: const Offset(0, 52),
+            onSelected: (val) {
+              if (val is DspPreset) {
+                controller.applyPreset(val);
+              } else if (val == '__SAVE_NEW__') {
+                _showSaveProfileDialog(context, controller);
+              }
+            },
+            itemBuilder: (context) {
+              final items = <PopupMenuEntry<dynamic>>[];
+
+              // Action: Save Current Setup
+              items.add(
+                PopupMenuItem<dynamic>(
+                  value: '__SAVE_NEW__',
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedFloppyDisk,
+                          size: 14,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '+ Save Current as New Profile...',
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
-            }).toList(),
+
+              items.add(const PopupMenuDivider());
+
+              // Section 1: Custom User Profiles
+              if (customPresets.isNotEmpty) {
+                items.add(
+                  PopupMenuItem<dynamic>(
+                    enabled: false,
+                    height: 28,
+                    child: Text(
+                      'USER SAVED PROFILES (${customPresets.length})',
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.0,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ),
+                );
+
+                for (final p in customPresets) {
+                  final isSelected = state.activePresetId == p.id;
+                  items.add(
+                    PopupMenuItem<dynamic>(
+                      value: p,
+                      child: Row(
+                        children: [
+                          HugeIcon(
+                            icon: isSelected
+                                ? HugeIcons.strokeRoundedCheckmarkCircle02
+                                : HugeIcons.strokeRoundedBookmark02,
+                            size: 15,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  p.name,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                    color: isSelected
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (p.description.isNotEmpty)
+                                  Text(
+                                    p.description,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedDelete02,
+                              size: 14,
+                              color: Colors.redAccent,
+                            ),
+                            tooltip: 'Delete Profile',
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _showDeleteProfileDialog(context, controller, p);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                items.add(const PopupMenuDivider());
+              }
+
+              // Section 2: Factory Studio Presets
+              items.add(
+                PopupMenuItem<dynamic>(
+                  enabled: false,
+                  height: 28,
+                  child: Text(
+                    'STUDIO FACTORY PRESETS',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              );
+
+              for (final p in studioPresets) {
+                final isSelected = state.activePresetId == p.id;
+                items.add(
+                  PopupMenuItem<dynamic>(
+                    value: p,
+                    child: Row(
+                      children: [
+                        HugeIcon(
+                          icon: isSelected
+                              ? HugeIcons.strokeRoundedCheckmarkCircle02
+                              : HugeIcons.strokeRoundedSlidersVertical,
+                          size: 15,
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                p.name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                p.description,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return items;
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: activePreset != null
+                      ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                      : theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  width: activePreset != null ? 1.2 : 0.8,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: (activePreset != null ? theme.colorScheme.primary : theme.colorScheme.onSurface)
+                          .withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: HugeIcon(
+                      icon: isCustomActive
+                          ? HugeIcons.strokeRoundedBookmark02
+                          : (activePreset != null
+                              ? HugeIcons.strokeRoundedSlidersVertical
+                              : HugeIcons.strokeRoundedAudioWaveform),
+                      size: 16,
+                      color: activePreset != null
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                displayName,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: (isCustomActive
+                                        ? const Color(0xFF00E676)
+                                        : (activePreset != null
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.outline))
+                                    .withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                isCustomActive
+                                    ? 'CUSTOM'
+                                    : (activePreset != null ? 'PRESET' : 'MANUAL'),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                  color: isCustomActive
+                                      ? const Color(0xFF00E676)
+                                      : (activePreset != null
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          activePreset?.description ?? 'Custom dialed hardware parameters',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (isCustomActive)
+                    IconButton(
+                      icon: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedDelete02,
+                        size: 15,
+                        color: Colors.redAccent,
+                      ),
+                      tooltip: 'Delete Profile',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => _showDeleteProfileDialog(context, controller, activePreset!),
+                    ),
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowDown01,
+                    size: 16,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1007,6 +1396,143 @@ class DspRackScreen extends ConsumerWidget {
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showSaveProfileDialog(
+    BuildContext context,
+    DspRackController controller,
+  ) {
+    final textController = TextEditingController(text: 'My Studio Mastering');
+    final descController = TextEditingController();
+    final theme = Theme.of(context);
+
+    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.6), width: 1.0),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedFloppyDisk,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Save DSP Profile',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Save your active hardware module chain (Pre-Amp, Tube, Bass, Compressor, Stereo Width, Reverb, Limiter).',
+              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: textController,
+              autofocus: true,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                labelText: 'Profile Name',
+                hintText: 'e.g. Warm Tube Acoustic',
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('CANCEL'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              final name = textController.text.trim();
+              if (name.isNotEmpty) {
+                await controller.saveCustomProfile(name, description: descController.text.trim());
+                if (context.mounted) {
+                  Navigator.of(dialogCtx).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('DSP Profile "$name" saved successfully!'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('SAVE PROFILE', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteProfileDialog(
+    BuildContext context,
+    DspRackController controller,
+    DspPreset preset,
+  ) {
+    final theme = Theme.of(context);
+
+    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.6), width: 1.0),
+        ),
+        title: const Text('Delete DSP Profile', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to delete "${preset.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFFFF3B30)),
+            onPressed: () async {
+              await controller.deleteCustomProfile(preset.id);
+              if (context.mounted) {
+                Navigator.of(dialogCtx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Profile "${preset.name}" deleted.'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            child: const Text('DELETE'),
+          ),
+        ],
       ),
     );
   }

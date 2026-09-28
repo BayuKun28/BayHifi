@@ -23,6 +23,7 @@ class SoLoudController {
   double _preampDb = 0.0;
   double _replayGainDb = 0.0;
   double _playbackSpeed = 1.0;
+  int _playRequestId = 0;
 
   SoundHandle? get currentHandle => _currentHandle;
   AudioSource? get currentSource => _currentSource;
@@ -48,6 +49,22 @@ class SoLoudController {
         automaticCleanup: true,
       );
 
+      // Pastikan idle timeout dinonaktifkan agar output hardware audio tidak tertidur/mati saat jeda
+      SoLoud.instance.setAudioDeviceIdleTimeout(null);
+
+      // Pastikan master volume engine pada level 1.0 penuh
+      SoLoud.instance.setGlobalVolume(1.0);
+
+      // Listen untuk event kegagalan audio device dan lakukan recovery otomatis
+      SoLoud.instance.audioDeviceStartFailures.listen((error) {
+        debugPrint('[SoLoudController] Audio device start failure detected: $error. Attempting auto-recovery...');
+        try {
+          SoLoud.instance.startAudioDevice();
+        } catch (e) {
+          debugPrint('[SoLoudController] Audio device recovery error: $e');
+        }
+      });
+
       // Aktifkan stream FFT & Waveform secara default untuk RTA Visualizer
       SoLoud.instance.setVisualizationEnabled(
         true,
@@ -71,36 +88,46 @@ class SoLoudController {
   }
 
   /// Memulai pemutaran audio dari path file lokal
-  Future<SoundHandle> playFile(
+  Future<SoundHandle?> playFile(
     String filePath, {
     bool fadeIn = false,
     Duration fadeDuration = const Duration(milliseconds: 300),
   }) async {
+    final int requestId = ++_playRequestId;
     if (!_isInitialized) await init();
+    if (requestId != _playRequestId) return null;
 
     await stop();
+    if (requestId != _playRequestId) return null;
 
     try {
+      // Pastikan hardware audio output dalam keadaan aktif
+      try {
+        if (SoLoud.instance.getAudioDeviceState() == AudioDeviceState.stopped) {
+          await SoLoud.instance.startAudioDevice();
+        }
+      } catch (e) {
+        debugPrint('[SoLoudController] Audio device start check: $e');
+      }
+
       final source = await SoLoud.instance.loadFile(
         filePath,
         mode: LoadMode.disk,
       );
+      if (requestId != _playRequestId) {
+        await SoLoud.instance.disposeSource(source);
+        return null;
+      }
       _currentSource = source;
 
-      final initialVolume = fadeIn ? 0.001 : effectiveVolume;
+      final targetVolume = effectiveVolume > 0.0 ? effectiveVolume : 1.0;
       final handle = SoLoud.instance.play(
         source,
-        volume: initialVolume,
+        volume: targetVolume,
         scale: _playbackSpeed.clamp(0.05, 5.0),
       );
       _currentHandle = handle;
-
-      if (fadeIn && fadeDuration > Duration.zero) {
-        SoLoud.instance.fadeVolume(handle, effectiveVolume, fadeDuration);
-      }
-
-      // Pastikan rantai filter DSP terpasang di bus audio
-      VirtualDspService.instance.init();
+      SoLoud.instance.setVolume(handle, targetVolume);
 
       return handle;
     } catch (e, stack) {
@@ -110,36 +137,46 @@ class SoLoudController {
   }
 
   /// Memutar audio dari URL streaming (Navidrome / remote)
-  Future<SoundHandle> playUrl(
+  Future<SoundHandle?> playUrl(
     String url, {
     bool fadeIn = false,
     Duration fadeDuration = const Duration(milliseconds: 300),
   }) async {
+    final int requestId = ++_playRequestId;
     if (!_isInitialized) await init();
+    if (requestId != _playRequestId) return null;
 
     await stop();
+    if (requestId != _playRequestId) return null;
 
     try {
+      // Pastikan hardware audio output dalam keadaan aktif
+      try {
+        if (SoLoud.instance.getAudioDeviceState() == AudioDeviceState.stopped) {
+          await SoLoud.instance.startAudioDevice();
+        }
+      } catch (e) {
+        debugPrint('[SoLoudController] Audio device start check: $e');
+      }
+
       final source = await SoLoud.instance.loadUrl(
         url,
         mode: LoadMode.disk,
       );
+      if (requestId != _playRequestId) {
+        await SoLoud.instance.disposeSource(source);
+        return null;
+      }
       _currentSource = source;
 
-      final initialVolume = fadeIn ? 0.001 : effectiveVolume;
+      final targetVolume = effectiveVolume > 0.0 ? effectiveVolume : 1.0;
       final handle = SoLoud.instance.play(
         source,
-        volume: initialVolume,
+        volume: targetVolume,
         scale: _playbackSpeed.clamp(0.05, 5.0),
       );
       _currentHandle = handle;
-
-      if (fadeIn && fadeDuration > Duration.zero) {
-        SoLoud.instance.fadeVolume(handle, effectiveVolume, fadeDuration);
-      }
-
-      // Pastikan rantai filter DSP terpasang di bus audio
-      VirtualDspService.instance.init();
+      SoLoud.instance.setVolume(handle, targetVolume);
 
       return handle;
     } catch (e, stack) {
@@ -222,6 +259,7 @@ class SoLoudController {
 
   /// Stop pemutaran dan dispose source
   Future<void> stop() async {
+    _playRequestId++;
     final handle = _currentHandle;
     if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
       SoLoud.instance.stop(handle);

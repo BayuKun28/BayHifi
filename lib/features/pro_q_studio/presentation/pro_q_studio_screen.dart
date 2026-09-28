@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../core/database/local_persistence_service.dart';
 import 'controllers/eq_controller.dart';
 import 'controllers/eq_state.dart';
 import 'widgets/band_strip_bar.dart';
@@ -344,7 +345,50 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
             ),
           ),
 
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
+
+          // ─── 2.5 INTERACTIVE SAVE PRESET BUTTON ───────────────────────────
+          Tooltip(
+            message: 'Save Pro-Q Preset & Target Profile',
+            child: InkWell(
+              onTap: () => _showSavePresetDialog(context, state, notifier),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFF00E676).withValues(alpha: 0.6),
+                    width: 1.0,
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedFloppyDisk,
+                      size: 14,
+                      color: Color(0xFF00E676),
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      'SAVE',
+                      style: TextStyle(
+                        color: Color(0xFF00E676),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
 
           // ─── 3. FIXED RIGHT: Tombol Power ON/OFF (Always Visible) ────────────
           Tooltip(
@@ -466,6 +510,110 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showSavePresetDialog(
+    BuildContext context,
+    EqState state,
+    EqController notifier,
+  ) {
+    final textController = TextEditingController(
+      text: state.targetFr != null
+          ? '${state.targetFr!.name} Tuned'
+          : (state.activePresetName != 'Custom' ? state.activePresetName : 'Custom Pro-Q'),
+    );
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: const Color(0xFF141820),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF2C3542), width: 1),
+        ),
+        title: const Row(
+          children: [
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedFloppyDisk,
+              size: 20,
+              color: Color(0xFF00E676),
+            ),
+            SizedBox(width: 10),
+            Text(
+              'Save EQ Preset',
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Save current 10-band parametric curves, gain levels, and target matching profile.',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: textController,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                labelText: 'Preset Name',
+                labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+                filled: true,
+                fillColor: const Color(0xFF1E2430),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFF37474F)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFF00E676)),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('CANCEL', style: TextStyle(color: Color(0xFF90A4AE))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00E676),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              final name = textController.text.trim();
+              if (name.isNotEmpty) {
+                if (state.driverFr != null) {
+                  LocalPersistenceService.instance.saveFrCurve(
+                    state.driverFr!.toMap(category: 'driver'),
+                  );
+                }
+                if (state.targetFr != null) {
+                  LocalPersistenceService.instance.saveFrCurve(
+                    state.targetFr!.toMap(category: 'target'),
+                  );
+                }
+                Navigator.of(dialogCtx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Saved Pro-Q preset "$name" successfully'),
+                    backgroundColor: const Color(0xFF1E2836),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            child: const Text('SAVE PRESET', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

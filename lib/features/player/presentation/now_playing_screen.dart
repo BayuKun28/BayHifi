@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
+import '../../library/domain/library_collection_models.dart';
 import '../../library/presentation/controllers/library_controller.dart';
+import '../../library/presentation/screens/album_detail_screen.dart';
+import '../../library/presentation/screens/artist_detail_screen.dart';
 import '../../pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../../pro_q_studio/presentation/controllers/eq_state.dart';
-import '../../pro_q_studio/presentation/widgets/auto_eq_modal_dialog.dart';
 import '../../settings/domain/player_customization_settings.dart';
 import '../../settings/presentation/controllers/player_customization_controller.dart';
 import '../data/lyrics_service.dart';
@@ -25,6 +27,7 @@ import 'widgets/parallax_artwork_card.dart';
 import 'widgets/playback_speed_pitch_sheet.dart';
 import 'widgets/sleep_timer_sheet.dart';
 import 'widgets/spectrum_visualizer.dart';
+import 'widgets/studio_dsp_bento_capsule.dart';
 import 'widgets/synchronized_lyrics_view.dart';
 
 class NowPlayingScreen extends ConsumerStatefulWidget {
@@ -128,6 +131,43 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
 
       await ref.read(playerControllerProvider.notifier).playTrack(track);
     }
+  }
+
+  void _navigateToAlbum(BuildContext context, Track track) {
+    if (track.album.isEmpty || track.album == 'Unknown Album') return;
+    final libraryState = ref.read(unifiedLibraryProvider);
+    final album = libraryState.albums.firstWhere(
+      (a) => a.name.toLowerCase() == track.album.toLowerCase(),
+      orElse: () => AlbumModel(
+        name: track.album,
+        artist: track.artist,
+        tracks: [track],
+      ),
+    );
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AlbumDetailScreen(album: album),
+      ),
+    );
+  }
+
+  void _navigateToArtist(BuildContext context, Track track) {
+    if (track.artist.isEmpty || track.artist == 'Unknown Artist') return;
+    final libraryState = ref.read(unifiedLibraryProvider);
+    final artist = libraryState.artists.firstWhere(
+      (a) => a.name.toLowerCase() == track.artist.toLowerCase(),
+      orElse: () => ArtistModel(
+        name: track.artist,
+        tracks: [track],
+      ),
+    );
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ArtistDetailScreen(artist: artist),
+      ),
+    );
   }
 
   void _handleArtworkGesture(ArtworkGestureAction action, Track? track) {
@@ -404,7 +444,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     final availableWidth = constraints.maxWidth;
 
     // Studio Proportional Padding & Sizing Formula:
-    final albumArtSize = (availableHeight * 0.325).clamp(200.0, availableWidth - 48.0);
+    final albumArtSize = (availableHeight * 0.355).clamp(210.0, availableWidth - 44.0);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20.0, 4.0, 20.0, 24.0),
@@ -421,7 +461,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             sleepTimer,
           ),
 
-          // 2. Main Center: Lyrics View (if toggled) OR (Hero Album Art + AutoEQ Profile + DSP Rack)
+          // 2. Main Center: Lyrics View (if toggled) OR (Hero Album Art + Studio DSP Bento Capsule)
           Expanded(
             child: _showLyrics
                 ? Padding(
@@ -447,19 +487,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                         onDoubleTap: () => _handleArtworkGesture(displaySettings.doubleTapAction, track),
                         onLongPress: () => _handleArtworkGesture(displaySettings.longPressAction, track),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
 
-                      // AutoEQ Active Driver & Target Curve Badge (Decoded URL names)
-                      _buildAutoEqProfileBadge(context, eqState, theme, primary),
-                      const SizedBox(height: 10),
-
-                      // Shortcut Chip: MASTERING DSP RACK
-                      _buildMasteringDspRackButton(context, theme, primary),
+                      // Unified Studio DSP & AutoEQ Bento Capsule
+                      const StudioDspBentoCapsule(),
                     ],
                   ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
 
           // 3. Track Title & Artist & Technical Specs
           Column(
@@ -469,7 +505,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               Text(
                 track?.title ?? 'No track currently playing',
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 18.5,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.2,
                 ),
@@ -477,19 +513,69 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 2),
-              Text(
-                track != null
-                    ? '${track.artist} • ${track.album}'
-                    : 'Tap folder icon in action strip to open files',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              const SizedBox(height: 3),
+              if (track != null)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: InkWell(
+                        onTap: () => _navigateToArtist(context, track),
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          child: Text(
+                            track.artist,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      ' • ',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    Flexible(
+                      child: InkWell(
+                        onTap: () => _navigateToAlbum(context, track),
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          child: Text(
+                            track.album,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Text(
+                  'Tap folder icon in action strip to open files',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
               const SizedBox(height: 5),
               // Dedicated Technical Specs Badge
               _buildAudioSpecsBanner(context, track, theme, primary),
@@ -649,14 +735,25 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               HapticFeedback.mediumImpact();
               ref.read(playerControllerProvider.notifier).togglePlayPause();
             },
-            icon: HugeIcon(
-              icon: playback.isPlaying
-                  ? HugeIcons.strokeRoundedPause
-                  : HugeIcons.strokeRoundedPlay,
-              color: theme.colorScheme.onPrimary,
-              size: 30,
-            ),
-            tooltip: playback.isPlaying ? 'Pause' : 'Play',
+            icon: playback.isLoading
+                ? SizedBox(
+                    width: 26,
+                    height: 26,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.8,
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                    ),
+                  )
+                : HugeIcon(
+                    icon: playback.isPlaying
+                        ? HugeIcons.strokeRoundedPause
+                        : HugeIcons.strokeRoundedPlay,
+                    color: theme.colorScheme.onPrimary,
+                    size: 30,
+                  ),
+            tooltip: playback.isLoading
+                ? 'Buffering...'
+                : (playback.isPlaying ? 'Pause' : 'Play'),
           ),
         ),
 
@@ -728,211 +825,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     );
   }
 
-  // ─── AUTO-EQ ACTIVE PROFILE BADGE (ABOVE DSP RACK) ───────────────────────
-  Widget _buildAutoEqProfileBadge(
-    BuildContext context,
-    EqState eqState,
-    ThemeData theme,
-    Color primary,
-  ) {
-    String decodeClean(String? s) {
-      if (s == null || s.trim().isEmpty) return '';
-      try {
-        return Uri.decodeComponent(s).replaceAll('_', ' ');
-      } catch (_) {
-        return s.replaceAll('%20', ' ').replaceAll('_', ' ');
-      }
-    }
 
-    final driverName = decodeClean(eqState.driverFr?.name).isNotEmpty
-        ? decodeClean(eqState.driverFr?.name)
-        : 'Flat / Direct';
-    final targetName = decodeClean(eqState.targetFr?.name).isNotEmpty
-        ? decodeClean(eqState.targetFr?.name)
-        : 'Harman In-Ear 2019';
-    final isAutoActive = eqState.isAutoEqActive;
-
-    return InkWell(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        AutoEqModalDialog.show(context);
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isAutoActive
-                ? const Color(0xFF00E676).withValues(alpha: 0.5)
-                : theme.dividerColor.withValues(alpha: 0.5),
-            width: 0.8,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            // Driver section
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedHeadphones,
-              size: 12,
-              color: isAutoActive ? const Color(0xFF00E676) : primary,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              'DRIVER: ',
-              style: TextStyle(
-                fontSize: 8.5,
-                fontWeight: FontWeight.w900,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                letterSpacing: 0.3,
-              ),
-            ),
-            Flexible(
-              flex: 5,
-              child: Text(
-                driverName,
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  color: isAutoActive ? const Color(0xFF00E676) : theme.colorScheme.onSurface,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                '•',
-                style: TextStyle(color: theme.dividerColor, fontSize: 8),
-              ),
-            ),
-            // Target section
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedTarget02,
-              size: 12,
-              color: const Color(0xFF00F0FF),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              'TARGET: ',
-              style: TextStyle(
-                fontSize: 8.5,
-                fontWeight: FontWeight.w900,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                letterSpacing: 0.3,
-              ),
-            ),
-            Flexible(
-              flex: 4,
-              child: Text(
-                targetName,
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF00F0FF),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ─── MASTERING DSP RACK BUTTON ───────────────────────────────────────────
-  Widget _buildMasteringDspRackButton(
-    BuildContext context,
-    ThemeData theme,
-    Color primary,
-  ) {
-    return InkWell(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => const DspRackScreen(),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5.5),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: primary.withValues(alpha: 0.6),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.15),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(
-                  color: primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 7),
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedSlidersVertical,
-                size: 14,
-                color: primary,
-              ),
-              const SizedBox(width: 6),
-              const Text(
-                'MASTERING DSP RACK',
-                style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Text(
-                  '10+ Modules',
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowRight01,
-                size: 12,
-                color: primary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   // ─── AUDIO SPECS BANNER ───────────────────────────────────────────────────
   Widget _buildAudioSpecsBanner(
@@ -1261,11 +1154,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            // AutoEQ profile badge
-                            _buildAutoEqProfileBadge(context, eqState, theme, primary),
-                            const SizedBox(height: 4),
-                            // DSP Rack Button
-                            _buildMasteringDspRackButton(context, theme, primary),
+                            // Unified Studio DSP & AutoEQ Bento Capsule
+                            const StudioDspBentoCapsule(),
                           ],
                         ),
                       ),
@@ -1359,11 +1249,21 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                           HapticFeedback.mediumImpact();
                           ref.read(playerControllerProvider.notifier).togglePlayPause();
                         },
-                        icon: HugeIcon(
-                          icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
-                          color: theme.colorScheme.onPrimary,
-                          size: 24,
-                        ),
+                        icon: playback.isLoading
+                            ? SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.4,
+                                  valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                                ),
+                              )
+                            : HugeIcon(
+                                icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                                color: theme.colorScheme.onPrimary,
+                                size: 24,
+                              ),
+                        tooltip: playback.isLoading ? 'Buffering...' : (playback.isPlaying ? 'Pause' : 'Play'),
                       ),
                     ),
                     Container(

@@ -498,10 +498,15 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     );
   }
 
-  /// Check and request storage permissions (Android audio & external storage access)
+  /// Check and request storage & notification permissions (Android audio & external storage access)
   Future<bool> ensureStoragePermissions() async {
     if (kIsWeb || !Platform.isAndroid) return true;
     try {
+      // Request notification permission for Android 13+ (API 33+) media status bar playback
+      try {
+        await Permission.notification.request();
+      } catch (_) {}
+
       final manageStatus = await Permission.manageExternalStorage.status;
       if (!manageStatus.isGranted) {
         final res = await Permission.manageExternalStorage.request();
@@ -913,7 +918,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     state = state.copyWith(isScanning: true, statusMessage: 'Syncing Navidrome library...');
 
     try {
-      final songs = await _subsonicClient.getRandomSongs(config, size: 50);
+      final songs = await _subsonicClient.fetchAllSongs(config);
       final cloudTracks = songs.map((s) => s.toTrack(config)).toList();
 
       final existingLocal = state.tracks.where((t) => t.filePath != null).toList();

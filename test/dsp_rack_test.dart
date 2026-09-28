@@ -167,12 +167,12 @@ void main() {
       expect(find.text('04'), findsOneWidget); // Compressor
       expect(find.text('DYNAMIC COMPRESSOR'), findsOneWidget);
 
-      // Verify Studio Preset Chips
-      expect(find.text('Audiophile Bit-Perfect'), findsOneWidget);
-      expect(find.text('Warm Analog Tube Acoustic'), findsOneWidget);
+      // Verify Studio Preset & Profile Selector Combo Box
+      expect(find.text('MASTERING PRESET & PROFILE'), findsOneWidget);
+      expect(find.text('SAVE PROFILE'), findsOneWidget);
 
-      // Tap preset chip
-      await tester.tap(find.text('Warm Analog Tube Acoustic'));
+      // Tap combo box to open dropdown
+      await tester.tap(find.text('MASTERING PRESET & PROFILE'));
       await tester.pumpAndSettle();
 
       // Tap bypass comparison switch

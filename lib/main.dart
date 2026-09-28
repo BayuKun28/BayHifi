@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
+import 'audio_engine/audio_cache_service.dart';
 import 'audio_engine/soloud_controller.dart';
 import 'core/audio_service/baydev_audio_handler.dart';
 import 'core/database/local_persistence_service.dart';
@@ -16,6 +17,13 @@ void main() async {
     debugPrint('Peringatan: Inisialisasi database lokal gagal: $e');
   }
 
+  // Inisialisasi AudioCacheService untuk offline caching & prefetching
+  try {
+    await AudioCacheService.instance.init();
+  } catch (e) {
+    debugPrint('Peringatan: Inisialisasi AudioCacheService gagal: $e');
+  }
+
   // Inisialisasi background AudioService untuk status bar notification
   try {
     await AudioService.init(
@@ -26,7 +34,7 @@ void main() async {
         androidNotificationChannelDescription: 'Audiophile Lossless Music Playback Controls',
         androidNotificationOngoing: true,
         androidStopForegroundOnPause: true,
-        androidNotificationIcon: 'mipmap/ic_launcher',
+        androidNotificationIcon: 'drawable/ic_stat_music',
       ),
     );
   } catch (e) {

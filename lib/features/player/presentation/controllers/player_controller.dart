@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
+import '../../../../audio_engine/audio_cache_service.dart';
 import '../../../../audio_engine/soloud_controller.dart';
 import '../../../../core/audio_engine/audio_interruption_manager.dart';
 import '../../../../core/audio_engine/replay_gain_service.dart';
@@ -12,6 +13,7 @@ import '../../../settings/domain/player_playback_settings.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
 import '../../domain/playback_state.dart';
 import '../../domain/track.dart';
+import '../../../youtube_music/data/youtube_music_service.dart';
 
 final playerControllerProvider =
     StateNotifierProvider<PlayerController, PlaybackState>((ref) {
@@ -402,6 +404,12 @@ class PlayerController extends StateNotifier<PlaybackState> {
     }
 
     try {
+      if (state.volume <= 0.0 && !state.isMuted) {
+        setVolume(1.0);
+      } else {
+        _audioEngine.setVolume(state.volume);
+      }
+
       // Calculate ReplayGain if enabled
       final rgDb = ReplayGainService.instance.calculateEffectiveGainDb(
         track: track,
@@ -418,10 +426,25 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
       if (track.filePath != null && track.filePath!.isNotEmpty) {
         await _audioEngine.playFile(track.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
-      } else if (track.remoteUrl != null && track.remoteUrl!.isNotEmpty) {
-        await _audioEngine.playUrl(track.remoteUrl!, fadeIn: enableFade, fadeDuration: fadeDuration);
       } else {
-        throw ArgumentError('Track does not have a valid filePath or remoteUrl');
+        // Remote / cloud track: Check if cached in AudioCacheService
+        final cachedPath = AudioCacheService.instance.getCachedFilePath(track.id);
+        if (cachedPath != null) {
+          debugPrint('[PlayerController] Playing cached track from $cachedPath');
+          await _audioEngine.playFile(cachedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+        } else {
+          String? streamUrl = track.streamUrl ?? track.remoteUrl;
+          if ((streamUrl == null || streamUrl.isEmpty) && track.id.startsWith('yt_')) {
+            streamUrl = await YouTubeMusicService.instance.getAudioStreamUrl(track.id);
+          }
+
+          if (streamUrl != null && streamUrl.isNotEmpty) {
+            await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
+            AudioCacheService.instance.cacheTrack(track.copyWith(remoteUrl: streamUrl));
+          } else {
+            throw ArgumentError('Track does not have a valid filePath or streamUrl');
+          }
+        }
       }
 
       state = state.copyWith(
@@ -430,6 +453,9 @@ class PlayerController extends StateNotifier<PlaybackState> {
         position: Duration.zero,
         effectiveReplayGainDb: rgDb,
       );
+
+      // Smart Prefetch: Cache next track in queue ahead of time
+      _prefetchNextTrackInQueue();
 
       // Log to playback history database
       LocalPersistenceService.instance.logTrackPlayback(track.toMap());
@@ -442,6 +468,25 @@ class PlayerController extends StateNotifier<PlaybackState> {
         errorMessage: 'Failed to play track: $e',
       );
       _syncAudioHandler();
+    }
+  }
+
+  void _prefetchNextTrackInQueue() {
+    try {
+      if (state.queue.isNotEmpty && state.queueIndex + 1 < state.queue.length) {
+        final nextTrack = state.queue[state.queueIndex + 1];
+        if (nextTrack.id.startsWith('yt_') && (nextTrack.streamUrl == null || nextTrack.streamUrl!.isEmpty)) {
+          YouTubeMusicService.instance.getAudioStreamUrl(nextTrack.id).then((url) {
+            if (url != null && url.isNotEmpty) {
+              AudioCacheService.instance.prefetchNextTrack(nextTrack.copyWith(remoteUrl: url));
+            }
+          });
+        } else {
+          AudioCacheService.instance.prefetchNextTrack(nextTrack);
+        }
+      }
+    } catch (e) {
+      debugPrint('[PlayerController] Error triggering next track prefetch: $e');
     }
   }
 
@@ -467,6 +512,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
   /// Toggle play / pause
   void togglePlayPause() {
+    if (state.isLoading) return;
     if (state.isPlaying) {
       pause();
     } else if (state.isPaused) {

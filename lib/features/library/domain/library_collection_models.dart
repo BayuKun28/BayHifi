@@ -7,6 +7,7 @@ enum CollectionTab {
   albums('Albums'),
   artists('Artists'),
   genres('Genres'),
+  youtube('YouTube'),
   folders('Folders');
 
   final String label;

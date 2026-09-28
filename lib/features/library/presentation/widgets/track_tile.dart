@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../audio_engine/audio_cache_service.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
-import '../../../player/presentation/widgets/audio_file_inspector_sheet.dart';
+import '../../../player/presentation/controllers/player_controller.dart';
 import '../../../settings/domain/player_customization_settings.dart';
 import '../../../settings/presentation/controllers/player_customization_controller.dart';
 import '../controllers/library_controller.dart';
+import 'studio_track_action_sheet.dart';
 
 class TrackTile extends ConsumerWidget {
   final Track track;
@@ -85,7 +87,11 @@ class TrackTile extends ConsumerWidget {
     final theme = Theme.of(context);
     final settings = ref.watch(playerCustomizationProvider);
     final libraryState = ref.watch(unifiedLibraryProvider);
+    final playback = ref.watch(playerControllerProvider);
     final isFav = libraryState.favoriteTrackIds.contains(track.id);
+    final isCurrent = playback.currentTrack?.id == track.id;
+    final isBuffering = isCurrent && playback.isLoading;
+    final isTileActive = isPlaying || isBuffering;
 
     final titleText = settings.trackTitleFirst ? track.title : track.artist;
     final subtitleText = settings.trackTitleFirst
@@ -97,14 +103,14 @@ class TrackTile extends ConsumerWidget {
       decoration: BoxDecoration(
         color: isSelected
             ? theme.colorScheme.primary.withValues(alpha: 0.16)
-            : (isPlaying
+            : (isTileActive
                 ? theme.colorScheme.primary.withValues(alpha: 0.1)
                 : theme.colorScheme.surface),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isSelected
               ? theme.colorScheme.primary
-              : (isPlaying
+              : (isTileActive
                   ? theme.colorScheme.primary.withValues(alpha: 0.5)
                   : theme.dividerColor.withValues(alpha: 0.4)),
           width: isSelected ? 1.4 : 1.0,
@@ -148,20 +154,29 @@ class TrackTile extends ConsumerWidget {
                     ),
                   ),
                 )
-              else if (isPlaying)
+              else if (isTileActive)
                 Container(
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.4),
+                    color: Colors.black.withValues(alpha: 0.45),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedAudioWaveform,
-                      color: theme.colorScheme.primary,
-                      size: 22,
-                    ),
+                    child: isBuffering
+                        ? SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                            ),
+                          )
+                        : HugeIcon(
+                            icon: HugeIcons.strokeRoundedAudioWaveform,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
                   ),
                 ),
             ],
@@ -171,8 +186,8 @@ class TrackTile extends ConsumerWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontWeight: isPlaying ? FontWeight.w800 : FontWeight.w600,
-              color: isPlaying ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+              fontWeight: isTileActive ? FontWeight.w800 : FontWeight.w600,
+              color: isTileActive ? theme.colorScheme.primary : theme.colorScheme.onSurface,
               fontSize: 13,
             ),
           ),
@@ -190,59 +205,96 @@ class TrackTile extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 3),
-              Row(
-                children: [
-                  if (settings.trackShowFormatBadge) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: track.isHiRes
-                            ? const Color(0xFFFF9F0A).withValues(alpha: 0.15)
-                            : theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    if (settings.trackShowFormatBadge) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
                           color: track.isHiRes
-                              ? const Color(0xFFFF9F0A).withValues(alpha: 0.5)
-                              : theme.dividerColor,
-                          width: 0.6,
+                              ? const Color(0xFFFF9F0A).withValues(alpha: 0.15)
+                              : theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: track.isHiRes
+                                ? const Color(0xFFFF9F0A).withValues(alpha: 0.5)
+                                : theme.dividerColor,
+                            width: 0.6,
+                          ),
+                        ),
+                        child: Text(
+                          track.format.name.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: track.isHiRes
+                                ? const Color(0xFFFF9F0A)
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        track.format.name.toUpperCase(),
+                      const SizedBox(width: 6),
+                    ],
+                    if ((track.streamUrl != null || track.remoteUrl != null) &&
+                        AudioCacheService.instance.isCached(track.id)) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: const Color(0xFF00E676).withValues(alpha: 0.5),
+                            width: 0.6,
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            HugeIcon(
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                              size: 9,
+                              color: Color(0xFF00E676),
+                            ),
+                            SizedBox(width: 2),
+                            Text(
+                              'CACHED',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF00E676),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    if (settings.trackShowBitrate && track.sampleRate != null) ...[
+                      Text(
+                        '${(track.sampleRate! / 1000).toStringAsFixed(1)}kHz',
                         style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          color: track.isHiRes
-                              ? const Color(0xFFFF9F0A)
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          fontFeatures: AppTypography.audioFigures,
+                          fontSize: 10,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                  if (settings.trackShowBitrate && track.sampleRate != null) ...[
-                    Text(
-                      '${(track.sampleRate! / 1000).toStringAsFixed(1)}kHz',
-                      style: TextStyle(
-                        fontFeatures: AppTypography.audioFigures,
-                        fontSize: 10,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(width: 6),
+                    ],
+                    if (settings.trackShowDuration && track.duration.inSeconds > 0)
+                      Text(
+                        _formatDuration(track.duration),
+                        style: TextStyle(
+                          fontFeatures: AppTypography.audioFigures,
+                          fontSize: 10,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
                   ],
-                  if (settings.trackShowDuration && track.duration.inSeconds > 0)
-                    Text(
-                      _formatDuration(track.duration),
-                      style: TextStyle(
-                        fontFeatures: AppTypography.audioFigures,
-                        fontSize: 10,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                ],
+                ),
               ),
             ],
           ),
@@ -262,81 +314,14 @@ class TrackTile extends ConsumerWidget {
                     ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
                   },
                 ),
-              PopupMenuButton<String>(
+              IconButton(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedMoreVertical,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   size: 18,
                 ),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                color: theme.colorScheme.surfaceContainerHighest,
-                onSelected: (action) {
-                  HapticFeedback.lightImpact();
-                  if (action == 'queue') {
-                    onAddToQueue?.call();
-                  } else if (action == 'play_next') {
-                    onPlayNext?.call();
-                  } else if (action == 'playlist') {
-                    onAddToPlaylist?.call();
-                  } else if (action == 'favorite') {
-                    ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
-                  } else if (action == 'inspect') {
-                    AudioFileInspectorSheet.show(context, track);
-                  }
-                },
-                itemBuilder: (ctx) => [
-                  PopupMenuItem(
-                    value: 'play_next',
-                    child: Row(
-                      children: [
-                        HugeIcon(icon: HugeIcons.strokeRoundedNext, size: 16, color: theme.colorScheme.primary),
-                        const SizedBox(width: 8),
-                        const Text('Play Next', style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'queue',
-                    child: Row(
-                      children: [
-                        HugeIcon(icon: HugeIcons.strokeRoundedPlaylist01, size: 16, color: theme.colorScheme.onSurface),
-                        const SizedBox(width: 8),
-                        const Text('Add to Queue', style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'playlist',
-                    child: Row(
-                      children: [
-                        HugeIcon(icon: HugeIcons.strokeRoundedAddCircleHalfDot, size: 16, color: theme.colorScheme.onSurface),
-                        const SizedBox(width: 8),
-                        const Text('Add to Playlist', style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'favorite',
-                    child: Row(
-                      children: [
-                        HugeIcon(icon: HugeIcons.strokeRoundedFavourite, size: 16, color: const Color(0xFFFF2D55)),
-                        const SizedBox(width: 8),
-                        Text(isFav ? 'Remove Favorite' : 'Add to Favorites', style: const TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'inspect',
-                    child: Row(
-                      children: [
-                        HugeIcon(icon: HugeIcons.strokeRoundedInformationCircle, size: 16, color: theme.colorScheme.onSurface),
-                        const SizedBox(width: 8),
-                        const Text('Inspect Audio File', style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                ],
+                tooltip: 'Track Options',
+                onPressed: () => StudioTrackActionSheet.show(context, track),
               ),
             ],
           ),

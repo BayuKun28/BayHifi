@@ -71,6 +71,8 @@ class Track {
     this.replayGainAlbumPeak,
   });
 
+  String? get streamUrl => remoteUrl;
+
   bool get isHiRes =>
       (bitDepth != null && bitDepth! >= 24) ||
       (sampleRate != null && sampleRate! >= 88200) ||

@@ -87,7 +87,9 @@ class VirtualDspService extends ChangeNotifier {
   void init() {
     if (_initialized) return;
     _initialized = true;
-    _applyProfileToSoLoudSmart(activeProfile);
+    if (SoLoud.instance.isInitialized) {
+      _applyProfileToSoLoudSmart(activeProfile);
+    }
     notifyListeners();
   }
 
@@ -435,7 +437,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateAllFilters() {
     try {
-      if (!SoLoudController.instance.isInitialized) return;
+      if (!SoLoud.instance.isInitialized) return;
       _deactivateEq();
       _deactivateBassBoost();
       _deactivateCompressor();
@@ -453,7 +455,7 @@ class VirtualDspService extends ChangeNotifier {
   /// Rebuilds the C++ filter chain completely in strict mastering order:
   /// Max 8 concurrent active filters enforced by SoLoud C++ engine.
   void _rebuildChain(DspProfile profile) {
-    if (!SoLoudController.instance.isInitialized) return;
+    if (!SoLoud.instance.isInitialized) return;
     _deactivateAllFilters();
 
     int activeCount = 0;
@@ -504,6 +506,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateEq() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.parametricEqFilter;
       if (!filter.isActive) {
         filter
@@ -520,6 +523,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateEq() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.parametricEqFilter.isActive) {
         SoLoud.instance.filters.parametricEqFilter.deactivate();
       }
@@ -530,6 +534,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyEqBand(int band) {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.parametricEqFilter;
       final gains = eqGains;
       if (band < 0 || band >= gains.length) return;
@@ -565,6 +570,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateBassBoost() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.bassBoostFilter;
       if (!filter.isActive) filter.activate();
       _applyBassBoost();
@@ -575,6 +581,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateBassBoost() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.bassBoostFilter.isActive) {
         SoLoud.instance.filters.bassBoostFilter.deactivate();
       }
@@ -585,6 +592,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyBassBoost() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       SoLoud.instance.filters.bassBoostFilter.boost.value = bassBoostValue;
     } catch (e) {
       debugPrint('[VirtualDspService] BassBoost apply error: $e');
@@ -593,6 +601,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateCompressor() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.compressorFilter;
       if (!filter.isActive) filter.activate();
       _applyCompressor();
@@ -603,6 +612,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateCompressor() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.compressorFilter.isActive) {
         SoLoud.instance.filters.compressorFilter.deactivate();
       }
@@ -613,6 +623,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyCompressor() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final f = SoLoud.instance.filters.compressorFilter;
       // Unit scaling: konversi detik ke milidetik (* 1000.0) sesuai spesifikasi C++ SoLoud
       f.attackTime.value = compAttack * 1000.0;
@@ -627,6 +638,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateLimiter() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.limiterFilter;
       if (!filter.isActive) filter.activate();
       _applyLimiter();
@@ -637,6 +649,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateLimiter() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.limiterFilter.isActive) {
         SoLoud.instance.filters.limiterFilter.deactivate();
       }
@@ -647,6 +660,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyLimiter() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final f = SoLoud.instance.filters.limiterFilter;
       f.threshold.value = limiterThreshold;
       // Hard ceiling -1.3 dBFS untuk proteksi inter-sample peak
@@ -660,6 +674,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateReverb() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.freeverbFilter;
       if (!filter.isActive) filter.activate();
       _applyReverb();
@@ -670,6 +685,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateReverb() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.freeverbFilter.isActive) {
         SoLoud.instance.filters.freeverbFilter.deactivate();
       }
@@ -680,6 +696,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyReverb() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final f = SoLoud.instance.filters.freeverbFilter;
       f.roomSize.value = reverbRoomSize;
       f.damp.value = reverbDamp;
@@ -692,6 +709,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activatePitchShift() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.pitchShiftFilter;
       if (!filter.isActive) filter.activate();
       _applyPitchShift();
@@ -702,6 +720,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivatePitchShift() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.pitchShiftFilter.isActive) {
         SoLoud.instance.filters.pitchShiftFilter.deactivate();
       }
@@ -712,6 +731,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyPitchShift() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       SoLoud.instance.filters.pitchShiftFilter.shift.value = pitchValue;
     } catch (e) {
       debugPrint('[VirtualDspService] PitchShift apply error: $e');
@@ -720,6 +740,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateCrossfeed() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.crossfeedFilter;
       if (!filter.isActive) filter.activate();
       _applyCrossfeed();
@@ -730,6 +751,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateCrossfeed() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.crossfeedFilter.isActive) {
         SoLoud.instance.filters.crossfeedFilter.deactivate();
       }
@@ -740,6 +762,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyCrossfeed() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final f = SoLoud.instance.filters.crossfeedFilter;
       f.cutoff.value = crossfeedCutoff;
       f.feed.value = crossfeedFeed;
@@ -752,6 +775,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateTubeExciter() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.tubeExciterFilter;
       if (!filter.isActive) filter.activate();
       _applyTubeExciter();
@@ -762,6 +786,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateTubeExciter() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.tubeExciterFilter.isActive) {
         SoLoud.instance.filters.tubeExciterFilter.deactivate();
       }
@@ -772,6 +797,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyTubeExciter() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final f = SoLoud.instance.filters.tubeExciterFilter;
       f.drive.value = tubeDrive;
       f.warmth.value = tubeWarmth;
@@ -783,6 +809,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _activateStereoWidth() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final filter = SoLoud.instance.filters.stereoWidthFilter;
       if (!filter.isActive) filter.activate();
       _applyStereoWidth();
@@ -793,6 +820,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _deactivateStereoWidth() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       if (SoLoud.instance.filters.stereoWidthFilter.isActive) {
         SoLoud.instance.filters.stereoWidthFilter.deactivate();
       }
@@ -803,6 +831,7 @@ class VirtualDspService extends ChangeNotifier {
 
   void _applyStereoWidth() {
     try {
+      if (!SoLoud.instance.isInitialized) return;
       final f = SoLoud.instance.filters.stereoWidthFilter;
       f.width.value = stereoWidthFactor;
       f.midGain.value = stereoMidGain;

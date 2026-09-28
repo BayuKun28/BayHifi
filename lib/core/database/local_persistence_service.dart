@@ -321,7 +321,38 @@ class LocalPersistenceService {
     _cache['autoeq_downloaded_ids'] = ids.toList();
     await _save();
   }
+
+  // ─── 8. DSP RACK STATE & CUSTOM MASTERING PROFILES ─────────────────────────
+  Map<String, dynamic>? getDspRackState() {
+    final data = _cache['dsp_rack_state'];
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return null;
+  }
+
+  Future<void> saveDspRackState(Map<String, dynamic> stateMap) async {
+    _cache['dsp_rack_state'] = stateMap;
+    await _save();
+  }
+
+  List<Map<String, dynamic>> getCustomDspProfiles() {
+    final list = _cache['custom_dsp_profiles'];
+    if (list is List) {
+      return list.whereType<Map<String, dynamic>>().toList();
+    }
+    return [];
+  }
+
+  Future<void> saveCustomDspProfiles(List<Map<String, dynamic>> profiles) async {
+    _cache['custom_dsp_profiles'] = profiles;
+    await _save();
+  }
 }
+
 
 
 

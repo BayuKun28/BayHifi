@@ -6,16 +6,19 @@ import '../../../core/widgets/studio_alphabetical_scroller.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
-import '../../player/presentation/widgets/audio_file_inspector_sheet.dart';
 import '../../navidrome/domain/subsonic_models.dart';
 import '../../navidrome/presentation/widgets/navidrome_connect_dialog.dart';
 import '../domain/genre_icon_helper.dart';
 import '../domain/library_collection_models.dart';
 import 'controllers/library_controller.dart';
+import 'screens/album_detail_screen.dart';
+import 'screens/artist_detail_screen.dart';
+import 'screens/folder_detail_screen.dart';
+import 'screens/genre_detail_screen.dart';
+import '../../youtube_music/presentation/youtube_discovery_screen.dart';
 import 'widgets/artist_avatar_widget.dart';
 import 'widgets/batch_track_tag_editor_modal.dart';
 import 'widgets/library_batch_actions_bar.dart';
-import 'widgets/metadata_tag_editor_sheet.dart';
 import 'widgets/track_tile.dart';
 
 
@@ -30,6 +33,7 @@ class UnifiedLibraryScreen extends ConsumerStatefulWidget {
 
 class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   final Set<String> _selectedTrackIds = {};
   final ScrollController _tracksScrollController = ScrollController();
   final ScrollController _albumsScrollController = ScrollController();
@@ -67,6 +71,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _tracksScrollController.dispose();
     _albumsScrollController.dispose();
     _artistsScrollController.dispose();
@@ -174,157 +179,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   }
 
 
-  void _showTrackMenu(BuildContext context, Track track) {
-    final state = ref.read(unifiedLibraryProvider);
-    final isFav = state.favoriteTrackIds.contains(track.id);
-    final theme = Theme.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    width: 46,
-                    height: 46,
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: track.albumArtBytes != null
-                        ? Image.memory(track.albumArtBytes!, fit: BoxFit.cover)
-                        : Center(
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedMusicNote01,
-                              size: 22,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                  ),
-                ),
-                title: Text(track.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: Text('${track.artist} • ${track.hiResBadgeText}', maxLines: 1),
-                trailing: IconButton(
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedFavourite,
-                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
-                    Navigator.of(ctx).pop();
-                  },
-                ),
-              ),
-              const Divider(),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlay,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
-                title: const Text('Play Now'),
-                onTap: () {
-                  ref.read(playerControllerProvider.notifier).playTrack(track);
-                  Navigator.of(ctx).pop();
-                },
-              ),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedNext,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                ),
-                title: const Text('Play Next'),
-                onTap: () {
-                  ref.read(playerControllerProvider.notifier).playNext(track);
-                  Navigator.of(ctx).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('"${track.title}" added to play next'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlayList,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                ),
-                title: const Text('Add to Queue'),
-                onTap: () {
-                  ref.read(playerControllerProvider.notifier).addToQueue(track);
-                  Navigator.of(ctx).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('"${track.title}" added to queue'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlaylist01,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                ),
-                title: const Text('Add to Playlist'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  _showAddToPlaylistSheet(context, track);
-                },
-              ),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedEdit02,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                ),
-                title: const Text('Edit Metadata Tags'),
-                subtitle: const Text(
-                  'Edit Title, Artist, Album, Year',
-                  style: TextStyle(fontSize: 11),
-                ),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  MetadataTagEditorSheet.show(context, track);
-                },
-              ),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedAudioWaveform,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                ),
-                title: const Text('View All Metadata & Audio Specs'),
-                subtitle: Text(
-                  'Full ID3 tags, ${track.format.name.toUpperCase()} • ${track.sampleRate ?? 44100} Hz • ${track.bitDepth ?? 16}-bit',
-                  style: const TextStyle(fontSize: 11),
-                ),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  AudioFileInspectorSheet.show(context, track);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   void _showAddToPlaylistSheet(BuildContext context, Track track) {
     _showAddToPlaylistSheetForTracks(context, [track]);
@@ -392,481 +246,48 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     );
   }
 
-  // ─── ALBUM DETAIL MODAL SHEET ─────────────────────────────────────────────
-  void _showAlbumDetailSheet(BuildContext context, AlbumModel album) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+  // ─── DEDICATED SCREEN NAVIGATION (SPOTIFY & NAMIDA GRADE) ─────────────────
+  void _openAlbumDetail(BuildContext context, AlbumModel album) {
+    HapticFeedback.selectionClick();
+    _searchFocusNode.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AlbumDetailScreen(album: album),
       ),
-      builder: (ctx) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.7,
-          minChildSize: 0.4,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (_, scrollController) {
-            return Column(
-              children: [
-                const SizedBox(height: 12),
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.dividerColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: theme.dividerColor),
-                        ),
-                        child: StudioArtworkWidget(
-                          track: album.firstTrack,
-                          bytes: album.coverBytes,
-                          url: album.coverUrl,
-                          borderRadius: BorderRadius.circular(15),
-                          fallbackIconSize: 36,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              album.name,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              album.artist,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${album.trackCount} Tracks • ${album.isHiRes ? "Hi-Res FLAC" : "Lossless"}',
-                              style: TextStyle(fontSize: 11, color: primary, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              if (album.tracks.isNotEmpty) {
-                                ref.read(playerControllerProvider.notifier).setQueue(album.tracks, initialIndex: 0);
-                                Navigator.of(ctx).pop();
-                              }
-                            },
-                            icon: const HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 18, color: Colors.black),
-                            label: const Text('Play All'),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            if (album.tracks.isNotEmpty) {
-                              final list = List<Track>.from(album.tracks)..shuffle();
-                              ref.read(playerControllerProvider.notifier).setQueue(list, initialIndex: 0);
-                              Navigator.of(ctx).pop();
-                            }
-                          },
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedShuffle, size: 18, color: primary),
-                          label: const Text('Shuffle'),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton.outlined(
-                          tooltip: 'Edit Album Tags',
-                          onPressed: () {
-                            Navigator.of(ctx).pop();
-                            BatchTrackTagEditorModal.show(context, album.tracks);
-                          },
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedEdit02,
-                            size: 18,
-                            color: primary,
-                          ),
-                          style: IconButton.styleFrom(
-                            side: BorderSide(color: theme.dividerColor),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                const Divider(height: 24),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    itemCount: album.tracks.length,
-                    itemBuilder: (context, idx) {
-                      final track = album.tracks[idx];
-                      return ListTile(
-                        leading: StudioArtworkWidget(
-                          track: track,
-                          width: 36,
-                          height: 36,
-                          borderRadius: BorderRadius.circular(8),
-                          fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
-                          fallbackIconSize: 18,
-                        ),
-                        title: Text(track.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                        subtitle: Text(track.format.name.toUpperCase(), style: const TextStyle(fontSize: 10.5)),
-                        trailing: IconButton(
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical, size: 18, color: null),
-                          onPressed: () => _showTrackMenu(context, track),
-                        ),
-                        onTap: () {
-                          ref.read(playerControllerProvider.notifier).setQueue(album.tracks, initialIndex: idx);
-                          Navigator.of(ctx).pop();
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
     );
   }
 
-  // ─── ARTIST DETAIL MODAL SHEET ────────────────────────────────────────────
-  void _showArtistDetailSheet(BuildContext context, ArtistModel artist) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+  void _openArtistDetail(BuildContext context, ArtistModel artist) {
+    HapticFeedback.selectionClick();
+    _searchFocusNode.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ArtistDetailScreen(artist: artist),
       ),
-      builder: (ctx) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.7,
-          minChildSize: 0.4,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (_, scrollController) {
-            return Column(
-              children: [
-                const SizedBox(height: 12),
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.dividerColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      ArtistAvatarWidget(
-                        artistName: artist.name,
-                        fallbackCoverBytes: artist.coverBytes,
-                        fallbackCoverUrl: artist.coverUrl,
-                        radius: 36,
-                        iconSize: 32,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              artist.name,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${artist.albumsCount} Albums • ${artist.tracksCount} Tracks',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () {
-                            if (artist.tracks.isNotEmpty) {
-                              ref.read(playerControllerProvider.notifier).setQueue(artist.tracks, initialIndex: 0);
-                              Navigator.of(ctx).pop();
-                            }
-                          },
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 18, color: Colors.black),
-                          label: const Text('Play All'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          if (artist.tracks.isNotEmpty) {
-                            final list = List<Track>.from(artist.tracks)..shuffle();
-                            ref.read(playerControllerProvider.notifier).setQueue(list, initialIndex: 0);
-                            Navigator.of(ctx).pop();
-                          }
-                        },
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedShuffle, size: 18, color: primary),
-                        label: const Text('Shuffle'),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 24),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    itemCount: artist.tracks.length,
-                    itemBuilder: (context, idx) {
-                      final track = artist.tracks[idx];
-                      return ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            child: track.albumArtBytes != null
-                                ? Image.memory(track.albumArtBytes!, fit: BoxFit.cover)
-                                : Center(
-                                    child: HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, size: 20, color: primary),
-                                  ),
-                          ),
-                        ),
-                        title: Text(track.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                        subtitle: Text('${track.album} • ${track.format.name.toUpperCase()}', style: const TextStyle(fontSize: 10.5)),
-                        trailing: IconButton(
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical, size: 18, color: null),
-                          onPressed: () => _showTrackMenu(context, track),
-                        ),
-                        onTap: () {
-                          ref.read(playerControllerProvider.notifier).setQueue(artist.tracks, initialIndex: idx);
-                          Navigator.of(ctx).pop();
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
     );
   }
 
-  // ─── GENRE DETAIL MODAL SHEET ─────────────────────────────────────────────
-  void _showGenreDetailSheet(BuildContext context, GenreModel genre) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+  void _openGenreDetail(BuildContext context, GenreModel genre) {
+    HapticFeedback.selectionClick();
+    _searchFocusNode.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GenreDetailScreen(genre: genre),
       ),
-      builder: (ctx) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.75,
-          minChildSize: 0.45,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (_, scrollController) {
-            return Column(
-              children: [
-                const SizedBox(height: 12),
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.dividerColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: primary.withValues(alpha: 0.4)),
-                        ),
-                        child: Center(
-                          child: HugeIcon(
-                            icon: GenreIconHelper.getGenreIcon(genre.name),
-                            size: 30,
-                            color: primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              genre.name,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${genre.trackCount} Tracks in Genre Collection',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () {
-                            if (genre.tracks.isNotEmpty) {
-                              ref.read(playerControllerProvider.notifier).setQueue(genre.tracks, initialIndex: 0);
-                              Navigator.of(ctx).pop();
-                            }
-                          },
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 18, color: Colors.black),
-                          label: const Text('Play All', style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          if (genre.tracks.isNotEmpty) {
-                            final list = List<Track>.from(genre.tracks)..shuffle();
-                            ref.read(playerControllerProvider.notifier).setQueue(list, initialIndex: 0);
-                            Navigator.of(ctx).pop();
-                          }
-                        },
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedShuffle, size: 18, color: primary),
-                        label: const Text('Shuffle'),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 24),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    itemCount: genre.tracks.length,
-                    itemBuilder: (context, idx) {
-                      final track = genre.tracks[idx];
-                      return ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            child: track.albumArtBytes != null
-                                ? Image.memory(track.albumArtBytes!, fit: BoxFit.cover)
-                                : Center(
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedMusicNote01,
-                                      size: 20,
-                                      color: primary,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        title: Text(track.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                        subtitle: Text('${track.artist} • ${track.album}', style: const TextStyle(fontSize: 10.5)),
-                        trailing: IconButton(
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical, size: 18, color: null),
-                          onPressed: () => _showTrackMenu(context, track),
-                        ),
-                        onTap: () {
-                          ref.read(playerControllerProvider.notifier).setQueue(genre.tracks, initialIndex: idx);
-                          Navigator.of(ctx).pop();
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+    );
+  }
+
+  void _openFolderDetail(BuildContext context, FolderModel folder) {
+    HapticFeedback.selectionClick();
+    _searchFocusNode.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => FolderDetailScreen(folder: folder),
+      ),
     );
   }
 
@@ -939,7 +360,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                         child: TextField(
                           key: const ValueKey('search_field'),
                           controller: _searchController,
+                          focusNode: _searchFocusNode,
                           autofocus: true,
+                          textInputAction: TextInputAction.search,
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                           decoration: InputDecoration(
                             isDense: true,
@@ -953,6 +376,10 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                             contentPadding: const EdgeInsets.symmetric(vertical: 10),
                           ),
                           onChanged: controller.setSearchQuery,
+                          onSubmitted: (_) {
+                            _searchFocusNode.unfocus();
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          },
                         ),
                       ),
                       if (libraryState.searchQuery.isNotEmpty)
@@ -1026,6 +453,8 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               ),
               tooltip: 'Close Search',
               onPressed: () {
+                _searchFocusNode.unfocus();
+                FocusManager.instance.primaryFocus?.unfocus();
                 _searchController.clear();
                 controller.toggleSearch(false);
               },
@@ -1069,6 +498,8 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                     context: context,
                     builder: (_) => const NavidromeConnectDialog(),
                   );
+                } else if (val == 'youtube') {
+                  controller.setTab(CollectionTab.youtube);
                 } else if (val == 'clear') {
                   _confirmClearLibrary(context);
                 }
@@ -1117,6 +548,23 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                       Text(
                         isNavidromeConnected ? 'Navidrome Server (Connected)' : 'Connect Navidrome Cloud',
                         style: const TextStyle(fontSize: 12.5),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'youtube',
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedPlayList,
+                        size: 18,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'YouTube Music HiFi',
+                        style: TextStyle(fontSize: 12.5),
                       ),
                     ],
                   ),
@@ -1200,47 +648,52 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           ),
 
           // ─── 2. SOURCE FILTER CHIPS (ALL / OFFLINE / NAVIDROME / HI-RES) ───
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildSourceChip(
-                    context: context,
-                    label: 'All Sources (${libraryState.totalTracksCount})',
-                    filter: LibrarySourceFilter.all,
-                    isSelected: libraryState.selectedFilter == LibrarySourceFilter.all,
-                    onTap: () => controller.setFilter(LibrarySourceFilter.all),
-                  ),
-                  const SizedBox(width: 6),
-                  _buildSourceChip(
-                    context: context,
-                    label: 'Offline Local (${libraryState.offlineTracksCount})',
-                    filter: LibrarySourceFilter.offline,
-                    isSelected: libraryState.selectedFilter == LibrarySourceFilter.offline,
-                    onTap: () => controller.setFilter(LibrarySourceFilter.offline),
-                  ),
-                  const SizedBox(width: 6),
-                  _buildSourceChip(
-                    context: context,
-                    label: 'Navidrome Cloud (${libraryState.navidromeTracksCount})',
-                    filter: LibrarySourceFilter.navidrome,
-                    isSelected: libraryState.selectedFilter == LibrarySourceFilter.navidrome,
-                    onTap: () => controller.setFilter(LibrarySourceFilter.navidrome),
-                  ),
-                  const SizedBox(width: 6),
-                  _buildSourceChip(
-                    context: context,
-                    label: 'Hi-Res Lossless (${libraryState.hiResTracksCount})',
-                    filter: LibrarySourceFilter.hiRes,
-                    isSelected: libraryState.selectedFilter == LibrarySourceFilter.hiRes,
-                    onTap: () => controller.setFilter(LibrarySourceFilter.hiRes),
-                  ),
-                ],
+          if (libraryState.currentTab != CollectionTab.youtube)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildSourceChip(
+                      context: context,
+                      label: 'All Sources (${libraryState.totalTracksCount})',
+                      filter: LibrarySourceFilter.all,
+                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.all,
+                      onTap: () => controller.setFilter(LibrarySourceFilter.all),
+                    ),
+                    const SizedBox(width: 6),
+                    _buildSourceChip(
+                      context: context,
+                      label: 'Offline Local (${libraryState.offlineTracksCount})',
+                      filter: LibrarySourceFilter.offline,
+                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.offline,
+                      onTap: () => controller.setFilter(LibrarySourceFilter.offline),
+                    ),
+                    const SizedBox(width: 6),
+                    _buildSourceChip(
+                      context: context,
+                      label: 'Navidrome Cloud (${libraryState.navidromeTracksCount})',
+                      filter: LibrarySourceFilter.navidrome,
+                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.navidrome,
+                      onTap: () => controller.setFilter(LibrarySourceFilter.navidrome),
+                    ),
+                    const SizedBox(width: 6),
+                    _buildSourceChip(
+                      context: context,
+                      label: 'Hi-Res Lossless (${libraryState.hiResTracksCount})',
+                      filter: LibrarySourceFilter.hiRes,
+                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.hiRes,
+                      onTap: () => controller.setFilter(LibrarySourceFilter.hiRes),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+
+          // ─── 2b. YOUTUBE MUSIC HIFI QUICK ACTION CAPSULE ───
+          if (libraryState.currentTab != CollectionTab.youtube)
+            _buildYouTubeQuickRibbon(context, primaryColor, theme, controller),
 
           // ─── 3. TAB CONTENT VIEWS ─────────────────────────────────────────
           Expanded(
@@ -1295,6 +748,106 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     );
   }
 
+  Widget _buildYouTubeQuickRibbon(
+    BuildContext context,
+    Color primaryColor,
+    ThemeData theme,
+    UnifiedLibraryController controller,
+  ) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 2, 14, 4),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          controller.setTab(CollectionTab.youtube);
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: primaryColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: primaryColor.withValues(alpha: 0.25),
+              width: 0.9,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedPlayList,
+                  size: 13,
+                  color: primaryColor,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'YOUTUBE MUSIC HIFI HUB',
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                        color: primaryColor,
+                      ),
+                    ),
+                    Text(
+                      'Search & stream bit-perfect Opus audio through DSP chain',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Explore',
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        color: primaryColor,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedArrowRight01,
+                      size: 10,
+                      color: primaryColor,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   String _getSubheaderSummary(UnifiedLibraryState state) {
     return switch (state.currentTab) {
       CollectionTab.tracks => '${state.filteredTracks.length} Tracks • Sorted by ${state.sortField.label}',
@@ -1302,6 +855,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       CollectionTab.artists => '${state.artists.length} Artists in Library',
       CollectionTab.genres => '${state.genres.length} Audio Genres',
       CollectionTab.folders => '${state.folders.length} Directory Folders',
+      CollectionTab.youtube => 'YouTube Music HiFi • Global Streaming',
     };
   }
 
@@ -1398,7 +952,15 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       CollectionTab.artists => _buildArtistsView(context, state, bottomPadding),
       CollectionTab.genres => _buildGenresView(context, state, bottomPadding),
       CollectionTab.folders => _buildFoldersView(context, state, bottomPadding),
+      CollectionTab.youtube => _buildYouTubeDiscoveryView(context, bottomPadding),
     };
+  }
+
+  Widget _buildYouTubeDiscoveryView(BuildContext context, double bottomPadding) {
+    return YouTubeDiscoveryScreen(
+      showAppBar: false,
+      bottomPadding: bottomPadding,
+    );
   }
 
   // ─── TRACKS LIST ──────────────────────────────────────────────────────────
@@ -1447,6 +1009,8 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             isMultiSelecting: _isMultiSelecting,
             isSelected: isSelected,
             onTap: () {
+              _searchFocusNode.unfocus();
+              FocusManager.instance.primaryFocus?.unfocus();
               if (_isMultiSelecting) {
                 _toggleTrackSelection(track.id);
               } else {
@@ -1516,7 +1080,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   title: Text(album.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                   subtitle: Text('${album.artist} • ${album.trackCount} tracks', style: const TextStyle(fontSize: 11)),
                   trailing: HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                  onTap: () => _showAlbumDetailSheet(context, album),
+                  onTap: () => _openAlbumDetail(context, album),
                 ),
               ),
             );
@@ -1552,7 +1116,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           itemBuilder: (ctx, index) {
             final album = albums[index];
             return InkWell(
-              onTap: () => _showAlbumDetailSheet(context, album),
+              onTap: () => _openAlbumDetail(context, album),
               borderRadius: BorderRadius.circular(18),
               child: Container(
                 decoration: BoxDecoration(
@@ -1692,7 +1256,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 title: Text(artist.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                 subtitle: Text('${artist.albumsCount} Albums • ${artist.tracksCount} Tracks', style: const TextStyle(fontSize: 11)),
                 trailing: HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                onTap: () => _showArtistDetailSheet(context, artist),
+                onTap: () => _openArtistDetail(context, artist),
               ),
             ),
           );
@@ -1755,7 +1319,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   title: Text(genre.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                   subtitle: Text('${genre.trackCount} Tracks', style: const TextStyle(fontSize: 11)),
                   trailing: HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                  onTap: () => _showGenreDetailSheet(context, genre),
+                  onTap: () => _openGenreDetail(context, genre),
                 ),
               ),
             );
@@ -1835,11 +1399,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                       ),
                     ],
                   ),
-                  onTap: () {
-                    if (folder.tracks.isNotEmpty) {
-                      ref.read(playerControllerProvider.notifier).setQueue(folder.tracks, initialIndex: 0);
-                    }
-                  },
+                  onTap: () => _openFolderDetail(context, folder),
                 ),
               ),
             );
@@ -1979,6 +1539,26 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                     label: const Text(
                       'CONNECT NAVIDROME CLOUD',
                       style: TextStyle(letterSpacing: 0.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const YouTubeDiscoveryScreen()),
+                      );
+                    },
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlayList,
+                      size: 18,
+                      color: primary,
+                    ),
+                    label: const Text(
+                      'EXPLORE YOUTUBE MUSIC HIFI',
+                      style: TextStyle(letterSpacing: 0.5, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

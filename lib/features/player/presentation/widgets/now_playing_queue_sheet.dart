@@ -30,7 +30,8 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _scrollToActiveTrack(animate: false);
+    _scrollToActiveTrack(animate: false, delayMs: 150);
+    _scrollToActiveTrack(animate: false, delayMs: 350);
   }
 
   @override
@@ -39,8 +40,8 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
     super.dispose();
   }
 
-  void _scrollToActiveTrack({bool animate = true}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void _scrollToActiveTrack({bool animate = true, int delayMs = 0}) {
+    void executeScroll() {
       if (!mounted || !_scrollController.hasClients) return;
       final playback = ref.read(playerControllerProvider);
       final index = playback.queueIndex;
@@ -50,21 +51,32 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
       const double estimatedItemHeight = 62.0;
       final viewportHeight = _scrollController.position.viewportDimension;
       final targetOffset = (index * estimatedItemHeight) - (viewportHeight / 2) + (estimatedItemHeight / 2);
+      final maxExtent = _scrollController.position.maxScrollExtent;
       final clampedOffset = targetOffset.clamp(
         0.0,
-        _scrollController.position.maxScrollExtent,
+        maxExtent > 0 ? maxExtent : double.infinity,
       );
 
-      if (animate) {
+      if (animate && _scrollController.hasClients) {
         _scrollController.animateTo(
           clampedOffset,
           duration: const Duration(milliseconds: 350),
           curve: Curves.easeOutCubic,
         );
-      } else {
+      } else if (_scrollController.hasClients) {
         _scrollController.jumpTo(clampedOffset);
       }
-    });
+    }
+
+    if (delayMs > 0) {
+      Future.delayed(Duration(milliseconds: delayMs), () {
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => executeScroll());
+        }
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) => executeScroll());
+    }
   }
 
   @override
@@ -74,7 +86,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
       playerControllerProvider.select((s) => s.queueIndex),
       (prev, next) {
         if (prev != next) {
-          _scrollToActiveTrack(animate: true);
+          _scrollToActiveTrack(animate: true, delayMs: 50);
         }
       },
     );
@@ -272,12 +284,14 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                         itemBuilder: (context, index) {
                           final track = playback.queue[index];
                           final isCurrent = index == playback.queueIndex;
+                          final isBuffering = isCurrent && playback.isLoading;
 
                           return _QueueTrackTile(
                             key: ValueKey('queue_track_${track.id}_$index'),
                             index: index,
                             track: track,
                             isCurrent: isCurrent,
+                            isBuffering: isBuffering,
                             primaryColor: primary,
                             onTap: () {
                               HapticFeedback.lightImpact();
@@ -303,6 +317,7 @@ class _QueueTrackTile extends StatelessWidget {
   final int index;
   final Track track;
   final bool isCurrent;
+  final bool isBuffering;
   final Color primaryColor;
   final VoidCallback onTap;
   final VoidCallback onRemove;
@@ -312,6 +327,7 @@ class _QueueTrackTile extends StatelessWidget {
     required this.index,
     required this.track,
     required this.isCurrent,
+    this.isBuffering = false,
     required this.primaryColor,
     required this.onTap,
     required this.onRemove,
@@ -360,21 +376,30 @@ class _QueueTrackTile extends StatelessWidget {
               ),
             ),
             child: Center(
-              child: isCurrent
-                  ? HugeIcon(
-                      icon: HugeIcons.strokeRoundedAudioWaveform,
-                      size: 16,
-                      color: primaryColor,
-                    )
-                  : Text(
-                      (index + 1).toString().padLeft(2, '0'),
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF64748B),
-                        fontFeatures: [FontFeature.tabularFigures()],
+              child: isBuffering
+                  ? SizedBox(
+                      width: 15,
+                      height: 15,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.8,
+                        valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                       ),
-                    ),
+                    )
+                  : (isCurrent
+                      ? HugeIcon(
+                          icon: HugeIcons.strokeRoundedAudioWaveform,
+                          size: 16,
+                          color: primaryColor,
+                        )
+                      : Text(
+                          (index + 1).toString().padLeft(2, '0'),
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF64748B),
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
+                        )),
             ),
           ),
           title: Row(

@@ -8,6 +8,7 @@ import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
+import '../../../youtube_music/presentation/youtube_discovery_screen.dart';
 
 /// Data model representing an auto-generated audiophile smart mix
 class StudioMixItem {
@@ -69,6 +70,15 @@ class _StudioHeroShowcaseCarouselState
   }
 
   List<StudioMixItem> _generateMixes(List<Track> allTracks) {
+    const ytShowcase = StudioMixItem(
+      id: 'youtube_hifi_showcase',
+      categoryBadge: 'OPUS 160K • DSP MASTER',
+      title: 'YouTube Music HiFi',
+      subtitle: 'Stream global music charts & route Opus audio directly through SoLoud DSP chain',
+      icon: HugeIcons.strokeRoundedPlayList,
+      tracks: [],
+    );
+
     if (allTracks.isEmpty) {
       return [
         const StudioMixItem(
@@ -79,6 +89,7 @@ class _StudioHeroShowcaseCarouselState
           icon: HugeIcons.strokeRoundedMusicNote01,
           tracks: [],
         ),
+        ytShowcase,
       ];
     }
 
@@ -127,6 +138,7 @@ class _StudioHeroShowcaseCarouselState
         icon: HugeIcons.strokeRoundedSparkles,
         tracks: recommendedTracks,
       ),
+      ytShowcase,
       StudioMixItem(
         id: 'heavy_rotation',
         categoryBadge: 'HEAVY ROTATION • TOP RECENTS',
@@ -163,6 +175,13 @@ class _StudioHeroShowcaseCarouselState
   }
 
   void _playMix(StudioMixItem mix, {bool shuffle = false, int initialIndex = 0}) {
+    if (mix.id == 'youtube_hifi_showcase') {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const YouTubeDiscoveryScreen()),
+      );
+      return;
+    }
+
     if (mix.tracks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -195,6 +214,13 @@ class _StudioHeroShowcaseCarouselState
 
   void _openMixDetailSheet(BuildContext context, StudioMixItem mix) {
     HapticFeedback.lightImpact();
+    if (mix.id == 'youtube_hifi_showcase') {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const YouTubeDiscoveryScreen()),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -355,7 +381,35 @@ class _StudioHeroShowcaseCarouselState
                 child: Row(
                   children: [
                     // Left Side: Artwork Thumbnail / Grid Preview
-                    if (firstTrack != null)
+                    if (mix.id == 'youtube_hifi_showcase')
+                      Container(
+                        width: 78,
+                        height: 78,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: primary.withValues(alpha: 0.35),
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedPlayList,
+                            size: 34,
+                            color: primary,
+                          ),
+                        ),
+                      )
+                    else if (firstTrack != null)
                       Container(
                         width: 78,
                         height: 78,
@@ -466,88 +520,145 @@ class _StudioHeroShowcaseCarouselState
                             children: [
                               // Track Count and Duration
                               if (mix.trackCount > 0)
-                                Text(
-                                  '${mix.trackCount} trk • ${mix.formattedDuration}',
-                                  style: TextStyle(
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                Expanded(
+                                  child: Text(
+                                    '${mix.trackCount} trk • ${mix.formattedDuration}',
+                                    style: TextStyle(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                )
+                              else if (mix.id == 'youtube_hifi_showcase')
+                                Expanded(
+                                  child: Text(
+                                    'Global Charts • Live',
+                                    style: TextStyle(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 )
                               else
-                                const SizedBox.shrink(),
+                                const Spacer(),
+                              const SizedBox(width: 8),
 
-                              // Action Buttons (Play & Shuffle)
+                              // Action Buttons (Play & Shuffle or Discover)
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (mix.trackCount > 0) ...[
+                                  if (mix.id == 'youtube_hifi_showcase') ...[
                                     InkWell(
-                                      onTap: () => _playMix(mix, shuffle: true),
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (_) => const YouTubeDiscoveryScreen()),
+                                        );
+                                      },
                                       borderRadius: BorderRadius.circular(8),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: theme.colorScheme.surfaceContainerHighest,
+                                          color: primary,
                                           borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: theme.dividerColor.withValues(alpha: 0.6),
-                                            width: 0.8,
-                                          ),
                                         ),
-                                        child: Row(
+                                        child: const Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             HugeIcon(
-                                              icon: HugeIcons.strokeRoundedShuffle,
+                                              icon: HugeIcons.strokeRoundedPlayList,
                                               size: 12,
-                                              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                                              color: Colors.black,
                                             ),
-                                            const SizedBox(width: 3),
+                                            SizedBox(width: 4),
                                             Text(
-                                              'Shuffle',
+                                              'DISCOVER',
                                               style: TextStyle(
                                                 fontSize: 9.5,
-                                                fontWeight: FontWeight.w700,
-                                                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 0.4,
+                                                color: Colors.black,
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 6),
-                                  ],
-                                  InkWell(
-                                    onTap: () => _playMix(mix),
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: primary,
+                                  ] else ...[
+                                    if (mix.trackCount > 0) ...[
+                                      InkWell(
+                                        onTap: () => _playMix(mix, shuffle: true),
                                         borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          HugeIcon(
-                                            icon: HugeIcons.strokeRoundedPlay,
-                                            size: 12,
-                                            color: Colors.black,
-                                          ),
-                                          SizedBox(width: 3),
-                                          Text(
-                                            'Play',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w900,
-                                              color: Colors.black,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.surfaceContainerHighest,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: theme.dividerColor.withValues(alpha: 0.6),
+                                              width: 0.8,
                                             ),
                                           ),
-                                        ],
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              HugeIcon(
+                                                icon: HugeIcons.strokeRoundedShuffle,
+                                                size: 12,
+                                                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                'Shuffle',
+                                                style: TextStyle(
+                                                  fontSize: 9.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                    ],
+                                    InkWell(
+                                      onTap: () => _playMix(mix),
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: primary,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            HugeIcon(
+                                              icon: HugeIcons.strokeRoundedPlay,
+                                              size: 12,
+                                              color: Colors.black,
+                                            ),
+                                            SizedBox(width: 3),
+                                            Text(
+                                              'Play',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w900,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ],
                               ),
                             ],

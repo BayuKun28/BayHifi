@@ -8,6 +8,7 @@ import '../../dsp_rack/domain/dsp_models.dart';
 import '../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import '../../dsp_rack/presentation/widgets/vu_level_meter.dart';
 import '../domain/playback_state.dart';
+import '../domain/track.dart';
 import 'controllers/player_controller.dart';
 import 'widgets/audio_file_inspector_sheet.dart';
 import 'widgets/spectrum_visualizer.dart';
@@ -124,7 +125,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
   }
 
   // ─── STUDIO TOP BAR ───────────────────────────────────────────────────────
-  Widget _buildStudioTopBar(BuildContext context, Color primary, dynamic track, bool isLandscape) {
+  Widget _buildStudioTopBar(BuildContext context, Color primary, Track? track, bool isLandscape) {
     final theme = Theme.of(context);
 
     return Container(
@@ -543,11 +544,21 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           HapticFeedback.mediumImpact();
                           playerNotifier.togglePlayPause();
                         },
-                        icon: HugeIcon(
-                          icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
-                          color: Colors.black,
-                          size: 34,
-                        ),
+                        icon: playback.isLoading
+                            ? const SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3.2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                ),
+                              )
+                            : HugeIcon(
+                                icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                                color: Colors.black,
+                                size: 34,
+                              ),
+                        tooltip: playback.isLoading ? 'Buffering...' : (playback.isPlaying ? 'Pause' : 'Play'),
                       ),
                     ),
 
@@ -810,11 +821,21 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                     HapticFeedback.mediumImpact();
                     playerNotifier.togglePlayPause();
                   },
-                  icon: HugeIcon(
-                    icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
-                    color: Colors.black,
-                    size: 32,
-                  ),
+                  icon: playback.isLoading
+                      ? const SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3.0,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                          ),
+                        )
+                      : HugeIcon(
+                          icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                          color: Colors.black,
+                          size: 32,
+                        ),
+                  tooltip: playback.isLoading ? 'Buffering...' : (playback.isPlaying ? 'Pause' : 'Play'),
                 ),
               ),
               Container(

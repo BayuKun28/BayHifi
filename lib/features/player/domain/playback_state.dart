@@ -67,6 +67,8 @@ class PlaybackState {
 
   bool get isPlaying => status == PlaybackStatus.playing;
   bool get isPaused => status == PlaybackStatus.paused;
+  bool get isLoading => status == PlaybackStatus.loading;
+  bool get isBuffering => status == PlaybackStatus.loading;
   bool get hasQueue => queue.isNotEmpty;
   bool get hasNext => queue.isNotEmpty && (queueIndex < queue.length - 1 || repeatMode == PlaybackRepeatMode.all);
   bool get hasPrevious => queue.isNotEmpty && (queueIndex > 0 || position.inSeconds > 3);

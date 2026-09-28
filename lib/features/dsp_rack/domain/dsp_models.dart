@@ -15,6 +15,24 @@ class DspPreset {
   final String description;
   final DspRackState state;
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'state': state.toMap(),
+    };
+  }
+
+  factory DspPreset.fromMap(Map<String, dynamic> map) {
+    return DspPreset(
+      id: map['id'] as String? ?? 'custom_${DateTime.now().millisecondsSinceEpoch}',
+      name: map['name'] as String? ?? 'Custom Preset',
+      description: map['description'] as String? ?? '',
+      state: DspRackState.fromMap(Map<String, dynamic>.from(map['state'] as Map? ?? {})),
+    );
+  }
+
   /// Kumpulan preset studio terkurasi
   static List<DspPreset> get studioPresets => [
         DspPreset(
@@ -360,6 +378,104 @@ class DspRackState {
       limiterKnee: limiterKnee ?? this.limiterKnee,
       limiterWet: limiterWet ?? this.limiterWet,
       activePresetId: clearPreset ? null : (activePresetId ?? this.activePresetId),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'isBypassed': isBypassed,
+      'masterWet': masterWet,
+      'preampDb': preampDb,
+      'bassBoostEnabled': bassBoostEnabled,
+      'bassBoostAmount': bassBoostAmount,
+      'bassBoostWet': bassBoostWet,
+      'tubeExciterEnabled': tubeExciterEnabled,
+      'tubeDrive': tubeDrive,
+      'tubeWarmth': tubeWarmth,
+      'tubeMix': tubeMix,
+      'compressorEnabled': compressorEnabled,
+      'compThreshold': compThreshold,
+      'compRatio': compRatio,
+      'compAttack': compAttack,
+      'compRelease': compRelease,
+      'compMakeup': compMakeup,
+      'compKnee': compKnee,
+      'compWet': compWet,
+      'stereoWidthEnabled': stereoWidthEnabled,
+      'stereoWidth': stereoWidth,
+      'stereoMidGain': stereoMidGain,
+      'stereoWet': stereoWet,
+      'crossfeedEnabled': crossfeedEnabled,
+      'crossfeedCutoff': crossfeedCutoff,
+      'crossfeedFeed': crossfeedFeed,
+      'crossfeedDelayMs': crossfeedDelayMs,
+      'crossfeedWet': crossfeedWet,
+      'reverbEnabled': reverbEnabled,
+      'reverbRoomSize': reverbRoomSize,
+      'reverbDamp': reverbDamp,
+      'reverbWidth': reverbWidth,
+      'reverbFreeze': reverbFreeze,
+      'reverbWet': reverbWet,
+      'pitchShiftEnabled': pitchShiftEnabled,
+      'pitchSemitones': pitchSemitones,
+      'pitchWet': pitchWet,
+      'limiterEnabled': limiterEnabled,
+      'limiterThreshold': limiterThreshold,
+      'limiterOutputCeiling': limiterOutputCeiling,
+      'limiterAttack': limiterAttack,
+      'limiterRelease': limiterRelease,
+      'limiterKnee': limiterKnee,
+      'limiterWet': limiterWet,
+      'activePresetId': activePresetId,
+    };
+  }
+
+  factory DspRackState.fromMap(Map<String, dynamic> map) {
+    return DspRackState(
+      isBypassed: map['isBypassed'] as bool? ?? false,
+      masterWet: (map['masterWet'] as num?)?.toDouble() ?? 1.0,
+      preampDb: (map['preampDb'] as num?)?.toDouble() ?? 0.0,
+      bassBoostEnabled: map['bassBoostEnabled'] as bool? ?? false,
+      bassBoostAmount: (map['bassBoostAmount'] as num?)?.toDouble() ?? 2.0,
+      bassBoostWet: (map['bassBoostWet'] as num?)?.toDouble() ?? 1.0,
+      tubeExciterEnabled: map['tubeExciterEnabled'] as bool? ?? false,
+      tubeDrive: (map['tubeDrive'] as num?)?.toDouble() ?? 1.0,
+      tubeWarmth: (map['tubeWarmth'] as num?)?.toDouble() ?? 0.4,
+      tubeMix: (map['tubeMix'] as num?)?.toDouble() ?? 0.35,
+      compressorEnabled: map['compressorEnabled'] as bool? ?? false,
+      compThreshold: (map['compThreshold'] as num?)?.toDouble() ?? -6.0,
+      compRatio: (map['compRatio'] as num?)?.toDouble() ?? 3.0,
+      compAttack: (map['compAttack'] as num?)?.toDouble() ?? 10.0,
+      compRelease: (map['compRelease'] as num?)?.toDouble() ?? 100.0,
+      compMakeup: (map['compMakeup'] as num?)?.toDouble() ?? 0.0,
+      compKnee: (map['compKnee'] as num?)?.toDouble() ?? 2.0,
+      compWet: (map['compWet'] as num?)?.toDouble() ?? 1.0,
+      stereoWidthEnabled: map['stereoWidthEnabled'] as bool? ?? false,
+      stereoWidth: (map['stereoWidth'] as num?)?.toDouble() ?? 1.35,
+      stereoMidGain: (map['stereoMidGain'] as num?)?.toDouble() ?? 1.0,
+      stereoWet: (map['stereoWet'] as num?)?.toDouble() ?? 1.0,
+      crossfeedEnabled: map['crossfeedEnabled'] as bool? ?? false,
+      crossfeedCutoff: (map['crossfeedCutoff'] as num?)?.toDouble() ?? 700.0,
+      crossfeedFeed: (map['crossfeedFeed'] as num?)?.toDouble() ?? -6.0,
+      crossfeedDelayMs: (map['crossfeedDelayMs'] as num?)?.toDouble() ?? 0.35,
+      crossfeedWet: (map['crossfeedWet'] as num?)?.toDouble() ?? 1.0,
+      reverbEnabled: map['reverbEnabled'] as bool? ?? false,
+      reverbRoomSize: (map['reverbRoomSize'] as num?)?.toDouble() ?? 0.5,
+      reverbDamp: (map['reverbDamp'] as num?)?.toDouble() ?? 0.5,
+      reverbWidth: (map['reverbWidth'] as num?)?.toDouble() ?? 1.0,
+      reverbFreeze: map['reverbFreeze'] as bool? ?? false,
+      reverbWet: (map['reverbWet'] as num?)?.toDouble() ?? 0.25,
+      pitchShiftEnabled: map['pitchShiftEnabled'] as bool? ?? false,
+      pitchSemitones: (map['pitchSemitones'] as num?)?.toDouble() ?? 0.0,
+      pitchWet: (map['pitchWet'] as num?)?.toDouble() ?? 1.0,
+      limiterEnabled: map['limiterEnabled'] as bool? ?? true,
+      limiterThreshold: (map['limiterThreshold'] as num?)?.toDouble() ?? -3.0,
+      limiterOutputCeiling: (map['limiterOutputCeiling'] as num?)?.toDouble() ?? -1.0,
+      limiterAttack: (map['limiterAttack'] as num?)?.toDouble() ?? 1.0,
+      limiterRelease: (map['limiterRelease'] as num?)?.toDouble() ?? 100.0,
+      limiterKnee: (map['limiterKnee'] as num?)?.toDouble() ?? 2.0,
+      limiterWet: (map['limiterWet'] as num?)?.toDouble() ?? 1.0,
+      activePresetId: map['activePresetId'] as String?,
     );
   }
 }

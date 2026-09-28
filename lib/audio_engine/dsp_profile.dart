@@ -31,7 +31,7 @@ class DspProfile {
     this.compRatio = 4.0,
     this.compKnee = 6.0,
     this.compMakeup = 0.0,
-    this.limiterEnabled = true,
+    this.limiterEnabled = false,
     this.limiterThreshold = -1.0,
     this.limiterAttack = 0.005,
     this.limiterRelease = 0.1,
@@ -135,7 +135,7 @@ class DspProfile {
         crossfeedEnabled: false,
         reverbEnabled: false,
         pitchShiftEnabled: false,
-        limiterEnabled: true,
+        limiterEnabled: false,
         limiterOutputCeiling: -1.3,
         preampGain: 0.0,
       );

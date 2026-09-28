@@ -24,12 +24,11 @@ void main() {
     // 1. Verify Minimalist Top Bar with NOW PLAYING
     expect(find.text('NOW PLAYING'), findsOneWidget);
 
-    // 2. Verify AutoEQ Profile Badge is present above DSP Rack
-    expect(find.textContaining('DRIVER:'), findsOneWidget);
-    expect(find.textContaining('TARGET:'), findsOneWidget);
+    // 2. Verify AutoEQ Profile Slim Chip is present
+    expect(find.textContaining('AutoEQ'), findsOneWidget);
 
-    // 3. Verify Mastering DSP Rack shortcut is present
-    expect(find.text('MASTERING DSP RACK'), findsOneWidget);
+    // 3. Verify Mastering DSP Rack shortcut Slim Chip is present
+    expect(find.textContaining('DSP'), findsOneWidget);
 
     // 4. Verify Pre-Amp and Volume panels are NOT present on player screen
     expect(find.text('PRE-AMP'), findsNothing);
