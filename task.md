@@ -5,10 +5,11 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 ---
 
 ## Status Dashboard
-- **Total Fase**: 28 Fase + Phase 29 Bug Fix (In Progress)
+- **Total Fase**: 28 Fase + Phase 29 Bug Fix + Phase 30 UX Fixes (Planned)
 - **Arsitektur UI**: *Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)*
-- **Status Proyek**: *Phase 28 Completed + Phase 29 Bug Fix In Progress — 246/246 Tests Passing (100%), 0 Analyzer Warnings*
-- **Known Bug**: YouTube streaming still exhibits intermittent loading spinner → playback failure → button reverts to paused state (race condition between `getAudioStreamUrl` resolution and `SoLoud.loadUrl` engine state)
+- **Status Proyek**: *Phase 28 Completed + Phase 29/30 In Progress — 246/246 Tests Passing (100%), 0 Analyzer Warnings*
+- **Known Bug (29.3)**: YouTube streaming spinner → playback failure → button reverts to paused state
+- **Known Bug (30.3)**: Lyrics active line auto-scroll tidak tepat di tengah viewport — active line muncul di tepi bawah/atas, bukan center
 
 ---
 
@@ -695,3 +696,56 @@ Perbaikan bug streaming YouTube di mana loading spinner muncul beberapa saat lal
     - Evaluasi pull-streaming approach: `setBufferStream` / `setPullBufferStream` dengan chunk download YoutubeExplode yang distream ke SoLoud buffer secara real-time.
     - Alternatif: Download minimal 10% dari file ke temp cache dahulu lalu `playFile()` untuk instant start dengan streaming remainder di background.
 
+---
+
+## Fase 30: Navidrome UX Fixes, Session Persistence & Lyrics Active Line Centering (Planned)
+Perbaikan UX untuk koneksi Navidrome dan presisi auto-scroll lyric sinkronisasi.
+
+- [ ] **30.1 Navidrome Tab — Empty State Connect UI**
+  - [ ] **Symptom**: Tab Navidrome di `UnifiedLibraryScreen` saat belum terkoneksi menampilkan area kosong tanpa instruksi.
+  - [ ] **Fix**: Tambahkan empty state yang jelas di tab Navidrome ketika `navidromeConnectionStatus != connected`:
+    - Studio-grade empty state card dengan icon `HugeIcons.strokeRoundedCloudOff` (48px)
+    - Label `'No Navidrome Server Connected'` + subtitle `'Stream lossless audio from your personal server'`
+    - Tombol primary `[ Connect to Navidrome ]` yang membuka `NavidromeConnectDialog` langsung
+    - Quick info badge: `SUBSONIC API • LOSSLESS FLAC • OPUS STREAMING`
+
+- [ ] **30.2 Navidrome Connect Dialog — Proportional Icon Fix & UX Polish**
+  - [ ] **Symptom**: Icon pada `prefixIcon` di `TextFormField` (Server URL, Username, Password) terlalu besar / tidak proporsional karena `HugeIcon` di dalam `prefixIcon` tidak dipadding/wrapped dengan benar — Flutter merender `prefixIcon` menggunakan default intrinsic size yang terlalu besar.
+  - [ ] **Fix**: Ganti `prefixIcon: HugeIcon(...)` dengan `prefixIcon: Padding(padding: EdgeInsets.all(12), child: HugeIcon(size: 18, ...))` agar icon tertanam proporsional di dalam field dengan clearance cukup.
+  - [ ] **UX Improvement**: Perkecil dialog width dari `440` ke `380`, turunkan padding dari `24` ke `20`, gunakan `fontSize: 13` untuk label field agar lebih compact dan studio-grade.
+  - [ ] **Test**: Tambahkan widget test untuk `NavidromeConnectDialog` memverifikasi render textfield dan icon proportionality.
+
+- [ ] **30.3 Navidrome Connection Session Persistence (Auto-Reconnect on App Restart)**
+  - [ ] **Symptom**: Setelah app di-close dan dibuka kembali, koneksi Navidrome tidak tersimpan — user harus connect ulang setiap kali buka app.
+  - [ ] **Root Cause Analysis**: Perlu dicek apakah `connectNavidrome()` di `LibraryController` sudah menyimpan `SubsonicServerConfig` ke `LocalPersistenceService`, dan apakah ada restore di `initState` / provider initialization.
+  - [ ] **Fix**:
+    1. Verifikasi `LibraryController` menyimpan config ke `LocalPersistenceService.saveSetting('navidrome_config', config.toMap())` setelah connect sukses.
+    2. Di `LibraryController` konstruktor / `_init()`, load saved config dan auto-call `connectNavidrome(savedConfig)` jika config tersedia.
+    3. Tambahkan key `'navidrome_config'` ke `LocalPersistenceService` backup/restore map.
+  - [ ] **Test**: Unit test memverifikasi `connectNavidrome()` persist config dan `LibraryController` auto-restores session on init.
+
+- [ ] **30.4 Lyrics Active Line Auto-Scroll Centering Fix**
+  - [ ] **Symptom**: Saat lirik berjalan dan berganti ke baris aktif berikutnya, `_scrollToActiveLine()` tidak menempatkan baris aktif tepat di **tengah viewport** — baris aktif muncul di tepi atas/bawah viewport atau bahkan terpotong.
+  - [ ] **Root Cause**: `_scrollToActiveLine` di [`synchronized_lyrics_view.dart`](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/lib/features/player/presentation/widgets/synchronized_lyrics_view.dart#L100-L109) menghitung offset dengan:
+    ```dart
+    final targetOffset = (index * itemHeight) - 120.0;
+    ```
+    Hardcoded `-120.0` tidak mempertimbangkan **actual viewport height** dan **actual item height per mode** yang bervariasi. Akibatnya active line tidak terletak di center viewport.
+  - [ ] **Fix**:
+    ```dart
+    void _scrollToActiveLine(int index) {
+      if (!_scrollController.hasClients) return;
+      final itemHeight = _displayMode == LyricsDisplayMode.dualLine ? 74.0 : 56.0;
+      final viewportHeight = _scrollController.position.viewportDimension;
+      // Center active line: scroll so the active item is in the middle of viewport
+      final targetOffset = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
+      final maxExtent = _scrollController.position.maxScrollExtent;
+      _scrollController.animateTo(
+        targetOffset.clamp(0.0, maxExtent > 0 ? maxExtent : double.infinity),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutCubic,
+      );
+    }
+    ```
+  - [ ] Pastikan `_scrollController.hasClients` dan `viewportDimension > 0` sebelum menghitung.
+  - [ ] **Test**: Widget test memverifikasi bahwa setelah `didUpdateWidget` dengan `activeIndex = 10` dari 20 lines, scroll offset menempatkan item 10 mendekati center viewport.
