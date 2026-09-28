@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../app/theme/app_typography.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
+import '../../dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../library/presentation/widgets/studio_track_action_sheet.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
@@ -38,12 +40,14 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     return '$m:$s';
   }
 
-  final List<String> _quickFilters = const [
-    'All',
-    'Top 100 Charts',
-    'Audiophile Masters',
-    'Acoustic Live',
-    'Hi-Res Mixes',
+  static final List<({String label, dynamic icon})> _quickFilters = [
+    (label: 'All', icon: HugeIcons.strokeRoundedSparkles),
+    (label: 'Top 100 Charts', icon: HugeIcons.strokeRoundedChartHistogram),
+    (label: 'Audiophile Masters', icon: HugeIcons.strokeRoundedDisc),
+    (label: 'Acoustic Live', icon: HugeIcons.strokeRoundedMic01),
+    (label: 'Hi-Res Mixes', icon: HugeIcons.strokeRoundedSlidersVertical),
+    (label: 'Lofi & Chill', icon: HugeIcons.strokeRoundedCoffee01),
+    (label: 'Bass & EDM', icon: HugeIcons.strokeRoundedVolumeHigh),
   ];
 
   @override
@@ -76,6 +80,13 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     );
   }
 
+  void _openDspRack() {
+    HapticFeedback.lightImpact();
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const DspRackScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -105,7 +116,9 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                      color: _searchFocusNode.hasFocus
+                          ? primary.withValues(alpha: 0.6)
+                          : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
@@ -115,7 +128,9 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       HugeIcon(
                         icon: HugeIcons.strokeRoundedSearch01,
                         size: 18,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: _searchFocusNode.hasFocus
+                            ? primary
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -186,7 +201,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           ),
         ),
 
-        // ─── 2. HORIZONTAL QUICK FILTER CHIPS ──────────────────────────────
+        // ─── 2. HORIZONTAL QUICK FILTER PILLS ──────────────────────────────
         SizedBox(
           height: 38,
           child: ListView.separated(
@@ -196,10 +211,15 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (ctx, idx) {
               final filter = _quickFilters[idx];
-              final isSelected = _selectedFilter == filter;
+              final isSelected = _selectedFilter == filter.label;
               return ChoiceChip(
+                avatar: HugeIcon(
+                  icon: filter.icon,
+                  size: 14,
+                  color: isSelected ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
                 label: Text(
-                  filter,
+                  filter.label,
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -219,7 +239,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                onSelected: (_) => _onFilterSelected(filter),
+                onSelected: (_) => _onFilterSelected(filter.label),
               );
             },
           ),
@@ -296,7 +316,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontFeatures: AppTypography.audioFigures,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -307,6 +327,15 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           ],
         ),
         actions: [
+          IconButton(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedSlidersHorizontal,
+              size: 20,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+            ),
+            tooltip: 'Open DSP Mastering Rack',
+            onPressed: _openDspRack,
+          ),
           IconButton(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedPlayList,
@@ -399,17 +428,23 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${searchResults.length} RESULTS FOUND',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                Flexible(
+                  child: Text(
+                    '${searchResults.length} RESULTS FOUND',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      fontFeatures: AppTypography.audioFigures,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     InkWell(
                       onTap: () {
@@ -445,6 +480,48 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.bold,
                                 color: primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        final shuffled = List<Track>.from(searchResults)..shuffle();
+                        ref.read(playerControllerProvider.notifier).setQueue(
+                              shuffled,
+                              initialIndex: 0,
+                            );
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            HugeIcon(
+                              icon: HugeIcons.strokeRoundedShuffle,
+                              size: 12,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Shuffle',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
                               ),
                             ),
                           ],
@@ -492,95 +569,183 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
         // ─── BENTO HERO OVERVIEW ─────────────────────────────────────────────
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
-              width: 1,
+        InkWell(
+          onTap: _openDspRack,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: primary.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedAudioWave01,
+                          size: 20,
+                          color: primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Flexible(
+                                child: Text(
+                                  'C++ SOLOUD AUDIO PIPELINE',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.6,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  'ACTIVE',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF00E676),
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'All YouTube streams route through mastering DSP chain',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _buildBentoFeatureTag(
+                      context,
+                      HugeIcons.strokeRoundedSlidersHorizontal,
+                      'Pro-Q 10-Band EQ',
+                    ),
+                    _buildBentoFeatureTag(
+                      context,
+                      HugeIcons.strokeRoundedHeadphones,
+                      'AutoEQ IEM Calibration',
+                    ),
+                    _buildBentoFeatureTag(
+                      context,
+                      HugeIcons.strokeRoundedFlame,
+                      'Analog Tube Warmth',
+                    ),
+                    _buildBentoFeatureTag(
+                      context,
+                      HugeIcons.strokeRoundedShield01,
+                      'Inter-Sample Peak Limiter',
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: primary.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Center(
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedAudioWave01,
-                        size: 20,
-                        color: primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'C++ SOLOUD AUDIO PIPELINE',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'All YouTube streams route through the mastering chain',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+        ),
+
+        const SizedBox(height: 16),
+
+        // ─── 2X2 CURATED DISCOVERY BENTO GRID ──────────────────────────────
+        Row(
+          children: [
+            Expanded(
+              child: _buildDiscoveryBentoTile(
+                theme: theme,
+                primary: primary,
+                title: 'Global Top 50',
+                subtitle: 'Billboard & Global Hits',
+                icon: HugeIcons.strokeRoundedChartHistogram,
+                badge: 'TRENDING',
+                onTap: () => _onFilterSelected('Top 100 Charts'),
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  _buildBentoFeatureTag(
-                    context,
-                    HugeIcons.strokeRoundedSlidersHorizontal,
-                    'Pro-Q 10-Band EQ',
-                  ),
-                  _buildBentoFeatureTag(
-                    context,
-                    HugeIcons.strokeRoundedHeadphones,
-                    'AutoEQ IEM Calibration',
-                  ),
-                  _buildBentoFeatureTag(
-                    context,
-                    HugeIcons.strokeRoundedFlame,
-                    'Analog Tube Warmth',
-                  ),
-                  _buildBentoFeatureTag(
-                    context,
-                    HugeIcons.strokeRoundedShield01,
-                    'Inter-Sample Peak Limiter',
-                  ),
-                ],
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildDiscoveryBentoTile(
+                theme: theme,
+                primary: primary,
+                title: 'Audiophile Mix',
+                subtitle: 'Studio Master Quality',
+                icon: HugeIcons.strokeRoundedDisc,
+                badge: 'LOSSLESS',
+                onTap: () => _onFilterSelected('Audiophile Masters'),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildDiscoveryBentoTile(
+                theme: theme,
+                primary: primary,
+                title: 'Acoustic Sessions',
+                subtitle: 'Unplugged Sessions',
+                icon: HugeIcons.strokeRoundedMic01,
+                badge: 'STUDIO',
+                onTap: () => _onFilterSelected('Acoustic Live'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildDiscoveryBentoTile(
+                theme: theme,
+                primary: primary,
+                title: 'Import Playlist',
+                subtitle: 'Paste YouTube URL',
+                icon: HugeIcons.strokeRoundedPlayList,
+                badge: 'IMPORT',
+                onTap: _openImportPlaylistDialog,
+              ),
+            ),
+          ],
         ),
 
         const SizedBox(height: 20),
@@ -613,17 +778,63 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 ],
               ),
             ),
-            IconButton(
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedRefresh,
-                size: 16,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              tooltip: 'Refresh Charts',
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                ytController.fetchTrending(force: true);
-              },
+            Row(
+              children: [
+                if (trendingTracks.isNotEmpty)
+                  InkWell(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      ref.read(playerControllerProvider.notifier).setQueue(
+                            trendingTracks,
+                            initialIndex: 0,
+                          );
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: primary.withValues(alpha: 0.3),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedPlay,
+                            size: 12,
+                            color: primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Play All',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 6),
+                IconButton(
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedRefresh,
+                    size: 16,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                  tooltip: 'Refresh Charts',
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    ytController.fetchTrending(force: true);
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -702,6 +913,93 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     );
   }
 
+  Widget _buildDiscoveryBentoTile({
+    required ThemeData theme,
+    required Color primary,
+    required String title,
+    required String subtitle,
+    required dynamic icon,
+    required String badge,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: HugeIcon(
+                      icon: icon,
+                      size: 16,
+                      color: primary,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    badge,
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 10,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBentoFeatureTag(BuildContext context, dynamic icon, String label) {
     final theme = Theme.of(context);
     return Container(
@@ -768,143 +1066,143 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         ),
         clipBehavior: Clip.antiAlias,
         child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        leading: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-                  width: 0.8,
-                ),
-              ),
-              child: StudioArtworkWidget(
-                track: track,
-                borderRadius: BorderRadius.circular(11),
-                fallbackIconSize: 20,
-              ),
-            ),
-            if (isTileActive)
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          leading: Stack(
+            alignment: Alignment.center,
+            children: [
               Container(
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.45),
                   borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: isBuffering
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(primary),
-                          ),
-                        )
-                      : HugeIcon(
-                          icon: HugeIcons.strokeRoundedAudioWave01,
-                          size: 20,
-                          color: primary,
-                        ),
-                ),
-              ),
-          ],
-        ),
-        title: Text(
-          track.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: isTileActive ? FontWeight.w900 : FontWeight.w700,
-            color: isTileActive ? primary : theme.colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Row(
-          children: [
-            // Format tag
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                'OPUS',
-                style: TextStyle(
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w900,
-                  color: primary,
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                track.artist,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-            ),
-            Text(
-              _formatDuration(track.duration),
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Start Radio Button
-            IconButton(
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedRadio,
-                size: 18,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-              ),
-              tooltip: 'Start Smart Track Radio',
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                onStartRadio();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Starting smart radio based on "${track.title}"...'),
-                    duration: const Duration(seconds: 2),
+                  border: Border.all(
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    width: 0.8,
                   ),
-                );
-              },
-            ),
-            // Unified Track Action Sheet
-            IconButton(
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedMoreVertical,
-                size: 18,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                ),
+                child: StudioArtworkWidget(
+                  track: track,
+                  borderRadius: BorderRadius.circular(11),
+                  fallbackIconSize: 20,
+                ),
               ),
-              tooltip: 'Track Options',
-              onPressed: () {
-                StudioTrackActionSheet.show(context, track);
-              },
+              if (isTileActive)
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: isBuffering
+                        ? SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              valueColor: AlwaysStoppedAnimation<Color>(primary),
+                            ),
+                          )
+                        : HugeIcon(
+                            icon: HugeIcons.strokeRoundedAudioWave01,
+                            size: 20,
+                            color: primary,
+                          ),
+                  ),
+                ),
+            ],
+          ),
+          title: Text(
+            track.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isTileActive ? FontWeight.w900 : FontWeight.w700,
+              color: isTileActive ? primary : theme.colorScheme.onSurface,
             ),
-          ],
+          ),
+          subtitle: Row(
+            children: [
+              // Format tag
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'OPUS',
+                  style: TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w900,
+                    color: primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  track.artist,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+              Text(
+                _formatDuration(track.duration),
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontFeatures: AppTypography.audioFigures,
+                ),
+              ),
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Start Radio Button
+              IconButton(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedRadio,
+                  size: 18,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                ),
+                tooltip: 'Start Smart Track Radio',
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onStartRadio();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Starting smart radio based on "${track.title}"...'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+              // Unified Track Action Sheet
+              IconButton(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedMoreVertical,
+                  size: 18,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                ),
+                tooltip: 'Track Options',
+                onPressed: () {
+                  StudioTrackActionSheet.show(context, track);
+                },
+              ),
+            ],
+          ),
+          onTap: onTap,
         ),
-        onTap: onTap,
       ),
-    ),
-  );
-}
+    );
+  }
 }

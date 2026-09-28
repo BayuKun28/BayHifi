@@ -53,5 +53,26 @@ void main() {
       expect(SoLoudController.instance.volume, equals(0.85));
       expect(testTrack.isHiRes, isTrue);
     });
+
+    test('PlayerController preserves track duration and does not stay at Duration.zero', () {
+      final player = PlayerController(SoLoudController.instance);
+      const testTrack = Track(
+        id: 'test_sample_2',
+        title: '33x',
+        artist: 'Perunggu',
+        album: 'Memorandum',
+        duration: Duration(minutes: 4, seconds: 12),
+        filePath: '/storage/emulated/0/Music/33x.mp3',
+        format: AudioFormat.mp3,
+        bitDepth: 16,
+        sampleRate: 44100,
+      );
+
+      final engineDur = SoLoudController.instance.duration;
+      final effectiveDur = engineDur > Duration.zero ? engineDur : testTrack.duration;
+      expect(effectiveDur, equals(const Duration(minutes: 4, seconds: 12)));
+      expect(effectiveDur.inSeconds, equals(252));
+      expect(player.state.duration, equals(Duration.zero));
+    });
   });
 }

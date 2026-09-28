@@ -111,16 +111,20 @@ class PlayerController extends StateNotifier<PlaybackState> {
   void _initListener() {
     _posSub = _audioEngine.positionStream.listen((pos) {
       if (state.isPlaying) {
+        final engineDur = _audioEngine.duration;
+        final currentDur = engineDur > Duration.zero
+            ? engineDur
+            : (state.duration > Duration.zero ? state.duration : (state.currentTrack?.duration ?? Duration.zero));
+
         state = state.copyWith(
           position: pos,
-          duration: _audioEngine.duration,
+          duration: currentDur,
         );
         _syncAudioHandler();
 
         // Check if track has finished playing
-        final dur = _audioEngine.duration;
-        if (dur > Duration.zero &&
-            pos >= dur - const Duration(milliseconds: 350) &&
+        if (currentDur > Duration.zero &&
+            pos >= currentDur - const Duration(milliseconds: 350) &&
             !_isAdvancing) {
           _onTrackEnded();
         }
@@ -432,24 +436,51 @@ class PlayerController extends StateNotifier<PlaybackState> {
         if (cachedPath != null) {
           debugPrint('[PlayerController] Playing cached track from $cachedPath');
           await _audioEngine.playFile(cachedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
-        } else {
+        } else if (track.id.startsWith('yt_')) {
+          // YouTube track: resolve CDN stream URL immediately and stream (zero-wait)
+          // Full download happens silently in background for next-play cache hit.
           String? streamUrl = track.streamUrl ?? track.remoteUrl;
-          if ((streamUrl == null || streamUrl.isEmpty) && track.id.startsWith('yt_')) {
+          if (streamUrl == null || streamUrl.isEmpty) {
             streamUrl = await YouTubeMusicService.instance.getAudioStreamUrl(track.id);
           }
 
           if (streamUrl != null && streamUrl.isNotEmpty) {
+            // Begin streaming immediately — no wait for full download
             await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
-            AudioCacheService.instance.cacheTrack(track.copyWith(remoteUrl: streamUrl));
+
+            // Background cache: download for instant future plays (fire-and-forget)
+            AudioCacheService.instance.cacheTrack(track).then((path) {
+              if (path != null) {
+                debugPrint('[PlayerController] YT track cached for future use: ${track.title}');
+              }
+            }).catchError((e) {
+              debugPrint('[PlayerController] YT background cache error: $e');
+            });
           } else {
-            throw ArgumentError('Track does not have a valid filePath or streamUrl');
+            throw ArgumentError('Unable to resolve YouTube stream URL for: ${track.id}');
+          }
+        } else {
+          // Subsonic / generic remote: download-to-cache then play
+          final downloadedPath = await AudioCacheService.instance.cacheTrack(track);
+          if (downloadedPath != null) {
+            await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+          } else {
+            final streamUrl = track.streamUrl ?? track.remoteUrl;
+            if (streamUrl != null && streamUrl.isNotEmpty) {
+              await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
+            } else {
+              throw ArgumentError('Unable to stream or cache track: ${track.id}');
+            }
           }
         }
       }
 
+      final engineDur = _audioEngine.duration;
+      final effectiveDuration = engineDur > Duration.zero ? engineDur : track.duration;
+
       state = state.copyWith(
         status: PlaybackStatus.playing,
-        duration: _audioEngine.duration,
+        duration: effectiveDuration,
         position: Duration.zero,
         effectiveReplayGainDb: rgDb,
       );

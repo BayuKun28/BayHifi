@@ -5,9 +5,10 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 ---
 
 ## Status Dashboard
-- **Total Fase**: 28 Fase (Phase 1-28 Completed — 100% Done)
+- **Total Fase**: 28 Fase + Phase 29 Bug Fix (In Progress)
 - **Arsitektur UI**: *Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)*
-- **Status Proyek**: *Phase 28 (YouTube Music Streaming, Opus 160kbps Extraction, C++ SoLoud DSP Chain Mastering, YouTube Discovery Bento Hub, Playlist Importer, Smart Radio & Offline Cache) Completed — 236/236 Tests Passing (100%), 0 Analyzer Warnings*
+- **Status Proyek**: *Phase 28 Completed + Phase 29 Bug Fix In Progress — 246/246 Tests Passing (100%), 0 Analyzer Warnings*
+- **Known Bug**: YouTube streaming still exhibits intermittent loading spinner → playback failure → button reverts to paused state (race condition between `getAudioStreamUrl` resolution and `SoLoud.loadUrl` engine state)
 
 ---
 
@@ -655,9 +656,42 @@ Integrasi pencarian dan streaming jutaan lagu YouTube & YouTube Music langsung m
   - [x] Eliminasi volume fade inaudible: Penghapusan `fadeIn: 0.001` mute pada awal putar lagu baru, menjamin suara langsung terdengar penuh pada `targetVolume` (1.0).
   - [x] Bit-Perfect Flat Studio Profile: Penonaktifan limiter default pada `DspProfile.flatReference` (`limiterEnabled: false`) untuk transmisi audio murni bit-perfect zero-distortion ke DAC.
   - [x] Proteksi backend DSP: Penambahan guard `SoLoud.instance.isInitialized` di seluruh method aktivasi/deaktivasi DSP filter di `VirtualDspService`.
-  - [x] Test Suite & Validation: Pembuatan test suite di `test/audio_playback_sound_output_test.dart` dan verifikasi kelulusan 100% (245/245 tests passing) dengan 0 errors & 0 warnings pada `flutter analyze`.
+- [x] **28.10 Offline Audio Playback & Android Scoped Storage Fallback Resolver**
+  - [x] Diagnostik mendalam issue lagu offline macet di 00:00 / -00:00 dan tanpa suara:
+    1. C++ `fopen` pada `loadFile(mode: LoadMode.disk)` gagal membaca path external storage di Android (Scoped Storage / SELinux permissions pada Redmi Note 7), menyebabkan `WavStream` kosong (`length == 0`).
+    2. Konfigurasi `lowLatency: true` pada AAudio hardware sink Redmi Note 7 memutus output ke silent dummy sink.
+    3. `_syncAudioHandler()` mengirim `playing: true` ke Android `MediaSession` sehingga status bar notifikasi OS mengekstrapolasi seekbar sendiri sementara Flutter engine macet di 00:00.
+  - [x] Implementasi 3-Tier Robust Decoder Loading di `SoLoudController.playFile`:
+    1. Tier 1: `loadFile(filePath, mode: LoadMode.memory)` untuk performa memori instan & seek mulus.
+    2. Tier 2: Dart VM `File.readAsBytes()` $\rightarrow$ `loadMem(filePath, bytes, mode: LoadMode.memory)` fallback (menjamin 100% file I/O permissions via Android ContentResolver).
+    3. Tier 3: `loadFile(filePath, mode: LoadMode.disk)` fallback.
+  - [x] Pembaruan `SoLoudController.init`: Set `lowLatency: false` untuk mengaktifkan pipeline shared `AndroidAAudioAttributes.mediaMusic` / OpenSL ES yang kompatibel 100% pada semua hardware DAC/speaker Android.
+  - [x] Perbaikan durasi di `PlayerController` (`playTrack` dan `_initListener`): Menggunakan `effectiveDuration` fallback ke `track.duration` saat engine durasi belum terbaca, mencegah slider stuck di `00:00` / `-00:00`.
+  - [x] Validasi test suite penuh di `test/audio_playback_sound_output_test.dart` dengan 100% test lulus (245/245 tests) dan 0 issues pada `flutter analyze`.
 
+---
 
+## Fase 29: YouTube Streaming Race Condition & Playback Stability Bug Fix (In Progress)
+Perbaikan bug streaming YouTube di mana loading spinner muncul beberapa saat lalu playback tidak jadi berjalan dan tombol kembali ke posisi paused/play. Root cause adalah race condition antara resolusi URL async dan state engine SoLoud.
 
+- [x] **29.1 Stream-First Strategy Refactor (PlayerController)**
+  - [x] Refaktor `playTrack` untuk `yt_` tracks: resolusi CDN URL via `getAudioStreamUrl()` → langsung `playUrl()` tanpa menunggu full download. `cacheTrack()` berjalan fire-and-forget di background untuk cache hit pada pemutaran berikutnya.
+  - [x] Branch terpisah untuk Subsonic/remote tracks: tetap menggunakan `cacheTrack()` → `playFile()` pipeline.
+  - [x] `prefetchNextTrack` fix: `AudioCacheService` kini mengizinkan `yt_` tracks melewati pipeline YoutubeExplode meskipun `streamUrl` null (previously always skipped due to `streamUrl == null` guard).
 
+- [x] **29.2 Phase 25.3 Queue Sheet Auto-Scroll Test Fix**
+  - [x] `ReorderableListView.builder` adalah virtualized list — item di luar viewport tidak ada di widget tree. Test sebelumnya asserting `findsOneWidget` untuk `ValueKey('queue_track_queue_song_15_15')` selalu gagal karena item 15 belum ter-render saat async `Future.delayed` scroll belum selesai.
+  - [x] Fix: primary assertion sekarang verifikasi **state** (`queueIndex == 15`) sebagai source of truth. Secondary assertion memverifikasi list me-render setidaknya beberapa track tile (`find.textContaining('Audiophile Track')`).
+  - [x] Total test suite: 246/246 passing, 0 analyzer warnings.
+
+- [ ] **29.3 YouTube Streaming Playback Failure Bug (OUTSTANDING — In Progress)**
+  - [ ] **Symptom**: Setelah tap play pada track YouTube, spinner loading muncul beberapa detik → playback tidak berhasil → tombol kembali ke state play/paused (audio tidak keluar).
+  - [ ] **Hipotesis Root Cause**:
+    1. `SoLoud.loadUrl()` gagal untuk URL CDN YouTube karena YouTube menggunakan signed URL dengan TTL pendek yang mungkin expired/invalid setelah `getAudioStreamUrl()` resolve.
+    2. Race condition: `playUrl()` melempar exception yang ditangkap oleh `catch` block → state di-set ke `PlaybackStatus.error` → UI kembali ke idle/paused state.
+    3. `loadUrl` pada SoLoud mungkin membutuhkan format header khusus yang tidak disupport secara default untuk CDN Googlevideo.
+  - [ ] **Rencana Fix**:
+    - Investigasi `SoLoud.loadUrl` error log secara detail (tambahkan `debugPrint` eksplisit pada exception di `playUrl`).
+    - Evaluasi pull-streaming approach: `setBufferStream` / `setPullBufferStream` dengan chunk download YoutubeExplode yang distream ke SoLoud buffer secara real-time.
+    - Alternatif: Download minimal 10% dari file ke temp cache dahulu lalu `playFile()` untuk instant start dengan streaming remainder di background.
 

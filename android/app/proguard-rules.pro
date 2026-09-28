@@ -19,3 +19,6 @@
 
 # SoLoud Native bindings & FFI
 -keep class com.flutter.soloud.** { *; }
+
+# Flutter Deferred Components & Google Play Core Missing Class Suppressions
+-dontwarn com.google.android.play.core.**

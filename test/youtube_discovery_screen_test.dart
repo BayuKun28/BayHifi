@@ -11,7 +11,7 @@ void main() {
   group('YouTubeDiscoveryScreen & Import Dialog Widget Tests', () {
     testWidgets('YouTubeDiscoveryScreen renders search bar, filters, and SoLoud DSP telemetry',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(800, 800);
+      tester.view.physicalSize = const Size(1200, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
 
@@ -75,7 +75,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap on 'Top 100 Charts' filter chip
-      await tester.tap(find.text('Top 100 Charts'));
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Top 100 Charts'));
       await tester.pump(const Duration(milliseconds: 500));
 
       final textField = tester.widget<TextField>(find.byType(TextField));

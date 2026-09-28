@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../features/player/domain/track.dart';
+import '../features/youtube_music/data/youtube_music_service.dart';
 
 /// Spotify-grade Audio Caching & Next-Track Prefetch Service
 /// Memungkinkan pemutaran instan 0ms dari disk cache lokal untuk remote stream tracks.
@@ -150,11 +151,6 @@ class AudioCacheService extends ChangeNotifier {
       return getCachedFilePath(track.id);
     }
 
-    final streamUrl = track.streamUrl;
-    if (streamUrl == null || streamUrl.isEmpty) {
-      return null;
-    }
-
     if (_downloadProgress.containsKey(track.id)) {
       // Already downloading in background
       return null;
@@ -171,18 +167,44 @@ class AudioCacheService extends ChangeNotifier {
         await tempFile.delete();
       }
 
-      await _dio.download(
-        streamUrl,
-        tempFile.path,
-        onReceiveProgress: (received, total) {
-          if (total > 0) {
-            final progress = (received / total).clamp(0.0, 1.0);
-            _downloadProgress[track.id] = progress;
-            onProgress?.call(progress);
+      if (track.id.startsWith('yt_')) {
+        // Direct authenticated stream chunking using YoutubeExplode
+        final downloadedPath = await YouTubeMusicService.instance.downloadAudio(
+          track.id,
+          tempFile,
+          onProgress: (p) {
+            _downloadProgress[track.id] = p;
+            onProgress?.call(p);
             notifyListeners();
-          }
-        },
-      );
+          },
+        );
+
+        if (downloadedPath == null) {
+          _downloadProgress.remove(track.id);
+          notifyListeners();
+          return null;
+        }
+      } else {
+        final streamUrl = track.streamUrl ?? track.remoteUrl;
+        if (streamUrl == null || streamUrl.isEmpty) {
+          _downloadProgress.remove(track.id);
+          notifyListeners();
+          return null;
+        }
+
+        await _dio.download(
+          streamUrl,
+          tempFile.path,
+          onReceiveProgress: (received, total) {
+            if (total > 0) {
+              final progress = (received / total).clamp(0.0, 1.0);
+              _downloadProgress[track.id] = progress;
+              onProgress?.call(progress);
+              notifyListeners();
+            }
+          },
+        );
+      }
 
       if (await tempFile.exists() && await tempFile.length() > 0) {
         if (await targetFile.exists()) {
@@ -212,8 +234,14 @@ class AudioCacheService extends ChangeNotifier {
   /// Smart Prefetching: Unduh lagu berikutnya di antrean secara hening di latar belakang
   Future<void> prefetchNextTrack(Track? nextTrack) async {
     if (nextTrack == null) return;
-    if (nextTrack.streamUrl == null || isCached(nextTrack.id)) return;
+    if (isCached(nextTrack.id)) return;
     if (_downloadProgress.containsKey(nextTrack.id)) return;
+
+    // Allow YouTube tracks (yt_) through — they use YoutubeExplode internally.
+    // For non-YouTube tracks, require a streamUrl or remoteUrl.
+    final hasUrl = (nextTrack.streamUrl != null && nextTrack.streamUrl!.isNotEmpty) ||
+        (nextTrack.remoteUrl != null && nextTrack.remoteUrl!.isNotEmpty);
+    if (!nextTrack.id.startsWith('yt_') && !hasUrl) return;
 
     debugPrint('[AudioCacheService] Prefetching next track in background: ${nextTrack.title}');
     try {

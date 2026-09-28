@@ -41,10 +41,10 @@ void main() async {
     debugPrint('Peringatan: Inisialisasi background AudioService ditunda/mock: $e');
   }
 
-  // Inisialisasi engine audio SoLoud native dengan sample rate 48000 Hz
+  // Inisialisasi engine audio SoLoud native dengan sample rate 44100 Hz
   try {
     await SoLoudController.instance.init(
-      sampleRate: 48000,
+      sampleRate: 44100,
       bufferSize: 2048,
     );
   } catch (e) {

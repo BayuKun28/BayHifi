@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -121,6 +122,62 @@ class YouTubeMusicService {
       return streamUrl;
     } catch (e, st) {
       debugPrint('[YouTubeMusicService] Error extracting audio stream URL for $videoId: $e\n$st');
+      return null;
+    }
+  }
+
+  /// Downloads audio directly using YoutubeExplode streamsClient into targetFile
+  Future<String?> downloadAudio(
+    String videoIdOrTrackId,
+    File targetFile, {
+    void Function(double progress)? onProgress,
+  }) async {
+    final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
+    try {
+      final manifest = await _client.videos.streamsClient.getManifest(videoId);
+      final audioStreams = manifest.audioOnly;
+      if (audioStreams.isEmpty) {
+        debugPrint('[YouTubeMusicService] No audio streams found for $videoId');
+        return null;
+      }
+
+      AudioStreamInfo? bestStream;
+      try {
+        final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
+        if (opusStreams.isNotEmpty) {
+          bestStream = opusStreams.withHighestBitrate();
+        }
+      } catch (_) {}
+      bestStream ??= audioStreams.withHighestBitrate();
+
+      final stream = _client.videos.streamsClient.get(bestStream);
+      final totalBytes = bestStream.size.totalBytes;
+      int received = 0;
+
+      if (!await targetFile.parent.exists()) {
+        await targetFile.parent.create(recursive: true);
+      }
+      if (await targetFile.exists()) {
+        await targetFile.delete();
+      }
+
+      final sink = targetFile.openWrite();
+      await for (final chunk in stream) {
+        sink.add(chunk);
+        received += chunk.length;
+        if (totalBytes > 0) {
+          onProgress?.call((received / totalBytes).clamp(0.0, 1.0));
+        }
+      }
+      await sink.flush();
+      await sink.close();
+
+      if (await targetFile.exists() && await targetFile.length() > 0) {
+        return targetFile.path;
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('[YouTubeMusicService] Download error for $videoId: $e\n$st');
       return null;
     }
   }

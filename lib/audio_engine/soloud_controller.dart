@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
@@ -34,7 +35,7 @@ class SoLoudController {
 
   /// Inisialisasi engine audio SoLoud native dengan sample rate audiophile
   Future<void> init({
-    int sampleRate = 48000,
+    int sampleRate = 44100,
     int bufferSize = 2048,
     Channels channels = Channels.stereo,
   }) async {
@@ -45,25 +46,12 @@ class SoLoudController {
         sampleRate: sampleRate,
         bufferSize: bufferSize,
         channels: channels,
-        lowLatency: true,
+        lowLatency: false,
         automaticCleanup: true,
       );
 
-      // Pastikan idle timeout dinonaktifkan agar output hardware audio tidak tertidur/mati saat jeda
-      SoLoud.instance.setAudioDeviceIdleTimeout(null);
-
       // Pastikan master volume engine pada level 1.0 penuh
       SoLoud.instance.setGlobalVolume(1.0);
-
-      // Listen untuk event kegagalan audio device dan lakukan recovery otomatis
-      SoLoud.instance.audioDeviceStartFailures.listen((error) {
-        debugPrint('[SoLoudController] Audio device start failure detected: $error. Attempting auto-recovery...');
-        try {
-          SoLoud.instance.startAudioDevice();
-        } catch (e) {
-          debugPrint('[SoLoudController] Audio device recovery error: $e');
-        }
-      });
 
       // Aktifkan stream FFT & Waveform secara default untuk RTA Visualizer
       SoLoud.instance.setVisualizationEnabled(
@@ -97,23 +85,43 @@ class SoLoudController {
     if (!_isInitialized) await init();
     if (requestId != _playRequestId) return null;
 
-    await stop();
+    await _stopCurrentAudio();
     if (requestId != _playRequestId) return null;
 
     try {
-      // Pastikan hardware audio output dalam keadaan aktif
+      final file = File(filePath);
+      AudioSource? source;
+
+      // 1. Coba load via loadFile(mode: LoadMode.memory) untuk kecepatan decode & seek optimal
       try {
-        if (SoLoud.instance.getAudioDeviceState() == AudioDeviceState.stopped) {
-          await SoLoud.instance.startAudioDevice();
-        }
-      } catch (e) {
-        debugPrint('[SoLoudController] Audio device start check: $e');
+        source = await SoLoud.instance.loadFile(
+          filePath,
+          mode: LoadMode.memory,
+        );
+      } catch (loadErr) {
+        debugPrint('[SoLoudController] loadFile(memory) failed ($loadErr). Attempting readAsBytes + loadMem fallback...');
       }
 
-      final source = await SoLoud.instance.loadFile(
+      // 2. Fallback jika C++ fopen terhalang Android Scoped Storage permissions
+      if (source == null && await file.exists()) {
+        try {
+          final bytes = await file.readAsBytes();
+          source = await SoLoud.instance.loadMem(
+            filePath,
+            bytes,
+            mode: LoadMode.memory,
+          );
+        } catch (memErr) {
+          debugPrint('[SoLoudController] loadMem fallback failed: $memErr');
+        }
+      }
+
+      // 3. Fallback terakhir ke loadFile(mode: LoadMode.disk)
+      source ??= await SoLoud.instance.loadFile(
         filePath,
         mode: LoadMode.disk,
       );
+
       if (requestId != _playRequestId) {
         await SoLoud.instance.disposeSource(source);
         return null;
@@ -128,6 +136,8 @@ class SoLoudController {
       );
       _currentHandle = handle;
       SoLoud.instance.setVolume(handle, targetVolume);
+
+      _startPositionTracking();
 
       return handle;
     } catch (e, stack) {
@@ -146,22 +156,13 @@ class SoLoudController {
     if (!_isInitialized) await init();
     if (requestId != _playRequestId) return null;
 
-    await stop();
+    await _stopCurrentAudio();
     if (requestId != _playRequestId) return null;
 
     try {
-      // Pastikan hardware audio output dalam keadaan aktif
-      try {
-        if (SoLoud.instance.getAudioDeviceState() == AudioDeviceState.stopped) {
-          await SoLoud.instance.startAudioDevice();
-        }
-      } catch (e) {
-        debugPrint('[SoLoudController] Audio device start check: $e');
-      }
-
       final source = await SoLoud.instance.loadUrl(
         url,
-        mode: LoadMode.disk,
+        mode: LoadMode.memory,
       );
       if (requestId != _playRequestId) {
         await SoLoud.instance.disposeSource(source);
@@ -177,6 +178,8 @@ class SoLoudController {
       );
       _currentHandle = handle;
       SoLoud.instance.setVolume(handle, targetVolume);
+
+      _startPositionTracking();
 
       return handle;
     } catch (e, stack) {
@@ -257,9 +260,8 @@ class SoLoudController {
     }
   }
 
-  /// Stop pemutaran dan dispose source
-  Future<void> stop() async {
-    _playRequestId++;
+  /// Menghentikan audio yang aktif dan membersihkan voice/source tanpa membatalkan requestId aktif
+  Future<void> _stopCurrentAudio() async {
     final handle = _currentHandle;
     if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
       SoLoud.instance.stop(handle);
@@ -271,6 +273,12 @@ class SoLoudController {
       await SoLoud.instance.disposeSource(source);
       _currentSource = null;
     }
+  }
+
+  /// Stop pemutaran dan dispose source (eksternal stop membatalkan pemutaran yang sedang berlangsung)
+  Future<void> stop() async {
+    _playRequestId++;
+    await _stopCurrentAudio();
   }
 
   /// Lompat ke posisi tertentu
