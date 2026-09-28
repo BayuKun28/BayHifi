@@ -7,6 +7,7 @@ import 'package:baydev_hifi/audio_engine/audio_cache_service.dart';
 import 'package:baydev_hifi/core/database/local_persistence_service.dart';
 import 'package:baydev_hifi/features/library/presentation/unified_library_screen.dart';
 import 'package:baydev_hifi/features/player/data/lyrics_service.dart';
+import 'package:baydev_hifi/features/player/domain/lyrics_line.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/synchronized_lyrics_view.dart';
 import 'package:baydev_hifi/features/settings/presentation/sub_screens/theming_settings_screen.dart';
 
@@ -76,7 +77,7 @@ void main() {
         rawLyrics: lrcContent,
         lines: lines,
         isSynced: true,
-        source: LyricsSource.localEmbedded,
+        source: LyricsSource.embedded,
       );
 
       await tester.pumpWidget(
@@ -114,11 +115,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('NO AUDIO TRACKS LOADED'), findsOneWidget);
-      expect(find.text('SCAN FOLDER'), findsOneWidget);
-      expect(find.text('PICK FILES'), findsOneWidget);
-      expect(find.text('NAVIDROME'), findsOneWidget);
-      expect(find.text('YOUTUBE HIFI'), findsOneWidget);
-      expect(find.text('FLAC • WAV • DSD • ALAC • OPUS • MP3'), findsOneWidget);
+      expect(find.text('SELECT MUSIC FOLDER'), findsOneWidget);
+      expect(find.text('PICK AUDIO FILES'), findsOneWidget);
+      expect(find.text('CONNECT NAVIDROME CLOUD'), findsOneWidget);
+      expect(find.text('EXPLORE YOUTUBE MUSIC HIFI'), findsOneWidget);
     });
   });
 

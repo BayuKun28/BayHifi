@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../../player/domain/track.dart';
+import 'webm_to_ogg_remuxer.dart';
 
 /// Service for YouTube & YouTube Music audio streaming, search, and metadata extraction.
 /// Integrates with Baydev HiFi's C++ SoLoud DSP mastering engine and AudioCacheService.
@@ -126,7 +127,7 @@ class YouTubeMusicService {
     }
   }
 
-  /// Returns a live Stream<List<int>> of audio chunks using YoutubeExplode streamsClient
+  /// Returns a live `Stream<List<int>>` of audio chunks using YoutubeExplode streamsClient
   Future<Stream<List<int>>?> getAudioByteStream(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
     try {
@@ -150,7 +151,41 @@ class YouTubeMusicService {
     }
   }
 
-  /// Downloads audio directly using YoutubeExplode streamsClient into targetFile
+  /// Returns a live `Stream<Uint8List>` of Ogg Opus audio chunks, remuxed in real-time from WebM Opus.
+  /// This allows direct, low-latency streaming into flutter_soloud's C++ audio decoding engine.
+  Future<Stream<Uint8List>?> getOggOpusAudioByteStream(String videoIdOrTrackId) async {
+    final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
+    try {
+      final manifest = await _client.videos.streamsClient.getManifest(videoId);
+      final audioStreams = manifest.audioOnly;
+      if (audioStreams.isEmpty) return null;
+
+      AudioStreamInfo? bestStream;
+      try {
+        final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
+        if (opusStreams.isNotEmpty) {
+          bestStream = opusStreams.withHighestBitrate();
+        }
+      } catch (_) {}
+      bestStream ??= audioStreams.withHighestBitrate();
+
+      final rawStream = _client.videos.streamsClient.get(bestStream);
+      final isOpusOrWebm = bestStream.audioCodec.toLowerCase().contains('opus') ||
+          bestStream.container.name.toLowerCase().contains('webm');
+
+      if (isOpusOrWebm) {
+        return WebmToOggRemuxer.remuxStream(rawStream);
+      } else {
+        return rawStream.map((chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk));
+      }
+    } catch (e, st) {
+      debugPrint('[YouTubeMusicService] Error getting Ogg Opus audio stream for $videoId: $e\n$st');
+      return null;
+    }
+  }
+
+  /// Downloads audio directly using YoutubeExplode streamsClient into targetFile,
+  /// remuxing WebM Opus to standard Ogg Opus on the fly for native SoLoud compatibility.
   Future<String?> downloadAudio(
     String videoIdOrTrackId,
     File targetFile, {
@@ -174,7 +209,7 @@ class YouTubeMusicService {
       } catch (_) {}
       bestStream ??= audioStreams.withHighestBitrate();
 
-      final stream = _client.videos.streamsClient.get(bestStream);
+      final rawStream = _client.videos.streamsClient.get(bestStream);
       final totalBytes = bestStream.size.totalBytes;
       int received = 0;
 
@@ -185,8 +220,15 @@ class YouTubeMusicService {
         await targetFile.delete();
       }
 
+      final isOpusOrWebm = bestStream.audioCodec.toLowerCase().contains('opus') ||
+          bestStream.container.name.toLowerCase().contains('webm');
+
+      final streamToSave = isOpusOrWebm
+          ? WebmToOggRemuxer.remuxStream(rawStream)
+          : rawStream.map((chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk));
+
       final sink = targetFile.openWrite();
-      await for (final chunk in stream) {
+      await for (final chunk in streamToSave) {
         sink.add(chunk);
         received += chunk.length;
         if (totalBytes > 0) {

@@ -18,12 +18,16 @@ class LocalPersistenceService {
   bool get isInitialized => _isInitialized;
 
   /// Inisialisasi file penyimpanan persisten di direktori dokumen aplikasi
-  Future<void> init() async {
-    if (_isInitialized) return;
+  Future<void> init({String? customPath}) async {
+    if (_isInitialized && customPath == null) return;
 
     try {
-      final dir = await getApplicationDocumentsDirectory();
-      _dbFile = File('${dir.path}/baydev_hifi_storage.json');
+      if (customPath != null) {
+        _dbFile = File(customPath);
+      } else {
+        final dir = await getApplicationDocumentsDirectory();
+        _dbFile = File('${dir.path}/baydev_hifi_storage.json');
+      }
 
       if (await _dbFile!.exists()) {
         final content = await _dbFile!.readAsString();
