@@ -84,6 +84,26 @@ class SubsonicServerConfig {
       apiVersion: apiVersion ?? this.apiVersion,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'serverUrl': serverUrl,
+      'username': username,
+      'password': password,
+      'clientName': clientName,
+      'apiVersion': apiVersion,
+    };
+  }
+
+  factory SubsonicServerConfig.fromMap(Map<String, dynamic> map) {
+    return SubsonicServerConfig(
+      serverUrl: map['serverUrl'] as String? ?? '',
+      username: map['username'] as String? ?? '',
+      password: map['password'] as String? ?? '',
+      clientName: map['clientName'] as String? ?? 'BaydevHiFi',
+      apiVersion: map['apiVersion'] as String? ?? '1.16.1',
+    );
+  }
 }
 
 /// Status koneksi Navidrome

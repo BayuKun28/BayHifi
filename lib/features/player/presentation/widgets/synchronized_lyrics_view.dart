@@ -31,6 +31,7 @@ class SynchronizedLyricsView extends ConsumerStatefulWidget {
 
 class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView> {
   final ScrollController _scrollController = ScrollController();
+  final Map<int, GlobalKey> _lineKeys = {};
   int _lastActiveIndex = -1;
   LyricsDisplayMode _displayMode = LyricsDisplayMode.dualLine;
   Duration _timingOffset = Duration.zero;
@@ -39,6 +40,20 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
   void initState() {
     super.initState();
     _loadPersistedSettings();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.lyricsResult.isSynced && widget.lyricsResult.lines.isNotEmpty) {
+        final activeIndex = LrcParser.findActiveIndex(
+          widget.lyricsResult.lines,
+          widget.currentPosition,
+          offset: _timingOffset,
+        );
+        if (activeIndex >= 0) {
+          _lastActiveIndex = activeIndex;
+          _scrollToActiveLine(activeIndex);
+        }
+      }
+    });
   }
 
   void _loadPersistedSettings() {
@@ -62,8 +77,13 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     HapticFeedback.selectionClick();
     setState(() {
       _displayMode = mode;
+      _lineKeys.clear();
     });
     LocalPersistenceService.instance.saveSetting('lyrics_display_mode', mode.name);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _lastActiveIndex < 0) return;
+      _scrollToActiveLine(_lastActiveIndex);
+    });
   }
 
   void _updateTimingOffset(Duration newOffset) {
@@ -74,6 +94,20 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     if (widget.trackId != null) {
       LocalPersistenceService.instance.saveSetting('lyrics_offset_${widget.trackId}', newOffset.inMilliseconds);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.lyricsResult.isSynced && widget.lyricsResult.lines.isNotEmpty) {
+        final activeIndex = LrcParser.findActiveIndex(
+          widget.lyricsResult.lines,
+          widget.currentPosition,
+          offset: _timingOffset,
+        );
+        if (activeIndex >= 0) {
+          _lastActiveIndex = activeIndex;
+          _scrollToActiveLine(activeIndex);
+        }
+      }
+    });
   }
 
   @override
@@ -82,6 +116,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     if (widget.trackId != oldWidget.trackId && widget.trackId != null) {
       final savedOffsetMs = LocalPersistenceService.instance.getSetting<int>('lyrics_offset_${widget.trackId}', 0);
       _timingOffset = Duration(milliseconds: savedOffsetMs ?? 0);
+      _lineKeys.clear();
     }
 
     if (widget.lyricsResult.isSynced && widget.lyricsResult.lines.isNotEmpty) {
@@ -99,13 +134,38 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
 
   void _scrollToActiveLine(int index) {
     if (!_scrollController.hasClients) return;
-    final itemHeight = _displayMode == LyricsDisplayMode.dualLine ? 74.0 : 56.0;
-    final targetOffset = (index * itemHeight) - 120.0;
-    _scrollController.animateTo(
-      targetOffset < 0 ? 0 : targetOffset,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
+
+    final key = _lineKeys[index];
+    if (key?.currentContext != null) {
+      Scrollable.ensureVisible(
+        key!.currentContext!,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      final itemHeight = _displayMode == LyricsDisplayMode.dualLine ? 74.0 : 56.0;
+      final viewportHeight = _scrollController.position.viewportDimension;
+      final targetOffset = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
+      final maxExtent = _scrollController.position.maxScrollExtent;
+      _scrollController.animateTo(
+        targetOffset.clamp(0.0, maxExtent > 0 ? maxExtent : double.infinity),
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final k = _lineKeys[index];
+        if (k?.currentContext != null) {
+          Scrollable.ensureVisible(
+            k!.currentContext!,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
+    }
   }
 
   @override
@@ -243,34 +303,38 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
 
               final line = lines[index];
               final isActive = isSynced && index == activeIndex;
+              final lineKey = _lineKeys.putIfAbsent(index, () => GlobalKey());
 
-              return InkWell(
-                onTap: isSynced
-                    ? () {
-                        HapticFeedback.selectionClick();
-                        final seekPos = line.timestamp - _timingOffset;
-                        ref.read(playerControllerProvider.notifier).seek(
-                          seekPos < Duration.zero ? Duration.zero : seekPos,
-                        );
-                      }
-                    : null,
-                borderRadius: BorderRadius.circular(12),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? primary.withValues(alpha: 0.15)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
+              return KeyedSubtree(
+                key: lineKey,
+                child: InkWell(
+                  onTap: isSynced
+                      ? () {
+                          HapticFeedback.selectionClick();
+                          final seekPos = line.timestamp - _timingOffset;
+                          ref.read(playerControllerProvider.notifier).seek(
+                            seekPos < Duration.zero ? Duration.zero : seekPos,
+                          );
+                        }
+                      : null,
+                  borderRadius: BorderRadius.circular(12),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    decoration: BoxDecoration(
                       color: isActive
-                          ? primary.withValues(alpha: 0.4)
+                          ? primary.withValues(alpha: 0.15)
                           : Colors.transparent,
-                      width: 1.0,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isActive
+                            ? primary.withValues(alpha: 0.4)
+                            : Colors.transparent,
+                        width: 1.0,
+                      ),
                     ),
+                    child: _buildLyricLineContent(line, isActive, isSynced, primary, theme),
                   ),
-                  child: _buildLyricLineContent(line, isActive, isSynced, primary, theme),
                 ),
               );
             },

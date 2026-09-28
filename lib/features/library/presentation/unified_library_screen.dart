@@ -1445,7 +1445,100 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final controller = ref.read(unifiedLibraryProvider.notifier);
-    final totalCount = ref.watch(unifiedLibraryProvider).totalTracksCount;
+    final libraryState = ref.watch(unifiedLibraryProvider);
+    final totalCount = libraryState.totalTracksCount;
+
+    if (libraryState.selectedFilter == LibrarySourceFilter.navidrome &&
+        libraryState.navidromeConnectionStatus != NavidromeConnectionStatus.connected) {
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1.0),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: primary.withValues(alpha: 0.3)),
+                  ),
+                  child: Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCloudOff,
+                      size: 32,
+                      color: primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'NO NAVIDROME SERVER CONNECTED',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Stream lossless FLAC and Opus audio directly from your personal Subsonic or Navidrome music server.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => const NavidromeConnectDialog(),
+                      );
+                    },
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, size: 18, color: Colors.black),
+                    label: const Text(
+                      'CONNECT TO NAVIDROME',
+                      style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'SUBSONIC API • LOSSLESS FLAC • OPUS STREAMING',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     if (totalCount == 0) {
       return Center(

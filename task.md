@@ -5,20 +5,20 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 ---
 
 ## Status Dashboard
-- **Total Fase**: 28 Fase + Phase 29 Bug Fix + Phase 30 UX Fixes (Planned)
-- **Arsitektur UI**: *Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)*
-- **Status Proyek**: *Phase 28 Completed + Phase 29/30 In Progress — 246/246 Tests Passing (100%), 0 Analyzer Warnings*
-- **Known Bug (29.3)**: YouTube streaming spinner → playback failure → button reverts to paused state
-- **Known Bug (30.3)**: Lyrics active line auto-scroll tidak tepat di tengah viewport — active line muncul di tepi bawah/atas, bukan center
+
+- **Total Fase**: 31 Fase (Fase 31 Dalam Pengerjaan)
+- **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
+- **Status Proyek**: _Phase 31: Lyrics Viewport Centering, YouTube Instant Streaming, Compact Empty State & Solid Theming Mode_
 
 ---
 
 ## Fase 13: DSP Rack Collapsible Units, Bottom Floating Category Dock, Pastel Palettes & Expressive Controls
+
 Penyempurnaan ergonomi satu tangan dan visual Material 3 Expressive studio di seluruh antarmuka utama Baydev HiFi.
 
 - [x] **13.1 DSP Rack Collapsible Units & Reset Confirmation Modal**
   - [x] `RackUnitCard` collapsible state: otomatis terminimize saat bypass (OFF) ke faceplate ramping ~46px, auto-expand saat dinyalakan, dan tap header untuk expand manual dengan indikator chevron.
-  - [x] Modal dialog konfirmasi Material 3 untuk aksi *Reset to Flat Reference* dengan tombol Cancel dan Reset All.
+  - [x] Modal dialog konfirmasi Material 3 untuk aksi _Reset to Flat Reference_ dengan tombol Cancel dan Reset All.
 - [x] **13.2 Library Bottom Floating Category Dock**
   - [x] Mengganti static top horizontal category bar dengan ergonomic bottom floating action pill di atas miniplayer.
   - [x] Secondary floating category dock animasi halus yang menampilkan opsi Tracks, Albums, Artists, Genres, Folders, dan Playlists.
@@ -33,6 +33,7 @@ Penyempurnaan ergonomi satu tangan dan visual Material 3 Expressive studio di se
 ---
 
 ## Fase 12: Material 3 Expressive UI/UX Architecture & Bento Grid System
+
 Implementasi arsitektur antarmuka Material 3 Expressive modern dengan sistem Bento Grid modular, token squircle, elevasi tonal 5-layer, physics spring, dan animasi staggered entrance.
 
 - [x] **12.1 Standardisasi Aturan Material 3 Expressive & Zero-Emoji Policy di `rules.md` & `GEMINI.md`**
@@ -40,7 +41,7 @@ Implementasi arsitektur antarmuka Material 3 Expressive modern dengan sistem Ben
 - [x] **12.2 Bento Module 1: C++ SoLoud Engine & Hardware Telemetry Hero Card**
   - [x] Live C++ audio engine telemetry, source specs (kHz, bit depth, format), safe preamp level, and Bit-Perfect DAC status badge.
 - [x] **12.3 Studio Hero Showcase Carousel (Horizontal Showcase)**
-  - [x] Horizontal M3 Expressive showcase banner directly above Audiophile Stats card with 4 rich cards (*32-Band Pro-Q Studio*, *Mastering DSP Rack*, *AutoEQ & Target Solver*, *Studio Desk Docking*), page indicator dots, and direct navigation.
+  - [x] Horizontal M3 Expressive showcase banner directly above Audiophile Stats card with 4 rich cards (_32-Band Pro-Q Studio_, _Mastering DSP Rack_, _AutoEQ & Target Solver_, _Studio Desk Docking_), page indicator dots, and direct navigation.
 - [x] **12.4 Semi-Minimalist Dashboard Streamlining**
   - [x] Removed redundant Pro-Q and DSP Rack mini cards and top header quick chips to produce an uncrowded, semi-minimalist Material 3 Expressive studio layout.
 - [x] **12.5 Bento Module 2: Audiophile Listening Statistics Card**
@@ -60,6 +61,7 @@ Implementasi arsitektur antarmuka Material 3 Expressive modern dengan sistem Ben
 ---
 
 ## Fase 11: Pure Custom Local Library & Storage Directory Management
+
 Pembersihan seluruh data demo/sampling audio bawaan dan integrasi pemilihan direktori & file fisik lokal dengan database persisten.
 
 - [x] **11.1 Penghapusan Seluruh Dummy / Sampling Track Bawaan**
@@ -75,7 +77,7 @@ Pembersihan seluruh data demo/sampling audio bawaan dan integrasi pemilihan dire
   - [x] Fitur `clearLibrary()` dengan dialog konfirmasi untuk membersihkan katalog library
 - [x] **11.4 Studio Empty State & Quick Actions**
   - [x] Desain empty state studio high-fidelity saat library kosong dengan tombol aksi langsung: `[SELECT MUSIC FOLDER]`, `[PICK AUDIO FILES]`, dan `[CONNECT NAVIDROME CLOUD]`
-  - [x] Popup menu AppBar lengkap di `UnifiedLibraryScreen`: *Pick & Scan Music Folder*, *Pick Audio Files*, *Rescan Music Folders*, *Connect Navidrome Cloud*, *Clear Music Library*
+  - [x] Popup menu AppBar lengkap di `UnifiedLibraryScreen`: _Pick & Scan Music Folder_, _Pick Audio Files_, _Rescan Music Folders_, _Connect Navidrome Cloud_, _Clear Music Library_
 
 ---
 
@@ -112,6 +114,7 @@ Fondasi aplikasi, integrasi low-level engine SoLoud C++, pemutaran audio dasar, 
 ---
 
 ## Fase 2: Pro-Q Studio & Canvas Interaktif
+
 Implementasi antarmuka Parametric EQ studio presisi tinggi sesuai tangkapan layar referensi.
 
 - [x] **2.1 Domain Model Parametric EQ**
@@ -151,6 +154,7 @@ Implementasi antarmuka Parametric EQ studio presisi tinggi sesuai tangkapan laya
 ---
 
 ## Fase 3: AutoEQ & Squiglink Import Engine
+
 Modul kalkulasi pencocokan respons frekuensi IEM/headphone terhadap kurva target (Harman/HBB) dan impor format Squiglink.
 
 - [x] **3.1 Parser Universal File Pengukuran Driver**
@@ -179,11 +183,12 @@ Modul kalkulasi pencocokan respons frekuensi IEM/headphone terhadap kurva target
   - [x] Ekspor konfigurasi EQ saat ini ke format teks Squiglink / Wavelet
 - [x] **3.7 Fitur A/B Comparison Switch**
   - [x] Tombol instan beralih antara `[A: RAW]` (audio murni) dan `[B: ACTIVE]` (audio ber-tuning)
-  - [x] Transisi crossfade halus (10ms) untuk mencegah bunyi *pop/click* saat switching
+  - [x] Transisi crossfade halus (10ms) untuk mencegah bunyi _pop/click_ saat switching
 
 ---
 
 ## Fase 4: Mastering DSP Studio Rack (10+ Modul)
+
 Rantai pemrosesan audio kelas profesional untuk mastering dan personalisasi karakter suara.
 
 - [x] **4.1 Pre-Amp Gain Stage**
@@ -191,7 +196,7 @@ Rantai pemrosesan audio kelas profesional untuk mastering dan personalisasi kara
 - [x] **4.2 Dynamic Bass Boost**
   - [x] Peningkatan frekuensi sub-bass (40–160 Hz) dengan harmonik psychoacoustic
 - [x] **4.3 Tube Exciter / Triode Saturation**
-  - [x] Algoritma nonlinearitas analog ($y = \tanh(k \cdot x)$) untuk distorsi harmonik genap (*even harmonics*)
+  - [x] Algoritma nonlinearitas analog ($y = \tanh(k \cdot x)$) untuk distorsi harmonik genap (_even harmonics_)
   - [x] Kontrol Drive/Warmth, Harmonics Blend, dan Tube Bias
 - [x] **4.4 Dynamic Compressor**
   - [x] Implementasi parameter: Threshold (-60 s/d 0 dB), Ratio (1:1 s/d 20:1), Attack (0.1–100ms), Release (10–1000ms), Makeup Gain
@@ -200,7 +205,7 @@ Rantai pemrosesan audio kelas profesional untuk mastering dan personalisasi kara
   - [x] Dekomposisi sinyal ke $M = (L+R)/2$ dan $S = (L-R)/2$
   - [x] Kontrol pelebaran soundstage (0% Mono s/d 200% Super-Wide)
 - [x] **4.6 Binaural Crossfeed (Meier / Chu-Moy Algorithm)**
-  - [x] Simulasi tata letak speaker stereo untuk headphone guna mengurangi kelelahan telinga (*listener fatigue*)
+  - [x] Simulasi tata letak speaker stereo untuk headphone guna mengurangi kelelahan telinga (_listener fatigue_)
   - [x] Kontrol Cutoff Frequency (650 Hz) dan Crossfeed Level (-3 dB s/d -9 dB)
 - [x] **4.7 Spatial Studio Reverb**
   - [x] Algoritma Freeverb stereo: Room Size, Damping, Width, Predelay, dan Decay Time
@@ -215,11 +220,12 @@ Rantai pemrosesan audio kelas profesional untuk mastering dan personalisasi kara
 ---
 
 ## Fase 5: UI/UX Studio Collection, Multi-Tab Navigation & Layout Rework
-Penyesuaian tata letak (layout), icon, struktur menu, dan alur interaksi mengacu pada referensi *Expressive Music App Screen Designs* (`collection_dark`, `collection_light`, `customization_settings`, `yt_miniplayer`).
+
+Penyesuaian tata letak (layout), icon, struktur menu, dan alur interaksi mengacu pada referensi _Expressive Music App Screen Designs_ (`collection_dark`, `collection_light`, `customization_settings`, `yt_miniplayer`).
 
 - [x] **5.1 Pembersihan & Penataan Terminologi UI**
   - [x] Hapus/ganti seluruh penyebutan kata eksternal di halaman Settings & Theming menjadi standar Studio Audiophile / Baydev HiFi
-  - [x] Standardisasi nama palet warna: *Obsidian Cyan*, *Amber Tube Glow*, *Emerald HiFi*, *Electric Purple*, *Crimson Passion*, *True OLED Black*, *Champagne Light*
+  - [x] Standardisasi nama palet warna: _Obsidian Cyan_, _Amber Tube Glow_, _Emerald HiFi_, _Electric Purple_, _Crimson Passion_, _True OLED Black_, _Champagne Light_
 - [x] **5.2 Multi-Tab Collection Screen (Tracks, Albums, Artists, Genres, Playlists, Folders)**
   - [x] **Top Header & Action Bar**:
     - [x] Search Bar interaktif dengan live filtering
@@ -228,7 +234,7 @@ Penyesuaian tata letak (layout), icon, struktur menu, dan alur interaksi mengacu
   - [x] **Tracks Tab View**:
     - [x] List view dengan squircle album art cover (rounded corners)
     - [x] Title, Artist, Album, Durasi & badge format audio (FLAC/Hi-Res/MP3)
-    - [x] Trailing 3-dot popup menu: *Play Next*, *Add to Queue*, *Add to Playlist*, *Track Details*, *Favorite Heart*
+    - [x] Trailing 3-dot popup menu: _Play Next_, _Add to Queue_, _Add to Playlist_, _Track Details_, _Favorite Heart_
   - [x] **Albums & Artists Grid View** (Sesuai `collection_dark_2` & `collection_light_2`):
     - [x] 2-column squircle grid card layout responsif
     - [x] Album card: Cover art besar, Album Name, Artist Name, Year, Jumlah Tracks
@@ -261,6 +267,7 @@ Penyesuaian tata letak (layout), icon, struktur menu, dan alur interaksi mengacu
 ---
 
 ## Fase 6: Advanced Customization Settings & Local Database Persistence
+
 Implementasi kustomisasi mendalam sesuai `customization_settings` dan penyimpanan data lokal persisten.
 
 - [x] **6.1 Unified Local Persistence (Database SQLite / SharedPreferences / Cache)**
@@ -269,7 +276,7 @@ Implementasi kustomisasi mendalam sesuai `customization_settings` dan penyimpana
   - [x] Penyimpanan persisten konfigurasi DSP Master Rack dan Custom EQ Presets
   - [x] Indeks pencarian offline super cepat
 - [x] **6.2 Customization Settings: Visualizer & Display Options** (Sesuai `customization_settings`)
-  - [x] **Visualizer Style**: Pilihan gaya visualizer (*Spectrum Bars*, *Spline Smooth Waveform*, *Dual Analog VU Meters*, *Circular Halo*)
+  - [x] **Visualizer Style**: Pilihan gaya visualizer (_Spectrum Bars_, _Spline Smooth Waveform_, _Dual Analog VU Meters_, _Circular Halo_)
   - [x] **Visualizer Tuning**: FFT Bins selector (256, 512, 1024, 2048) & Decay Falloff Speed slider
   - [x] **Album Art Styling**: Squircle corner radius selector (`0px` sharp, `14px` squircle, `28px` rounded)
   - [x] **Ambient Glow & Effects**: Slider intensitas blur ambient shadow & toggle animasi vinyl spinning
@@ -285,10 +292,11 @@ Implementasi kustomisasi mendalam sesuai `customization_settings` dan penyimpana
 ---
 
 ## Fase 7: Queue Management, Playback History & Session Memory
+
 Pengelolaan antrean pemutaran lagu dinamis, pencatatan histori dan statistik mendengarkan, serta pemulihan sesi pemutaran audio.
 
 - [x] **7.1 Now Playing Queue Sheet & Reordering**
-  - [x] Lembar antrean lagu aktif (*Up Next Queue Sheet*) dapat diakses dari Now Playing Screen
+  - [x] Lembar antrean lagu aktif (_Up Next Queue Sheet_) dapat diakses dari Now Playing Screen
   - [x] Drag-to-reorder untuk mengubah urutan lagu dalam antrean secara interaktif
   - [x] Swipe-to-dismiss untuk menghapus lagu dari antrean pemutaran
   - [x] Tombol aksi: `[Play Next]` dan `[Clear Queue]`
@@ -302,11 +310,12 @@ Pengelolaan antrean pemutaran lagu dinamis, pencatatan histori dan statistik men
 ---
 
 ## Fase 8: Sleep Timer, File Inspector & Metadata Tag Editor
+
 Fitur utilitas audio audiophile: pengatur waktu tidur dengan fade out halus, inspeksi teknis mendalam file audio, dan pengeditan metadata tag.
 
 - [x] **8.1 Smart Sleep Timer dengan Gradual Fade-Out**
   - [x] Pilihan timer tidur: 15 menit, 30 menit, 45 menit, 60 menit, atau kustom
-  - [x] Opsi *Stop at end of track* (berhenti otomatis setelah lagu yang sedang berjalan selesai)
+  - [x] Opsi _Stop at end of track_ (berhenti otomatis setelah lagu yang sedang berjalan selesai)
   - [x] Gradual volume fade-out (penurunan volume secara bertahap selama 15 detik sebelum pemutaran berhenti agar tidak mengagetkan)
 - [x] **8.2 Technical Audio File Inspector Modal**
   - [x] Dialog inspeksi teknis mendalam file audio: Codec profile, Bitrate real-time (kbps), Channels (Stereo/Mono), Container format, File size asli, Magic bytes header, dan MD5 checksum
@@ -317,6 +326,7 @@ Fitur utilitas audio audiophile: pengatur waktu tidur dengan fade out halus, ins
 ---
 
 ## Fase 9: Studio Landscape & Dual-Pane Adaptive Layout
+
 Optimalisasi tata letak responsif untuk orientasi lanskap, tablet, dan docking desktop DAC.
 
 - [x] **9.1 Adaptive Dual-Pane Layout (Tablet / Landscape / Desktop)**
@@ -328,6 +338,7 @@ Optimalisasi tata letak responsif untuk orientasi lanskap, tablet, dan docking d
 ---
 
 ## Fase 10: AutoEQ Online Target Downloader (Squiglink Cloud Database)
+
 Integrasi cloud downloader untuk kurva target dan pengukuran IEM/Headphone langsung ke Pro-Q Studio.
 
 - [x] **10.1 Cloud Catalog Client untuk Squiglink / AutoEQ Targets**
@@ -341,6 +352,7 @@ Integrasi cloud downloader untuk kurva target dan pengukuran IEM/Headphone langs
 ---
 
 ## Fase 14: Adopsi & Stabilisasi DSP Audio Engine (RYNLABS_HIFI Flow)
+
 Adopsi arsitektur SoLoud C++ FFI `VirtualDspService` dan `AudioService` dari RYNLABS_HIFI untuk menjamin reproduksi suara bit-perfect, crash-free, dan perbaikan parameter unit scaling (anti-distorsi).
 
 - [x] **14.1 Unified `VirtualDspService` (Single Source of Truth)**
@@ -361,6 +373,7 @@ Adopsi arsitektur SoLoud C++ FFI `VirtualDspService` dan `AudioService` dari RYN
 ---
 
 ## Fase 15: Customization, Parallax, Blur, Gestures & Visual Dynamics (Namida Flow)
+
 Implementasi sistem kustomisasi visual mendalam, efek 3D parallax, gaussian blur, dynamic ambient glow, performa adaptif, dan gestur album art.
 
 - [x] **15.1 Parallax 3D Motion Physics Engine**
@@ -375,13 +388,14 @@ Implementasi sistem kustomisasi visual mendalam, efek 3D parallax, gaussian blur
   - [x] Single-tap, double-tap, dan long-press handler pada album art
   - [x] Swipe-to-action pada track tile library (Swipe Left: Queue/Play Next, Swipe Right: Playlist/Fav)
 - [x] **15.5 Track Tile Display Layout Customizer**
-  - [x] Pilihan urutan judul (*Artist - Title* vs *Title - Artist*), kustomisasi baris ke-3, dan direct favorite button
+  - [x] Pilihan urutan judul (_Artist - Title_ vs _Title - Artist_), kustomisasi baris ke-3, dan direct favorite button
 - [x] **15.6 Dedicated Tests Validation**
   - [x] Unit & widget tests untuk parallax controller, performance mode, track tile layout, dan gestures (`customization_and_parallax_test.dart` with 99 passing tests)
 
 ---
 
 ## Fase 16: Advanced Playback Engine & Interruption Policies (Namida Flow)
+
 Pengaturan pemutaran audio, transisi, dan kebijakan interupsi perangkat dari Namida.
 
 - [x] **16.1 Smooth Play/Pause Volume Fade Engine**
@@ -401,6 +415,7 @@ Pengaturan pemutaran audio, transisi, dan kebijakan interupsi perangkat dari Nam
 ---
 
 ## Fase 17: Smart Playlists Dynamic Rule Engine (Namida Feature)
+
 Generator playlist dinamis berbasis aturan multi-filter yang terbarui otomatis.
 
 - [x] **17.1 Domain Model & Filter Condition Framework**
@@ -417,6 +432,7 @@ Generator playlist dinamis berbasis aturan multi-filter yang terbarui otomatis.
 ---
 
 ## Fase 18: Multi-Track Metadata Tagger & Tag Extraction System (Namida Feature)
+
 Editor metadata fisik audio lokal yang tangguh untuk single maupun batch files.
 
 - [x] **18.1 Native/Pure Dart Metadata Tag Read & Write Service**
@@ -431,12 +447,13 @@ Editor metadata fisik audio lokal yang tangguh untuk single maupun batch files.
 ---
 
 ## Fase 19: East Asian Lyrics & Metadata Romanizer Engine (Namida Feature)
+
 Transliterasi otomatis karakter teks lirik dan judul lagu dari bahasa Asia Timur ke alfabet Latin.
 
 - [x] **19.1 Romanizer Core Engine**
   - [x] Modul Jepang (Romaji Hepburn dengan digraph, sokuon, chōonpu, kamus kanji), Korea (Romaja Revised via dekomposisi matematis silabel Hangul), dan Mandarin (Pinyin dengan/tanpa nada) di `EastAsianRomanizer`
 - [x] **19.2 Synchronized Lyrics Modes Integration**
-  - [x] Mode *Original Text* (`ORIG`), *Romanized Text* (`ROM`), dan *Dual-Line Display* (`DUAL`) di `SynchronizedLyricsView` dengan persistensi lokal
+  - [x] Mode _Original Text_ (`ORIG`), _Romanized Text_ (`ROM`), dan _Dual-Line Display_ (`DUAL`) di `SynchronizedLyricsView` dengan persistensi lokal
 - [x] **19.3 LRC Timing Synchronizer & Offset Adjuster**
   - [x] Bottom sheet modal penyesuaian offset waktu lirik sub-second precision (`±100ms`, `±500ms`, continuous slider, reset) dengan kalkulasi real-time di `LrcParser.findActiveIndex()` dan persistensi per-track
 - [x] **19.4 Dedicated Tests Validation**
@@ -445,16 +462,17 @@ Transliterasi otomatis karakter teks lirik dan judul lagu dari bahasa Asia Timur
 ---
 
 ## Fase 20: Advanced Library Indexer, Storage Cache, Backup & Settings Fusion
+
 Utilitas pemeliharaan database, penanganan file hilang/duplikat, manajemen kuota cache, pencadangan, dan reorganisasi pengaturan.
 
 - [x] **20.1 Missing Tracks & Duplicate Resolver**
-  - [x] Deteksi file berpindah folder (*missing tracks resolver*) dan pembersihan lagu duplikat berbasis audiophile fidelity rating (`LibraryIndexerService`, `MissingTracksResolverSheet`, `DuplicateTracksResolverModal`)
+  - [x] Deteksi file berpindah folder (_missing tracks resolver_) dan pembersihan lagu duplikat berbasis audiophile fidelity rating (`LibraryIndexerService`, `MissingTracksResolverSheet`, `DuplicateTracksResolverModal`)
 - [x] **20.2 Storage & Cache Quota Manager**
-  - [x] Monitoring ukuran cache (Artwork, Lyrics, DB, Playback history) dan pembersihan granular serta 1-klik *Purge All Caches* (`StorageCacheManager`, `StorageCacheSettingsScreen`)
+  - [x] Monitoring ukuran cache (Artwork, Lyrics, DB, Playback history) dan pembersihan granular serta 1-klik _Purge All Caches_ (`StorageCacheManager`, `StorageCacheSettingsScreen`)
 - [x] **20.3 Full Backup & Restore System (`.bayhifi` JSON Archive)**
   - [x] Ekspor dan impor seluruh konfigurasi tema, playlists kustom, smart rules, DSP presets, history, and favorites (`BackupRestoreService`, `BackupRestoreSettingsScreen`)
 - [x] **20.4 Reorganisasi 7 Kategori Pengaturan Studio**
-  - [x] Menu terstruktur rapi: *Theming & Color Palettes*, *Visualizer & Display*, *Gestures & Track Tiles*, *Studio Workstation & Car Dock*, *Audio Hardware & DAC Engine*, *Library Scanner & Sleep Timer*, *Storage & Cache Quota*, *Backup & Restore Archive*
+  - [x] Menu terstruktur rapi: _Theming & Color Palettes_, _Visualizer & Display_, _Gestures & Track Tiles_, _Studio Workstation & Car Dock_, _Audio Hardware & DAC Engine_, _Library Scanner & Sleep Timer_, _Storage & Cache Quota_, _Backup & Restore Archive_
 - [x] **20.5 Multi-Select Batch Actions Bar**
   - [x] Seleksi multi-track di library: Play Next, Add to Queue, Add to Playlist, Batch Tag Editor, Deselect All (`LibraryBatchActionsBar`, `TrackTile` multi-selection mode)
 - [x] **20.6 Dedicated Tests Validation**
@@ -463,6 +481,7 @@ Utilitas pemeliharaan database, penanganan file hilang/duplikat, manajemen kuota
 ---
 
 ## Fase 21: Master Quality Assurance, Performance Profiling & 100% Passing Tests
+
 Pengujian stabilitas menyeluruh, benchmarking performa, dan pemenuhan 100% test passing.
 
 - [x] **21.1 Eksekusi Menyeluruh Test Suite (`flutter test`)**
@@ -481,15 +500,16 @@ Pengujian stabilitas menyeluruh, benchmarking performa, dan pemenuhan 100% test 
 ---
 
 ## Fase 22: Deterministic Bidirectional Shuffle Queue Engine & Original Context Restoration
+
 Penyempurnaan arsitektur antrean putar dengan pelestarian konteks asal dan visualisasi queue acak yang deterministik.
 
 - [x] **22.1 Pelestarian Antrean Orisinal (`originalQueue` in `PlaybackState`)**
   - [x] Penambahan atribut immutable `originalQueue` pada `PlaybackState` untuk menyimpan urutan asli album, playlist, library, genre, artist, folder, atau top mix dari mana lagu mulai diputar.
 - [x] **22.2 Sinkronisasi Pengacakan Antrean Deterministik (`shuffleQueue` & `setQueue`)**
-  - [x] Saat *Shuffle ON*: Mengacak daftar antrean aktif (`queue`) dengan menyematkan (*pin*) track yang sedang diputar di posisi index 0. Daftar antrean yang terlihat pada `NowPlayingQueueSheet` merefleksikan urutan acak tersebut.
-  - [x] Navigasi *Next* (`skipNext()`) maju secara sekuensial mengikuti urutan acak yang terlihat di antrean (`0 -> 1 -> 2 -> ...`), mengeliminasi bug *double randomization*.
+  - [x] Saat _Shuffle ON_: Mengacak daftar antrean aktif (`queue`) dengan menyematkan (_pin_) track yang sedang diputar di posisi index 0. Daftar antrean yang terlihat pada `NowPlayingQueueSheet` merefleksikan urutan acak tersebut.
+  - [x] Navigasi _Next_ (`skipNext()`) maju secara sekuensial mengikuti urutan acak yang terlihat di antrean (`0 -> 1 -> 2 -> ...`), mengeliminasi bug _double randomization_.
 - [x] **22.3 Pemulihan Konteks Asal saat Shuffle Dimatikan (`toggleShuffle`)**
-  - [x] Saat *Shuffle OFF*: Memulihkan urutan asli secara instan dari `originalQueue`. Track yang sedang diputar tetap aktif di index aslinya pada daftar asal tersebut, dan navigasi *Next/Previous* kembali mengikuti urutan album/playlist awal.
+  - [x] Saat _Shuffle OFF_: Memulihkan urutan asli secara instan dari `originalQueue`. Track yang sedang diputar tetap aktif di index aslinya pada daftar asal tersebut, dan navigasi _Next/Previous_ kembali mengikuti urutan album/playlist awal.
 - [x] **22.4 Sinkronisasi Mutasi Antrean & Sesi Persistence**
   - [x] Sinkronisasi `originalQueue` pada semua operasi mutasi: `addToQueue`, `playNext`, `reorderQueue`, `removeFromQueue`, `clearQueue`, `_saveSession`, dan `_restoreSession`.
 - [x] **22.5 Dedicated Tests Validation**
@@ -498,6 +518,7 @@ Penyempurnaan arsitektur antrean putar dengan pelestarian konteks asal dan visua
 ---
 
 ## Fase 23: Queue Auto-Centering & Ordering-Aware Contextual Scrollbars Engine
+
 Ergonomi navigasi antrean putar dengan auto-fokus di tengah dan scrollbar kontekstual cerdas pada library musik.
 
 - [x] **23.1 Queue Sheet Active Track Auto-Focus Centering**
@@ -506,31 +527,35 @@ Ergonomi navigasi antrean putar dengan auto-fokus di tengah dan scrollbar kontek
   - [x] Penambahan Material 3 Studio regular `Scrollbar` di sisi kanan `NowPlayingQueueSheet` dengan interactive thumb dragging, pill radius, dan aksen warna tema.
 - [x] **23.3 Library Alphabetical Fast-Scroller (`StudioAlphabeticalScroller`)**
   - [x] Komponen scroller kustom berkinerja tinggi dengan rel alfabet interaktif (`#`, `A`–`Z`) di sisi kanan saat library diurutkan berdasarkan Nama / Judul / Artis (`SortField.title`, `SortField.artist`, `SortField.album`).
-  - [x] Navigasi instan via tap & drag dengan haptic feedback halus (`HapticFeedback.selectionClick()`), pencocokan huruf otomatis, sinkronisasi highlighting huruf aktif saat scroll normal, dan indikator huruf mengambang (*floating studio bubble indicator*).
+  - [x] Navigasi instan via tap & drag dengan haptic feedback halus (`HapticFeedback.selectionClick()`), pencocokan huruf otomatis, sinkronisasi highlighting huruf aktif saat scroll normal, dan indikator huruf mengambang (_floating studio bubble indicator_).
 - [x] **23.4 Fallback Scrollbar Standar untuk Pengurutan Non-Alfabetis**
   - [x] Saat library diurutkan berdasarkan kriteria non-alfabetis (`SortField.duration`, `SortField.dateAdded`, `SortField.hiRes`), sistem otomatis menampilkan standard Studio Material 3 `Scrollbar`.
+
 ---
 
 ## Fase 24: RYNLABS DSP Parity, Bidirectional Pro-Q Sync & Offline AutoEQ Caching
+
 Sinkronisasi mendalam arsitektur DSP Rack dengan RYNLABS_HIFI, sinkronisasi dua arah PreAmp dengan Pro-Q Studio, penyimpanan offline otomatis kurva AutoEQ / target / driver, dan optimalisasi UI/UX layar DSP Rack dan modal dialog portrait.
 
 - [x] **24.1 RYNLABS DSP Mathematical & Logic Parity (`VirtualDspService`)**
   - [x] Verifikasi 100% keselarasan rumus dan arsitektur pemrosesan audio C++ mastering chain dengan `/mnt/01DC9A2666E1A190/Other/PROJECTS/DSP/RYNLABS_HIFI` (Master Bypass deactivation tanpa kehilangan parameter, Freeverb volume compensation formula $-1.0 \times (\text{wet} \times 0.75)\text{ dB}$, Tube warmth & drive scaling, dynamic compressor lookahead, limiter true peak output ceiling, dan biquad filter transfer function).
 - [x] **24.2 Bidirectional PreAmp & Headroom Synchronization**
-  - [x] Integrasi sinkronisasi dua arah (*bidirectional sync*) Pre-Amp gain antara `DspRackController`, `EqController`, dan `VirtualDspService` (Single Source of Truth).
+  - [x] Integrasi sinkronisasi dua arah (_bidirectional sync_) Pre-Amp gain antara `DspRackController`, `EqController`, dan `VirtualDspService` (Single Source of Truth).
   - [x] Modifikasi PreAmp di Unit 01 DSP Rack langsung memutasi headroom dan safe preamp di Pro-Q Studio, dan sebaliknya perubahan PreAmp atau Auto-Headroom di Pro-Q Studio langsung memperbarui slider PreAmp dan level meter di DSP Rack.
-  - [x] Pembuatan komponen interaktif `_PreampBox` pada `BandStripBar` di Pro-Q Studio yang membuka *Material 3 Studio PreAmp & Headroom bottom sheet* lengkap dengan slider input gain, toggle auto-headroom protection, dan quick gain preset chips (`-12 dB`, `-6 dB`, `-3 dB`, `-1 dB`, `0 dB FLAT`, `+3 dB`).
+  - [x] Pembuatan komponen interaktif `_PreampBox` pada `BandStripBar` di Pro-Q Studio yang membuka _Material 3 Studio PreAmp & Headroom bottom sheet_ lengkap dengan slider input gain, toggle auto-headroom protection, dan quick gain preset chips (`-12 dB`, `-6 dB`, `-3 dB`, `-1 dB`, `0 dB FLAT`, `+3 dB`).
 - [x] **24.3 Automatic Persistent Offline Storage for AutoEQ Cloud Presets & Target Curves**
   - [x] Penambahan serialisasi dan deserialisasi `FrCurveData.toMap()` / `FrCurveData.fromMap()`.
   - [x] Penambahan metode `saveFrCurve()`, `getSavedFrCurves()`, `deleteFrCurve()`, `saveDownloadedAutoEqIds()`, dan `getDownloadedAutoEqIds()` di `LocalPersistenceService`.
   - [x] Saat pengguna mengunduh kurva target atau pengukuran IEM/headphone via `AutoEqCloudService.downloadItem()` atau mengimpor URL Squiglink, kurva tersebut secara otomatis disimpan ke penyimpanan offline persisten dan langsung terhidrasi ke daftar target/driver di `EqController`.
 - [x] **24.4 UI/UX Optimization for DSP Rack & Compact Mobile Portrait Viewports (360x780)**
-  - [x] Penambahan baris *Quick Gain Selector Chips* pada Unit 01 Pre-Amp Gain Stage di `DspRackScreen` (`-12 dB`, `-6 dB`, `-3 dB`, `-1 dB`, `0 dB Flat`, `+3 dB`).
+  - [x] Penambahan baris _Quick Gain Selector Chips_ pada Unit 01 Pre-Amp Gain Stage di `DspRackScreen` (`-12 dB`, `-6 dB`, `-3 dB`, `-1 dB`, `0 dB Flat`, `+3 dB`).
   - [x] Optimalisasi tata letak responsif `AutoEqCloudBrowserDialog` dengan `LayoutBuilder` (tampilan 2-tier stacked cards yang nyaman pada layar portrait sempit 360px tanpa overlap / overflow).
   - [x] Optimalisasi `SquiglinkDialog` dan `AutoEqModalDialog` dengan pembungkus `Wrap` dan `BoxConstraints` fleksibel, mengeliminasi seluruh risiko `RenderFlex` overflow pada mode portrait.
+
 ---
 
 ## Fase 25: Studio Stability, DSP Profile Saving, Navidrome Full Sync & Spotify-Grade Audio Caching
+
 Penyempurnaan stabilitas interaksi, penyimpanan profil DSP (paritas RYNLABS), sinkronisasi penuh library Navidrome, proteksi konkurensi streaming audio ganda, dan engine caching audio/download offline Spotify-grade.
 
 - [x] **25.1 Search Focus & Soft Keyboard Popup Resolver**
@@ -558,6 +583,7 @@ Penyempurnaan stabilitas interaksi, penyimpanan profil DSP (paritas RYNLABS), si
 ---
 
 ## Fase 26: Dedicated Detail Screens (Spotify/Namida Grade), Full Scrollbars & Android Release Notification Resolver
+
 Migrasi arsitektur dari bottom modal sheets ke dedicated Material 3 Expressive screens (`AlbumDetailScreen`, `ArtistDetailScreen`, `GenreDetailScreen`, `FolderDetailScreen`), perbaikan artwork dan scrollbar interaktif, hirarki diskografi artis (carousel album + daftar seluruh lagu), navigasi dua arah Album ⇄ Artis, dan pemecahan masalah notifikasi status bar Android di mode release.
 
 - [x] **26.1 Android Release Mode Status Bar Playback Notification Resolver**
@@ -598,7 +624,7 @@ Migrasi arsitektur dari bottom modal sheets ke dedicated Material 3 Expressive s
 - [x] **26.7 Unified Studio Track Action Bottom Sheet (`StudioTrackActionSheet`)**
   - [x] Menyatukan seluruh interaksi tombol 3-dots lagu di seluruh aplikasi (`TrackTile` di Library, `AlbumDetailScreen`, `ArtistDetailScreen`, `GenreDetailScreen`, dan `FolderDetailScreen`) ke dalam satu modal bottom sheet studio yang konsisten 100%.
   - [x] Header visual terpadu: Thumbnail squircle artwork, judul lagu, artis • album, badge Hi-Res/FLAC, dan status cache offline.
-  - [x] Daftar aksi lengkap: *Play Next*, *Add to Queue*, *Add to Playlist*, *Go to Album*, *Go to Artist*, *Add/Remove Favorite*, *Download/Cache Offline*, *Edit Metadata Tags*, dan *Inspect Audio Specs*.
+  - [x] Daftar aksi lengkap: _Play Next_, _Add to Queue_, _Add to Playlist_, _Go to Album_, _Go to Artist_, _Add/Remove Favorite_, _Download/Cache Offline_, _Edit Metadata Tags_, dan _Inspect Audio Specs_.
 - [x] **26.8 Unit & Widget Test Suite Validation (223/223 Tests Passing)**
   - [x] Buat suite pengujian komprehensif di `test/phase_26_library_detail_screens_test.dart` dan `test/studio_track_action_sheet_test.dart` menguji rendering ke-4 screen detail, scroll parallax collapse behavior, integrasi action sheet terpadu, dan navigasi silang dua arah.
   - [x] Validasi 100% test lulus (223/223 tests) dengan 0 errors dan 0 warnings pada `flutter analyze`.
@@ -606,6 +632,7 @@ Migrasi arsitektur dari bottom modal sheets ke dedicated Material 3 Expressive s
 ---
 
 ## Fase 27: Streamlined NowPlayingScreen UX & Unified Studio DSP Bento Capsule
+
 Penyederhanaan tata letak vertikal `NowPlayingScreen`, penggabungan pintasan AutoEQ Driver/Target Profile dan Mastering DSP Rack menjadi satu baris kapsul horizontal Bento terpadu (38px height), ekspansi ukuran cover art album proporsional, cross-navigation interaktif Artist • Album, dan eliminasi redundansi spesifikasi audio.
 
 - [x] **27.1 Ultra-Compact Studio Slim Chips Module (`StudioDspBentoCapsule` - Opsi 2)**
@@ -623,11 +650,12 @@ Penyederhanaan tata letak vertikal `NowPlayingScreen`, penggabungan pintasan Aut
 ---
 
 ## Fase 28: YouTube Music Streaming Integration, Search & DSP Mastering Engine
+
 Integrasi pencarian dan streaming jutaan lagu YouTube & YouTube Music langsung melalui C++ SoLoud audio engine, pemrosesan rantai master DSP (Pro-Q Parametric EQ, AutoEQ IEM Tuning, Tube Warmth, Compressor, Limiter), auto-caching offline disk (`AudioCacheService`), smart next-track prefetching, dan sanitasi metadata studio.
 
 - [x] **28.1 YouTube Audio Streaming & Extraction Core (`YouTubeMusicService`)**
   - [x] Integrasi `youtube_explode_dart` untuk pencarian audio real-time dan ekstraksi Opus ~160kbps / AAC ~256kbps audio-only streams.
-  - [x] Sanitasi cerdas judul video YouTube (`cleanMetadata` regex) untuk membersihkan noise `[Official Music Video]`, `(Lyrics)`, `VEVO`, `4K`, dan memisahkan *Artist - Title*.
+  - [x] Sanitasi cerdas judul video YouTube (`cleanMetadata` regex) untuk membersihkan noise `[Official Music Video]`, `(Lyrics)`, `VEVO`, `4K`, dan memisahkan _Artist - Title_.
   - [x] Ekstraksi playlist YouTube / YouTube Music (`getPlaylistTracks`) dan algoritma smart track radio (`getRelatedTracks`).
 - [x] **28.2 C++ SoLoud Audio Engine & Disk Caching Pipeline**
   - [x] Integrasi pemutaran dinamis di `PlayerController` (`playTrack` & `_prefetchNextTrackInQueue`) untuk resolusi URL on-demand dan caching disk simultaneous (`${appDocDir}/audio_cache/yt_<videoId>.cache`).
@@ -673,6 +701,7 @@ Integrasi pencarian dan streaming jutaan lagu YouTube & YouTube Music langsung m
 ---
 
 ## Fase 29: YouTube Streaming Race Condition & Playback Stability Bug Fix (In Progress)
+
 Perbaikan bug streaming YouTube di mana loading spinner muncul beberapa saat lalu playback tidak jadi berjalan dan tombol kembali ke posisi paused/play. Root cause adalah race condition antara resolusi URL async dan state engine SoLoud.
 
 - [x] **29.1 Stream-First Strategy Refactor (PlayerController)**
@@ -685,67 +714,77 @@ Perbaikan bug streaming YouTube di mana loading spinner muncul beberapa saat lal
   - [x] Fix: primary assertion sekarang verifikasi **state** (`queueIndex == 15`) sebagai source of truth. Secondary assertion memverifikasi list me-render setidaknya beberapa track tile (`find.textContaining('Audiophile Track')`).
   - [x] Total test suite: 246/246 passing, 0 analyzer warnings.
 
-- [ ] **29.3 YouTube Streaming Playback Failure Bug (OUTSTANDING — In Progress)**
-  - [ ] **Symptom**: Setelah tap play pada track YouTube, spinner loading muncul beberapa detik → playback tidak berhasil → tombol kembali ke state play/paused (audio tidak keluar).
-  - [ ] **Hipotesis Root Cause**:
-    1. `SoLoud.loadUrl()` gagal untuk URL CDN YouTube karena YouTube menggunakan signed URL dengan TTL pendek yang mungkin expired/invalid setelah `getAudioStreamUrl()` resolve.
-    2. Race condition: `playUrl()` melempar exception yang ditangkap oleh `catch` block → state di-set ke `PlaybackStatus.error` → UI kembali ke idle/paused state.
-    3. `loadUrl` pada SoLoud mungkin membutuhkan format header khusus yang tidak disupport secara default untuk CDN Googlevideo.
-  - [ ] **Rencana Fix**:
-    - Investigasi `SoLoud.loadUrl` error log secara detail (tambahkan `debugPrint` eksplisit pada exception di `playUrl`).
-    - Evaluasi pull-streaming approach: `setBufferStream` / `setPullBufferStream` dengan chunk download YoutubeExplode yang distream ke SoLoud buffer secara real-time.
-    - Alternatif: Download minimal 10% dari file ke temp cache dahulu lalu `playFile()` untuk instant start dengan streaming remainder di background.
+- [x] **29.3 YouTube Streaming Playback Failure Bug Fix**
+  - [x] **Root Cause**: Googlevideo CDN streams menolak unauthenticated HTTP GET requests dari generic `http.Client` di `SoLoud.instance.loadUrl()` dengan HTTP 403 Forbidden, menyebabkan exception yang me-revert status playback ke error/paused.
+  - [x] **Fix**: Refaktor `playTrack` untuk memprioritaskan download/caching stream via `YoutubeExplode` streamsClient authenticated pipeline (`AudioCacheService.instance.cacheTrack`), diikuti dengan bit-perfect local playback via `_audioEngine.playFile`. Menyediakan instant playback dengan fallback stream URL dan smart next-track prefetching (0ms delay).
 
 ---
 
-## Fase 30: Navidrome UX Fixes, Session Persistence & Lyrics Active Line Centering (Planned)
+## Fase 30: Navidrome UX Fixes, Session Persistence & Lyrics Active Line Centering (Completed)
+
 Perbaikan UX untuk koneksi Navidrome dan presisi auto-scroll lyric sinkronisasi.
 
-- [ ] **30.1 Navidrome Tab — Empty State Connect UI**
-  - [ ] **Symptom**: Tab Navidrome di `UnifiedLibraryScreen` saat belum terkoneksi menampilkan area kosong tanpa instruksi.
-  - [ ] **Fix**: Tambahkan empty state yang jelas di tab Navidrome ketika `navidromeConnectionStatus != connected`:
-    - Studio-grade empty state card dengan icon `HugeIcons.strokeRoundedCloudOff` (48px)
-    - Label `'No Navidrome Server Connected'` + subtitle `'Stream lossless audio from your personal server'`
-    - Tombol primary `[ Connect to Navidrome ]` yang membuka `NavidromeConnectDialog` langsung
-    - Quick info badge: `SUBSONIC API • LOSSLESS FLAC • OPUS STREAMING`
+- [x] **30.1 Navidrome Tab — Empty State Connect UI**
+  - [x] Desain studio-grade empty state card di tab/filter Navidrome ketika `navidromeConnectionStatus != connected`:
+    - Container rounded squircle dengan icon `HugeIcons.strokeRoundedCloudOff` (32px)
+    - Judul `'NO NAVIDROME SERVER CONNECTED'` + deskripsi `'Stream lossless FLAC and Opus audio directly from your personal Subsonic or Navidrome music server.'`
+    - Tombol primary `[ CONNECT TO NAVIDROME ]` (`HugeIcons.strokeRoundedCloudSync`) yang membuka `NavidromeConnectDialog` langsung
+    - Quick info badge studio: `SUBSONIC API • LOSSLESS FLAC • OPUS STREAMING`
 
-- [ ] **30.2 Navidrome Connect Dialog — Proportional Icon Fix & UX Polish**
-  - [ ] **Symptom**: Icon pada `prefixIcon` di `TextFormField` (Server URL, Username, Password) terlalu besar / tidak proporsional karena `HugeIcon` di dalam `prefixIcon` tidak dipadding/wrapped dengan benar — Flutter merender `prefixIcon` menggunakan default intrinsic size yang terlalu besar.
-  - [ ] **Fix**: Ganti `prefixIcon: HugeIcon(...)` dengan `prefixIcon: Padding(padding: EdgeInsets.all(12), child: HugeIcon(size: 18, ...))` agar icon tertanam proporsional di dalam field dengan clearance cukup.
-  - [ ] **UX Improvement**: Perkecil dialog width dari `440` ke `380`, turunkan padding dari `24` ke `20`, gunakan `fontSize: 13` untuk label field agar lebih compact dan studio-grade.
-  - [ ] **Test**: Tambahkan widget test untuk `NavidromeConnectDialog` memverifikasi render textfield dan icon proportionality.
+- [x] **30.2 Navidrome Connect Dialog — Proportional Icon Fix & UX Polish**
+  - [x] Memperbaiki proporsi `prefixIcon` pada `TextFormField` (Server URL, Username, Password) dengan padding 12px dan `prefixIconConstraints: BoxConstraints(minWidth: 42, minHeight: 42)` agar icon proporsional dan tidak meregang besar.
+  - [x] Mengurangi dialog width dari 440px ke 380px dan padding dari 24px ke 20px untuk layout studio compact yang ergonomis.
+  - [x] Menambahkan widget test di `test/phase_29_and_30_features_test.dart` memverifikasi rendering dialog dan proporsi icon.
 
-- [ ] **30.3 Navidrome Connection Session Persistence (Auto-Reconnect on App Restart)**
-  - [ ] **Symptom**: Setelah app di-close dan dibuka kembali, koneksi Navidrome tidak tersimpan — user harus connect ulang setiap kali buka app.
-  - [ ] **Root Cause Analysis**: Perlu dicek apakah `connectNavidrome()` di `LibraryController` sudah menyimpan `SubsonicServerConfig` ke `LocalPersistenceService`, dan apakah ada restore di `initState` / provider initialization.
-  - [ ] **Fix**:
-    1. Verifikasi `LibraryController` menyimpan config ke `LocalPersistenceService.saveSetting('navidrome_config', config.toMap())` setelah connect sukses.
-    2. Di `LibraryController` konstruktor / `_init()`, load saved config dan auto-call `connectNavidrome(savedConfig)` jika config tersedia.
-    3. Tambahkan key `'navidrome_config'` ke `LocalPersistenceService` backup/restore map.
-  - [ ] **Test**: Unit test memverifikasi `connectNavidrome()` persist config dan `LibraryController` auto-restores session on init.
+- [x] **30.3 Navidrome Connection Session Persistence (Auto-Reconnect on App Restart)**
+  - [x] Menambahkan method serialisasi `toMap()` dan deserialisasi `SubsonicServerConfig.fromMap()` pada `SubsonicServerConfig`.
+  - [x] `UnifiedLibraryController.connectNavidrome()` otomatis menyimpan konfigurasi server ke `LocalPersistenceService.saveSetting('navidrome_config', config.toMap())` setelah koneksi berhasil.
+  - [x] `UnifiedLibraryController.disconnectNavidrome()` menghapus konfigurasi server dari persistence.
+  - [x] Implementasi `restoreNavidromeSession()` pada startup controller (`Future.microtask`) untuk auto-reconnect ke server Navidrome saat aplikasi dibuka kembali.
+  - [x] Mendaftarkan key `'navidrome_config'` pada archive backup & restore `BackupRestoreService`.
 
-- [ ] **30.4 Lyrics Active Line Auto-Scroll Centering Fix**
-  - [ ] **Symptom**: Saat lirik berjalan dan berganti ke baris aktif berikutnya, `_scrollToActiveLine()` tidak menempatkan baris aktif tepat di **tengah viewport** — baris aktif muncul di tepi atas/bawah viewport atau bahkan terpotong.
-  - [ ] **Root Cause**: `_scrollToActiveLine` di [`synchronized_lyrics_view.dart`](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/lib/features/player/presentation/widgets/synchronized_lyrics_view.dart#L100-L109) menghitung offset dengan:
+- [x] **30.4 Lyrics Active Line Auto-Scroll Centering Fix**
+  - [x] Memperbaiki perhitungan target offset pada `_scrollToActiveLine()` di `SynchronizedLyricsView`:
     ```dart
-    final targetOffset = (index * itemHeight) - 120.0;
+    final itemHeight = _displayMode == LyricsDisplayMode.dualLine ? 74.0 : 56.0;
+    final viewportHeight = _scrollController.position.viewportDimension;
+    final targetOffset = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    _scrollController.animateTo(
+      targetOffset.clamp(0.0, maxExtent > 0 ? maxExtent : double.infinity),
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
     ```
-    Hardcoded `-120.0` tidak mempertimbangkan **actual viewport height** dan **actual item height per mode** yang bervariasi. Akibatnya active line tidak terletak di center viewport.
-  - [ ] **Fix**:
-    ```dart
-    void _scrollToActiveLine(int index) {
-      if (!_scrollController.hasClients) return;
-      final itemHeight = _displayMode == LyricsDisplayMode.dualLine ? 74.0 : 56.0;
-      final viewportHeight = _scrollController.position.viewportDimension;
-      // Center active line: scroll so the active item is in the middle of viewport
-      final targetOffset = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
-      final maxExtent = _scrollController.position.maxScrollExtent;
-      _scrollController.animateTo(
-        targetOffset.clamp(0.0, maxExtent > 0 ? maxExtent : double.infinity),
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutCubic,
-      );
-    }
-    ```
-  - [ ] Pastikan `_scrollController.hasClients` dan `viewportDimension > 0` sebelum menghitung.
-  - [ ] **Test**: Widget test memverifikasi bahwa setelah `didUpdateWidget` dengan `activeIndex = 10` dari 20 lines, scroll offset menempatkan item 10 mendekati center viewport.
+  - [x] Memastikan baris lirik aktif selalu terpusat tepat di tengah (_center viewport_) di semua mode display (Original, Romanized, Dual-Line).
+  - [x] Validasi widget test pada `test/phase_29_and_30_features_test.dart` (254/254 tests lulus 100%, 0 analyzer warnings).
+
+---
+
+## Fase 31: Lyrics Viewport Centering, YouTube Instant Streaming, Compact Empty State & Solid Theming Mode (In Progress)
+
+Penyempurnaan presisi viewport centering lirik di semua mode pemutaran, eliminasi infinite spinner YouTube, perapian UI empty state library ke Bento 2x2, serta pengaturan gaya warna solid vs transparan.
+
+- [ ] **31.1 Synchronized Lyrics Active Viewport Centering (All Sources)**
+  - [ ] Implementasi `Scrollable.ensureVisible` dengan `alignment: 0.5` (`curve: Curves.easeOutCubic`, 300ms) untuk menempatkan baris lirik aktif selalu tepat di tengah vertikal viewport.
+  - [ ] Memastikan centering presisi berfungsi konsisten untuk trek Lokal/Offline, Navidrome Cloud stream, dan YouTube Music stream.
+  - [ ] Auto-scroll langsung pada inisialisasi awal, saat scrubbing/seeking, dan saat pergantian offset waktu.
+
+- [ ] **31.2 YouTube Instant Streaming & Non-Blocking Audio Pipeline**
+  - [ ] Refaktor `PlayerController.playTrack` untuk memutar stream YouTube secara instan (<1–2s) tanpa menunggu download 100% selesai.
+  - [ ] Background caching pipeline tetap berjalan secara fire-and-forget untuk pemutaran ulang 0ms offline.
+  - [ ] Penambahan guard timeout dan error fallback agar tombol Play/Pause tidak stuck di loading spinner.
+
+- [ ] **31.3 Compact Bento 2x2 Library Empty State Quick Actions**
+  - [ ] Redesain layout kartu empty state library dari 4 tombol vertikal yang terlalu tinggi menjadi Bento Grid 2x2 yang ringkas dan proporsional.
+  - [ ] Mengelompokkan tombol sumber lokal (`Select Folder`, `Pick Files`) dan sumber online (`Navidrome`, `YouTube HiFi`) dengan visual studio yang rapi.
+  - [ ] Penambahan pill badge format audiophile compact di bagian footer kartu.
+
+- [ ] **31.4 Theming Color Surface Fill Style Setting (Solid vs Translucent)**
+  - [ ] Penambahan enum `SurfaceFillStyle` (`translucent`, `solid`) dan integrasi ke `ThemeSettingsState` serta `LocalPersistenceService`.
+  - [ ] Penambahan Segmented Control selector pada `ThemingSettingsScreen` di bawah section `SURFACE & COMPONENT FILL STYLE`.
+  - [ ] Penerapan gaya warna solid vs transparan secara dinamis pada kartu, container, dock navigation, dan tombol.
+
+- [ ] **31.5 Unit & Widget Test Suite Validation**
+  - [ ] Pembuatan test file `test/phase_31_features_test.dart` untuk memvalidasi centering lirik, YouTube non-blocking stream, layout Bento empty state, dan konfigurasi solid theming.
+  - [ ] Memastikan 100% test passing dan 0 issues pada `flutter analyze`.

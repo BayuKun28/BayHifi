@@ -78,8 +78,13 @@ class BackupRestoreService {
       backupMap['saved_library_tracks'] = storage.getSavedLibraryTracks();
     }
 
-    // Include personalization settings
-    final allKeys = ['player_customization_settings', 'playback_settings', 'lyrics_display_mode'];
+    // Include personalization settings & cloud config
+    final allKeys = [
+      'player_customization_settings',
+      'playback_settings',
+      'lyrics_display_mode',
+      'navidrome_config',
+    ];
     for (final key in allKeys) {
       final val = storage.getSetting<dynamic>(key);
       if (val != null) {
@@ -218,6 +223,9 @@ class BackupRestoreService {
       }
       if (data['lyrics_display_mode'] != null) {
         await storage.saveSetting('lyrics_display_mode', data['lyrics_display_mode']);
+      }
+      if (data['navidrome_config'] != null) {
+        await storage.saveSetting('navidrome_config', data['navidrome_config']);
       }
 
       return RestoreResult(

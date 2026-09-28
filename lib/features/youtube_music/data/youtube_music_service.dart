@@ -126,6 +126,30 @@ class YouTubeMusicService {
     }
   }
 
+  /// Returns a live Stream<List<int>> of audio chunks using YoutubeExplode streamsClient
+  Future<Stream<List<int>>?> getAudioByteStream(String videoIdOrTrackId) async {
+    final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
+    try {
+      final manifest = await _client.videos.streamsClient.getManifest(videoId);
+      final audioStreams = manifest.audioOnly;
+      if (audioStreams.isEmpty) return null;
+
+      AudioStreamInfo? bestStream;
+      try {
+        final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
+        if (opusStreams.isNotEmpty) {
+          bestStream = opusStreams.withHighestBitrate();
+        }
+      } catch (_) {}
+      bestStream ??= audioStreams.withHighestBitrate();
+
+      return _client.videos.streamsClient.get(bestStream);
+    } catch (e, st) {
+      debugPrint('[YouTubeMusicService] Error getting audio stream for $videoId: $e\n$st');
+      return null;
+    }
+  }
+
   /// Downloads audio directly using YoutubeExplode streamsClient into targetFile
   Future<String?> downloadAudio(
     String videoIdOrTrackId,

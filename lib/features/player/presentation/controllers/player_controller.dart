@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
@@ -437,27 +439,80 @@ class PlayerController extends StateNotifier<PlaybackState> {
           debugPrint('[PlayerController] Playing cached track from $cachedPath');
           await _audioEngine.playFile(cachedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
         } else if (track.id.startsWith('yt_')) {
-          // YouTube track: resolve CDN stream URL immediately and stream (zero-wait)
-          // Full download happens silently in background for next-play cache hit.
-          String? streamUrl = track.streamUrl ?? track.remoteUrl;
-          if (streamUrl == null || streamUrl.isEmpty) {
-            streamUrl = await YouTubeMusicService.instance.getAudioStreamUrl(track.id);
+          // YouTube track: progressive push-streaming via setBufferStream + simultaneous cache writing
+          bool streamedSuccessfully = false;
+          try {
+            final byteStream = await YouTubeMusicService.instance
+                .getAudioByteStream(track.id)
+                .timeout(const Duration(seconds: 12));
+
+            if (byteStream != null) {
+              final bufferSource = SoLoud.instance.setBufferStream(
+                bufferingType: BufferingType.preserved,
+                bufferingTimeNeeds: 0.5,
+                format: BufferType.auto,
+              );
+              await _audioEngine.playAudioSource(bufferSource, fadeIn: enableFade, fadeDuration: fadeDuration);
+              streamedSuccessfully = true;
+
+              // Asynchronously pipe chunks into SoLoud and disk cache
+              () async {
+                final tempFile = AudioCacheService.instance.getTempFile(track.id);
+                final targetFile = AudioCacheService.instance.getCacheFile(track.id);
+                IOSink? sink;
+                try {
+                  if (!await tempFile.parent.exists()) {
+                    await tempFile.parent.create(recursive: true);
+                  }
+                  sink = tempFile.openWrite();
+                  await for (final chunk in byteStream) {
+                    SoLoud.instance.addAudioDataStream(bufferSource, Uint8List.fromList(chunk));
+                    sink.add(chunk);
+                  }
+                  SoLoud.instance.setDataIsEnded(bufferSource);
+                  await sink.flush();
+                  await sink.close();
+                  sink = null;
+
+                  if (await tempFile.exists() && await tempFile.length() > 0) {
+                    if (await targetFile.exists()) await targetFile.delete();
+                    await tempFile.rename(targetFile.path);
+                    await AudioCacheService.instance.scanCache();
+                  }
+                } catch (e) {
+                  debugPrint('[PlayerController] Progressive stream piping error: $e');
+                  try {
+                    SoLoud.instance.setDataIsEnded(bufferSource);
+                  } catch (_) {}
+                } finally {
+                  try {
+                    await sink?.close();
+                  } catch (_) {}
+                }
+              }();
+            }
+          } catch (streamErr) {
+            debugPrint('[PlayerController] Progressive streaming failed, attempting fallback cacheTrack: $streamErr');
           }
 
-          if (streamUrl != null && streamUrl.isNotEmpty) {
-            // Begin streaming immediately — no wait for full download
-            await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
-
-            // Background cache: download for instant future plays (fire-and-forget)
-            AudioCacheService.instance.cacheTrack(track).then((path) {
-              if (path != null) {
-                debugPrint('[PlayerController] YT track cached for future use: ${track.title}');
+          if (!streamedSuccessfully) {
+            // Fallback: Download via cacheTrack with 15s timeout
+            final downloadedPath = await AudioCacheService.instance
+                .cacheTrack(track)
+                .timeout(const Duration(seconds: 15), onTimeout: () => null);
+            if (downloadedPath != null) {
+              await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+            } else {
+              String? streamUrl = track.streamUrl ?? track.remoteUrl;
+              if (streamUrl == null || streamUrl.isEmpty) {
+                streamUrl = await YouTubeMusicService.instance.getAudioStreamUrl(track.id);
               }
-            }).catchError((e) {
-              debugPrint('[PlayerController] YT background cache error: $e');
-            });
-          } else {
-            throw ArgumentError('Unable to resolve YouTube stream URL for: ${track.id}');
+              if (streamUrl != null && streamUrl.isNotEmpty) {
+                await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
+              } else {
+                throw ArgumentError('Unable to resolve YouTube audio stream for: ${track.id}');
+              }
+            }
           }
         } else {
           // Subsonic / generic remote: download-to-cache then play

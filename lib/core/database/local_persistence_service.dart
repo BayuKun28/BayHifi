@@ -106,6 +106,11 @@ class LocalPersistenceService {
     await _save();
   }
 
+  Future<void> removeSetting(String key) async {
+    _cache.remove(key);
+    await _save();
+  }
+
   // ─── 3.1 THEME & PALETTE PERSISTENCE ───────────────────────────────────────
   Map<String, dynamic> getThemeSettings() {
     final data = _cache['theme_settings'];
@@ -120,6 +125,7 @@ class LocalPersistenceService {
       'theme_mode': 2, // dark
       'custom_accent': 0xFF38BDF8,
       'dynamic_album_art': false,
+      'surface_fill_style': 'translucent',
     };
   }
 
@@ -128,12 +134,14 @@ class LocalPersistenceService {
     required int themeModeIndex,
     required int customAccentColorValue,
     required bool dynamicAlbumArtEnabled,
+    String surfaceFillStyle = 'translucent',
   }) async {
     _cache['theme_settings'] = {
       'palette_id': paletteId,
       'theme_mode': themeModeIndex,
       'custom_accent': customAccentColorValue,
       'dynamic_album_art': dynamicAlbumArtEnabled,
+      'surface_fill_style': surfaceFillStyle,
     };
     await _save();
   }

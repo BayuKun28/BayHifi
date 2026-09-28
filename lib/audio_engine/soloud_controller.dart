@@ -188,6 +188,38 @@ class SoLoudController {
     }
   }
 
+  /// Memutar audio dari AudioSource kustom (misal Push/Buffer Stream)
+  Future<SoundHandle?> playAudioSource(
+    AudioSource source, {
+    bool fadeIn = false,
+    Duration fadeDuration = const Duration(milliseconds: 300),
+  }) async {
+    final int requestId = ++_playRequestId;
+    if (!_isInitialized) await init();
+    if (requestId != _playRequestId) return null;
+
+    await _stopCurrentAudio();
+    if (requestId != _playRequestId) return null;
+
+    try {
+      _currentSource = source;
+      final targetVolume = effectiveVolume > 0.0 ? effectiveVolume : 1.0;
+      final handle = SoLoud.instance.play(
+        source,
+        volume: targetVolume,
+        scale: _playbackSpeed.clamp(0.05, 5.0),
+      );
+      _currentHandle = handle;
+      SoLoud.instance.setVolume(handle, targetVolume);
+
+      _startPositionTracking();
+      return handle;
+    } catch (e, stack) {
+      debugPrint('[SoLoudController] Failed to play AudioSource -> $e\n$stack');
+      rethrow;
+    }
+  }
+
   /// Pause / Resume toggle
   void pauseSwitch() {
     final handle = _currentHandle;

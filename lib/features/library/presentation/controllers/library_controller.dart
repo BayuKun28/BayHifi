@@ -352,10 +352,11 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
           smartPlaylists: initialSmartPlaylists ?? _loadSavedSmartPlaylists(),
           favoriteTrackIds: LocalPersistenceService.instance.getFavoriteTrackIds().toSet(),
         )) {
-    // Non-blocking differential startup sync for newly added tracks and missing artwork
+    // Non-blocking differential startup sync for newly added tracks, missing artwork, and Navidrome session
     Future.microtask(() async {
       await syncNewTracksOnStartup();
       await recoverMissingArtwork();
+      await restoreNavidromeSession();
     });
   }
 
@@ -890,6 +891,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
           statusMessage: 'Connected to Navidrome server.',
         );
 
+        await LocalPersistenceService.instance.saveSetting('navidrome_config', config.toMap());
         await syncNavidromeLibrary();
         return true;
       } else {
@@ -907,6 +909,24 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
         statusMessage: 'Navidrome connection error: $e',
       );
       return false;
+    }
+  }
+
+  /// Restore saved Navidrome session on startup
+  Future<void> restoreNavidromeSession() async {
+    if (state.navidromeConnectionStatus == NavidromeConnectionStatus.connected || state.isConnectingNavidrome) {
+      return;
+    }
+    try {
+      final configMap = LocalPersistenceService.instance.getSetting<Map<String, dynamic>>('navidrome_config');
+      if (configMap != null) {
+        final config = SubsonicServerConfig.fromMap(configMap);
+        if (config.serverUrl.isNotEmpty && config.username.isNotEmpty) {
+          await connectNavidrome(config);
+        }
+      }
+    } catch (e) {
+      debugPrint('[UnifiedLibraryController] Error restoring Navidrome session: $e');
     }
   }
 
@@ -940,6 +960,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   /// Disconnect Navidrome
   void disconnectNavidrome() {
     final existingLocal = state.tracks.where((t) => t.filePath != null).toList();
+    LocalPersistenceService.instance.removeSetting('navidrome_config');
     state = state.copyWith(
       tracks: existingLocal,
       navidromeConnectionStatus: NavidromeConnectionStatus.disconnected,

@@ -20,6 +20,17 @@ enum AppThemeMode {
   const AppThemeMode(this.mode, this.label, this.description, this.icon);
 }
 
+/// Surface and component fill style (translucent soft tint vs pure solid M3)
+enum SurfaceFillStyle {
+  translucent('Translucent Soft Tint', 'Subtle transparent tint for cards and surfaces', HugeIcons.strokeRoundedLayers01),
+  solid('Pure Solid M3', '100% solid filled colors for all cards, containers and buttons', HugeIcons.strokeRoundedSquare);
+
+  final String label;
+  final String description;
+  final dynamic icon;
+  const SurfaceFillStyle(this.label, this.description, this.icon);
+}
+
 /// Audiophile Studio Custom Palette Model
 @immutable
 class AppPalette {
@@ -295,12 +306,16 @@ class ThemeSettingsState {
   final AppPalette currentPalette;
   final Color customAccentColor;
   final bool dynamicAlbumArtEnabled;
+  final SurfaceFillStyle? surfaceFillStyle;
+
+  SurfaceFillStyle get effectiveSurfaceFillStyle => surfaceFillStyle ?? SurfaceFillStyle.translucent;
 
   const ThemeSettingsState({
     this.themeMode = AppThemeMode.dark,
     this.currentPalette = AppPalette.namidaCyan,
     this.customAccentColor = const Color(0xFF38BDF8),
     this.dynamicAlbumArtEnabled = false,
+    this.surfaceFillStyle = SurfaceFillStyle.translucent,
   });
 
   ThemeSettingsState copyWith({
@@ -308,12 +323,14 @@ class ThemeSettingsState {
     AppPalette? currentPalette,
     Color? customAccentColor,
     bool? dynamicAlbumArtEnabled,
+    SurfaceFillStyle? surfaceFillStyle,
   }) {
     return ThemeSettingsState(
       themeMode: themeMode ?? this.themeMode,
       currentPalette: currentPalette ?? this.currentPalette,
       customAccentColor: customAccentColor ?? this.customAccentColor,
       dynamicAlbumArtEnabled: dynamicAlbumArtEnabled ?? this.dynamicAlbumArtEnabled,
+      surfaceFillStyle: surfaceFillStyle ?? (this.surfaceFillStyle ?? SurfaceFillStyle.translucent),
     );
   }
 }
@@ -329,6 +346,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       final modeIndex = saved['theme_mode'] as int? ?? AppThemeMode.dark.index;
       final accentVal = saved['custom_accent'] as int? ?? 0xFF38BDF8;
       final dynamicArt = saved['dynamic_album_art'] as bool? ?? false;
+      final fillStyleStr = saved['surface_fill_style'] as String? ?? 'translucent';
 
       final themeMode = (modeIndex >= 0 && modeIndex < AppThemeMode.values.length)
           ? AppThemeMode.values[modeIndex]
@@ -340,12 +358,17 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       );
 
       final customColor = Color(accentVal);
+      final fillStyle = SurfaceFillStyle.values.firstWhere(
+        (f) => f.name == fillStyleStr,
+        orElse: () => SurfaceFillStyle.translucent,
+      );
 
       return ThemeSettingsState(
         themeMode: themeMode,
         currentPalette: palette,
         customAccentColor: customColor,
         dynamicAlbumArtEnabled: dynamicArt,
+        surfaceFillStyle: fillStyle,
       );
     } catch (e) {
       debugPrint('[ThemeController] Error loading initial theme state: $e');
@@ -357,11 +380,13 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
     try {
       final paletteId = state.currentPalette.isDynamic ? 'obsidian_cyan' : state.currentPalette.id;
       final accentValue = state.customAccentColor.toARGB32();
+      final fillStyle = state.surfaceFillStyle ?? SurfaceFillStyle.translucent;
       LocalPersistenceService.instance.saveThemeSettings(
         paletteId: paletteId,
         themeModeIndex: state.themeMode.index,
         customAccentColorValue: accentValue,
         dynamicAlbumArtEnabled: state.dynamicAlbumArtEnabled,
+        surfaceFillStyle: fillStyle.name,
       );
     } catch (e) {
       debugPrint('[ThemeController] Error persisting theme settings: $e');
@@ -374,6 +399,11 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
 
   void setThemeMode(AppThemeMode mode) {
     state = state.copyWith(themeMode: mode);
+    _persist();
+  }
+
+  void setSurfaceFillStyle(SurfaceFillStyle style) {
+    state = state.copyWith(surfaceFillStyle: style);
     _persist();
   }
 

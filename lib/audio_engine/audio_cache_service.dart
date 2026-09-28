@@ -70,6 +70,12 @@ class AudioCacheService extends ChangeNotifier {
     return File('${_cacheDir!.path}/$sanitized.tmp');
   }
 
+  /// Returns cache file for a track ID
+  File getCacheFile(String trackId) => _getCacheFile(trackId);
+
+  /// Returns temp file for a track ID
+  File getTempFile(String trackId) => _getTempFile(trackId);
+
   /// Memeriksa apakah track telah tersimpan di cache lokal
   bool isCached(String trackId) {
     return _cachedTrackIds.contains(trackId);

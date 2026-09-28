@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
@@ -55,6 +56,12 @@ class ThemingSettingsScreen extends ConsumerWidget {
           _buildSectionHeader(context, 'THEME MODE', HugeIcons.strokeRoundedSun01),
           const SizedBox(height: 8),
           _buildThemeModeSelector(context, themeState, themeNotifier),
+          const SizedBox(height: 20),
+
+          // 2b. SURFACE & COMPONENT FILL STYLE
+          _buildSectionHeader(context, 'SURFACE & COMPONENT FILL STYLE', HugeIcons.strokeRoundedPaintBoard),
+          const SizedBox(height: 8),
+          _buildSurfaceFillStyleSelector(context, themeState, themeNotifier),
           const SizedBox(height: 20),
 
           // 3. STUDIO COLOR PALETTES
@@ -262,6 +269,83 @@ class ThemingSettingsScreen extends ConsumerWidget {
                         color: isSelected
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildSurfaceFillStyleSelector(
+    BuildContext context,
+    ThemeSettingsState state,
+    ThemeController notifier,
+  ) {
+    final theme = Theme.of(context);
+    final activeStyle = state.surfaceFillStyle ?? SurfaceFillStyle.translucent;
+
+    return Row(
+      children: SurfaceFillStyle.values.map((fillOption) {
+        final isSelected = activeStyle == fillOption;
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                notifier.setSurfaceFillStyle(fillOption);
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                      : theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.dividerColor,
+                    width: isSelected ? 1.8 : 1.0,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    HugeIcon(
+                      icon: fillOption.icon,
+                      size: 20,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      fillOption.label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      fillOption.description,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ],

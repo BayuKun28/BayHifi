@@ -48,8 +48,8 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
       backgroundColor: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Container(
-        width: 440,
-        padding: const EdgeInsets.all(24),
+        width: 380,
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
@@ -139,10 +139,16 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
               // Server URL Field
               TextFormField(
                 controller: _urlController,
+                style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
                   labelText: 'Server URL',
+                  labelStyle: const TextStyle(fontSize: 13),
                   hintText: 'http://192.168.1.100:4533',
-                  prefixIcon: const HugeIcon(icon: HugeIcons.strokeRoundedServer, size: 20, color: Color(0xFF90A4AE)),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: HugeIcon(icon: HugeIcons.strokeRoundedServer, size: 18, color: Color(0xFF90A4AE)),
+                  ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
@@ -153,9 +159,15 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
               // Username Field
               TextFormField(
                 controller: _usernameController,
+                style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
                   labelText: 'Username',
-                  prefixIcon: const HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 20, color: Color(0xFF90A4AE)),
+                  labelStyle: const TextStyle(fontSize: 13),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 18, color: Color(0xFF90A4AE)),
+                  ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
@@ -167,9 +179,15 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: const HugeIcon(icon: HugeIcons.strokeRoundedLockPassword, size: 20, color: Color(0xFF90A4AE)),
+                  labelStyle: const TextStyle(fontSize: 13),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: HugeIcon(icon: HugeIcons.strokeRoundedLockPassword, size: 18, color: Color(0xFF90A4AE)),
+                  ),
                   suffixIcon: IconButton(
                     icon: HugeIcon(
                       icon: _obscurePassword ? HugeIcons.strokeRoundedViewOffSlash : HugeIcons.strokeRoundedView,
