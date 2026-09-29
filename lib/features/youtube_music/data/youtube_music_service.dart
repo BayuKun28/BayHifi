@@ -83,6 +83,61 @@ class YouTubeMusicService {
     }
   }
 
+  /// Cache of recently resolved stream manifests: videoId -> (manifest, expiresAt)
+  final Map<String, ({StreamManifest manifest, DateTime expiresAt})> _manifestCache = {};
+
+  /// Resolves the stream manifest with caching and auto-client recreation on error
+  Future<StreamManifest?> _getStreamManifest(String videoId) async {
+    final cached = _manifestCache[videoId];
+    if (cached != null && DateTime.now().isBefore(cached.expiresAt)) {
+      return cached.manifest;
+    }
+
+    try {
+      final manifest = await _client.videos.streamsClient.getManifest(videoId);
+      _manifestCache[videoId] = (
+        manifest: manifest,
+        expiresAt: DateTime.now().add(const Duration(minutes: 30)),
+      );
+      return manifest;
+    } catch (e) {
+      debugPrint('[YouTubeMusicService] Manifest fetch notice for $videoId: $e, recycling client...');
+      try {
+        _yt?.close();
+      } catch (_) {}
+      _yt = YoutubeExplode();
+      try {
+        final manifest = await _client.videos.streamsClient.getManifest(videoId);
+        _manifestCache[videoId] = (
+          manifest: manifest,
+          expiresAt: DateTime.now().add(const Duration(minutes: 30)),
+        );
+        return manifest;
+      } catch (retryErr, st) {
+        debugPrint('[YouTubeMusicService] Retry manifest fetch failed for $videoId: $retryErr\n$st');
+        return null;
+      }
+    }
+  }
+
+  /// Selects the highest quality audio stream from manifest
+  AudioStreamInfo? _selectBestAudioStream(StreamManifest manifest) {
+    final audioStreams = manifest.audioOnly.isNotEmpty
+        ? manifest.audioOnly
+        : (manifest.audio.isNotEmpty ? manifest.audio : <AudioStreamInfo>[]);
+
+    if (audioStreams.isEmpty) return null;
+
+    try {
+      final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
+      if (opusStreams.isNotEmpty) {
+        return opusStreams.withHighestBitrate();
+      }
+    } catch (_) {}
+
+    return audioStreams.withHighestBitrate();
+  }
+
   /// Resolves the highest quality direct audio stream URL (Opus 160kbps or AAC 256kbps).
   Future<String?> getAudioStreamUrl(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
@@ -94,25 +149,14 @@ class YouTubeMusicService {
     }
 
     try {
-      final manifest = await _client.videos.streamsClient.getManifest(videoId);
-      final audioStreams = manifest.audioOnly;
+      final manifest = await _getStreamManifest(videoId);
+      if (manifest == null) return null;
 
-      if (audioStreams.isEmpty) {
-        debugPrint('[YouTubeMusicService] No audio-only streams found for $videoId');
+      final bestStream = _selectBestAudioStream(manifest);
+      if (bestStream == null) {
+        debugPrint('[YouTubeMusicService] No audio streams found for $videoId');
         return null;
       }
-
-      // Prioritize Opus (WebM) audio stream for highest fidelity and SoLoud compatibility
-      AudioStreamInfo? bestStream;
-      try {
-        final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
-        if (opusStreams.isNotEmpty) {
-          bestStream = opusStreams.withHighestBitrate();
-        }
-      } catch (_) {}
-
-      // Fallback to highest bitrate audio stream
-      bestStream ??= audioStreams.withHighestBitrate();
 
       final streamUrl = bestStream.url.toString();
       _urlCache[videoId] = (
@@ -131,18 +175,11 @@ class YouTubeMusicService {
   Future<Stream<List<int>>?> getAudioByteStream(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
     try {
-      final manifest = await _client.videos.streamsClient.getManifest(videoId);
-      final audioStreams = manifest.audioOnly;
-      if (audioStreams.isEmpty) return null;
+      final manifest = await _getStreamManifest(videoId);
+      if (manifest == null) return null;
 
-      AudioStreamInfo? bestStream;
-      try {
-        final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
-        if (opusStreams.isNotEmpty) {
-          bestStream = opusStreams.withHighestBitrate();
-        }
-      } catch (_) {}
-      bestStream ??= audioStreams.withHighestBitrate();
+      final bestStream = _selectBestAudioStream(manifest);
+      if (bestStream == null) return null;
 
       return _client.videos.streamsClient.get(bestStream);
     } catch (e, st) {
@@ -156,18 +193,11 @@ class YouTubeMusicService {
   Future<Stream<Uint8List>?> getOggOpusAudioByteStream(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
     try {
-      final manifest = await _client.videos.streamsClient.getManifest(videoId);
-      final audioStreams = manifest.audioOnly;
-      if (audioStreams.isEmpty) return null;
+      final manifest = await _getStreamManifest(videoId);
+      if (manifest == null) return null;
 
-      AudioStreamInfo? bestStream;
-      try {
-        final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
-        if (opusStreams.isNotEmpty) {
-          bestStream = opusStreams.withHighestBitrate();
-        }
-      } catch (_) {}
-      bestStream ??= audioStreams.withHighestBitrate();
+      final bestStream = _selectBestAudioStream(manifest);
+      if (bestStream == null) return null;
 
       final rawStream = _client.videos.streamsClient.get(bestStream);
       final isOpusOrWebm = bestStream.audioCodec.toLowerCase().contains('opus') ||
@@ -193,21 +223,17 @@ class YouTubeMusicService {
   }) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
     try {
-      final manifest = await _client.videos.streamsClient.getManifest(videoId);
-      final audioStreams = manifest.audioOnly;
-      if (audioStreams.isEmpty) {
-        debugPrint('[YouTubeMusicService] No audio streams found for $videoId');
+      final manifest = await _getStreamManifest(videoId);
+      if (manifest == null) {
+        debugPrint('[YouTubeMusicService] No stream manifest found for $videoId');
         return null;
       }
 
-      AudioStreamInfo? bestStream;
-      try {
-        final opusStreams = audioStreams.where((s) => s.audioCodec.toLowerCase().contains('opus'));
-        if (opusStreams.isNotEmpty) {
-          bestStream = opusStreams.withHighestBitrate();
-        }
-      } catch (_) {}
-      bestStream ??= audioStreams.withHighestBitrate();
+      final bestStream = _selectBestAudioStream(manifest);
+      if (bestStream == null) {
+        debugPrint('[YouTubeMusicService] No audio streams found for $videoId');
+        return null;
+      }
 
       final rawStream = _client.videos.streamsClient.get(bestStream);
       final totalBytes = bestStream.size.totalBytes;

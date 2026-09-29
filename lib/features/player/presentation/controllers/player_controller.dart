@@ -442,7 +442,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
           try {
             final oggStream = await YouTubeMusicService.instance
                 .getOggOpusAudioByteStream(track.id)
-                .timeout(const Duration(seconds: 12));
+                .timeout(const Duration(seconds: 25));
 
             if (oggStream != null) {
               final bufferSource = SoLoud.instance.setBufferStream(
@@ -458,7 +458,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
               }
               final sink = tempFile.openWrite();
 
-              // Pre-buffer initial header chunks (OpusHead, OpusTags) + initial audio frames (~128KB or 15 chunks)
+              // Pre-buffer initial header chunks (OpusHead, OpusTags) + initial audio frames (~16KB or 3 chunks)
               final streamIterator = StreamIterator(oggStream);
               int prebufferedBytes = 0;
               int prebufferedChunks = 0;
@@ -470,14 +470,14 @@ class PlayerController extends StateNotifier<PlaybackState> {
                 SoLoud.instance.addAudioDataStream(bufferSource, chunk);
                 sink.add(chunk);
 
-                // Ensure OpusHead (page0), OpusTags (page1) and at least 3-5 audio pages are fed
-                if (prebufferedBytes >= 131072 || prebufferedChunks >= 15) {
+                // Ensure OpusHead (page0), OpusTags (page1) and first audio page are fed
+                if (prebufferedBytes >= 16384 || prebufferedChunks >= 3) {
                   break;
                 }
               }
 
               if (prebufferedChunks > 0) {
-                // Start playback once headers and audio frames are in SoLoud's buffer
+                // Start playback once headers and initial audio frames are in SoLoud's buffer
                 final handle = await _audioEngine.playAudioSource(
                   bufferSource,
                   fadeIn: enableFade,
@@ -522,10 +522,10 @@ class PlayerController extends StateNotifier<PlaybackState> {
           }
 
           if (!streamedSuccessfully) {
-            // Fallback: Download via cacheTrack with 20s timeout
+            // Fallback: Download via cacheTrack with 45s timeout
             final downloadedPath = await AudioCacheService.instance
                 .cacheTrack(track)
-                .timeout(const Duration(seconds: 20), onTimeout: () => null);
+                .timeout(const Duration(seconds: 45), onTimeout: () => null);
             if (downloadedPath != null) {
               await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
             } else {
