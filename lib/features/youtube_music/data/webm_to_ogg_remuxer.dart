@@ -366,6 +366,9 @@ class _WebmToOggSink implements EventSink<List<int>> {
     }
   }
 
+  final List<Uint8List> _pendingPackets = [];
+  int _pendingGranulePos = 0;
+
   void _ensureHeadersSent() {
     if (_headersSent) return;
     _headersSent = true;
@@ -393,6 +396,18 @@ class _WebmToOggSink implements EventSink<List<int>> {
       packets: [opusTags],
     );
     _outputSink.add(page1);
+  }
+
+  void _flushPendingPackets() {
+    if (_pendingPackets.isEmpty) return;
+    _currentGranulePos = _pendingGranulePos;
+    final oggPage = _pageBuilder.buildPage(
+      headerType: 0x00,
+      granulePos: _currentGranulePos,
+      packets: List<Uint8List>.from(_pendingPackets),
+    );
+    _pendingPackets.clear();
+    _outputSink.add(oggPage);
   }
 
   void _handleBlock(int start, int end) {
@@ -503,13 +518,18 @@ class _WebmToOggSink implements EventSink<List<int>> {
     if (packets.isNotEmpty) {
       for (final pkt in packets) {
         final samples = getOpusPacketSamples(pkt);
-        _currentGranulePos += samples;
-        final oggPage = _pageBuilder.buildPage(
-          headerType: 0x00,
-          granulePos: _currentGranulePos,
-          packets: [pkt],
-        );
-        _outputSink.add(oggPage);
+        _pendingGranulePos += samples;
+        _pendingPackets.add(pkt);
+      }
+
+      int totalBytes = 0;
+      for (final p in _pendingPackets) {
+        totalBytes += p.length;
+      }
+
+      // Emit page when accumulator has 6+ packets or reaches ~3KB
+      if (_pendingPackets.length >= 6 || totalBytes >= 3072) {
+        _flushPendingPackets();
       }
     }
   }
@@ -591,6 +611,7 @@ class _WebmToOggSink implements EventSink<List<int>> {
 
   @override
   void close() {
+    _flushPendingPackets();
     if (_hasEmittedAnyPage) {
       try {
         final eosPage = _pageBuilder.buildPage(

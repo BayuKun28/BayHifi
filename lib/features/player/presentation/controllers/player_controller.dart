@@ -458,44 +458,63 @@ class PlayerController extends StateNotifier<PlaybackState> {
               }
               final sink = tempFile.openWrite();
 
-              // Pre-buffer initial header chunk(s) (contains OpusHead & OpusTags)
+              // Pre-buffer initial header chunks (OpusHead, OpusTags) + initial audio frames (~128KB or 15 chunks)
               final streamIterator = StreamIterator(oggStream);
-              if (await streamIterator.moveNext()) {
-                final firstChunk = streamIterator.current;
-                SoLoud.instance.addAudioDataStream(bufferSource, firstChunk);
-                sink.add(firstChunk);
+              int prebufferedBytes = 0;
+              int prebufferedChunks = 0;
 
-                // Start playback once headers are in SoLoud's buffer
-                await _audioEngine.playAudioSource(bufferSource, fadeIn: enableFade, fadeDuration: fadeDuration);
-                streamedSuccessfully = true;
+              while (await streamIterator.moveNext()) {
+                final chunk = streamIterator.current;
+                prebufferedChunks++;
+                prebufferedBytes += chunk.length;
+                SoLoud.instance.addAudioDataStream(bufferSource, chunk);
+                sink.add(chunk);
 
-                // Asynchronously pipe remaining chunks into SoLoud and disk cache
-                () async {
-                  try {
-                    while (await streamIterator.moveNext()) {
-                      final chunk = streamIterator.current;
-                      SoLoud.instance.addAudioDataStream(bufferSource, chunk);
-                      sink.add(chunk);
-                    }
-                    SoLoud.instance.setDataIsEnded(bufferSource);
-                    await sink.flush();
-                    await sink.close();
+                // Ensure OpusHead (page0), OpusTags (page1) and at least 3-5 audio pages are fed
+                if (prebufferedBytes >= 131072 || prebufferedChunks >= 15) {
+                  break;
+                }
+              }
 
-                    if (await tempFile.exists() && await tempFile.length() > 0) {
-                      if (await targetFile.exists()) await targetFile.delete();
-                      await tempFile.rename(targetFile.path);
-                      await AudioCacheService.instance.scanCache();
-                    }
-                  } catch (e) {
-                    debugPrint('[PlayerController] Progressive stream piping error: $e');
+              if (prebufferedChunks > 0) {
+                // Start playback once headers and audio frames are in SoLoud's buffer
+                final handle = await _audioEngine.playAudioSource(
+                  bufferSource,
+                  fadeIn: enableFade,
+                  fadeDuration: fadeDuration,
+                );
+
+                if (handle != null && handle != -1) {
+                  streamedSuccessfully = true;
+
+                  // Asynchronously pipe remaining chunks into SoLoud and disk cache
+                  () async {
                     try {
+                      while (await streamIterator.moveNext()) {
+                        final chunk = streamIterator.current;
+                        SoLoud.instance.addAudioDataStream(bufferSource, chunk);
+                        sink.add(chunk);
+                      }
                       SoLoud.instance.setDataIsEnded(bufferSource);
-                    } catch (_) {}
-                    try {
+                      await sink.flush();
                       await sink.close();
-                    } catch (_) {}
-                  }
-                }();
+
+                      if (await tempFile.exists() && await tempFile.length() > 0) {
+                        if (await targetFile.exists()) await targetFile.delete();
+                        await tempFile.rename(targetFile.path);
+                        await AudioCacheService.instance.scanCache();
+                      }
+                    } catch (e) {
+                      debugPrint('[PlayerController] Progressive stream piping notice: $e');
+                      try {
+                        SoLoud.instance.setDataIsEnded(bufferSource);
+                      } catch (_) {}
+                      try {
+                        await sink.close();
+                      } catch (_) {}
+                    }
+                  }();
+                }
               }
             }
           } catch (streamErr) {
@@ -503,22 +522,14 @@ class PlayerController extends StateNotifier<PlaybackState> {
           }
 
           if (!streamedSuccessfully) {
-            // Fallback: Download via cacheTrack with 15s timeout
+            // Fallback: Download via cacheTrack with 20s timeout
             final downloadedPath = await AudioCacheService.instance
                 .cacheTrack(track)
-                .timeout(const Duration(seconds: 15), onTimeout: () => null);
+                .timeout(const Duration(seconds: 20), onTimeout: () => null);
             if (downloadedPath != null) {
               await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
             } else {
-              String? streamUrl = track.streamUrl ?? track.remoteUrl;
-              if (streamUrl == null || streamUrl.isEmpty) {
-                streamUrl = await YouTubeMusicService.instance.getAudioStreamUrl(track.id);
-              }
-              if (streamUrl != null && streamUrl.isNotEmpty) {
-                await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
-              } else {
-                throw ArgumentError('Unable to resolve YouTube audio stream for: ${track.id}');
-              }
+              throw ArgumentError('Unable to play or cache YouTube track: ${track.title} (${track.id})');
             }
           }
         } else {

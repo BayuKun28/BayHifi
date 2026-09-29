@@ -52,8 +52,11 @@ class YouTubeMusicController extends StateNotifier<YouTubeMusicState> {
   final Ref _ref;
   Timer? _debounceTimer;
 
-  YouTubeMusicController(this._ref) : super(const YouTubeMusicState()) {
-    fetchTrending();
+  YouTubeMusicController(this._ref, [YouTubeMusicState? initialState])
+      : super(initialState ?? const YouTubeMusicState()) {
+    if (initialState == null) {
+      fetchTrending();
+    }
   }
 
   @override
