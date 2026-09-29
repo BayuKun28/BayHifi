@@ -908,3 +908,34 @@ Ekspansi mode visualisasi audio (*Album Art Styles*, *RTA Spectrum Styles*, *Tim
   - [x] Pembuatan test suite di `test/phase_33_visualizer_expansion_test.dart` menguji rendering ke-7 mode album art, ke-7 mode spektrum, ke-6 mode seekbar, serta interaksi Bento dropdown.
   - [x] Seluruh 298 pengujian lulus 100% dengan 0 issues pada `flutter analyze`.
 
+---
+
+## Fase 34: Material 3 Expressive Settings Hub Redesign & 19 Studio Color Palettes Expansion
+
+Perombakan arsitektur Settings Screen dan seluruh sub-screen menjadi layout Bento Grid Material 3 Expressive semi-minimalis, penambahan 7 palet warna studio baru (total 19 palet studio), dan ekspansi cockpit overview.
+
+- [x] **34.1 Interactive Studio Overview Hero Card & Real-Time Cockpit Telemetry**
+  - [x] Header kartu hero interaktif di `SettingsScreen` dengan badge pill live (Active Palette, DSP Engine Status, Storage Quota, Visualizer Profile) yang dapat di-tap sebagai shortcut navigasi instan.
+- [x] **34.2 Ekspansi 7 Preset Palet Warna Studio M3 Expressive (Total 19 Studio Palettes)**
+  - [x] Menambahkan 7 palet warna baru di `AppPalette`: `Nordic Slate Frost`, `Terracotta Clay Studio`, `Matcha Botanical Green`, `Midnight Sapphire`, `Vintage Brass & Walnut`, `Mocha Espresso Roast`, `Monochrome Pro Carbon`.
+  - [x] Standardisasi neutral studio dark & light surfaces untuk seluruh 19 preset warna.
+- [x] **34.3 Streamlined Settings Bento Grid Grouping**
+  - [x] Pengelompokan seluruh opsi ke 4 Bento Groups utama: _Audio Engine & Hardware DSP_, _Visual Dynamics & Theming_, _Library, Storage & Cloud_, dan _System & Backup Archive_.
+- [x] **34.4 Unit & Widget Test Suite Validation (305/305 Passing Tests)**
+  - [x] Validasi suite pengujian komprehensif pada `test/settings_redesign_and_palettes_test.dart` dan `flutter analyze` 0 issues.
+
+---
+
+## Fase 35: Studio Settings Architecture & Sub-Screen Standardization
+
+Standardisasi menyeluruh terhadap seluruh sub-screen pengaturan (Theming, Playback Engine, Visualizer, Docking, Audio Hardware, Gestures, Storage & Cache, Library Scanner, Backup & Restore) menggunakan Bento Dropdowns, status hero banners, dan padding konsisten.
+
+- [x] **35.1 Layout & Spatial Geometry Standardization**
+  - [x] Margin lateral 16px, padding bawah 96px (clearance floating dock), squircle outer radius 16px, inner element radius 12px, badge pill radius 6-8px dengan tabular figures (`FontFeature.tabularFigures()`).
+- [x] **35.2 Standardisasi Bento Dropdowns (ComboBox) di Sub-Screens**
+  - [x] Mengganti kartu daftar vertikal yang panjang dengan Bento ComboBox Dropdown ringkas pada `GesturesSettingsScreen` (Single Tap, Double Tap, Long Press, Track Swipes), `StorageCacheSettingsScreen` (Auto-Purge Threshold, Cache Retention), `LibraryScannerSettingsScreen` (Min Track Duration), dan `DockingSettingsScreen` (Orientation Lock, VU Needle Damping).
+- [x] **35.3 Status / Telemetry Hero Banners**
+  - [x] Penambahan hero status banner di bagian atas setiap sub-screen dengan telemetry real-time dan badge metrik terpadu.
+- [x] **35.4 Unit & Widget Test Suite Validation**
+  - [x] Verifikasi regresi nol pada seluruh sub-screen pengaturan dengan 100% tests passing dan 0 lint errors.
+
