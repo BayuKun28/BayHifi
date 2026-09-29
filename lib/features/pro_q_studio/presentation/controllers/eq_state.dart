@@ -3,6 +3,16 @@ import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/eq_band.dart';
 import '../../domain/fr_curve_data.dart';
 
+/// Built-in factory preset names — these cannot be overwritten directly.
+const kBuiltInEqPresets = <String>[
+  'Default 10-Band',
+  'Flat',
+  'Bass Boost',
+  'V-Shape',
+  'Vocal Clarity',
+  'Treble Tamer',
+];
+
 @immutable
 class EqState {
   final List<EqBand> bands;
@@ -24,6 +34,14 @@ class EqState {
   final List<FrCurveData> availableTargets;
   final bool isAutoEqActive;
 
+  /// Whether the bands have changed since the last preset was applied / saved.
+  /// true  → show "SAVE" button (overwrite current preset)
+  /// false → show "+" button (create new preset)
+  final bool isDirty;
+
+  /// Names of all user-saved custom EQ presets (loaded from LocalPersistenceService).
+  final List<String> customPresetNames;
+
   const EqState({
     required this.bands,
     this.selectedBandIndex = 2, // Default selected on B2 (226Hz +4.4dB)
@@ -41,6 +59,8 @@ class EqState {
     this.availableDrivers = const [],
     this.availableTargets = const [],
     this.isAutoEqActive = false,
+    this.isDirty = false,
+    this.customPresetNames = const [],
   });
 
   EqBand? get selectedBand {
@@ -49,6 +69,9 @@ class EqState {
   }
 
   bool get isRawBypassed => abMode == AbComparisonMode.aRaw;
+
+  /// True if the active preset is a user-saved custom preset (can be overwritten directly).
+  bool get isCustomPresetLoaded => customPresetNames.contains(activePresetName);
 
   EqState copyWith({
     List<EqBand>? bands,
@@ -67,6 +90,8 @@ class EqState {
     List<FrCurveData>? availableDrivers,
     List<FrCurveData>? availableTargets,
     bool? isAutoEqActive,
+    bool? isDirty,
+    List<String>? customPresetNames,
   }) {
     return EqState(
       bands: bands ?? this.bands,
@@ -87,6 +112,8 @@ class EqState {
       availableDrivers: availableDrivers ?? this.availableDrivers,
       availableTargets: availableTargets ?? this.availableTargets,
       isAutoEqActive: isAutoEqActive ?? this.isAutoEqActive,
+      isDirty: isDirty ?? this.isDirty,
+      customPresetNames: customPresetNames ?? this.customPresetNames,
     );
   }
 }

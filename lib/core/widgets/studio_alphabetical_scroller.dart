@@ -138,7 +138,9 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
     }
   }
 
-  void _handleTouch(Offset localPosition, double totalHeight) {
+  void _handleRailTouch(Offset localPosition) {
+    final railBox = _railKey.currentContext?.findRenderObject() as RenderBox?;
+    final totalHeight = railBox?.size.height ?? 0;
     if (totalHeight <= 0 || widget.itemCount == 0) return;
 
     final alphabet = StudioAlphabeticalScroller.defaultAlphabet;
@@ -229,16 +231,10 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragStart: (details) {
                   setState(() => _isDragging = true);
-                  final box = context.findRenderObject() as RenderBox?;
-                  if (box != null) {
-                    _handleTouch(details.localPosition, box.size.height);
-                  }
+                  _handleRailTouch(details.localPosition);
                 },
                 onVerticalDragUpdate: (details) {
-                  final box = context.findRenderObject() as RenderBox?;
-                  if (box != null) {
-                    _handleTouch(details.localPosition, box.size.height);
-                  }
+                  _handleRailTouch(details.localPosition);
                 },
                 onVerticalDragEnd: (_) {
                   setState(() => _isDragging = false);
@@ -248,10 +244,7 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
                 },
                 onTapDown: (details) {
                   setState(() => _isDragging = true);
-                  final box = context.findRenderObject() as RenderBox?;
-                  if (box != null) {
-                    _handleTouch(details.localPosition, box.size.height);
-                  }
+                  _handleRailTouch(details.localPosition);
                 },
                 onTapUp: (_) {
                   Future.delayed(const Duration(milliseconds: 300), () {

@@ -23,6 +23,18 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
   int _selectedNavIndex = 0; // Default: Dashboard (Index 0)
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final current = ref.read(playerControllerProvider).currentTrack;
+      if (current != null) {
+        ref.read(themeControllerProvider.notifier).updateDynamicPaletteFromTrack(current);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeControllerProvider);
 

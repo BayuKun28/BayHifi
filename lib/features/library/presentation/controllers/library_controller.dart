@@ -23,7 +23,7 @@ class UnifiedLibraryState {
     this.currentTab = CollectionTab.tracks,
     this.sortField = SortField.title,
     this.sortDirection = SortDirection.ascending,
-    this.layoutMode = ViewLayoutMode.list,
+    this.layoutMode = ViewLayoutMode.grid,
     this.searchQuery = '',
     this.isSearching = false,
     this.isScanning = false,
@@ -505,24 +505,52 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   Future<bool> ensureStoragePermissions() async {
     if (kIsWeb || !Platform.isAndroid) return true;
     try {
-      // Request notification permission for Android 13+ (API 33+) media status bar playback
+      // Step 1: Request READ_EXTERNAL_STORAGE — works on all Android versions (≤ API 32)
+      // On Android 13+ this may return 'restricted' but won't block.
+      PermissionStatus storageStatus = await Permission.storage.request();
+
+      // Step 2: Request READ_MEDIA_AUDIO — Android 13+ (API 33+) granular media permission
+      // On Android ≤ 12 this is a no-op (returns granted or restricted silently).
+      PermissionStatus audioStatus = PermissionStatus.granted;
+      try {
+        audioStatus = await Permission.audio.request();
+      } catch (_) {}
+
+      // If either standard storage permission is granted, proceed.
+      if (storageStatus.isGranted || audioStatus.isGranted) {
+        return true;
+      }
+
+      // Step 3: Handle permanently denied — open App Settings so user can manually grant.
+      if (storageStatus.isPermanentlyDenied || audioStatus.isPermanentlyDenied) {
+        debugPrint('[UnifiedLibraryController] Storage permission permanently denied. Opening app settings.');
+        await openAppSettings();
+        // Re-check after settings return
+        final recheckStorage = await Permission.storage.status;
+        final recheckAudio = await Permission.audio.status;
+        if (recheckStorage.isGranted || recheckAudio.isGranted) return true;
+      }
+
+      // Step 4: Android 11+ (API 30+) — MANAGE_EXTERNAL_STORAGE for SD card / custom paths.
+      // Only attempt on Android 11+ to avoid crashes on Android 10 (API 29).
+      try {
+        final manageStatus = await Permission.manageExternalStorage.status;
+        if (manageStatus.isGranted) return true;
+        final res = await Permission.manageExternalStorage.request();
+        if (res.isGranted) return true;
+      } catch (_) {
+        // Not supported on this Android version (< API 30), ignore silently.
+      }
+
+      // Step 5: Notification permission for media controls (Android 13+)
       try {
         await Permission.notification.request();
       } catch (_) {}
 
-      final manageStatus = await Permission.manageExternalStorage.status;
-      if (!manageStatus.isGranted) {
-        final res = await Permission.manageExternalStorage.request();
-        if (res.isGranted) return true;
-      } else {
-        return true;
-      }
-
-      final audio = await Permission.audio.request();
-      final storage = await Permission.storage.request();
-      return audio.isGranted || storage.isGranted || manageStatus.isGranted;
+      return storageStatus.isGranted || audioStatus.isGranted;
     } catch (e) {
-      debugPrint('[UnifiedLibraryController] Permission plugin not yet bound (requires full app restart): $e');
+      debugPrint('[UnifiedLibraryController] Permission request notice: $e');
+      // Return true to not block the user on permission errors — OS will handle it.
       return true;
     }
   }
@@ -621,6 +649,8 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   /// Open file picker to choose specific audio files
   Future<void> pickAudioFiles() async {
     try {
+      await ensureStoragePermissions();
+
       final pickedFiles = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: const [

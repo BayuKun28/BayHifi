@@ -92,6 +92,7 @@ class _NamidaExpandableMiniPlayerState
   Widget build(BuildContext context) {
     final isExpanded = ref.watch(playerExpansionProvider);
     final playback = ref.watch(playerControllerProvider);
+    final libraryState = ref.watch(unifiedLibraryProvider);
     final track = playback.currentTrack;
     final theme = Theme.of(context);
     final isSolid = ref.isSolidStyle;
@@ -274,12 +275,102 @@ class _NamidaExpandableMiniPlayerState
                   child: _buildCategoryFab(context, theme, isSolid),
                 ),
               ),
+
+            // ─── 4. SHUFFLE SHORTCUT FAB (DI ATAS CATEGORY FAB PADA TRACKS TAB) ───
+            if (widget.isLibraryTab &&
+                libraryState.currentTab == CollectionTab.tracks &&
+                !_isCategoryDockExpanded &&
+                progress < 0.95)
+              Positioned(
+                right: 10,
+                bottom: currentBottom + miniPlayerHeight + 8.0,
+                width: 58,
+                height: 54,
+                child: Opacity(
+                  opacity: (1.0 - progress * 3.0).clamp(0.0, 1.0),
+                  child: _buildShuffleFab(context, theme, isSolid),
+                ),
+              ),
           ],
         );
       },
     ),
   );
 }
+
+  Widget _buildShuffleFab(BuildContext context, ThemeData theme, bool isSolid) {
+    final libraryState = ref.watch(unifiedLibraryProvider);
+    final primary = theme.colorScheme.primary;
+    final tracks = libraryState.filteredTracks.isNotEmpty
+        ? libraryState.filteredTracks
+        : libraryState.tracks;
+
+    return Tooltip(
+      message: 'Shuffle All Tracks',
+      child: Material(
+        color: Colors.transparent,
+        elevation: 10,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+            if (tracks.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No tracks to shuffle.'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              return;
+            }
+            HapticFeedback.lightImpact();
+            final shuffled = List<Track>.from(tracks)..shuffle();
+            ref.read(playerControllerProvider.notifier).setQueue(
+                  shuffled,
+                  initialIndex: 0,
+                );
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Shuffled ${shuffled.length} tracks into queue'),
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: 58,
+            height: 54,
+            decoration: BoxDecoration(
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedShuffle,
+                  size: 20,
+                  color: primary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildCategoryFab(BuildContext context, ThemeData theme, bool isSolid) {
     final libraryState = ref.watch(unifiedLibraryProvider);

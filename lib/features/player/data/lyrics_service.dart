@@ -74,9 +74,10 @@ class LyricsService {
       final text = track.lyrics!.trim();
       final parsed = LrcParser.parse(text);
       final isSynced = parsed.isNotEmpty;
+      final lines = isSynced ? parsed : LrcParser.parsePlain(text);
       return LyricsResult(
         rawLyrics: text,
-        lines: parsed,
+        lines: lines,
         isSynced: isSynced,
         source: LyricsSource.embedded,
         trackName: track.title,
@@ -84,7 +85,7 @@ class LyricsService {
       );
     }
 
-    // 2. Sidecar .lrc file
+    // 2. Sidecar .lrc or .txt file
     if (track.filePath != null && track.filePath!.isNotEmpty) {
       try {
         final audioFile = File(track.filePath!);
@@ -94,14 +95,24 @@ class LyricsService {
           '',
         );
         final lrcFile = File('${parent.path}${Platform.pathSeparator}$baseName.lrc');
+        final txtFile = File('${parent.path}${Platform.pathSeparator}$baseName.txt');
+        File? candidateFile;
         if (await lrcFile.exists()) {
-          final content = await lrcFile.readAsString();
+          candidateFile = lrcFile;
+        } else if (await txtFile.exists()) {
+          candidateFile = txtFile;
+        }
+
+        if (candidateFile != null) {
+          final content = await candidateFile.readAsString();
           if (content.trim().isNotEmpty) {
             final parsed = LrcParser.parse(content);
+            final isSynced = parsed.isNotEmpty;
+            final lines = isSynced ? parsed : LrcParser.parsePlain(content);
             return LyricsResult(
               rawLyrics: content,
-              lines: parsed,
-              isSynced: parsed.isNotEmpty,
+              lines: lines,
+              isSynced: isSynced,
               source: LyricsSource.sidecarFile,
               trackName: track.title,
               artistName: track.artist,
@@ -118,10 +129,12 @@ class LyricsService {
     final cached = LocalPersistenceService.instance.getSetting<String>(cacheKey);
     if (cached != null && cached.trim().isNotEmpty) {
       final parsed = LrcParser.parse(cached);
+      final isSynced = parsed.isNotEmpty;
+      final lines = isSynced ? parsed : LrcParser.parsePlain(cached);
       return LyricsResult(
         rawLyrics: cached,
-        lines: parsed,
-        isSynced: parsed.isNotEmpty,
+        lines: lines,
+        isSynced: isSynced,
         source: LyricsSource.cached,
         trackName: track.title,
         artistName: track.artist,
@@ -239,15 +252,7 @@ class LyricsService {
     }
 
     if (plain != null && plain.trim().isNotEmpty) {
-      // Create faux lines or empty timed lines for plain reader
-      final rawLines = plain.split('\n');
-      final lines = <LyricsLine>[];
-      for (int i = 0; i < rawLines.length; i++) {
-        final line = rawLines[i].trim();
-        if (line.isNotEmpty) {
-          lines.add(LyricsLine(timestamp: Duration(seconds: i * 4), text: line));
-        }
-      }
+      final lines = LrcParser.parsePlain(plain);
       return LyricsResult(
         rawLyrics: plain,
         lines: lines,

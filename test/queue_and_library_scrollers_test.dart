@@ -135,6 +135,51 @@ void main() {
 
       expect(find.byType(Scrollbar), findsOneWidget);
     });
+
+    testWidgets('Tapping letter on alphabet rail jumps to corresponding target index', (tester) async {
+      final controller = ScrollController();
+      final tracks = List.generate(30, (i) {
+        final letter = String.fromCharCode(65 + (i % 26)); // A-Z
+        return Track(
+          id: 'track_$i',
+          title: '$letter Song $i',
+          artist: 'Artist',
+          album: 'Album',
+          duration: const Duration(minutes: 3),
+        );
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: StudioAlphabeticalScroller(
+              scrollController: controller,
+              itemCount: tracks.length,
+              itemHeight: 74.0,
+              isAlphabetical: true,
+              letterSelector: (i) => tracks[i].title,
+              child: ListView.builder(
+                controller: controller,
+                itemCount: tracks.length,
+                itemBuilder: (_, i) => SizedBox(key: ValueKey('item_$i'), height: 74.0, child: Text(tracks[i].title)),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap on letter 'E' in the alphabet rail (index 4 in tracks: E Song 4)
+      final letterE = find.text('E');
+      expect(letterE, findsAtLeastNWidgets(1));
+      await tester.tap(letterE.first);
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
+
+      // Index of E Song is 4, 4 * 74 = 296
+      expect(controller.offset, closeTo(296.0, 1.0));
+    });
   });
 
   group('NowPlayingQueueSheet Centering & Scrollbar Tests', () {

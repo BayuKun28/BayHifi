@@ -420,7 +420,7 @@ class ThemeSettingsState {
   final bool dynamicAlbumArtEnabled;
   final SurfaceFillStyle? surfaceFillStyle;
 
-  SurfaceFillStyle get effectiveSurfaceFillStyle => surfaceFillStyle ?? SurfaceFillStyle.translucent;
+  SurfaceFillStyle get effectiveSurfaceFillStyle => surfaceFillStyle ?? SurfaceFillStyle.solid;
   bool get isSolidStyle => effectiveSurfaceFillStyle == SurfaceFillStyle.solid;
 
   const ThemeSettingsState({
@@ -428,7 +428,7 @@ class ThemeSettingsState {
     this.currentPalette = AppPalette.namidaCyan,
     this.customAccentColor = const Color(0xFF38BDF8),
     this.dynamicAlbumArtEnabled = false,
-    this.surfaceFillStyle = SurfaceFillStyle.translucent,
+    this.surfaceFillStyle = SurfaceFillStyle.solid,
   });
 
   ThemeSettingsState copyWith({
@@ -443,7 +443,7 @@ class ThemeSettingsState {
       currentPalette: currentPalette ?? this.currentPalette,
       customAccentColor: customAccentColor ?? this.customAccentColor,
       dynamicAlbumArtEnabled: dynamicAlbumArtEnabled ?? this.dynamicAlbumArtEnabled,
-      surfaceFillStyle: surfaceFillStyle ?? (this.surfaceFillStyle ?? SurfaceFillStyle.translucent),
+      surfaceFillStyle: surfaceFillStyle ?? (this.surfaceFillStyle ?? SurfaceFillStyle.solid),
     );
   }
 }
@@ -473,14 +473,43 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       final customColor = Color(accentVal);
       final fillStyle = SurfaceFillStyle.values.firstWhere(
         (f) => f.name == fillStyleStr,
-        orElse: () => SurfaceFillStyle.translucent,
+        orElse: () => SurfaceFillStyle.solid,
       );
+
+      if (dynamicArt) {
+        final dynVibrantVal = saved['dynamic_vibrant'] as int? ?? accentVal;
+        final dynDomVal = saved['dynamic_dominant'] as int? ?? 0xFF14171E;
+        final vibrant = Color(dynVibrantVal);
+        final dominant = Color(dynDomVal);
+        final dynamicPalette = AppPalette(
+          id: 'dynamic_album_art',
+          name: 'Dynamic Album Art',
+          description: 'Ekstraksi warna otomatis dari cover album yang sedang diputar',
+          primary: vibrant,
+          secondary: dominant,
+          accent: vibrant,
+          backgroundDark: const Color(0xFF0C0E12),
+          backgroundLight: const Color(0xFFF8FAFC),
+          surfaceDark: const Color(0xFF14161C),
+          surfaceLight: const Color(0xFFFFFFFF),
+          surfaceContainerDark: const Color(0xFF1C1F27),
+          surfaceContainerLight: const Color(0xFFF1F5F9),
+          isDynamic: true,
+        );
+        return ThemeSettingsState(
+          themeMode: themeMode,
+          currentPalette: dynamicPalette,
+          customAccentColor: vibrant,
+          dynamicAlbumArtEnabled: true,
+          surfaceFillStyle: fillStyle,
+        );
+      }
 
       return ThemeSettingsState(
         themeMode: themeMode,
         currentPalette: palette,
         customAccentColor: customColor,
-        dynamicAlbumArtEnabled: dynamicArt,
+        dynamicAlbumArtEnabled: false,
         surfaceFillStyle: fillStyle,
       );
     } catch (e) {
@@ -491,15 +520,19 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
 
   void _persist() {
     try {
-      final paletteId = state.currentPalette.isDynamic ? 'obsidian_cyan' : state.currentPalette.id;
+      final paletteId = state.currentPalette.isDynamic ? 'dynamic_album_art' : state.currentPalette.id;
       final accentValue = state.customAccentColor.toARGB32();
-      final fillStyle = state.surfaceFillStyle ?? SurfaceFillStyle.translucent;
+      final fillStyle = state.surfaceFillStyle ?? SurfaceFillStyle.solid;
+      final dynamicDominant = state.currentPalette.isDynamic ? state.currentPalette.secondary.toARGB32() : null;
+      final dynamicVibrant = state.currentPalette.isDynamic ? state.currentPalette.primary.toARGB32() : null;
       LocalPersistenceService.instance.saveThemeSettings(
         paletteId: paletteId,
         themeModeIndex: state.themeMode.index,
         customAccentColorValue: accentValue,
         dynamicAlbumArtEnabled: state.dynamicAlbumArtEnabled,
         surfaceFillStyle: fillStyle.name,
+        dynamicDominantValue: dynamicDominant,
+        dynamicVibrantValue: dynamicVibrant,
       );
     } catch (e) {
       debugPrint('[ThemeController] Error persisting theme settings: $e');
@@ -563,6 +596,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       currentPalette: dynamicPalette,
       customAccentColor: vibrant,
     );
+    _persist();
   }
 
   Future<void> updateDynamicPaletteFromTrack(Track? track) async {

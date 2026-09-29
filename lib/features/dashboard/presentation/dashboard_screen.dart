@@ -53,7 +53,7 @@ class DashboardScreen extends ConsumerWidget {
 
               const SizedBox(height: 16),
 
-              // ─── 3. STUDIO HERO SHOWCASE CAROUSEL (4 STUDIO SHOWCASE CARDS) ──
+              // ─── 3. STUDIO HERO SHOWCASE CAROUSEL (DYNAMIC STUDIO MIXES) ────
               const StudioHeroShowcaseCarousel()
                   .animate()
                   .fadeIn(delay: 100.ms, duration: 350.ms, curve: Curves.easeOut)
@@ -61,18 +61,18 @@ class DashboardScreen extends ConsumerWidget {
 
               const SizedBox(height: 16),
 
-              // ─── 4. BENTO 2: AUDIOPHILE LISTENING STATS & HI-RES INSIGHTS ───
-              const ListeningStatisticsCard()
+              // ─── 4. BENTO 2: RECENT LOSSLESS SESSIONS & QUICK RESUME ────────
+              RecentSessionsBentoCarousel(
+                onNavigateToLibrary: onNavigateToLibrary,
+              )
                   .animate()
                   .fadeIn(delay: 150.ms, duration: 350.ms, curve: Curves.easeOut)
                   .slideY(begin: 0.06, end: 0.0, curve: Curves.easeOutBack),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
-              // ─── 5. BENTO 3: RECENT LOSSLESS SESSIONS & QUICK RESUME ────────
-              RecentSessionsBentoCarousel(
-                onNavigateToLibrary: onNavigateToLibrary,
-              )
+              // ─── 5. BENTO 3: AUDIOPHILE LISTENING STATS & HI-RES INSIGHTS ───
+              const ListeningStatisticsCard()
                   .animate()
                   .fadeIn(delay: 200.ms, duration: 350.ms, curve: Curves.easeOut)
                   .slideY(begin: 0.06, end: 0.0, curve: Curves.easeOutBack),

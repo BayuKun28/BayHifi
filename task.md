@@ -6,9 +6,65 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 37 Fase (Fase 37 Selesai • 100% Passing Tests • 315/315 Passed)
+- **Total Fase**: 41 Fase (Fase 41 Selesai • 100% Passing Tests • 340/340 Passed)
 - **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, StudioSurfaceTheme (Solid & Translucent), 19 Studio Color Palettes, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
-- **Status Proyek**: _Phase 37: YouTube Music HiFi UI/UX Streamlining & Audio Streaming & Playback Engine Resolution (Completed)_
+- **Status Proyek**: _Phase 41: UI/UX Redesign, Dashboard Reordering, Library Grid Mode & Dynamic Detail Screen Backdrops (Completed)_
+
+---
+
+## Fase 41: UI/UX Redesign, Dashboard Reordering, Library Grid Mode & Dynamic Detail Screen Backdrops
+
+Penyempurnaan estetika studio dan konsistensi interaksi visual:
+1. **Lyric Card Ratio Horizontal Scroll**: Selector rasio kartu lirik menggunakan `SingleChildScrollView` horizontal dengan tombol berukuran terstandarisasi (`86px`) sehingga seluruh opsi (Story 9:16, Portrait 4:5, Square 1:1, Landscape 16:9) pas dan tidak terpotong atau wrap ke bawah.
+2. **Dashboard Hierarchy Redesign**: Rekonfigurasi urutan section Dashboard di mana `Recent Lossless Sessions` (`RecentSessionsBentoCarousel`) kini berada tepat di bawah `Dynamic Studio Mixes` (`StudioHeroShowcaseCarousel`) untuk visual flow yang harmonis.
+3. **Default Grid Mode for Albums & Artists (3-Column Circular Studio Presentation)**: Menjadikan mode Grid sebagai default (`layoutMode = ViewLayoutMode.grid`) dan merombak tampilan tab Artists menjadi **3 kolom per baris** dengan avatar berbentuk lingkaran murni, bayangan studio, dan nama artis di tengah.
+4. **Album Detail Screen Ambient Artist Photo Background (Soft Studio Blur)**: Menampilkan foto artis di belakang cover album dengan efek Gaussian blur yang halus dan tidak berlebihan (`sigma 7.0`), berpadu dengan gradient scrim yang seimbang sehingga foto artis terlihat jelas namun teks dan cover tetap terbaca tajam.
+5. **Artist Detail Screen Dynamic Collage & Gradient Backdrop**:
+   - Jika artis memiliki $\ge 4$ album: Menghasilkan **2x2 Album Cover Art Collage** yang diblur halus (`sigma 12.0`) dan dipadukan dengan studio vignette overlay.
+   - Jika artis memiliki $< 4$ album: Menghasilkan ambient backdrop foto artis (`sigma 7.0`) / artwork album primer dengan gradasi permukaan tema yang menyatu mulus ke tracklist.
+6. **Library Tracks Shuffle Shortcut FAB**: Menambahkan secondary FAB di atas Category FAB pada tab Tracks (`CollectionTab.tracks`) yang mengacak seluruh koleksi track, memasukkan track ke playback queue (`ref.read(playerControllerProvider.notifier).setQueue(shuffled, initialIndex: 0)`), memicu haptic feedback, dan menampilkan konfirmasi snackbar.
+
+- [x] **41.1 Lyric Card Ratio Picker Horizontal Scroll**
+- [x] **41.2 Dashboard Section Reordering & Proportions**
+- [x] **41.3 Library Albums & Artists Default 3-Column Circular Grid Mode & Toggle Bugfix**
+- [x] **41.4 Album Detail Screen Artist Photo Ambient Background (Soft Recognizable Blur)**
+- [x] **41.5 Artist Detail Screen Dynamic 2x2 Collage Backdrop**
+- [x] **41.6 Library Tracks Shuffle All Shortcut FAB with Queue Integration**
+- [x] **41.7 Unit & Widget Test Suite Validation (`test/phase_41_ui_ux_redesign_test.dart` - 100% Passed)**
+
+---
+
+## Fase 38: Spotify-Style Studio Lyric Card & Social Media Sharing System
+
+Pembuatan kartu kutipan lirik studio beresolusi tinggi (Lyric Card) bergaya Spotify / Apple Music dengan rasio kustom (9:16 Story & 1:1 Post), seleksi multi-baris interaktif, tema warna dinamis / OLED / studio, badge format Hi-Res audio, rasterisasi gambar via RepaintBoundary, serta integrasi berbagi ke media sosial (Instagram Stories, WhatsApp, X, dsb.) dan galeri lokal.
+
+- [x] **38.1 Setup Dependensi `share_plus` & Domain Model**
+  - [x] Menambahkan package `share_plus` (`^13.3.0`) ke `pubspec.yaml`.
+  - [x] Membuat domain model `LyricShareConfig`, enum `LyricCardRatio` (9:16 Story, 1:1 Square, 4:5 Portrait), dan `LyricCardThemePreset`.
+  - [x] Membuat model `LyricCardColors` dengan resolusi tema preset (Dynamic, Studio OLED Black, Precision Mint, Sky Studio, Warm Tube, Studio Rose).
+- [x] **38.2 Canvas Render `LyricCardWidget` & Service Rasterisasi `LyricImageGenerator`**
+  - [x] Membangun `LyricCardWidget` responsif (`LayoutBuilder` & dynamic scale factor) dengan tipografi lirik tebal, metadata track, artwork squircle 12px, Hi-Res audio badge, dan studio branding.
+  - [x] Mengimplementasikan `LyricImageGenerator` untuk rasterisasi `RepaintBoundary` -> PNG byte buffer (`pixelRatio: 3.0`) -> cache file -> native sharing via `SharePlus.instance.share`.
+- [x] **38.3 State Management & Interactive Modal `LyricShareSheet`**
+  - [x] Membuat `LyricShareController` untuk mengelola seleksi baris lirik (1-5 baris berurutan) dan konfigurasi tampilan.
+  - [x] Membuat `LyricShareSheet` dengan tab seleksi lirik, live preview canvas interaktif, color/ratio switcher, dan tombol aksi share/save.
+- [x] **38.4 Integrasi ke `SynchronizedLyricsView` & Player**
+  - [x] Menambahkan tombol aksi Share Lyrics di toolbar lirik dan interaksi long-press pada baris lirik.
+  - [x] Menghubungkan metadata lagu aktif, format audio (kHz/bit), dan artwork.
+- [x] **38.5 Unit & Widget Test Suite Validation**
+  - [x] Membuat unit test `test/lyric_share_models_and_controller_test.dart` dan widget test `test/lyric_card_widget_and_sheet_test.dart`.
+  - [x] Memastikan `flutter test` lulus 100% dan `flutter analyze` 0 issues / 0 warnings.
+- [x] **38.6 Dynamic Album Palette, Blurred Cover Background, Gallery Saving & App Logo Branding**
+  - [x] Memperbaiki penyimpanan rasterisasi gambar langsung ke direktori publik Galeri / Pictures (`Pictures/BayHifi` di Android/desktop) agar langsung muncul di Galeri foto perangkat.
+  - [x] Menangani pengecualian `MissingPluginException` pada `share_plus` secara elegan dengan pesan informatif dan fallback otomatis ke penyimpanan galeri.
+  - [x] Memperbaiki rendering artwork album pada footer kartu preview menggunakan `StudioArtworkWidget` terpadu agar selalu tampil dari bytes, file lokal, maupun URL.
+  - [x] Menambahkan 4 mode styling background: *Blurred Cover* (artwork album blur dengan studio readability shield), *Cover Palette* (swatches warna dinamis via `PaletteGenerator`), *Studio Themes* (preset studio), dan *Custom Colors* (12 palet warna audiophile kustom).
+  - [x] Memperbarui branding studio di header kartu menggunakan aset logo resmi aplikasi `assets/images/baydev_logo.png`.
+- [x] **38.7 Custom Typography, Audio Specs Badge Custom Text & Landscape Ratio**
+  - [x] Menambahkan opsi tipe font (`Studio Sans`, `Editorial Serif`, `Studio Mono`, `Script Flow`).
+  - [x] Menambahkan kontrol perataan teks (*Left*, *Center*, *Right*), ketebalan teks (*Bold/Regular*), kemiringan (*Italic*), dan *font size scale stepper* (`65%` hingga `160%`).
+  - [x] Menambahkan dialog editor teks kustom untuk *Audio Specs Badge* dengan opsi *Reset to Auto*.
+  - [x] Menambahkan opsi rasio kartu *Landscape (16:9)* yang responsif untuk wallpaper desktop dan feed sosial horizontal.
 
 ---
 
@@ -1001,4 +1057,46 @@ Menghilangkan notifikasi snackbar yang mengganggu saat auto-reconnect Navidrome 
 - [x] **38.3 Unit & Widget Test Suite Validation**
   - [x] Pengujian unit di `test/phase_29_and_30_features_test.dart` memvalidasi `restoreNavidromeSession(isSilent: true)` tidak menampilkan status message saat sukses dan menampilkan error message saat koneksi gagal.
   - [x] 100% tests passing dan 0 analyzer issues.
+
+
+---
+
+## Fase 39: Notification Icon Crash Fix & Storage Permission Modal Fix (Android 10 / MIUI)
+
+Perbaikan crash `IllegalArgumentException: Invalid notification (no valid small icon)` saat memutar lagu offline, dan perbaikan alur permission storage yang tidak tampil dengan benar di MIUI Android 10.
+
+- [x] **39.1 Audio Service Notification Icon Crash Fix**
+  - [x] Identifikasi root cause: `AudioServiceConfig.androidNotificationIcon` menunjuk ke `drawable/ic_stat_music` yang tidak ada di APK MIUI.
+  - [x] Ganti ke `mipmap/ic_launcher` di `lib/main.dart` — icon yang selalu tersedia di semua density dan versi Android.
+  - [x] Verifikasi `AndroidManifest.xml` sudah memiliki `android:icon="@mipmap/ic_launcher"`.
+- [x] **39.2 Storage Permission Flow Fix (Android 10 / MIUI)**
+  - [x] Refaktor `ensureStoragePermissions()` di `library_controller.dart` dengan urutan yang benar: `READ_EXTERNAL_STORAGE` → `READ_MEDIA_AUDIO` → `permanently denied → openAppSettings()` → `MANAGE_EXTERNAL_STORAGE`.
+  - [x] Tambahkan fallback `openAppSettings()` saat izin `permanentlyDenied` agar user dapat grant manual dari System Settings.
+  - [x] Proteksi `MANAGE_EXTERNAL_STORAGE` dengan try/catch untuk mencegah crash di Android 10 (API < 30).
+  - [x] Pindahkan `Permission.notification.request()` ke akhir pipeline (Step 5) agar tidak memblokir permission storage utama.
+- [x] **39.3 Unit & Analyzer Validation**
+  - [x] `flutter analyze` 0 issues. Seluruh tes lulus 100%.
+
+---
+
+## Fase 40: Dynamic Album Art Theme Cold-Boot Persistence & Proportional Lyric Card Preview Redesign
+
+Perbaikan bug hilangnya warna tema dinamis dari cover album lagu yang sedang aktif saat aplikasi ditutup/di-kill, perombakan menyeluruh kartu preview lirik dengan layout dua-kolom proporsional untuk rasio landscape (16:9), serta redesain opsi kustomisasi kartu menjadi Bento Section yang bersih dan ergonomis.
+
+- [x] **40.1 Dynamic Album Art Theme Cold-Boot Persistence**
+  - [x] Menambahkan penyimpanan nilai warna `dynamic_dominant` dan `dynamic_vibrant` ke cache database lokal pada `LocalPersistenceService.saveThemeSettings()`.
+  - [x] Memperbarui `ThemeController._loadInitialState()` untuk memulihkan `AppPalette` dengan warna dinamis yang tersimpan saat startup jika `dynamic_album_art == true`.
+  - [x] Menambahkan pemanggilan `_persist()` otomatis saat `setDynamicAlbumArt()` dieksekusi saat lagu berubah.
+  - [x] Menambahkan sinkronisasi ulang palet warna dari lagu aktif di `_BaydevHiFiAppState.initState()` pada cold start.
+- [x] **40.2 Dedicated Landscape (16:9) Proportional Two-Column Layout**
+  - [x] Membangun `_buildLandscapeContent` di `LyricCardWidget` dengan arsitektur dua kolom: sisi kiri untuk kutipan lirik yang lapang dan proporsional (`Expanded(flex: 11)`), dan sisi kanan untuk studio track badge kompak (`Expanded(flex: 8)`).
+  - [x] Merampingkan footer dan thumbnail squircle pada rasio vertikal (`9:16`, `1:1`, `4:5`) agar tidak memakan ruang lirik.
+  - [x] Kalibrasi skala ukuran font dinamis sesuai rasio dan jumlah baris lirik yang dipilih.
+- [x] **40.3 Studio Bento Options Redesign di `LyricShareSheet`**
+  - [x] Viewport stage preview terisolasi dengan animasi transisi halus antar rasio.
+  - [x] Pengelompokan kontrol ke dalam 4 kartu Bento Material 3 Expressive studio: *CARD RATIO* (dengan wireframe preview box), *TYPOGRAPHY & FORMATTING* (font family, alignment, bold/italic, font size multiplier), *BACKGROUND & PALETTE* (blurred cover, dynamic album swatches, studio presets, custom palette), dan *ELEMENTS & BADGES* (custom audio specs editor, studio branding, phonetic subtitle).
+- [x] **40.4 Unit & Widget Test Suite Validation**
+  - [x] Menambahkan pengujian cold boot dynamic palette restoration di `test/theme_persistence_test.dart`.
+  - [x] Menambahkan pengujian dedicated landscape 16:9 layout di `test/lyric_card_widget_and_sheet_test.dart`.
+  - [x] 100% tests passing (334/334 tests) dan 0 analyzer issues (`flutter analyze`).
 

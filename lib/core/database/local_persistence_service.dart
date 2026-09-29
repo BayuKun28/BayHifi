@@ -139,6 +139,8 @@ class LocalPersistenceService {
     required int customAccentColorValue,
     required bool dynamicAlbumArtEnabled,
     String surfaceFillStyle = 'translucent',
+    int? dynamicDominantValue,
+    int? dynamicVibrantValue,
   }) async {
     _cache['theme_settings'] = {
       'palette_id': paletteId,
@@ -146,6 +148,8 @@ class LocalPersistenceService {
       'custom_accent': customAccentColorValue,
       'dynamic_album_art': dynamicAlbumArtEnabled,
       'surface_fill_style': surfaceFillStyle,
+      'dynamic_dominant': ?dynamicDominantValue,
+      'dynamic_vibrant': ?dynamicVibrantValue,
     };
     await _save();
   }
@@ -363,7 +367,45 @@ class LocalPersistenceService {
     _cache['custom_dsp_profiles'] = profiles;
     await _save();
   }
+
+  // ─── 9. CUSTOM PRO-Q EQ PRESETS ─────────────────────────────────────────────
+  /// Returns all user-saved EQ presets. Each entry has: name, preampDb, bands (List<Map>).
+  List<Map<String, dynamic>> getCustomEqPresets() {
+    final list = _cache['custom_eq_presets'];
+    if (list is List) {
+      return list.whereType<Map<String, dynamic>>().toList();
+    }
+    return [];
+  }
+
+  /// Saves (or overwrites) a custom EQ preset by name.
+  Future<void> saveCustomEqPreset({
+    required String name,
+    required double preampDb,
+    required List<Map<String, dynamic>> bands,
+  }) async {
+    if (name.trim().isEmpty) return;
+    final list = getCustomEqPresets();
+    final entry = <String, dynamic>{
+      'name': name.trim(),
+      'preampDb': preampDb,
+      'bands': bands,
+      'savedAt': DateTime.now().toIso8601String(),
+    };
+    final updated = list.where((p) => p['name'] != name.trim()).toList();
+    updated.add(entry);
+    _cache['custom_eq_presets'] = updated;
+    await _save();
+  }
+
+  /// Deletes a custom EQ preset by name.
+  Future<void> deleteCustomEqPreset(String name) async {
+    final list = getCustomEqPresets();
+    _cache['custom_eq_presets'] = list.where((p) => p['name'] != name).toList();
+    await _save();
+  }
 }
+
 
 
 

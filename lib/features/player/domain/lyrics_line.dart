@@ -99,6 +99,28 @@ class LrcParser {
     return lines;
   }
 
+  /// Parse isi teks lirik biasa (plain text / embedded non-LRC) menjadi baris lirik berurutan
+  static List<LyricsLine> parsePlain(String content, {bool autoRomanize = true}) {
+    final lines = <LyricsLine>[];
+    final rawLines = content.split('\n');
+
+    for (int i = 0; i < rawLines.length; i++) {
+      final trimmed = rawLines[i].trim();
+      if (trimmed.isEmpty) continue;
+
+      String? romanized;
+      if (autoRomanize && EastAsianRomanizer.hasEastAsianCharacters(trimmed)) {
+        romanized = EastAsianRomanizer.romanize(trimmed);
+      }
+      lines.add(LyricsLine(
+        timestamp: Duration(seconds: i * 4),
+        text: trimmed,
+        romanizedText: romanized,
+      ));
+    }
+    return lines;
+  }
+
   /// Mencari indeks baris lirik yang sedang aktif sesuai posisi lagu dan timing offset
   static int findActiveIndex(
     List<LyricsLine> lines,

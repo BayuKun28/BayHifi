@@ -192,6 +192,34 @@ class EqBand {
         ),
       ];
 
+  Map<String, dynamic> toMap() => {
+        'index': index,
+        'frequency': frequency,
+        'gainDb': gainDb,
+        'q': q,
+        'type': type.name,
+        'isEnabled': isEnabled,
+      };
+
+  static EqBand fromMap(Map<String, dynamic> map, {int fallbackIndex = 1}) {
+    final typeStr = map['type'] as String? ?? 'peaking';
+    final filterType = FilterType.values.firstWhere(
+      (t) => t.name == typeStr,
+      orElse: () => FilterType.peaking,
+    );
+    final idx = (map['index'] as int?) ?? fallbackIndex;
+    final color = EqBand.bandPalette[(idx - 1).clamp(0, bandPalette.length - 1)];
+    return EqBand(
+      index: idx,
+      frequency: (map['frequency'] as num? ?? 1000.0).toDouble(),
+      gainDb: (map['gainDb'] as num? ?? 0.0).toDouble(),
+      q: (map['q'] as num? ?? 1.414).toDouble(),
+      type: filterType,
+      isEnabled: map['isEnabled'] as bool? ?? true,
+      color: color,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

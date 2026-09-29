@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter, FontFeature;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
+import '../../data/artist_metadata_service.dart';
 import '../../domain/library_collection_models.dart';
 import '../controllers/library_controller.dart';
 import '../widgets/artist_avatar_widget.dart';
@@ -55,6 +58,30 @@ class ArtistDetailScreen extends ConsumerStatefulWidget {
 
 class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
   final ScrollController _scrollController = ScrollController();
+  String? _artistPhotoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchArtistPhoto();
+  }
+
+  @override
+  void didUpdateWidget(covariant ArtistDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.artist.name != widget.artist.name) {
+      _fetchArtistPhoto();
+    }
+  }
+
+  Future<void> _fetchArtistPhoto() async {
+    final url = await ArtistMetadataService.instance.getArtistImageUrl(widget.artist.name);
+    if (mounted) {
+      setState(() {
+        _artistPhotoUrl = url;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -145,18 +172,112 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                   final collapsedOpacity = ((collapseRatio - 0.65) / 0.35).clamp(0.0, 1.0);
                   final expandedOpacity = (1.0 - (collapseRatio / 0.65)).clamp(0.0, 1.0);
 
+                  final hasCollage = artistAlbums.length >= 4;
+                  final hasArtistPhoto = _artistPhotoUrl != null && _artistPhotoUrl!.isNotEmpty;
+                  final hasSingleCover = artistAlbums.isNotEmpty || widget.artist.coverBytes != null || widget.artist.coverUrl != null;
+
                   return Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Ambient Subtle Gradient Background
+                      // DYNAMIC AMBIENT BACKDROP: 2x2 Collage (if >=4 albums) or Artist Photo/Single Cover (if <4 albums)
+                      if (hasCollage)
+                        ClipRect(
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
+                            child: Transform.scale(
+                              scale: 1.15,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          child: StudioArtworkWidget(
+                                            track: artistAlbums[0].firstTrack,
+                                            bytes: artistAlbums[0].coverBytes,
+                                            url: artistAlbums[0].coverUrl,
+                                            borderRadius: BorderRadius.zero,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: StudioArtworkWidget(
+                                            track: artistAlbums[1].firstTrack,
+                                            bytes: artistAlbums[1].coverBytes,
+                                            url: artistAlbums[1].coverUrl,
+                                            borderRadius: BorderRadius.zero,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          child: StudioArtworkWidget(
+                                            track: artistAlbums[2].firstTrack,
+                                            bytes: artistAlbums[2].coverBytes,
+                                            url: artistAlbums[2].coverUrl,
+                                            borderRadius: BorderRadius.zero,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: StudioArtworkWidget(
+                                            track: artistAlbums[3].firstTrack,
+                                            bytes: artistAlbums[3].coverBytes,
+                                            url: artistAlbums[3].coverUrl,
+                                            borderRadius: BorderRadius.zero,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (hasArtistPhoto)
+                        ClipRect(
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
+                            child: Transform.scale(
+                              scale: 1.15,
+                              child: Image.network(
+                                _artistPhotoUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (hasSingleCover)
+                        ClipRect(
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
+                            child: Transform.scale(
+                              scale: 1.15,
+                              child: StudioArtworkWidget(
+                                track: artistAlbums.isNotEmpty ? artistAlbums.first.firstTrack : widget.artist.tracks.firstOrNull,
+                                bytes: artistAlbums.isNotEmpty ? artistAlbums.first.coverBytes : widget.artist.coverBytes,
+                                url: artistAlbums.isNotEmpty ? artistAlbums.first.coverUrl : widget.artist.coverUrl,
+                                borderRadius: BorderRadius.zero,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Studio Gradient & Scrim Overlay for Readability and Seamless Bottom Blending
                       Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              primary.withValues(alpha: 0.08 + (0.07 * (1.0 - collapseRatio))),
-                              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                              (hasCollage || hasArtistPhoto || hasSingleCover)
+                                  ? theme.colorScheme.surface.withValues(alpha: 0.40 + (0.55 * collapseRatio))
+                                  : primary.withValues(alpha: 0.08 + (0.07 * (1.0 - collapseRatio))),
+                              theme.colorScheme.surface.withValues(alpha: 0.72 + (0.26 * collapseRatio)),
                               theme.colorScheme.surface,
                             ],
                             stops: const [0.0, 0.65, 1.0],

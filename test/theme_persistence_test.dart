@@ -48,5 +48,26 @@ void main() {
       controller.setThemeMode(AppThemeMode.light);
       expect(persistence.getThemeSettings()['theme_mode'], AppThemeMode.light.index);
     });
+
+    test('ThemeController restores dynamic dominant and vibrant colors on cold restart', () async {
+      final persistence = LocalPersistenceService.instance;
+      const dominantColorValue = 0xFF1E293B;
+      const vibrantColorValue = 0xFF38BDF8;
+
+      await persistence.saveThemeSettings(
+        paletteId: 'obsidian_cyan',
+        themeModeIndex: AppThemeMode.dark.index,
+        customAccentColorValue: vibrantColorValue,
+        dynamicAlbumArtEnabled: true,
+        dynamicDominantValue: dominantColorValue,
+        dynamicVibrantValue: vibrantColorValue,
+      );
+
+      final controller = ThemeController();
+      expect(controller.state.dynamicAlbumArtEnabled, isTrue);
+      expect(controller.state.currentPalette.isDynamic, isTrue);
+      expect(controller.state.currentPalette.primary.toARGB32(), equals(vibrantColorValue));
+      expect(controller.state.currentPalette.secondary.toARGB32(), equals(dominantColorValue));
+    });
   });
 }

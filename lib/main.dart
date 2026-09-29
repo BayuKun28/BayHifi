@@ -34,7 +34,7 @@ void main() async {
         androidNotificationChannelDescription: 'Audiophile Lossless Music Playback Controls',
         androidNotificationOngoing: true,
         androidStopForegroundOnPause: true,
-        androidNotificationIcon: 'drawable/ic_stat_music',
+        androidNotificationIcon: 'mipmap/ic_launcher',
       ),
     );
   } catch (e) {

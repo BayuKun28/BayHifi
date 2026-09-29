@@ -59,6 +59,40 @@ void main() {
       expect(result.lines.length, equals(1));
       expect(result.lines.first.text, equals('Embedded Studio Master Lyrics'));
     });
+
+    test('LrcParser.parsePlain parses raw plain text lyrics into structured LyricsLine list', () {
+      const plainText = '''
+First line of plain song
+Second line of plain song
+Third line of plain song
+''';
+      final lines = LrcParser.parsePlain(plainText);
+      expect(lines.length, equals(3));
+      expect(lines[0].text, equals('First line of plain song'));
+      expect(lines[1].text, equals('Second line of plain song'));
+      expect(lines[2].text, equals('Third line of plain song'));
+    });
+
+    test('LyricsService converts embedded plain text lyrics to selectable lines for share feature', () async {
+      const embeddedPlain = 'Line 1: Hello Studio\nLine 2: Lossless HiFi\nLine 3: Pure Sound';
+      const track = Track(
+        id: 'track_plain_embedded',
+        title: 'Plain Track',
+        artist: 'Acoustic Artist',
+        album: 'Acoustic Album',
+        duration: Duration(minutes: 4),
+        lyrics: embeddedPlain,
+      );
+
+      final result = await LyricsService.instance.getLyricsForTrack(track);
+      expect(result.isNotEmpty, isTrue);
+      expect(result.isSynced, isFalse);
+      expect(result.source, equals(LyricsSource.embedded));
+      expect(result.lines.length, equals(3));
+      expect(result.lines[0].text, equals('Line 1: Hello Studio'));
+      expect(result.lines[1].text, equals('Line 2: Lossless HiFi'));
+      expect(result.lines[2].text, equals('Line 3: Pure Sound'));
+    });
   });
 
   group('Player Customization Controller & Models', () {

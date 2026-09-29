@@ -45,11 +45,12 @@ dependencies:
   dio: ^5.7.0
   crypto: ^3.0.6
 
-  # Storage, File Picker, Permissions & Metadata
+  # Storage, File Picker, Permissions, Sharing & Metadata
   path_provider: ^2.1.5
   file_picker: ^13.1.0
   permission_handler: ^11.3.1
   audio_metadata_reader: ^1.8.0
+  share_plus: ^13.3.0
 
   # UI Animation & Utilities
   flutter_animate: ^4.5.2

@@ -174,61 +174,79 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                 ),
                 const SizedBox(height: 12),
 
-                // ─── 2. SEARCH BAR ───────────────────────────────────────────────
-                Container(
-                  decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedSearch01,
-                        size: 15,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 12.0),
-                          decoration: InputDecoration(
-                            hintText: 'Search model (Castor, Chu II, HD600, Harman)...',
-                            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6), fontSize: 11.0),
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 9),
-                          ),
-                          onChanged: _onSearchChanged,
+                // ─── 2. SEARCH BAR (tap to open fullscreen keyboard) ─────────────
+                GestureDetector(
+                  onTap: () async {
+                    final result = await Navigator.of(context).push<String>(
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (ctx) => _FullscreenCloudSearchPage(
+                          initialValue: _searchQuery,
                         ),
                       ),
-                      if (_isSearchingOnline)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: SizedBox(
-                            width: 13,
-                            height: 13,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: theme.colorScheme.primary,
+                    );
+                    if (result != null) {
+                      _searchController.text = result;
+                      _onSearchChanged(result);
+                    }
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                    child: Row(
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedSearch01,
+                          size: 15,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _searchQuery.isNotEmpty
+                                ? _searchQuery
+                                : 'Search model (Castor, Chu II, HD600, Harman)...',
+                            style: TextStyle(
+                              color: _searchQuery.isNotEmpty
+                                  ? theme.colorScheme.onSurface
+                                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+                              fontSize: 12.0,
                             ),
                           ),
                         ),
-                      if (_searchQuery.isNotEmpty)
-                        IconButton(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCancel01,
-                            size: 13,
-                            color: theme.colorScheme.onSurfaceVariant,
+                        if (_isSearchingOnline)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: SizedBox(
+                              width: 13,
+                              height: 13,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
                           ),
-                          onPressed: () {
-                            _searchController.clear();
-                            _onSearchChanged('');
-                          },
-                        ),
-                    ],
+                        if (_searchQuery.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              _onSearchChanged('');
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 4),
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedCancel01,
+                                size: 13,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -748,6 +766,152 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
             color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
             fontSize: 10.5,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Fullscreen Cloud Search Input Page ─────────────────────────────────────
+
+/// Full-screen search page for the Cloud DB — provides a proper landscape
+/// keyboard experience by using a dedicated route instead of an inline TextField.
+class _FullscreenCloudSearchPage extends StatefulWidget {
+  final String initialValue;
+  const _FullscreenCloudSearchPage({required this.initialValue});
+
+  @override
+  State<_FullscreenCloudSearchPage> createState() => _FullscreenCloudSearchPageState();
+}
+
+class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    Navigator.of(context).pop(_controller.text.trim());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          onPressed: () => Navigator.of(context).pop(null),
+          tooltip: 'Back',
+        ),
+        title: Text(
+          'CLOUD DB SEARCH',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+              onPressed: _submit,
+              child: const Text(
+                'SEARCH',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+              ),
+            ),
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            color: theme.colorScheme.outlineVariant,
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: TextField(
+          controller: _controller,
+          autofocus: true,
+          textInputAction: TextInputAction.search,
+          onSubmitted: (_) => _submit(),
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+          decoration: InputDecoration(
+            hintText: 'e.g. Sennheiser HD600, KZ Castor, Harman IEM...',
+            hintStyle: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+              fontSize: 14,
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
+            ),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedSearch01,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 44),
+            suffixIcon: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _controller,
+              builder: (_, value, child) => value.text.isEmpty
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      icon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCancel01,
+                        size: 18,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      onPressed: () => _controller.clear(),
+                    ),
+            ),
           ),
         ),
       ),

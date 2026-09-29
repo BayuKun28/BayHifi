@@ -1223,7 +1223,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     );
   }
 
-  // ─── ARTISTS VIEW ─────────────────────────────────────────────────────────
+  // ─── ARTISTS VIEW (GRID / LIST) ───────────────────────────────────────────
   Widget _buildArtistsView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
     final artists = state.artists;
     final theme = Theme.of(context);
@@ -1233,46 +1233,142 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       return _buildEmptyState(context, 'No artists found.');
     }
 
-    return StudioAlphabeticalScroller(
-      scrollController: _artistsScrollController,
-      itemCount: artists.length,
-      itemHeight: 72.0,
-      isAlphabetical: true,
-      letterSelector: (i) => i < artists.length ? artists[i].name : '',
-      padding: EdgeInsets.only(bottom: bottomPadding),
-      child: ListView.builder(
-        controller: _artistsScrollController,
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(14, 4, 28, bottomPadding),
+    if (state.layoutMode == ViewLayoutMode.list) {
+      return StudioAlphabeticalScroller(
+        scrollController: _artistsScrollController,
         itemCount: artists.length,
-        itemBuilder: (ctx, index) {
-          final artist = artists[index];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 6),
-            decoration: BoxDecoration(
-              color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(14),
-              child: ListTile(
-                leading: ArtistAvatarWidget(
-                  artistName: artist.name,
-                  fallbackCoverBytes: artist.coverBytes,
-                  fallbackCoverUrl: artist.coverUrl,
-                  radius: 22,
-                  iconSize: 20,
-                ),
-                title: Text(artist.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                subtitle: Text('${artist.albumsCount} Albums • ${artist.tracksCount} Tracks', style: const TextStyle(fontSize: 11)),
-                trailing: HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                onTap: () => _openArtistDetail(context, artist),
+        itemHeight: 72.0,
+        isAlphabetical: true,
+        letterSelector: (i) => i < artists.length ? artists[i].name : '',
+        padding: EdgeInsets.only(bottom: bottomPadding),
+        child: ListView.builder(
+          controller: _artistsScrollController,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(14, 4, 28, bottomPadding),
+          itemCount: artists.length,
+          itemBuilder: (ctx, index) {
+            final artist = artists[index];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              decoration: BoxDecoration(
+                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
               ),
-            ),
-          );
-        },
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+                child: ListTile(
+                  leading: ArtistAvatarWidget(
+                    artistName: artist.name,
+                    fallbackCoverBytes: artist.coverBytes,
+                    fallbackCoverUrl: artist.coverUrl,
+                    radius: 22,
+                    iconSize: 20,
+                  ),
+                  title: Text(artist.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                  subtitle: Text('${artist.albumsCount} Albums • ${artist.tracksCount} Tracks', style: const TextStyle(fontSize: 11)),
+                  trailing: HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                  onTap: () => _openArtistDetail(context, artist),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    // Grid View (3-Column Circular Studio Artist Presentation)
+    return Theme(
+      data: theme.copyWith(
+        scrollbarTheme: ScrollbarThemeData(
+          thumbColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.5)),
+          radius: const Radius.circular(8),
+          thickness: const WidgetStatePropertyAll(4.5),
+        ),
+      ),
+      child: Scrollbar(
+        controller: _artistsScrollController,
+        thumbVisibility: true,
+        interactive: true,
+        child: GridView.builder(
+          controller: _artistsScrollController,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(14, 12, 14, bottomPadding),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.72,
+          ),
+          itemCount: artists.length,
+          itemBuilder: (ctx, index) {
+            final artist = artists[index];
+            return InkWell(
+              onTap: () => _openArtistDetail(context, artist),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Circular Artist Avatar with Studio Shadow & Subtle Border
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: ArtistAvatarWidget(
+                        artistName: artist.name,
+                        fallbackCoverBytes: artist.coverBytes,
+                        fallbackCoverUrl: artist.coverUrl,
+                        radius: 42,
+                        iconSize: 34,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Artist Name
+                    Text(
+                      artist.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    // Album and Track Count
+                    Text(
+                      '${artist.albumsCount > 0 ? "${artist.albumsCount} Alb • " : ""}${artist.tracksCount} Tracks',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

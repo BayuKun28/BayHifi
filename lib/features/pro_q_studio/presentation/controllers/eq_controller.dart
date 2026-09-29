@@ -24,6 +24,7 @@ class EqController extends StateNotifier<EqState> {
               : -4.3,
         )) {
     _loadSampleCurves();
+    _loadCustomPresetNames();
     _recalculateSafePreamp();
     _syncWithVirtualDsp();
     VirtualDspService.instance.addListener(_onDspServiceChanged);
@@ -243,7 +244,89 @@ class EqController extends StateNotifier<EqState> {
       EqBand.default10Bands,
       selectedIdx: 2,
       presetName: 'Default 10-Band',
+      markClean: true,
     );
+  }
+
+  // ─── Custom EQ Preset Persistence ─────────────────────────────────────────
+
+  /// Loads the list of saved custom preset names from persistence into state.
+  void _loadCustomPresetNames() {
+    try {
+      final names = LocalPersistenceService.instance
+          .getCustomEqPresets()
+          .map((p) => p['name'] as String? ?? '')
+          .where((n) => n.isNotEmpty)
+          .toList();
+      state = state.copyWith(customPresetNames: names);
+    } catch (_) {}
+  }
+
+  /// Saves the current EQ bands as a NEW custom preset with the given name,
+  /// or OVERWRITES an existing custom preset with that name.
+  Future<void> saveAsNewPreset(String name) async {
+    if (name.trim().isEmpty) return;
+    final trimmedName = name.trim();
+    try {
+      await LocalPersistenceService.instance.saveCustomEqPreset(
+        name: trimmedName,
+        preampDb: state.safePreampDb,
+        bands: state.bands.map((b) => b.toMap()).toList(),
+      );
+      final updatedNames = [...state.customPresetNames.where((n) => n != trimmedName), trimmedName];
+      state = state.copyWith(
+        activePresetName: trimmedName,
+        isDirty: false,
+        customPresetNames: updatedNames,
+      );
+    } catch (_) {}
+  }
+
+  /// Overwrites the currently-loaded custom preset in persistence
+  /// (called when SAVE is pressed and a custom preset is already loaded).
+  Future<void> saveToCurrentPreset() async {
+    if (!state.isCustomPresetLoaded) return;
+    await saveAsNewPreset(state.activePresetName);
+  }
+
+  /// Loads a user-saved custom preset by name and applies it.
+  Future<void> loadCustomPreset(String name) async {
+    try {
+      final presets = LocalPersistenceService.instance.getCustomEqPresets();
+      final entry = presets.firstWhere(
+        (p) => p['name'] == name,
+        orElse: () => <String, dynamic>{},
+      );
+      if (entry.isEmpty) return;
+
+      final bandMaps = entry['bands'];
+      if (bandMaps is! List) return;
+      final bands = bandMaps
+          .whereType<Map<String, dynamic>>()
+          .toList()
+          .asMap()
+          .entries
+          .map((e) => EqBand.fromMap(e.value, fallbackIndex: e.key + 1))
+          .toList();
+      if (bands.isEmpty) return;
+
+      final preamp = (entry['preampDb'] as num? ?? state.safePreampDb).toDouble();
+      _updateBands(bands, selectedIdx: bands.first.index, presetName: name, markClean: true);
+      state = state.copyWith(safePreampDb: preamp);
+    } catch (_) {}
+  }
+
+  /// Deletes a user-saved custom preset by name.
+  Future<void> deleteCustomPreset(String name) async {
+    try {
+      await LocalPersistenceService.instance.deleteCustomEqPreset(name);
+      final updatedNames = state.customPresetNames.where((n) => n != name).toList();
+      final newPresetName = state.activePresetName == name ? 'Custom' : state.activePresetName;
+      state = state.copyWith(
+        customPresetNames: updatedNames,
+        activePresetName: newPresetName,
+      );
+    } catch (_) {}
   }
 
   void togglePower() {
@@ -369,6 +452,7 @@ class EqController extends StateNotifier<EqState> {
       result.bands,
       selectedIdx: result.bands.isNotEmpty ? result.bands[0].index : 1,
       presetName: 'AutoEQ: ${driver.name} → ${target.name}',
+      markClean: true,
     );
 
     state = state.copyWith(
@@ -389,6 +473,7 @@ class EqController extends StateNotifier<EqState> {
       result.bands,
       selectedIdx: result.bands.first.index,
       presetName: 'Imported Squiglink EQ',
+      markClean: true,
     );
 
     state = state.copyWith(
@@ -411,6 +496,12 @@ class EqController extends StateNotifier<EqState> {
   }
 
   void applyPreset(String presetName) {
+    // Delegate to custom preset loader if this is a user-saved preset.
+    if (state.customPresetNames.contains(presetName)) {
+      loadCustomPreset(presetName);
+      return;
+    }
+
     List<EqBand> presetBands;
     switch (presetName) {
       case 'Flat':
@@ -449,10 +540,17 @@ class EqController extends StateNotifier<EqState> {
         presetBands = EqBand.default10Bands;
     }
 
-    _updateBands(presetBands, presetName: presetName);
+    _updateBands(presetBands, presetName: presetName, markClean: true);
   }
 
-  void _updateBands(List<EqBand> bands, {int? selectedIdx, String? presetName}) {
+  void _updateBands(
+    List<EqBand> bands, {
+    int? selectedIdx,
+    String? presetName,
+    /// When true, marks the state as clean (a preset was just loaded/applied).
+    /// When false (default), marks the state as dirty (user moved a band).
+    bool markClean = false,
+  }) {
     final safePreamp = state.autoPreampEnabled
         ? BiquadMath.calculateSafePreamp(bands)
         : state.safePreampDb;
@@ -461,6 +559,7 @@ class EqController extends StateNotifier<EqState> {
       selectedBandIndex: selectedIdx != null ? () => selectedIdx : null,
       safePreampDb: safePreamp,
       activePresetName: presetName ?? (state.activePresetName == 'Default 10-Band' ? 'Custom' : state.activePresetName),
+      isDirty: markClean ? false : true,
     );
 
     _syncWithVirtualDsp();

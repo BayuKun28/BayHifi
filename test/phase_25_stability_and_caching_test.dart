@@ -14,6 +14,7 @@ import 'package:baydev_hifi/features/navidrome/domain/subsonic_models.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/now_playing_queue_sheet.dart';
+import 'package:baydev_hifi/features/pro_q_studio/presentation/controllers/eq_controller.dart';
 import 'package:baydev_hifi/features/pro_q_studio/presentation/pro_q_studio_screen.dart';
 
 void main() {
@@ -163,9 +164,14 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
 
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(eqControllerProvider.notifier).updateBandGain(0, 4.0);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: ProQStudioScreen(),
           ),
         ),
@@ -181,10 +187,11 @@ void main() {
 
       // Save dialog appears
       expect(find.text('Save EQ Preset'), findsOneWidget);
-      expect(find.text('SAVE PRESET'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'My Studio Preset');
+      await tester.pumpAndSettle();
 
-      // Tap SAVE PRESET
-      await tester.tap(find.text('SAVE PRESET'));
+      // Tap SAVE in dialog
+      await tester.tap(find.widgetWithText(FilledButton, 'SAVE'));
       await tester.pumpAndSettle();
 
       // Dialog dismissed

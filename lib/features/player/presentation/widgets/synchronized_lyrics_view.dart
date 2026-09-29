@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../../core/lyrics/east_asian_romanizer.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../lyrics_share/presentation/widgets/lyric_share_sheet.dart';
 import '../../data/lyrics_service.dart';
 import '../../domain/lyrics_line.dart';
 import '../controllers/player_controller.dart';
@@ -319,7 +320,8 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                             seekPos < Duration.zero ? Duration.zero : seekPos,
                           );
                         }
-                      : null,
+                      : () => _openLyricShareSheet(line),
+                  onLongPress: () => _openLyricShareSheet(line),
                   borderRadius: BorderRadius.circular(12),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
@@ -350,29 +352,40 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
           ),
         ),
 
-        // Floating Action Bar at Top (Display Mode Pill, Offset Stepper & Source Badge)
+        // Floating Action Bar at Top (Display Mode Pill, Share Lyrics, Offset Stepper & Source Badge)
         Positioned(
           top: 6,
           left: 12,
           right: 12,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // 1. Display Mode Switcher Capsule
-              _buildModeSwitcherCapsule(theme, primary, isSolid),
-
-              // 2. Right Actions: Timing Offset Stepper & Source Badge
-              Row(
-                mainAxisSize: MainAxisSize.min,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width - 24,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (isSynced) ...[
-                    _buildTimingOffsetButton(context, theme, primary, isSolid),
-                    const SizedBox(width: 6),
-                  ],
-                  _buildSourceBadge(context, widget.lyricsResult.source, isSynced, primary, theme, isSolid),
+                  // 1. Display Mode Switcher Capsule
+                  _buildModeSwitcherCapsule(theme, primary, isSolid),
+
+                  // 2. Right Actions: Share Lyrics, Timing Offset Stepper & Source Badge
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (lines.isNotEmpty) ...[
+                        _buildShareLyricsButton(context, theme, primary, isSolid),
+                        const SizedBox(width: 6),
+                      ],
+                      if (isSynced) ...[
+                        _buildTimingOffsetButton(context, theme, primary, isSolid),
+                        const SizedBox(width: 6),
+                      ],
+                      _buildSourceBadge(context, widget.lyricsResult.source, isSynced, primary, theme, isSolid),
+                    ],
+                  ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ],
@@ -534,6 +547,59 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildShareLyricsButton(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
+    return GestureDetector(
+      onTap: () => _openLyricShareSheet(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+        decoration: BoxDecoration(
+          color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedShare08,
+              size: 11,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 3.5),
+            Text(
+              'SHARE',
+              style: TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.onSurfaceVariant,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openLyricShareSheet([LyricsLine? initialLine]) {
+    final track = ref.read(playerControllerProvider).currentTrack;
+    if (track == null || widget.lyricsResult.lines.isEmpty) return;
+
+    HapticFeedback.mediumImpact();
+    LyricShareSheet.show(
+      context,
+      track: track,
+      allLines: widget.lyricsResult.lines,
+      initialSelectedLine: initialLine,
+      audioSpec: track.format.name.isNotEmpty && track.format.name != 'unknown'
+          ? '${track.format.name.toUpperCase()} MASTER'
+          : 'STUDIO MASTER',
     );
   }
 

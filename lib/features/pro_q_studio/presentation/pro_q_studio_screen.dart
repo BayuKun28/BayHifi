@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
-import '../../../../core/database/local_persistence_service.dart';
 import 'controllers/eq_controller.dart';
 import 'controllers/eq_state.dart';
 import 'widgets/band_strip_bar.dart';
@@ -79,6 +78,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
   ) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final eqState = state;
 
     return Container(
       height: 48,
@@ -296,60 +296,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   const SizedBox(width: 6),
 
-                  // [PRESETS] Popup Button
-                  PopupMenuButton<String>(
-                    color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(
-                        color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                        width: 1,
-                      ),
-                    ),
-                    onSelected: (val) => notifier.applyPreset(val),
-                    itemBuilder: (context) => [
-                      'Default 10-Band',
-                      'Flat',
-                      'Bass Boost',
-                      'V-Shape',
-                      'Vocal Clarity',
-                      'Treble Tamer',
-                    ].map((p) {
-                      final isCurr = state.activePresetName == p;
-                      return PopupMenuItem(
-                        value: p,
-                        child: Row(
-                          children: [
-                            HugeIcon(
-                              icon: isCurr
-                                  ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                  : HugeIcons.strokeRoundedCircle,
-                              size: 14,
-                              color: isCurr ? primary : theme.colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              p,
-                              style: TextStyle(
-                                color: isCurr ? primary : theme.colorScheme.onSurface,
-                                fontSize: 12,
-                                fontWeight: isCurr ? FontWeight.bold : FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    child: _buildToolbarButton(
-                      context: context,
-                      icon: HugeIcons.strokeRoundedBookmark02,
-                      label: 'PRESETS',
-                      color: primary,
-                      isActive: false,
-                      isSolid: isSolid,
-                      onTap: null,
-                    ),
-                  ),
+                  // [PRESETS] Popup Button — shows built-in & custom presets
+                  _buildPresetsPopup(context, eqState, notifier, theme, isSolid, primary),
 
                   const SizedBox(width: 6),
 
@@ -370,55 +318,89 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
           const SizedBox(width: 8),
 
-          // ─── 2.5 INTERACTIVE SAVE PRESET BUTTON ───────────────────────────
-          Tooltip(
-            message: 'Save Pro-Q Preset & Target Profile',
-            child: InkWell(
-              onTap: () => _showSavePresetDialog(context, state, notifier, isSolid),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                height: 32,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.tintedContainer(
-                    context,
-                    const Color(0xFF00E676),
-                    isSolid: isSolid,
-                    translucentAlpha: 0.15,
+          // ─── 2.5 SMART SAVE / NEW PRESET BUTTON ──────────────────────────
+          if (state.isDirty)
+            // SAVE button — update the currently-loaded preset
+            Tooltip(
+              message: state.isCustomPresetLoaded
+                  ? 'Save changes to "${state.activePresetName}"'
+                  : 'Save current EQ as new preset',
+              child: InkWell(
+                onTap: () => _handleSaveTap(context, eqState, notifier),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 32,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: StudioSurfaceTheme.tintedContainer(
+                      context,
+                      const Color(0xFF00E676),
+                      isSolid: isSolid,
+                      translucentAlpha: 0.15,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isSolid
+                          ? theme.colorScheme.outline
+                          : const Color(0xFF00E676).withValues(alpha: 0.6),
+                      width: 1.0,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSolid ? theme.colorScheme.outline : const Color(0xFF00E676).withValues(alpha: 0.6),
-                    width: 1.0,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedFloppyDisk,
+                        size: 14,
+                        color: Color(0xFF00E676),
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        'SAVE',
+                        style: TextStyle(
+                          color: Color(0xFF00E676),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 11,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedFloppyDisk,
-                      size: 14,
-                      color: Color(0xFF00E676),
+              ),
+            )
+          else
+            // "+" button — create a brand new named preset
+            Tooltip(
+              message: 'Save current EQ as new preset',
+              child: InkWell(
+                onTap: () => _handleNewPresetTap(context, eqState, notifier),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 32,
+                  width: 32,
+                  decoration: BoxDecoration(
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                      width: 1.0,
                     ),
-                    SizedBox(width: 5),
-                    Text(
-                      'SAVE',
-                      style: TextStyle(
-                        color: Color(0xFF00E676),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 11,
-                        letterSpacing: 0.5,
-                      ),
+                  ),
+                  child: Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedAdd01,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
 
           const SizedBox(width: 8),
 
-          // ─── 3. FIXED RIGHT: Tombol Power ON/OFF (Always Visible) ────────────
+          // ─── 3. FIXED RIGHT: Power ON/OFF Button ────────────────────────────
           Tooltip(
             message: state.isEnabled ? 'Bypass EQ (Turn OFF)' : 'Enable EQ (Turn ON)',
             child: InkWell(
@@ -444,14 +426,6 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                         : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                     width: 1.5,
                   ),
-                  boxShadow: state.isEnabled
-                      ? [
-                          BoxShadow(
-                            color: primary.withValues(alpha: isSolid ? 0.2 : 0.4),
-                            blurRadius: 8,
-                          ),
-                        ]
-                      : null,
                 ),
                 child: Center(
                   child: HugeIcon(
@@ -469,6 +443,251 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
       ),
     );
   }
+
+  // ─── Presets Popup: Built-in + Custom with long-press delete ─────────────────
+
+  Widget _buildPresetsPopup(
+    BuildContext context,
+    EqState eqState,
+    EqController notifier,
+    ThemeData theme,
+    bool isSolid,
+    Color primary,
+  ) {
+    const builtIn = kBuiltInEqPresets;
+    final custom = eqState.customPresetNames;
+
+    return PopupMenuButton<String>(
+      color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 1,
+        ),
+      ),
+      onSelected: (val) => notifier.applyPreset(val),
+      itemBuilder: (ctx) {
+        final items = <PopupMenuEntry<String>>[];
+
+        // Built-in header
+        items.add(PopupMenuItem<String>(
+          enabled: false,
+          height: 28,
+          child: Text(
+            'FACTORY PRESETS',
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ));
+
+        for (final p in builtIn) {
+          final isCurr = eqState.activePresetName == p;
+          items.add(PopupMenuItem<String>(
+            value: p,
+            child: Row(
+              children: [
+                HugeIcon(
+                  icon: isCurr
+                      ? HugeIcons.strokeRoundedCheckmarkCircle02
+                      : HugeIcons.strokeRoundedCircle,
+                  size: 13,
+                  color: isCurr ? primary : theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  p,
+                  style: TextStyle(
+                    color: isCurr ? primary : theme.colorScheme.onSurface,
+                    fontSize: 12,
+                    fontWeight: isCurr ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ));
+        }
+
+        // Custom presets section (if any)
+        if (custom.isNotEmpty) {
+          items.add(const PopupMenuDivider());
+          items.add(PopupMenuItem<String>(
+            enabled: false,
+            height: 28,
+            child: Text(
+              'MY PRESETS',
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+              ),
+            ),
+          ));
+          for (final p in custom) {
+            final isCurr = eqState.activePresetName == p;
+            items.add(PopupMenuItem<String>(
+              value: p,
+              child: Row(
+                children: [
+                  HugeIcon(
+                    icon: isCurr
+                        ? HugeIcons.strokeRoundedCheckmarkCircle02
+                        : HugeIcons.strokeRoundedFloppyDisk,
+                    size: 13,
+                    color: isCurr ? primary : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      p,
+                      style: TextStyle(
+                        color: isCurr ? primary : theme.colorScheme.onSurface,
+                        fontSize: 12,
+                        fontWeight: isCurr ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  // Delete button for custom presets
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _confirmDeletePreset(context, p, notifier);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedDelete02,
+                        size: 13,
+                        color: theme.colorScheme.error.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ));
+          }
+        }
+
+        return items;
+      },
+      child: _buildToolbarButton(
+        context: context,
+        icon: HugeIcons.strokeRoundedBookmark02,
+        label: 'PRESETS',
+        color: primary,
+        isActive: false,
+        isSolid: isSolid,
+        onTap: null,
+      ),
+    );
+  }
+
+  // ─── Save Handlers ─────────────────────────────────────────────────────────
+
+  /// Called when SAVE button is tapped (isDirty = true).
+  /// If a custom preset is loaded → overwrite silently.
+  /// Otherwise → open fullscreen name dialog.
+  Future<void> _handleSaveTap(
+    BuildContext context,
+    EqState state,
+    EqController notifier,
+  ) async {
+    if (state.isCustomPresetLoaded) {
+      // Overwrite the currently loaded custom preset
+      await notifier.saveToCurrentPreset();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Preset "${state.activePresetName}" updated'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // Built-in or Custom (unnamed) → ask for a name
+      await _openNameDialogAndSave(context, state, notifier);
+    }
+  }
+
+  /// Called when "+" button is tapped (isDirty = false).
+  /// Always opens the name dialog for a new preset.
+  Future<void> _handleNewPresetTap(
+    BuildContext context,
+    EqState state,
+    EqController notifier,
+  ) async {
+    await _openNameDialogAndSave(context, state, notifier);
+  }
+
+  /// Opens a fullscreen name entry page and saves the result as a preset.
+  Future<void> _openNameDialogAndSave(
+    BuildContext context,
+    EqState state,
+    EqController notifier,
+  ) async {
+    final suggested = _suggestPresetName(state);
+    final name = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (ctx) => _FullscreenPresetNamePage(initialValue: suggested),
+      ),
+    );
+    if (name == null || name.trim().isEmpty) return;
+    await notifier.saveAsNewPreset(name.trim());
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Preset "$name" saved'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  String _suggestPresetName(EqState state) {
+    if (state.targetFr != null) return '${state.targetFr!.name} Tuned';
+    if (state.activePresetName != 'Custom' &&
+        state.activePresetName != 'Custom AutoEQ') {
+      return state.activePresetName;
+    }
+    return 'My Custom EQ';
+  }
+
+  void _confirmDeletePreset(
+    BuildContext context,
+    String name,
+    EqController notifier,
+  ) {
+    showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Delete Preset'),
+        content: Text('Delete "$name"? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: const Text('DELETE'),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        notifier.deleteCustomPreset(name);
+      }
+    });
+  }
+
+  // ─── Utility Widgets ───────────────────────────────────────────────────────
 
   Widget _buildLegendItem({
     required String label,
@@ -558,115 +777,169 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
       ),
     );
   }
+}
 
-  void _showSavePresetDialog(
-    BuildContext context,
-    EqState state,
-    EqController notifier,
-    bool isSolid,
-  ) {
+// ─── Fullscreen Name Input Page ─────────────────────────────────────────────
+
+/// A fullscreen page used for entering a preset name in landscape mode.
+/// The keyboard fills the available space — recommended for landscape inputs.
+class _FullscreenPresetNamePage extends StatefulWidget {
+  final String initialValue;
+
+  const _FullscreenPresetNamePage({required this.initialValue});
+
+  @override
+  State<_FullscreenPresetNamePage> createState() => _FullscreenPresetNamePageState();
+}
+
+class _FullscreenPresetNamePageState extends State<_FullscreenPresetNamePage> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final name = _controller.text.trim();
+    if (name.isNotEmpty) Navigator.of(context).pop(name);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textController = TextEditingController(
-      text: state.targetFr != null
-          ? '${state.targetFr!.name} Tuned'
-          : (state.activePresetName != 'Custom' ? state.activePresetName : 'Custom Pro-Q'),
-    );
 
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid),
-            width: 1,
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedCancel01,
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
+          onPressed: () => Navigator.of(context).pop(null),
+          tooltip: 'Cancel',
         ),
-        title: const Row(
+        title: Row(
           children: [
             HugeIcon(
               icon: HugeIcons.strokeRoundedFloppyDisk,
-              size: 20,
-              color: Color(0xFF00E676),
+              size: 18,
+              color: const Color(0xFF00E676),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
               'Save EQ Preset',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Save current 10-band parametric curves, gain levels, and target matching profile.',
-              style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 12),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: textController,
-              autofocus: true,
-              style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 13, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(
-                labelText: 'Preset Name',
-                labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
-                filled: true,
-                fillColor: StudioSurfaceTheme.surfaceContainerHigh(dialogCtx, isSolid: isSolid),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: StudioSurfaceTheme.subtleOutline(dialogCtx, isSolid: isSolid)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF00E676)),
-                ),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: Text('CANCEL', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00E676),
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF00E676),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+              onPressed: _submit,
+              child: const Text(
+                'SAVE',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+              ),
             ),
-            onPressed: () {
-              final name = textController.text.trim();
-              if (name.isNotEmpty) {
-                if (state.driverFr != null) {
-                  LocalPersistenceService.instance.saveFrCurve(
-                    state.driverFr!.toMap(category: 'driver'),
-                  );
-                }
-                if (state.targetFr != null) {
-                  LocalPersistenceService.instance.saveFrCurve(
-                    state.targetFr!.toMap(category: 'target'),
-                  );
-                }
-                Navigator.of(dialogCtx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Saved Pro-Q preset "$name" successfully'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            child: const Text('SAVE PRESET', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            color: theme.colorScheme.outlineVariant,
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Name your EQ preset to save band settings and preamp gain.',
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _submit(),
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: InputDecoration(
+                hintText: 'e.g. My Audiophile Tune, HBB Target Matched...',
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+                  fontSize: 14,
+                ),
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerHighest,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outlineVariant,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF00E676),
+                    width: 2,
+                  ),
+                ),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedText,
+                    size: 18,
+                    color: Color(0xFF00E676),
+                  ),
+                ),
+                prefixIconConstraints: const BoxConstraints(minWidth: 44),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+// ─── Legend Line Painter ────────────────────────────────────────────────────
 
 class _LegendLinePainter extends CustomPainter {
   final Color color;

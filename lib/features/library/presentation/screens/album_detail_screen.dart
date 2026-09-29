@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter, FontFeature;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
+import '../../data/artist_metadata_service.dart';
 import '../../domain/library_collection_models.dart';
 import '../controllers/library_controller.dart';
 import '../widgets/batch_track_tag_editor_modal.dart';
@@ -55,6 +58,30 @@ class AlbumDetailScreen extends ConsumerStatefulWidget {
 
 class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
   final ScrollController _scrollController = ScrollController();
+  String? _artistPhotoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchArtistPhoto();
+  }
+
+  @override
+  void didUpdateWidget(covariant AlbumDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.album.artist != widget.album.artist) {
+      _fetchArtistPhoto();
+    }
+  }
+
+  Future<void> _fetchArtistPhoto() async {
+    final url = await ArtistMetadataService.instance.getArtistImageUrl(widget.album.artist);
+    if (mounted) {
+      setState(() {
+        _artistPhotoUrl = url;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -178,15 +205,48 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                   return Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Ambient Subtle Gradient Background
+                      // Ambient Artist Photo or Subtle Artwork Backdrop (Soft Studio Blur)
+                      if (_artistPhotoUrl != null && _artistPhotoUrl!.isNotEmpty)
+                        ClipRect(
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
+                            child: Transform.scale(
+                              scale: 1.15,
+                              child: Image.network(
+                                _artistPhotoUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (widget.album.coverBytes != null || widget.album.coverUrl != null)
+                        ClipRect(
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
+                            child: Transform.scale(
+                              scale: 1.15,
+                              child: StudioArtworkWidget(
+                                track: widget.album.firstTrack,
+                                bytes: widget.album.coverBytes,
+                                url: widget.album.coverUrl,
+                                borderRadius: BorderRadius.zero,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Studio Gradient & Scrim Overlay for Readability and Seamless Bottom Blending
                       Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              primary.withValues(alpha: 0.08 + (0.07 * (1.0 - collapseRatio))),
-                              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                              (_artistPhotoUrl != null || widget.album.coverBytes != null || widget.album.coverUrl != null)
+                                  ? theme.colorScheme.surface.withValues(alpha: 0.38 + (0.58 * collapseRatio))
+                                  : primary.withValues(alpha: 0.08 + (0.07 * (1.0 - collapseRatio))),
+                              theme.colorScheme.surface.withValues(alpha: 0.72 + (0.26 * collapseRatio)),
                               theme.colorScheme.surface,
                             ],
                             stops: const [0.0, 0.65, 1.0],
