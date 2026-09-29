@@ -62,7 +62,7 @@ dependencies:
   audiotags: ^1.4.5
 
   # YouTube & YouTube Music Streaming Engine
-  youtube_explode_dart: ^2.3.6
+  youtube_explode_dart: ^3.1.0
 
 dev_dependencies:
   flutter_test:
