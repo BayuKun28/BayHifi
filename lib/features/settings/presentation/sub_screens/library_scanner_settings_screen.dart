@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -16,21 +17,30 @@ class LibraryScannerSettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSettingsScreen> {
-  bool _ignoreShortTracks = true;
+  int _minTrackDurationSeconds = 30;
   bool _autoScanOnStartup = true;
 
   @override
   void initState() {
     super.initState();
     final storage = LocalPersistenceService.instance;
-    _ignoreShortTracks = storage.getSetting<bool>('ignore_short_tracks', true)!;
+    final savedSeconds = storage.getSetting<int>('minimum_track_duration_seconds', null);
+    if (savedSeconds != null) {
+      _minTrackDurationSeconds = savedSeconds;
+    } else {
+      final legacyIgnore = storage.getSetting<bool>('ignore_short_tracks', true)!;
+      _minTrackDurationSeconds = legacyIgnore ? 30 : 0;
+    }
     _autoScanOnStartup = storage.getSetting<bool>('auto_scan_on_startup', true)!;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
+    final libraryState = ref.watch(unifiedLibraryProvider);
+    final timerState = ref.watch(sleepTimerControllerProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -48,23 +58,167 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: [
-          // 1. MUSIC SOURCE FOLDERS
+          // ─── 1. STATUS HERO BANNER ──────────────────────────────────────────
+          _buildStatusHero(context, theme, primary, libraryState.tracks.length, libraryState.configuredFolderPaths.length, timerState.isActive, isSolid),
+          const SizedBox(height: 18),
+
+          // ─── 2. MUSIC SOURCE FOLDERS ────────────────────────────────────────
           _buildSectionHeader(context, 'MUSIC SOURCE FOLDERS', HugeIcons.strokeRoundedFolderLibrary),
           const SizedBox(height: 8),
           _buildSourceFoldersCard(context, isSolid),
           const SizedBox(height: 20),
 
-          // 2. SMART SLEEP TIMER
+          // ─── 3. SMART SLEEP TIMER ───────────────────────────────────────────
           _buildSectionHeader(context, 'SMART SLEEP TIMER', HugeIcons.strokeRoundedHourglass),
           const SizedBox(height: 8),
           _buildSleepTimerCard(context, isSolid),
           const SizedBox(height: 20),
 
-          // 3. LIBRARY SCANNER RULES
+          // ─── 4. LIBRARY SCANNER RULES ───────────────────────────────────────
           _buildSectionHeader(context, 'LIBRARY SCANNER RULES', HugeIcons.strokeRoundedFolder01),
           const SizedBox(height: 8),
           _buildLibraryRulesCard(context, isSolid),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusHero(
+    BuildContext context,
+    ThemeData theme,
+    Color primary,
+    int trackCount,
+    int folderCount,
+    bool timerActive,
+    bool isSolid,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.12,
+                    solidBlendAlpha: 0.16,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedFolderLibrary,
+                  size: 18,
+                  color: primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'LIBRARY INDEX & PERSISTENCE',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      'Local media indexer, auto-sync watchers & gradual sleep timer',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Indexed: $trackCount Tracks',
+                isActive: trackCount > 0,
+                color: primary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Folders: $folderCount Sources',
+                isActive: folderCount > 0,
+                color: theme.colorScheme.secondary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: timerActive ? 'Sleep Timer: Active' : 'Sleep Timer: Idle',
+                isActive: timerActive,
+                color: timerActive ? const Color(0xFF00E676) : theme.colorScheme.outline,
+                isSolid: isSolid,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(
+    BuildContext context,
+    ThemeData theme, {
+    required String label,
+    required bool isActive,
+    required Color color,
+    required bool isSolid,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+      decoration: BoxDecoration(
+        color: isSolid
+            ? (isActive
+                ? color.withValues(alpha: 0.16)
+                : theme.colorScheme.surfaceContainerHighest)
+            : (isActive
+                ? color.withValues(alpha: 0.14)
+                : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isActive
+              ? color.withValues(alpha: 0.45)
+              : (isSolid
+                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
+          width: 0.9,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: isActive ? color : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+        ),
       ),
     );
   }
@@ -95,11 +249,11 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
     final primary = theme.colorScheme.primary;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: StudioSurfaceTheme.cardDecoration(
         context: context,
         isSolid: isSolid,
-        radius: 12,
+        radius: 16,
         borderColor: timerState.isActive ? primary.withValues(alpha: 0.5) : null,
       ),
       child: Column(
@@ -120,7 +274,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                     'Gradual Fade Sleep Timer',
                     style: TextStyle(
                       fontSize: 12.5,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
@@ -138,7 +292,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                           solidBlendAlpha: 0.20,
                         )
                       : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.3),
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: timerState.isActive
                         ? const Color(0xFF00E676).withValues(alpha: 0.6)
@@ -179,7 +333,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
           const SizedBox(height: 10),
           if (timerState.isActive) ...[
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: StudioSurfaceTheme.tintedContainer(
                   context,
@@ -188,7 +342,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   translucentAlpha: 0.08,
                   solidBlendAlpha: 0.14,
                 ),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: primary.withValues(alpha: 0.25),
                   width: 0.8,
@@ -206,7 +360,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       letterSpacing: 1.0,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,20 +393,23 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       side: BorderSide(
                         color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                         width: 0.8,
                       ),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    onPressed: () => timerNotifier.extendTimer(15),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      timerNotifier.extendTimer(15);
+                    },
                     icon: HugeIcon(icon: HugeIcons.strokeRoundedClock01, size: 14, color: primary),
                     label: Text(
                       '+15m Extend',
@@ -264,11 +421,14 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       side: BorderSide(color: const Color(0xFFFF3B30).withValues(alpha: 0.4), width: 0.8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    onPressed: () => timerNotifier.cancelTimer(),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      timerNotifier.cancelTimer();
+                    },
                     icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 14, color: Color(0xFFFF3B30)),
                     label: const Text(
                       'Cancel Timer',
@@ -287,7 +447,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 height: 1.3,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Row(
               children: [15, 30, 45, 60].map((mins) {
                 return Expanded(
@@ -295,17 +455,21 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                     padding: const EdgeInsets.symmetric(horizontal: 2.0),
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         side: BorderSide(
                           color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                           width: 0.8,
                         ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () => timerNotifier.startTimer(mins),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        timerNotifier.startTimer(mins);
+                      },
                       child: Text(
                         '${mins}m',
                         style: TextStyle(
+                          fontFeatures: AppTypography.audioFigures,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.onSurface,
@@ -322,8 +486,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             width: double.infinity,
             child: TextButton.icon(
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () => SleepTimerSheet.show(context),
               icon: HugeIcon(icon: HugeIcons.strokeRoundedSlidersHorizontal, size: 14, color: primary),
@@ -346,11 +510,11 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
     final folders = libraryState.configuredFolderPaths;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: StudioSurfaceTheme.cardDecoration(
         context: context,
         isSolid: isSolid,
-        radius: 12,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,7 +545,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
               decoration: BoxDecoration(
                 color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                 ),
@@ -422,6 +586,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 16, color: Color(0xFFFF453A)),
                       tooltip: 'Remove Folder',
                       onPressed: () {
+                        HapticFeedback.lightImpact();
                         controller.removeMusicFolder(path);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Removed folder: $path')),
@@ -474,14 +639,32 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             children: [
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: libraryState.isScanning ? null : () => controller.pickAndScanDirectory(),
-                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 16, color: Colors.black),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: libraryState.isScanning
+                      ? null
+                      : () {
+                          HapticFeedback.mediumImpact();
+                          controller.pickAndScanDirectory();
+                        },
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 16, color: theme.colorScheme.onPrimary),
                   label: const Text('Add Music Folder', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: 8),
               OutlinedButton.icon(
-                onPressed: libraryState.isScanning ? null : () => controller.rescanSavedFolders(),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: libraryState.isScanning
+                    ? null
+                    : () {
+                        HapticFeedback.lightImpact();
+                        controller.rescanSavedFolders();
+                      },
                 icon: HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 16, color: primary),
                 label: Text(
                   libraryState.isScanning ? 'Scanning...' : 'Rescan',
@@ -496,44 +679,181 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
   }
 
   Widget _buildLibraryRulesCard(BuildContext context, bool isSolid) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final storage = LocalPersistenceService.instance;
 
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBentoDropdownSelector<int>(
+            context: context,
+            title: 'MINIMUM AUDIO DURATION FILTER',
+            currentValue: _minTrackDurationSeconds,
+            items: const [0, 15, 30, 60],
+            itemLabel: (sec) => sec == 0 ? 'No Filter (Include All Tracks)' : 'Ignore Audio < $sec Seconds',
+            itemDescription: (sec) => sec == 0
+                ? 'Include all short audio clips, ringtones, and sound effects in library'
+                : 'Automatically hide ringtones, alarms, and short recordings under $sec s',
+            itemIcon: (sec) => sec == 0 ? HugeIcons.strokeRoundedVolumeHigh : HugeIcons.strokeRoundedFilter,
+            onChanged: (val) {
+              if (val != null) {
+                HapticFeedback.selectionClick();
+                setState(() => _minTrackDurationSeconds = val);
+                storage.saveSetting('minimum_track_duration_seconds', val);
+                storage.saveSetting('ignore_short_tracks', val > 0);
+              }
+            },
+            isSolid: isSolid,
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Auto-Scan on App Startup',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Automatically sync newly added local tracks in background on launch',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _autoScanOnStartup,
+                activeThumbColor: primary,
+                onChanged: (val) {
+                  HapticFeedback.lightImpact();
+                  setState(() => _autoScanOnStartup = val);
+                  storage.saveSetting('auto_scan_on_startup', val);
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBentoDropdownSelector<T>({
+    required BuildContext context,
+    required String title,
+    required T currentValue,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required String Function(T) itemDescription,
+    required dynamic Function(T) itemIcon,
+    required ValueChanged<T?> onChanged,
+    required bool isSolid,
+  }) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isSolid
+            ? theme.colorScheme.surfaceContainerHighest
+            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: false),
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 1.0,
+        border: Border.all(
+          color: isSolid
+              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+              : StudioSurfaceTheme.outline(context, isSolid: false),
+          width: 0.8,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _ignoreShortTracks,
-              title: const Text('Ignore Audio Files < 30 Seconds', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              subtitle: const Text('Hide ringtones, notifications, and short audio clips from library', style: TextStyle(fontSize: 10.5)),
-              onChanged: (val) {
-                setState(() => _ignoreShortTracks = val);
-                storage.saveSetting('ignore_short_tracks', val);
-              },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _autoScanOnStartup,
-              title: const Text('Auto-Scan on App Startup', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              subtitle: const Text('Automatically sync newly added local tracks in background', style: TextStyle(fontSize: 10.5)),
-              onChanged: (val) {
-                setState(() => _autoScanOnStartup = val);
-                storage.saveSetting('auto_scan_on_startup', val);
-              },
+          ),
+          const SizedBox(height: 4),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: currentValue,
+              isExpanded: true,
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowDown01,
+                size: 15,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              dropdownColor: isSolid
+                  ? theme.colorScheme.surfaceContainerHigh
+                  : theme.colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+              items: items.map((item) {
+                final isSelected = item == currentValue;
+                return DropdownMenuItem<T>(
+                  value: item,
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: itemIcon(item),
+                        size: 16,
+                        color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          itemLabel(item),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: isSelected ? primary : theme.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: onChanged,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            itemDescription(currentValue),
+            style: TextStyle(
+              fontSize: 10,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+              height: 1.25,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+

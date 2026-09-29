@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../app/theme/app_typography.dart';
 import '../../../library/data/storage_cache_manager.dart';
 import '../../../library/presentation/widgets/duplicate_tracks_resolver_modal.dart';
 import '../../../library/presentation/widgets/missing_tracks_resolver_sheet.dart';
@@ -102,12 +103,20 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('STORAGE & CACHE QUOTA'),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        leading: IconButton(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            size: 20,
+            color: theme.colorScheme.onSurface,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconButton(
-            onPressed: _loadStorageSummary,
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              _loadStorageSummary(showLoading: true);
+            },
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedRefresh,
               size: 20,
@@ -120,20 +129,19 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
               children: [
-                // 1. Hero Disk Quota Gauge Bento Banner
+                // ─── 1. HERO DISK QUOTA GAUGE BENTO BANNER ────────────────────────
                 _buildStorageOverviewCard(theme, primary, isSolid),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
 
-                // 2. Cache Categories Section Header
+                // ─── 2. CACHE BREAKDOWN & RECLAMATION ─────────────────────────────
                 _buildSectionHeader(context, 'CACHE BREAKDOWN & RECLAMATION', HugeIcons.strokeRoundedDatabase),
                 const SizedBox(height: 8),
 
-                // Artwork Cache Card
                 _buildCacheItemCard(
                   title: 'Album Artwork Cache',
-                  subtitle: 'Thumbnail covers cached from local files and Navidrome',
+                  subtitle: 'Thumbnail covers cached from local files & Navidrome',
                   sizeText: _summary?.formattedArtworkCache ?? '0 B',
                   icon: HugeIcons.strokeRoundedAlbum01,
                   onClear: _clearArtworkCache,
@@ -143,7 +151,6 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 ),
                 const SizedBox(height: 8),
 
-                // Lyrics Cache Card
                 _buildCacheItemCard(
                   title: 'Lyrics & LRCLIB Cache',
                   subtitle: 'Cached plain and synchronized LRC lyrics files',
@@ -156,7 +163,6 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 ),
                 const SizedBox(height: 8),
 
-                // Playback History Card
                 _buildCacheItemCard(
                   title: 'Playback History & Statistics',
                   subtitle: '${_summary?.playbackHistoryCount ?? 0} logged playback sessions',
@@ -167,13 +173,12 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   primary: primary,
                   isSolid: isSolid,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                // 3. Database Maintenance & Indexer Section
+                // ─── 3. LIBRARY INDEXER & INTEGRITY ───────────────────────────────
                 _buildSectionHeader(context, 'LIBRARY INDEXER & INTEGRITY', HugeIcons.strokeRoundedFolderSync),
                 const SizedBox(height: 8),
 
-                // Missing Tracks Card
                 _buildActionCard(
                   title: 'Missing Tracks Resolver',
                   subtitle: 'Locate moved files and repair dead library references',
@@ -186,7 +191,6 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 ),
                 const SizedBox(height: 8),
 
-                // Duplicate Resolver Card
                 _buildActionCard(
                   title: 'Duplicate Tracks Resolver',
                   subtitle: 'Scan and deduplicate audio files favoring Hi-Res masters',
@@ -197,27 +201,35 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   primary: primary,
                   isSolid: isSolid,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-                // 4. 1-Click Master Purge Button
+                // ─── 4. 1-CLICK MASTER PURGE BUTTON ───────────────────────────────
                 FilledButton.icon(
-                  onPressed: _clearAllCaches,
+                  onPressed: () {
+                    HapticFeedback.heavyImpact();
+                    _clearAllCaches();
+                  },
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedDelete02,
                     size: 16,
                     color: theme.colorScheme.onError,
                   ),
                   label: const Text(
-                    '1-Click Purge All Temporary Caches',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                    'PURGE ALL TEMPORARY CACHES',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                      letterSpacing: 0.6,
+                    ),
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.error,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    foregroundColor: theme.colorScheme.onError,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
                   ),
                 ),
-                const SizedBox(height: 30),
               ],
             ),
     );
@@ -236,20 +248,51 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
         children: [
           Row(
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedDatabase, size: 20, color: primary),
-              const SizedBox(width: 8),
-              Text(
-                'STORAGE QUOTA OVERVIEW',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.12,
+                    solidBlendAlpha: 0.16,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDatabase,
+                  size: 18,
                   color: primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'STORAGE QUOTA OVERVIEW',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      'Aggregated disk space utilized by artwork, lyrics & database indexes',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -271,14 +314,14 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           label,
           style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
             fontSize: 15,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             color: theme.colorScheme.onSurface,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            fontFeatures: AppTypography.audioFigures,
           ),
         ),
       ],
@@ -298,10 +341,14 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
+        color: isSolid
+            ? theme.colorScheme.surfaceContainerHighest
+            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          color: isSolid
+              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+              : StudioSurfaceTheme.outline(context, isSolid: false),
           width: 0.8,
         ),
       ),
@@ -325,13 +372,26 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            sizeText,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: primary,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: StudioSurfaceTheme.tintedContainer(
+                context,
+                primary,
+                isSolid: isSolid,
+                translucentAlpha: 0.12,
+                solidBlendAlpha: 0.16,
+              ),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              sizeText,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: primary,
+                fontFeatures: AppTypography.audioFigures,
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -358,7 +418,9 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
     required bool isSolid,
   }) {
     return Material(
-      color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
+      color: isSolid
+          ? theme.colorScheme.surfaceContainerHighest
+          : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () {
@@ -371,7 +433,9 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+              color: isSolid
+                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                  : StudioSurfaceTheme.outline(context, isSolid: false),
               width: 0.8,
             ),
           ),
@@ -421,25 +485,21 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
 
   Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 4, top: 8),
-      child: Row(
-        children: [
-          HugeIcon(icon: icon, size: 14, color: primary),
-          const SizedBox(width: 6),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.0,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+    return Row(
+      children: [
+        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+            fontSize: 11.5,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.6,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
+

@@ -10,6 +10,7 @@ class DockingSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
 
     return Scaffold(
@@ -28,15 +29,153 @@ class DockingSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: [
-          _buildSectionHeader(context, 'DOCKING MODE OVERVIEW', HugeIcons.strokeRoundedCar01),
+          // ─── 1. STATUS HERO BANNER ──────────────────────────────────────────
+          _buildStatusHero(context, theme, primary, isSolid),
+          const SizedBox(height: 18),
+
+          // ─── 2. DOCKING MODE OVERVIEW ───────────────────────────────────────
+          _buildSectionHeader(context, 'DOCKING MODE LAUNCHER', HugeIcons.strokeRoundedCar01),
           const SizedBox(height: 8),
           _buildDeskDockingCard(context, isSolid),
           const SizedBox(height: 20),
 
+          // ─── 3. DISPLAY BEHAVIOR & FEATURES ─────────────────────────────────
           _buildSectionHeader(context, 'DISPLAY BEHAVIOR & FEATURES', HugeIcons.strokeRoundedTv01),
           const SizedBox(height: 8),
           _buildFeaturesCard(context, isSolid),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusHero(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.12,
+                    solidBlendAlpha: 0.16,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedComputer,
+                  size: 18,
+                  color: primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'STUDIO WORKSTATION & DOCK',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      'High-contrast telemetry, analog VU needles & distraction-free car mode',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Landscape & Portrait Adaptive',
+                isActive: true,
+                color: primary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Dual VU Ballistics: Active',
+                isActive: true,
+                color: theme.colorScheme.secondary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Studio Clock: Real-Time',
+                isActive: true,
+                color: theme.colorScheme.tertiary,
+                isSolid: isSolid,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(
+    BuildContext context,
+    ThemeData theme, {
+    required String label,
+    required bool isActive,
+    required Color color,
+    required bool isSolid,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+      decoration: BoxDecoration(
+        color: isSolid
+            ? (isActive
+                ? color.withValues(alpha: 0.16)
+                : theme.colorScheme.surfaceContainerHighest)
+            : (isActive
+                ? color.withValues(alpha: 0.14)
+                : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isActive
+              ? color.withValues(alpha: 0.45)
+              : (isSolid
+                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
+          width: 0.9,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: isActive ? color : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+        ),
       ),
     );
   }
@@ -69,7 +208,7 @@ class DockingSettingsScreen extends ConsumerWidget {
       decoration: StudioSurfaceTheme.cardDecoration(
         context: context,
         isSolid: isSolid,
-        radius: 12,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,8 +225,11 @@ class DockingSettingsScreen extends ConsumerWidget {
                     translucentAlpha: 0.15,
                     solidBlendAlpha: 0.20,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFFF9F0A).withValues(alpha: 0.4)),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
                 ),
                 child: const HugeIcon(
                   icon: HugeIcons.strokeRoundedCar01,
@@ -105,12 +247,12 @@ class DockingSettingsScreen extends ConsumerWidget {
                       style: TextStyle(
                         color: theme.colorScheme.onSurface,
                         fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'High-contrast glanceable studio clock, dual analog VU level meters & extra-large buttons.',
+                      'Glanceable studio clock, dual analog VU level meters & extra-large tap targets.',
                       style: TextStyle(
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 11,
@@ -128,14 +270,15 @@ class DockingSettingsScreen extends ConsumerWidget {
               onPressed: () => StudioDeskDockingScreen.show(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primary,
-                foregroundColor: Colors.black,
+                foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
               ),
-              icon: const HugeIcon(
+              icon: HugeIcon(
                 icon: HugeIcons.strokeRoundedMaximize01,
                 size: 18,
-                color: Colors.black,
+                color: theme.colorScheme.onPrimary,
               ),
               label: const Text(
                 'LAUNCH STUDIO DOCKING MODE',
@@ -158,7 +301,7 @@ class DockingSettingsScreen extends ConsumerWidget {
       decoration: StudioSurfaceTheme.cardDecoration(
         context: context,
         isSolid: isSolid,
-        radius: 12,
+        radius: 16,
       ),
       child: Column(
         children: [
@@ -199,7 +342,20 @@ class DockingSettingsScreen extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        HugeIcon(icon: icon, size: 18, color: primary),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: StudioSurfaceTheme.tintedContainer(
+              context,
+              primary,
+              isSolid: false,
+              translucentAlpha: 0.10,
+              solidBlendAlpha: 0.12,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: HugeIcon(icon: icon, size: 16, color: primary),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -209,7 +365,7 @@ class DockingSettingsScreen extends ConsumerWidget {
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: theme.colorScheme.onSurface,
                 ),
               ),
@@ -228,3 +384,4 @@ class DockingSettingsScreen extends ConsumerWidget {
     );
   }
 }
+

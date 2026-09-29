@@ -491,7 +491,7 @@ class ThemingSettingsScreen extends ConsumerWidget {
       decoration: StudioSurfaceTheme.cardDecoration(
         context: context,
         isSolid: isSolid,
-        radius: 12,
+        radius: 16,
       ),
       child: Wrap(
         spacing: 12,
@@ -544,7 +544,7 @@ class ThemingSettingsScreen extends ConsumerWidget {
     return Material(
       color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 1.0,

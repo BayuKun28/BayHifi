@@ -270,173 +270,232 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('BACKUP & RESTORE'),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        leading: IconButton(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            size: 20,
+            color: theme.colorScheme.onSurface,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: [
-          // 1. Hero Backup Engine Banner
+          // ─── 1. STATUS HERO BANNER ──────────────────────────────────────────
           _buildHeroBanner(theme, primary, isSolid),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
-          // 2. Export Section Header
+          // ─── 2. CREATE SNAPSHOT ARCHIVE ─────────────────────────────────────
           _buildSectionHeader(context, 'CREATE SNAPSHOT ARCHIVE', HugeIcons.strokeRoundedCloudDownload),
           const SizedBox(height: 8),
+          _buildExportCard(context, theme, primary, isSolid),
+          const SizedBox(height: 20),
 
-          // Export Configuration Card
-          Material(
-            color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                width: 1.0,
-              ),
+          // ─── 3. RESTORE FROM SNAPSHOT ───────────────────────────────────────
+          _buildSectionHeader(context, 'RESTORE FROM SNAPSHOT', HugeIcons.strokeRoundedCloudSync),
+          const SizedBox(height: 8),
+          _buildRestoreCard(context, theme, primary, isSolid),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExportCard(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Export .bayhifi Configuration',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Export .bayhifi Configuration',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Includes theme styling, custom playlists, smart rules, DSP presets, and favorite tracks.',
-                    style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Includes theme styling, custom playlists, smart rules, DSP presets, and favorite tracks.',
+            style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 14),
 
-                  // Include History Toggle
-                  SwitchListTile(
-                    title: const Text('Include Playback History', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Listening statistics and last played timestamps', style: TextStyle(fontSize: 10.5)),
-                    value: _includeHistory,
-                    onChanged: (val) => setState(() => _includeHistory = val),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
+          // Include History Toggle
+          _buildSwitchRow(
+            theme: theme,
+            primary: primary,
+            title: 'Include Playback History',
+            subtitle: 'Listening statistics and last played timestamps',
+            value: _includeHistory,
+            onChanged: (val) => setState(() => _includeHistory = val),
+          ),
+          const Divider(height: 16),
 
-                  // Include Library Tracks Toggle
-                  SwitchListTile(
-                    title: const Text('Include Cached Library Database', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Cached track metadata and album catalog', style: TextStyle(fontSize: 10.5)),
-                    value: _includeLibrary,
-                    onChanged: (val) => setState(() => _includeLibrary = val),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _copyBackupJson,
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 14, color: primary),
-                          label: Text('Copy JSON', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: primary)),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: primary.withValues(alpha: 0.5)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: _exportBackupFile,
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedCloudDownload, size: 14, color: theme.colorScheme.onPrimary),
-                          label: Text('Save .bayhifi File', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: theme.colorScheme.onPrimary)),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: primary,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          // Include Library Tracks Toggle
+          _buildSwitchRow(
+            theme: theme,
+            primary: primary,
+            title: 'Include Cached Library Database',
+            subtitle: 'Cached track metadata and album catalog',
+            value: _includeLibrary,
+            onChanged: (val) => setState(() => _includeLibrary = val),
           ),
           const SizedBox(height: 16),
 
-          // 3. Restore Section Header
-          _buildSectionHeader(context, 'RESTORE FROM SNAPSHOT', HugeIcons.strokeRoundedCloudSync),
-          const SizedBox(height: 8),
-
-          // Restore Card
-          Material(
-            color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                width: 1.0,
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _copyBackupJson,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 14, color: primary),
+                  label: Text('Copy JSON', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: primary)),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: isSolid
+                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                          : primary.withValues(alpha: 0.5),
+                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
               ),
-            ),
-            child: InkWell(
-              onTap: _showRestoreDialog,
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: _exportBackupFile,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCloudDownload, size: 14, color: theme.colorScheme.onPrimary),
+                  label: Text('Save .bayhifi File', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: theme.colorScheme.onPrimary)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRestoreCard(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
+    return Material(
+      color: isSolid
+          ? theme.colorScheme.surfaceContainer
+          : StudioSurfaceTheme.surfaceContainer(context, isSolid: false),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          _showRestoreDialog();
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.12,
+                    solidBlendAlpha: 0.16,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, size: 24, color: primary),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: StudioSurfaceTheme.tintedContainer(
-                          context,
-                          primary,
-                          isSolid: isSolid,
-                          translucentAlpha: 0.12,
-                          solidBlendAlpha: 0.16,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, size: 24, color: primary),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Restore Snapshot / JSON Payload',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Load settings, smart rules, and playlists from a .bayhifi backup payload',
-                            style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
-                          ),
-                        ],
+                    Text(
+                      'Restore Snapshot / JSON Payload',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Load settings, smart rules, and playlists from a .bayhifi backup payload',
+                      style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
+                    ),
                   ],
                 ),
               ),
-            ),
+              HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurfaceVariant),
+            ],
           ),
-          const SizedBox(height: 30),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildSwitchRow({
+    required ThemeData theme,
+    required Color primary,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          activeThumbColor: primary,
+          onChanged: (val) {
+            HapticFeedback.lightImpact();
+            onChanged(val);
+          },
+        ),
+      ],
     );
   }
 
@@ -448,70 +507,139 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
         isSolid: isSolid,
         radius: 16,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: StudioSurfaceTheme.tintedContainer(
-                context,
-                primary,
-                isSolid: isSolid,
-                translucentAlpha: 0.12,
-                solidBlendAlpha: 0.16,
-              ),
-              shape: BoxShape.circle,
-            ),
-            child: HugeIcon(icon: HugeIcons.strokeRoundedDatabase, size: 24, color: primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '.BAYHIFI SNAPSHOT ENGINE',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                    color: primary,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.12,
+                    solidBlendAlpha: 0.16,
                   ),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '100% portable JSON snapshot architecture for seamless device migration.',
-                  style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDatabase,
+                  size: 18,
+                  color: primary,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '.BAYHIFI SNAPSHOT ENGINE',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      '100% portable JSON snapshot architecture for seamless device migration',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Format: .bayhifi v1 JSON',
+                isActive: true,
+                color: primary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Profiles, EQ & Playlists: Included',
+                isActive: true,
+                color: theme.colorScheme.secondary,
+                isSolid: isSolid,
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(
+    BuildContext context,
+    ThemeData theme, {
+    required String label,
+    required bool isActive,
+    required Color color,
+    required bool isSolid,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+      decoration: BoxDecoration(
+        color: isSolid
+            ? (isActive
+                ? color.withValues(alpha: 0.16)
+                : theme.colorScheme.surfaceContainerHighest)
+            : (isActive
+                ? color.withValues(alpha: 0.14)
+                : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isActive
+              ? color.withValues(alpha: 0.45)
+              : (isSolid
+                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
+          width: 0.9,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: isActive ? color : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+        ),
       ),
     );
   }
 
   Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 4, top: 8),
-      child: Row(
-        children: [
-          HugeIcon(icon: icon, size: 14, color: primary),
-          const SizedBox(width: 6),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.0,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+    return Row(
+      children: [
+        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+            fontSize: 11.5,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.6,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
+

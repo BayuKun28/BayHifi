@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../app/theme/app_typography.dart';
 import '../../domain/player_customization_settings.dart';
 import '../controllers/player_customization_controller.dart';
 
@@ -12,6 +13,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final settings = ref.watch(playerCustomizationProvider);
     final controller = ref.read(playerCustomizationProvider.notifier);
     final isSolid = ref.isSolidStyle;
@@ -32,7 +34,11 @@ class VisualizerSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: [
-          // 1. ALBUM ART & COVER DISPLAY (COMBOBOX)
+          // ─── 1. STATUS HERO BANNER ──────────────────────────────────────────
+          _buildStatusHero(context, theme, primary, settings, isSolid),
+          const SizedBox(height: 18),
+
+          // ─── 2. ALBUM ART & COVER DISPLAY (COMBOBOX) ────────────────────────
           _buildBentoDropdownSelector<AlbumArtStyle>(
             context: context,
             sectionTitle: 'ALBUM ART & COVER STYLE',
@@ -52,11 +58,11 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
 
-          // 2. SPECTRUM VISUALIZER STYLING (COMBOBOX + FFT RESOLUTION)
-          _buildSpectrumVisualizerCard(context, settings, controller, isSolid),
+          // ─── 3. SPECTRUM VISUALIZER STYLING ─────────────────────────────────
+          _buildSpectrumVisualizerCard(context, theme, primary, settings, controller, isSolid),
           const SizedBox(height: 14),
 
-          // 3. TIME BAR & SEEKBAR STYLING (COMBOBOX)
+          // ─── 4. TIME BAR & SEEKBAR STYLING ──────────────────────────────────
           _buildBentoDropdownSelector<TimeBarStyle>(
             context: context,
             sectionTitle: 'TIME BAR & SEEKBAR STYLE',
@@ -76,7 +82,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
 
-          // 4. PERFORMANCE PROFILE (COMBOBOX)
+          // ─── 5. PERFORMANCE PROFILE ─────────────────────────────────────────
           _buildBentoDropdownSelector<PerformanceMode>(
             context: context,
             sectionTitle: 'ADAPTIVE PERFORMANCE PROFILE',
@@ -94,27 +100,173 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 20),
 
-          // 5. 3D PARALLAX & MOTION PHYSICS
+          // ─── 6. 3D PARALLAX & MOTION PHYSICS ────────────────────────────────
           _buildSectionHeader(
             context,
             '3D PARALLAX MOTION & BREATHING PULSE',
             HugeIcons.strokeRoundedLayers01,
           ),
           const SizedBox(height: 8),
-          _buildParallaxCard(context, settings, controller, isSolid),
-          const SizedBox(height: 14),
+          _buildParallaxCard(context, theme, primary, settings, controller, isSolid),
+          const SizedBox(height: 20),
 
-          // 6. BACKDROP BLUR & AMBIENT GLOW
+          // ─── 7. BACKDROP BLUR & AMBIENT GLOW ────────────────────────────────
           _buildSectionHeader(
             context,
             'DYNAMIC BACKDROP BLUR & AMBIENT GLOW',
             HugeIcons.strokeRoundedSparkles,
           ),
           const SizedBox(height: 8),
-          _buildBlurGlowCard(context, settings, controller, isSolid),
+          _buildBlurGlowCard(context, theme, primary, settings, controller, isSolid),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusHero(
+    BuildContext context,
+    ThemeData theme,
+    Color primary,
+    PlayerCustomizationSettings settings,
+    bool isSolid,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.12,
+                    solidBlendAlpha: 0.16,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedSparkles,
+                  size: 18,
+                  color: primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'STUDIO VISUAL DYNAMICS',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      'RTA spectrum styling, dynamic artwork skins & 3D parallax shaders',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Art: ${settings.albumArtStyle.label}',
+                isActive: true,
+                color: primary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Spectrum: ${settings.spectrumStyle.label}',
+                isActive: true,
+                color: theme.colorScheme.secondary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Seekbar: ${settings.timeBarStyle.label}',
+                isActive: true,
+                color: theme.colorScheme.tertiary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Perf: ${settings.performanceMode.label.split('(').first.trim()}',
+                isActive: true,
+                color: primary,
+                isSolid: isSolid,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(
+    BuildContext context,
+    ThemeData theme, {
+    required String label,
+    required bool isActive,
+    required Color color,
+    required bool isSolid,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+      decoration: BoxDecoration(
+        color: isSolid
+            ? (isActive
+                ? color.withValues(alpha: 0.16)
+                : theme.colorScheme.surfaceContainerHighest)
+            : (isActive
+                ? color.withValues(alpha: 0.14)
+                : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isActive
+              ? color.withValues(alpha: 0.45)
+              : (isSolid
+                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
+          width: 0.9,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: isActive ? color : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+        ),
       ),
     );
   }
@@ -154,471 +306,491 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                HugeIcon(icon: sectionIcon, size: 15, color: primary),
-                const SizedBox(width: 8),
-                Text(
-                  sectionTitle,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Dropdown ComboBox Container
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-              decoration: BoxDecoration(
-                color: isSolid
-                    ? theme.colorScheme.surfaceContainerHighest
-                    : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                  width: 1.0,
-                ),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<T>(
-                  value: currentValue,
-                  isExpanded: true,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowDown01,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  dropdownColor: isSolid
-                      ? theme.colorScheme.surfaceContainerHigh
-                      : theme.colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(14),
-                  items: items.map((item) {
-                    final isSelected = item == currentValue;
-                    return DropdownMenuItem<T>(
-                      value: item,
-                      child: Row(
-                        children: [
-                          HugeIcon(
-                            icon: itemIcon(item),
-                            size: 18,
-                            color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  itemLabel(item),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                    color: isSelected ? primary : theme.colorScheme.onSurface,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: onChanged,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-
-            // Active Description
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                itemDescription(currentValue),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              HugeIcon(icon: sectionIcon, size: 15, color: primary),
+              const SizedBox(width: 8),
+              Text(
+                sectionTitle,
                 style: TextStyle(
-                  fontSize: 10.5,
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.3,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Dropdown ComboBox Container
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: BoxDecoration(
+              color: isSolid
+                  ? theme.colorScheme.surfaceContainerHighest
+                  : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                width: 1.0,
+              ),
             ),
-          ],
-        ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<T>(
+                value: currentValue,
+                isExpanded: true,
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowDown01,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                dropdownColor: isSolid
+                    ? theme.colorScheme.surfaceContainerHigh
+                    : theme.colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(14),
+                items: items.map((item) {
+                  final isSelected = item == currentValue;
+                  return DropdownMenuItem<T>(
+                    value: item,
+                    child: Row(
+                      children: [
+                        HugeIcon(
+                          icon: itemIcon(item),
+                          size: 18,
+                          color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            itemLabel(item),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              color: isSelected ? primary : theme.colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // Active Description
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              itemDescription(currentValue),
+              style: TextStyle(
+                fontSize: 10.5,
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSpectrumVisualizerCard(
     BuildContext context,
+    ThemeData theme,
+    Color primary,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
     bool isSolid,
   ) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 15, color: primary),
-                const SizedBox(width: 8),
-                Text(
-                  'RTA SPECTRUM VISUALIZER',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Spectrum Style Dropdown ComboBox
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-              decoration: BoxDecoration(
-                color: isSolid
-                    ? theme.colorScheme.surfaceContainerHighest
-                    : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                  width: 1.0,
-                ),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<SpectrumStyle>(
-                  value: settings.spectrumStyle,
-                  isExpanded: true,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowDown01,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  dropdownColor: isSolid
-                      ? theme.colorScheme.surfaceContainerHigh
-                      : theme.colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(14),
-                  items: SpectrumStyle.values.map((style) {
-                    final isSelected = style == settings.spectrumStyle;
-                    return DropdownMenuItem<SpectrumStyle>(
-                      value: style,
-                      child: Row(
-                        children: [
-                          HugeIcon(
-                            icon: _getSpectrumStyleIcon(style),
-                            size: 18,
-                            color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              style.label,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                color: isSelected ? primary : theme.colorScheme.onSurface,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      HapticFeedback.selectionClick();
-                      controller.setSpectrumStyle(val);
-                    }
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                settings.spectrumStyle.description,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 15, color: primary),
+              const SizedBox(width: 8),
+              Text(
+                'RTA SPECTRUM VISUALIZER',
                 style: TextStyle(
-                  fontSize: 10.5,
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.3,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Divider(height: 1, color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-            const SizedBox(height: 10),
+            ],
+          ),
+          const SizedBox(height: 10),
 
-            // FFT Resolution Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'FFT Frequency Resolution',
-                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Analysis frequency bin density',
-                      style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isSolid
-                        ? theme.colorScheme.surfaceContainerHighest
-                        : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: settings.fftBins,
-                      dropdownColor: isSolid
-                          ? theme.colorScheme.surfaceContainerHigh
-                          : theme.colorScheme.surfaceContainer,
-                      borderRadius: BorderRadius.circular(10),
-                      items: [256, 512, 1024, 2048].map((bins) {
-                        return DropdownMenuItem(
-                          value: bins,
-                          child: Text(
-                            '$bins Bins',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: bins == settings.fftBins ? FontWeight.w800 : FontWeight.w500,
-                              color: bins == settings.fftBins ? primary : theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          HapticFeedback.selectionClick();
-                          controller.setFftBins(val);
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
+          // Spectrum Style Dropdown ComboBox
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: BoxDecoration(
+              color: isSolid
+                  ? theme.colorScheme.surfaceContainerHighest
+                  : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                width: 1.0,
+              ),
             ),
-          ],
-        ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<SpectrumStyle>(
+                value: settings.spectrumStyle,
+                isExpanded: true,
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowDown01,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                dropdownColor: isSolid
+                    ? theme.colorScheme.surfaceContainerHigh
+                    : theme.colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(14),
+                items: SpectrumStyle.values.map((style) {
+                  final isSelected = style == settings.spectrumStyle;
+                  return DropdownMenuItem<SpectrumStyle>(
+                    value: style,
+                    child: Row(
+                      children: [
+                        HugeIcon(
+                          icon: _getSpectrumStyleIcon(style),
+                          size: 18,
+                          color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            style.label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              color: isSelected ? primary : theme.colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    HapticFeedback.selectionClick();
+                    controller.setSpectrumStyle(val);
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              settings.spectrumStyle.description,
+              style: TextStyle(
+                fontSize: 10.5,
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.3,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Divider(height: 1, color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
+          const SizedBox(height: 10),
+
+          // FFT Resolution Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'FFT Frequency Resolution',
+                    style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Analysis frequency bin density',
+                    style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isSolid
+                      ? theme.colorScheme.surfaceContainerHighest
+                      : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                    width: 0.8,
+                  ),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    value: settings.fftBins,
+                    dropdownColor: isSolid
+                        ? theme.colorScheme.surfaceContainerHigh
+                        : theme.colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(10),
+                    items: [256, 512, 1024, 2048].map((bins) {
+                      return DropdownMenuItem(
+                        value: bins,
+                        child: Text(
+                          '$bins Bins',
+                          style: TextStyle(
+                            fontFeatures: AppTypography.audioFigures,
+                            fontSize: 11,
+                            fontWeight: bins == settings.fftBins ? FontWeight.w800 : FontWeight.w500,
+                            color: bins == settings.fftBins ? primary : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        HapticFeedback.selectionClick();
+                        controller.setFftBins(val);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildParallaxCard(
     BuildContext context,
+    ThemeData theme,
+    Color primary,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
     bool isSolid,
   ) {
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: settings.enableParallax,
-              title: const Text(
-                '3D Motion Parallax Artwork',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text(
-                'Smooth perspective tilt responding to touch drag and pointer hover',
-                style: TextStyle(fontSize: 10.5),
-              ),
-              onChanged: (val) {
-                HapticFeedback.selectionClick();
-                controller.setEnableParallax(val);
-              },
+      child: Column(
+        children: [
+          _buildSwitchRow(
+            theme: theme,
+            primary: primary,
+            title: '3D Motion Parallax Artwork',
+            subtitle: 'Smooth perspective tilt responding to touch drag & pointer hover',
+            value: settings.enableParallax,
+            onChanged: (val) => controller.setEnableParallax(val),
+          ),
+          if (settings.enableParallax) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Tilt Intensity', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                _buildValueBadge(context, theme, primary, '${(settings.parallaxIntensity * 100).toInt()} %', isSolid),
+              ],
             ),
-            if (settings.enableParallax) ...[
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Tilt Intensity', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
-                  Text('${(settings.parallaxIntensity * 100).toInt()}%', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              Slider(
-                value: settings.parallaxIntensity,
-                min: 0.2,
-                max: 2.0,
-                divisions: 18,
-                onChanged: (val) => controller.setParallaxIntensity(val),
-              ),
-            ],
-            const Divider(height: 14),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: settings.enableBreathingPulse,
-              title: const Text(
-                'Audio-Reactive Bass Pulse',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text(
-                'Subtle organic breathing scale pulsing with low-frequency sub-bass',
-                style: TextStyle(fontSize: 10.5),
-              ),
-              onChanged: (val) {
-                HapticFeedback.selectionClick();
-                controller.setEnableBreathingPulse(val);
-              },
+            Slider(
+              value: settings.parallaxIntensity,
+              min: 0.2,
+              max: 2.0,
+              divisions: 18,
+              activeColor: primary,
+              onChanged: (val) => controller.setParallaxIntensity(val),
             ),
           ],
-        ),
+          const Divider(height: 16),
+          _buildSwitchRow(
+            theme: theme,
+            primary: primary,
+            title: 'Audio-Reactive Bass Pulse',
+            subtitle: 'Subtle organic breathing scale pulsing with low-frequency sub-bass',
+            value: settings.enableBreathingPulse,
+            onChanged: (val) => controller.setEnableBreathingPulse(val),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildBlurGlowCard(
     BuildContext context,
+    ThemeData theme,
+    Color primary,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
     bool isSolid,
   ) {
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
+      ),
+      child: Column(
+        children: [
+          _buildSwitchRow(
+            theme: theme,
+            primary: primary,
+            title: 'Gaussian Backdrop Blur',
+            subtitle: 'Glassmorphic blur on floating capsule dock and bottom sheets',
+            value: settings.enableBackdropBlur,
+            onChanged: (val) => controller.setEnableBackdropBlur(val),
+          ),
+          if (settings.enableBackdropBlur) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Blur Sigma', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                _buildValueBadge(context, theme, primary, '${settings.blurSigma.toInt()} px', isSolid),
+              ],
+            ),
+            Slider(
+              value: settings.blurSigma,
+              min: 4.0,
+              max: 30.0,
+              divisions: 26,
+              activeColor: primary,
+              onChanged: (val) => controller.setBlurSigma(val),
+            ),
+          ],
+          const Divider(height: 16),
+          _buildSwitchRow(
+            theme: theme,
+            primary: primary,
+            title: 'Dynamic Ambient Artwork Glow',
+            subtitle: 'Radiates real-time soft atmospheric color aura behind album art',
+            value: settings.ambientGlow,
+            onChanged: (val) => controller.setAmbientGlow(val),
+          ),
+          if (settings.ambientGlow) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Glow Intensity', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                _buildValueBadge(context, theme, primary, '${(settings.ambientGlowIntensity * 100).toInt()} %', isSolid),
+              ],
+            ),
+            Slider(
+              value: settings.ambientGlowIntensity,
+              min: 0.1,
+              max: 1.0,
+              divisions: 18,
+              activeColor: primary,
+              onChanged: (val) => controller.setAmbientGlowIntensity(val),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwitchRow({
+    required ThemeData theme,
+    required Color primary,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          activeThumbColor: primary,
+          onChanged: (val) {
+            HapticFeedback.lightImpact();
+            onChanged(val);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildValueBadge(BuildContext context, ThemeData theme, Color primary, String text, bool isSolid) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: isSolid
+            ? theme.colorScheme.surfaceContainerHighest
+            : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isSolid
+              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+              : primary.withValues(alpha: 0.3),
           width: 0.8,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: settings.enableBackdropBlur,
-              title: const Text(
-                'Gaussian Backdrop Blur',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text(
-                'Glassmorphic blur on floating capsule dock and bottom sheets',
-                style: TextStyle(fontSize: 10.5),
-              ),
-              onChanged: (val) {
-                HapticFeedback.selectionClick();
-                controller.setEnableBackdropBlur(val);
-              },
-            ),
-            if (settings.enableBackdropBlur) ...[
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Blur Sigma', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
-                  Text('${settings.blurSigma.toInt()} px', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              Slider(
-                value: settings.blurSigma,
-                min: 4.0,
-                max: 30.0,
-                divisions: 26,
-                onChanged: (val) => controller.setBlurSigma(val),
-              ),
-            ],
-            const Divider(height: 14),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: settings.ambientGlow,
-              title: const Text(
-                'Dynamic Ambient Artwork Glow',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text(
-                'Radiates real-time soft atmospheric color aura behind the album art',
-                style: TextStyle(fontSize: 10.5),
-              ),
-              onChanged: (val) {
-                HapticFeedback.selectionClick();
-                controller.setAmbientGlow(val);
-              },
-            ),
-            if (settings.ambientGlow) ...[
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Glow Intensity', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
-                  Text('${(settings.ambientGlowIntensity * 100).toInt()}%', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              Slider(
-                value: settings.ambientGlowIntensity,
-                min: 0.1,
-                max: 1.0,
-                divisions: 18,
-                onChanged: (val) => controller.setAmbientGlowIntensity(val),
-              ),
-            ],
-          ],
+      child: Text(
+        text,
+        style: TextStyle(
+          fontFeatures: AppTypography.audioFigures,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: primary,
         ),
       ),
     );
