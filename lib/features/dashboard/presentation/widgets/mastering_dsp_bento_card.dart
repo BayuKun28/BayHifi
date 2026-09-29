@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../dsp_rack/presentation/dsp_rack_screen.dart';
 
 class MasteringDspBentoCard extends ConsumerWidget {
@@ -11,6 +12,7 @@ class MasteringDspBentoCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return InkWell(
       onTap: () {
@@ -24,20 +26,9 @@ class MasteringDspBentoCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: theme.dividerColor.withValues(alpha: 0.6),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        decoration: StudioSurfaceTheme.cardDecoration(
+          context: context,
+          isSolid: isSolid,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +39,7 @@ class MasteringDspBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.15),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: HugeIcon(
@@ -74,7 +65,7 @@ class MasteringDspBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.15),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -96,17 +87,17 @@ class MasteringDspBentoCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: _buildModuleChip(context, 'Tube Exciter', true)),
+                    Expanded(child: _buildModuleChip(context, isSolid, 'Tube Exciter', true)),
                     const SizedBox(width: 6),
-                    Expanded(child: _buildModuleChip(context, 'Limiter', true)),
+                    Expanded(child: _buildModuleChip(context, isSolid, 'Limiter', true)),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Expanded(child: _buildModuleChip(context, 'Compressor', true)),
+                    Expanded(child: _buildModuleChip(context, isSolid, 'Compressor', true)),
                     const SizedBox(width: 6),
-                    Expanded(child: _buildModuleChip(context, 'Crossfeed', false)),
+                    Expanded(child: _buildModuleChip(context, isSolid, 'Crossfeed', false)),
                   ],
                 ),
               ],
@@ -119,7 +110,7 @@ class MasteringDspBentoCard extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4.5),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.6),
+                color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -153,7 +144,7 @@ class MasteringDspBentoCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildModuleChip(BuildContext context, String label, bool isActive) {
+  Widget _buildModuleChip(BuildContext context, bool isSolid, String label, bool isActive) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
@@ -161,13 +152,13 @@ class MasteringDspBentoCard extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: isActive
-            ? primary.withValues(alpha: 0.12)
-            : theme.colorScheme.surfaceContainer.withValues(alpha: 0.4),
+            ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid)
+            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isActive
-              ? primary.withValues(alpha: 0.35)
-              : theme.dividerColor.withValues(alpha: 0.5),
+              ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.35))
+              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 0.8,
         ),
       ),

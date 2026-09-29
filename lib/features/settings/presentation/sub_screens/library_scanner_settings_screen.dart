@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
@@ -29,6 +30,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -49,19 +51,19 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
           // 1. MUSIC SOURCE FOLDERS
           _buildSectionHeader(context, 'MUSIC SOURCE FOLDERS', HugeIcons.strokeRoundedFolderLibrary),
           const SizedBox(height: 8),
-          _buildSourceFoldersCard(context),
+          _buildSourceFoldersCard(context, isSolid),
           const SizedBox(height: 20),
 
           // 2. SMART SLEEP TIMER
           _buildSectionHeader(context, 'SMART SLEEP TIMER', HugeIcons.strokeRoundedHourglass),
           const SizedBox(height: 8),
-          _buildSleepTimerCard(context),
+          _buildSleepTimerCard(context, isSolid),
           const SizedBox(height: 20),
 
           // 3. LIBRARY SCANNER RULES
           _buildSectionHeader(context, 'LIBRARY SCANNER RULES', HugeIcons.strokeRoundedFolder01),
           const SizedBox(height: 8),
-          _buildLibraryRulesCard(context),
+          _buildLibraryRulesCard(context, isSolid),
         ],
       ),
     );
@@ -86,7 +88,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
     );
   }
 
-  Widget _buildSleepTimerCard(BuildContext context) {
+  Widget _buildSleepTimerCard(BuildContext context, bool isSolid) {
     final theme = Theme.of(context);
     final timerState = ref.watch(sleepTimerControllerProvider);
     final timerNotifier = ref.read(sleepTimerControllerProvider.notifier);
@@ -94,13 +96,11 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: timerState.isActive ? primary.withValues(alpha: 0.5) : theme.dividerColor,
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 12,
+        borderColor: timerState.isActive ? primary.withValues(alpha: 0.5) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,13 +130,19 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: timerState.isActive
-                      ? const Color(0xFF00E676).withValues(alpha: 0.15)
-                      : theme.dividerColor.withValues(alpha: 0.3),
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          const Color(0xFF00E676),
+                          isSolid: isSolid,
+                          translucentAlpha: 0.15,
+                          solidBlendAlpha: 0.20,
+                        )
+                      : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.3),
                   borderRadius: BorderRadius.circular(5),
                   border: Border.all(
                     color: timerState.isActive
                         ? const Color(0xFF00E676).withValues(alpha: 0.6)
-                        : theme.dividerColor,
+                        : StudioSurfaceTheme.outline(context, isSolid: isSolid),
                     width: 0.8,
                   ),
                 ),
@@ -175,9 +181,18 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.08),
+                color: StudioSurfaceTheme.tintedContainer(
+                  context,
+                  primary,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.08,
+                  solidBlendAlpha: 0.14,
+                ),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: primary.withValues(alpha: 0.25), width: 0.8),
+                border: Border.all(
+                  color: primary.withValues(alpha: 0.25),
+                  width: 0.8,
+                ),
               ),
               child: Row(
                 children: [
@@ -231,7 +246,10 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      side: BorderSide(color: theme.dividerColor, width: 0.8),
+                      side: BorderSide(
+                        color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                        width: 0.8,
+                      ),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     onPressed: () => timerNotifier.extendTimer(15),
@@ -278,7 +296,10 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 6),
-                        side: BorderSide(color: theme.dividerColor, width: 0.8),
+                        side: BorderSide(
+                          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                          width: 0.8,
+                        ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                       onPressed: () => timerNotifier.startTimer(mins),
@@ -317,7 +338,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
     );
   }
 
-  Widget _buildSourceFoldersCard(BuildContext context) {
+  Widget _buildSourceFoldersCard(BuildContext context, bool isSolid) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final libraryState = ref.watch(unifiedLibraryProvider);
@@ -326,10 +347,10 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 12,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,9 +380,11 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
+                border: Border.all(
+                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                ),
               ),
               child: Center(
                 child: Text(
@@ -377,9 +400,11 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6)),
+                  border: Border.all(
+                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -412,7 +437,13 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.1),
+                color: StudioSurfaceTheme.tintedContainer(
+                  context,
+                  primary,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.1,
+                  solidBlendAlpha: 0.16,
+                ),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: primary.withValues(alpha: 0.3)),
               ),
@@ -464,15 +495,17 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
     );
   }
 
-  Widget _buildLibraryRulesCard(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget _buildLibraryRulesCard(BuildContext context, bool isSolid) {
     final storage = LocalPersistenceService.instance;
 
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.dividerColor, width: 1.0),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 1.0,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),

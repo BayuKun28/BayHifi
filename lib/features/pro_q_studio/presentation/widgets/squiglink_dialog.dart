@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../controllers/eq_controller.dart';
 
 /// Modal dialog for Importing and Exporting EQ configuration in Squiglink / Equalizer APO / Wavelet format
@@ -47,6 +48,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
     final notifier = ref.read(eqControllerProvider.notifier);
     final exportedSquiglink = notifier.exportSquiglinkText();
     final exportedWavelet = notifier.exportWaveletText();
+    final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -56,12 +59,12 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
         width: double.infinity,
         height: 400,
         decoration: BoxDecoration(
-          color: const Color(0xFF131822),
+          color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF2C3542), width: 1.2),
+          border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.6),
+              color: Colors.black.withValues(alpha: isSolid ? 0.4 : 0.6),
               blurRadius: 24,
               spreadRadius: 4,
             ),
@@ -73,17 +76,17 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             // Header
             Row(
               children: [
-                const HugeIcon(
+                HugeIcon(
                   icon: HugeIcons.strokeRoundedSparkles,
                   size: 16,
-                  color: Color(0xFFCE93D8),
+                  color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'SQUIGLINK & EQUALIZER APO ENGINE',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                       fontSize: 12.0,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.8,
@@ -98,10 +101,10 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   borderRadius: BorderRadius.circular(4),
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    child: const HugeIcon(
+                    child: HugeIcon(
                       icon: HugeIcons.strokeRoundedCancel01,
                       size: 16,
-                      color: Color(0xFF90A4AE),
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -113,18 +116,28 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             Container(
               height: 32,
               decoration: BoxDecoration(
-                color: const Color(0xFF19202B),
+                color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFF25303D), width: 0.8),
+                border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 0.8),
               ),
               child: TabBar(
                 controller: _tabController,
                 indicator: BoxDecoration(
-                  color: const Color(0xFF7B1FA2),
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    theme.colorScheme.primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.35,
+                    solidBlendAlpha: 0.25,
+                  ),
                   borderRadius: BorderRadius.circular(5),
+                  border: Border.all(
+                    color: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
                 ),
-                labelColor: Colors.white,
-                unselectedLabelColor: const Color(0xFF90A4AE),
+                labelColor: theme.colorScheme.primary,
+                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                 labelStyle: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -144,10 +157,10 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                 controller: _tabController,
                 children: [
                   // Tab 1: Import
-                  _buildImportTab(notifier),
+                  _buildImportTab(notifier, isSolid, theme),
 
                   // Tab 2: Export
-                  _buildExportTab(exportedSquiglink, exportedWavelet),
+                  _buildExportTab(exportedSquiglink, exportedWavelet, isSolid, theme),
                 ],
               ),
             ),
@@ -157,32 +170,32 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
     );
   }
 
-  Widget _buildImportTab(EqController notifier) {
+  Widget _buildImportTab(EqController notifier, bool isSolid, ThemeData theme) {
     return Column(
       children: [
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F131A),
+              color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF25303D), width: 1.0),
+              border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
             ),
             child: TextField(
               controller: _importTextController,
               maxLines: null,
               expands: true,
-              style: const TextStyle(
-                color: Color(0xFFECEFF1),
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
                 fontSize: 10.5,
                 fontFamily: 'monospace',
                 height: 1.35,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText:
                     'Paste Squiglink / Equalizer APO text here...\nExample:\nPreamp: -4.3 dB\nFilter 1: ON PK Fc 63 Hz Gain -1.1 dB Q 1.414',
                 hintStyle: TextStyle(
-                  color: Color(0xFF546E7A),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                   fontSize: 10.5,
                   fontFamily: 'monospace',
                 ),
@@ -201,8 +214,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
           children: [
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF90A4AE),
-                side: const BorderSide(color: Color(0xFF37474F)),
+                foregroundColor: theme.colorScheme.onSurfaceVariant,
+                side: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -211,7 +224,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               onPressed: () {
                 _importTextController.text = _demoSquiglinkText;
               },
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedFile01, size: 13, color: Color(0xFF90A4AE)),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedFile01, size: 13, color: theme.colorScheme.onSurfaceVariant),
               label: const Text(
                 'LOAD DEMO',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -219,8 +232,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             ),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF29B6F6),
-                side: const BorderSide(color: Color(0xFF0288D1)),
+                foregroundColor: theme.colorScheme.primary,
+                side: BorderSide(color: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6)),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -234,7 +247,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   });
                 }
               },
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedClipboard, size: 13, color: Color(0xFF29B6F6)),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedClipboard, size: 13, color: theme.colorScheme.primary),
               label: const Text(
                 'PASTE',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -242,8 +255,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00E676),
-                foregroundColor: const Color(0xFF091A10),
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -257,23 +270,23 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                 if (success) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Squiglink EQ successfully imported to DSP rack.'),
-                      backgroundColor: Color(0xFF1B5E20),
-                      duration: Duration(seconds: 2),
+                    SnackBar(
+                      content: const Text('Squiglink EQ successfully imported to DSP rack.'),
+                      backgroundColor: theme.colorScheme.primary,
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Invalid Squiglink text format. Could not parse filters.'),
-                      backgroundColor: Color(0xFFB71C1C),
-                      duration: Duration(seconds: 2),
+                    SnackBar(
+                      content: const Text('Invalid Squiglink text format. Could not parse filters.'),
+                      backgroundColor: theme.colorScheme.error,
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 }
               },
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle02, size: 14, color: Color(0xFF091A10)),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle02, size: 14, color: theme.colorScheme.onPrimary),
               label: const Text(
                 'APPLY FILTERS',
                 style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w900),
@@ -285,7 +298,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
     );
   }
 
-  Widget _buildExportTab(String exportedSquiglink, String exportedWavelet) {
+  Widget _buildExportTab(String exportedSquiglink, String exportedWavelet, bool isSolid, ThemeData theme) {
     return Column(
       children: [
         Expanded(
@@ -293,15 +306,15 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             width: double.infinity,
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F131A),
+              color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF25303D), width: 1.0),
+              border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
             ),
             child: SingleChildScrollView(
               child: SelectableText(
                 exportedSquiglink,
-                style: const TextStyle(
-                  color: Color(0xFF81C784),
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
                   fontSize: 10.5,
                   fontFamily: 'monospace',
                   height: 1.35,
@@ -317,8 +330,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
           children: [
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7B1FA2),
-                foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -327,14 +340,14 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: exportedSquiglink));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Squiglink EQ text copied to clipboard!'),
-                    backgroundColor: Color(0xFF4A148C),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: const Text('Squiglink EQ text copied to clipboard!'),
+                    backgroundColor: theme.colorScheme.primary,
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               },
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 13, color: Colors.white),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 13, color: theme.colorScheme.onPrimary),
               label: const Text(
                 'COPY SQUIGLINK',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -342,8 +355,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             ),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF00E676),
-                side: const BorderSide(color: Color(0xFF00897B)),
+                foregroundColor: theme.colorScheme.secondary,
+                side: BorderSide(color: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6)),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -352,14 +365,14 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: exportedWavelet));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Wavelet GraphicEQ text copied to clipboard!'),
-                    backgroundColor: Color(0xFF1B5E20),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: const Text('Wavelet GraphicEQ text copied to clipboard!'),
+                    backgroundColor: theme.colorScheme.secondary,
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               },
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 13, color: Color(0xFF00E676)),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 13, color: theme.colorScheme.secondary),
               label: const Text(
                 'COPY WAVELET',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),

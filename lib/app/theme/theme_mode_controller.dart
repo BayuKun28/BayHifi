@@ -109,12 +109,12 @@ class AppPalette {
     primary: Color(0xFF38BDF8),
     secondary: Color(0xFF0284C7),
     accent: Color(0xFF38BDF8),
-    backgroundDark: Color(0xFF0D0F14),
-    backgroundLight: Color(0xFFF4F6F9),
-    surfaceDark: Color(0xFF141922),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF1B2230),
-    surfaceContainerLight: Color(0xFFE9ECF2),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette amberTube = AppPalette(
@@ -124,12 +124,12 @@ class AppPalette {
     primary: Color(0xFFF59E0B),
     secondary: Color(0xFFD97706),
     accent: Color(0xFFF59E0B),
-    backgroundDark: Color(0xFF100D0A),
-    backgroundLight: Color(0xFFFAF7F2),
-    surfaceDark: Color(0xFF1A1612),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF26201A),
-    surfaceContainerLight: Color(0xFFF0EBE3),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette emeraldHiFi = AppPalette(
@@ -139,12 +139,12 @@ class AppPalette {
     primary: Color(0xFF10B981),
     secondary: Color(0xFF059669),
     accent: Color(0xFF10B981),
-    backgroundDark: Color(0xFF09120D),
-    backgroundLight: Color(0xFFF2FAF5),
-    surfaceDark: Color(0xFF101E17),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF182C22),
-    surfaceContainerLight: Color(0xFFE4F2EA),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette electricPurple = AppPalette(
@@ -154,12 +154,12 @@ class AppPalette {
     primary: Color(0xFFA855F7),
     secondary: Color(0xFF7E22CE),
     accent: Color(0xFFC084FC),
-    backgroundDark: Color(0xFF110A18),
-    backgroundLight: Color(0xFFF8F2FC),
-    surfaceDark: Color(0xFF1B1226),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF281B38),
-    surfaceContainerLight: Color(0xFFEDE2F5),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette crimsonPassion = AppPalette(
@@ -169,12 +169,12 @@ class AppPalette {
     primary: Color(0xFFF43F5E),
     secondary: Color(0xFFBE123C),
     accent: Color(0xFFFB7185),
-    backgroundDark: Color(0xFF140A0B),
-    backgroundLight: Color(0xFFFCF3F3),
-    surfaceDark: Color(0xFF201113),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF2E191C),
-    surfaceContainerLight: Color(0xFFF5E4E4),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette trueOledBlack = AppPalette(
@@ -185,7 +185,7 @@ class AppPalette {
     secondary: Color(0xFF0284C7),
     accent: Color(0xFF34D399),
     backgroundDark: Color(0xFF000000),
-    backgroundLight: Color(0xFFF8F9FA),
+    backgroundLight: Color(0xFFF8FAFC),
     surfaceDark: Color(0xFF0A0A0A),
     surfaceLight: Color(0xFFFFFFFF),
     surfaceContainerDark: Color(0xFF141414),
@@ -200,12 +200,12 @@ class AppPalette {
     primary: Color(0xFFB8A9E8),
     secondary: Color(0xFF9D8BC9),
     accent: Color(0xFFB8A9E8),
-    backgroundDark: Color(0xFF121118),
-    backgroundLight: Color(0xFFF7F6FB),
-    surfaceDark: Color(0xFF1A1824),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF242232),
-    surfaceContainerLight: Color(0xFFECEAF5),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette pastelSage = AppPalette(
@@ -215,12 +215,12 @@ class AppPalette {
     primary: Color(0xFF93D5C0),
     secondary: Color(0xFF72B8A2),
     accent: Color(0xFF93D5C0),
-    backgroundDark: Color(0xFF0E1412),
-    backgroundLight: Color(0xFFF4FAF7),
-    surfaceDark: Color(0xFF151E1B),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF1F2B27),
-    surfaceContainerLight: Color(0xFFE8F4EE),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette pastelSky = AppPalette(
@@ -230,12 +230,12 @@ class AppPalette {
     primary: Color(0xFF9AC8EB),
     secondary: Color(0xFF74ABD4),
     accent: Color(0xFF9AC8EB),
-    backgroundDark: Color(0xFF0E1318),
-    backgroundLight: Color(0xFFF4F8FC),
-    surfaceDark: Color(0xFF141C24),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF1D2833),
-    surfaceContainerLight: Color(0xFFE7F0F9),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette pastelPeach = AppPalette(
@@ -245,12 +245,12 @@ class AppPalette {
     primary: Color(0xFFF7B297),
     secondary: Color(0xFFDE9173),
     accent: Color(0xFFF7B297),
-    backgroundDark: Color(0xFF16110F),
-    backgroundLight: Color(0xFFFAF5F2),
-    surfaceDark: Color(0xFF211A16),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF2E2420),
-    surfaceContainerLight: Color(0xFFF7ECE6),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette pastelBlush = AppPalette(
@@ -260,12 +260,12 @@ class AppPalette {
     primary: Color(0xFFF2A7B5),
     secondary: Color(0xFFD78494),
     accent: Color(0xFFF2A7B5),
-    backgroundDark: Color(0xFF160F12),
-    backgroundLight: Color(0xFFFAF4F6),
-    surfaceDark: Color(0xFF22161A),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF301F25),
-    surfaceContainerLight: Color(0xFFF7EAEF),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const AppPalette pastelButter = AppPalette(
@@ -275,12 +275,12 @@ class AppPalette {
     primary: Color(0xFFE8D18C),
     secondary: Color(0xFFCDB367),
     accent: Color(0xFFE8D18C),
-    backgroundDark: Color(0xFF14130C),
-    backgroundLight: Color(0xFFFAF9F2),
-    surfaceDark: Color(0xFF1E1C12),
+    backgroundDark: Color(0xFF0C0E12),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF14161C),
     surfaceLight: Color(0xFFFFFFFF),
-    surfaceContainerDark: Color(0xFF2B281B),
-    surfaceContainerLight: Color(0xFFF5F3E4),
+    surfaceContainerDark: Color(0xFF1C1F27),
+    surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
   static const List<AppPalette> allPresets = [
@@ -309,6 +309,7 @@ class ThemeSettingsState {
   final SurfaceFillStyle? surfaceFillStyle;
 
   SurfaceFillStyle get effectiveSurfaceFillStyle => surfaceFillStyle ?? SurfaceFillStyle.translucent;
+  bool get isSolidStyle => effectiveSurfaceFillStyle == SurfaceFillStyle.solid;
 
   const ThemeSettingsState({
     this.themeMode = AppThemeMode.dark,
@@ -437,12 +438,12 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       primary: vibrant,
       secondary: dominant,
       accent: vibrant,
-      backgroundDark: Color.lerp(const Color(0xFF0A0C10), dominant, 0.12)!,
-      backgroundLight: const Color(0xFFF5F7FA),
-      surfaceDark: Color.lerp(const Color(0xFF14171E), dominant, 0.18)!,
+      backgroundDark: const Color(0xFF0C0E12),
+      backgroundLight: const Color(0xFFF8FAFC),
+      surfaceDark: const Color(0xFF14161C),
       surfaceLight: const Color(0xFFFFFFFF),
-      surfaceContainerDark: Color.lerp(const Color(0xFF1D222C), dominant, 0.25)!,
-      surfaceContainerLight: const Color(0xFFE8ECF2),
+      surfaceContainerDark: const Color(0xFF1C1F27),
+      surfaceContainerLight: const Color(0xFFF1F5F9),
       isDynamic: true,
     );
 
@@ -504,8 +505,24 @@ class AppThemeBuilder {
     final textPrimary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
     final outline = isDark
-        ? (palette.isOledBlack ? const Color(0xFF222222) : const Color(0xFF263140))
+        ? (palette.isOledBlack ? const Color(0xFF262626) : const Color(0xFF282F3D))
         : const Color(0xFFCBD5E1);
+
+    final surfaceContainerHigh = isDark
+        ? (palette.isOledBlack ? const Color(0xFF1C1C1C) : const Color(0xFF242833))
+        : const Color(0xFFE2E8F0);
+    final surfaceContainerHighest = isDark
+        ? (palette.isOledBlack ? const Color(0xFF242424) : const Color(0xFF2C323E))
+        : const Color(0xFFCBD5E1);
+    final surfaceContainerLow = isDark
+        ? (palette.isOledBlack ? const Color(0xFF0F0F0F) : const Color(0xFF161820))
+        : const Color(0xFFF8FAFC);
+    final surfaceContainerLowest = isDark
+        ? (palette.isOledBlack ? const Color(0xFF000000) : const Color(0xFF0C0E12))
+        : const Color(0xFFFFFFFF);
+    final outlineVariant = isDark
+        ? (palette.isOledBlack ? const Color(0xFF1A1A1A) : const Color(0xFF1F2531))
+        : const Color(0xFFF1F5F9);
 
     final colorScheme = isDark
         ? ColorScheme.dark(
@@ -516,8 +533,14 @@ class AppThemeBuilder {
             tertiary: palette.accent,
             surface: surface,
             onSurface: textPrimary,
+            onSurfaceVariant: textSecondary,
             surfaceContainer: surfaceContainer,
+            surfaceContainerHigh: surfaceContainerHigh,
+            surfaceContainerHighest: surfaceContainerHighest,
+            surfaceContainerLow: surfaceContainerLow,
+            surfaceContainerLowest: surfaceContainerLowest,
             outline: outline,
+            outlineVariant: outlineVariant,
             error: const Color(0xFFFF453A),
           )
         : ColorScheme.light(
@@ -528,8 +551,14 @@ class AppThemeBuilder {
             tertiary: palette.accent,
             surface: surface,
             onSurface: textPrimary,
+            onSurfaceVariant: textSecondary,
             surfaceContainer: surfaceContainer,
+            surfaceContainerHigh: surfaceContainerHigh,
+            surfaceContainerHighest: surfaceContainerHighest,
+            surfaceContainerLow: surfaceContainerLow,
+            surfaceContainerLowest: surfaceContainerLowest,
             outline: outline,
+            outlineVariant: outlineVariant,
             error: const Color(0xFFD32F2F),
           );
 

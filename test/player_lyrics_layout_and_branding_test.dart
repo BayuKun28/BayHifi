@@ -128,11 +128,13 @@ void main() {
     int selectedIndex = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FloatingRoundedDock(
-            selectedIndex: selectedIndex,
-            onItemSelected: (idx) => selectedIndex = idx,
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: FloatingRoundedDock(
+              selectedIndex: selectedIndex,
+              onItemSelected: (idx) => selectedIndex = idx,
+            ),
           ),
         ),
       ),

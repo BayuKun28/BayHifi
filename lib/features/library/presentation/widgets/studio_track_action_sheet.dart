@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../audio_engine/audio_cache_service.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
@@ -135,6 +136,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final libraryState = ref.watch(unifiedLibraryProvider);
     final isFav = libraryState.favoriteTrackIds.contains(track.id);
     final isRemote = (track.filePath?.startsWith('http') ?? false) ||
@@ -162,7 +164,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
                         color: theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: 0.8,
                         ),
                       ),
@@ -204,19 +206,19 @@ class StudioTrackActionSheet extends ConsumerWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFFD700).withValues(alpha: 0.15),
+                                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+                                      color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
                                       width: 0.8,
                                     ),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'HI-RES',
                                     style: TextStyle(
                                       fontSize: 8.5,
                                       fontWeight: FontWeight.w900,
-                                      color: Color(0xFFFFD700),
+                                      color: primary,
                                     ),
                                   ),
                                 ),
@@ -235,15 +237,15 @@ class StudioTrackActionSheet extends ConsumerWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                                    color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.secondary, isSolid: isSolid),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'OFFLINE CACHED',
                                     style: TextStyle(
                                       fontSize: 8.5,
                                       fontWeight: FontWeight.w900,
-                                      color: Color(0xFF00E676),
+                                      color: theme.colorScheme.secondary,
                                     ),
                                   ),
                                 ),

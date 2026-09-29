@@ -285,27 +285,29 @@ void main() {
       int closeCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Stack(
-              children: [
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 16,
-                  child: LibraryBatchActionsBar(
-                    selectedCount: 5,
-                    totalCount: 10,
-                    onPlayNext: () => playNextCount++,
-                    onAddToQueue: () => queueCount++,
-                    onAddToPlaylist: () => playlistCount++,
-                    onBatchEditTags: () => editCount++,
-                    onSelectAll: () => selectAllCount++,
-                    onDeselectAll: () => deselectAllCount++,
-                    onClose: () => closeCount++,
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 16,
+                    child: LibraryBatchActionsBar(
+                      selectedCount: 5,
+                      totalCount: 10,
+                      onPlayNext: () => playNextCount++,
+                      onAddToQueue: () => queueCount++,
+                      onAddToPlaylist: () => playlistCount++,
+                      onBatchEditTags: () => editCount++,
+                      onSelectAll: () => selectAllCount++,
+                      onDeselectAll: () => deselectAllCount++,
+                      onClose: () => closeCount++,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

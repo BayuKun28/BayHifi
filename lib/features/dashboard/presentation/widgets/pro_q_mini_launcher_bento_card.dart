@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../pro_q_studio/domain/biquad_math.dart';
 import '../../../pro_q_studio/domain/eq_band.dart';
 import '../../../pro_q_studio/presentation/controllers/eq_controller.dart';
@@ -16,6 +17,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final eqState = ref.watch(eqControllerProvider);
 
     String decodeClean(String? s) {
@@ -46,20 +48,9 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: theme.dividerColor.withValues(alpha: 0.6),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        decoration: StudioSurfaceTheme.cardDecoration(
+          context: context,
+          isSolid: isSolid,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +61,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.15),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: HugeIcon(
@@ -96,7 +87,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.12),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: HugeIcon(
@@ -115,10 +106,10 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
               height: 54,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
+                color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: theme.dividerColor.withValues(alpha: 0.5),
+                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                   width: 0.8,
                 ),
               ),
@@ -130,7 +121,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                       bands: eqState.bands,
                       isEnabled: eqState.isEnabled,
                       primaryColor: primary,
-                      gridColor: theme.dividerColor.withValues(alpha: 0.4),
+                      gridColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                     ),
                   ),
                 ),
@@ -146,7 +137,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.6),
+                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -167,7 +158,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.1),
+                      color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(

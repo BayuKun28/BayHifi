@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
@@ -803,6 +804,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     final studioPlaylists = libraryState.playlists.where((p) => !p.isCustom).toList();
     final customPlaylists = libraryState.customPlaylists;
@@ -818,9 +820,9 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.15),
+                color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: primary.withValues(alpha: 0.4)),
+                border: Border.all(color: primary.withValues(alpha: isSolid ? 0.6 : 0.4)),
               ),
               child: HugeIcon(icon: HugeIcons.strokeRoundedPlayList, color: primary, size: 18),
             ),
@@ -915,13 +917,13 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
             (p) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Material(
-                color: theme.colorScheme.surface,
+                color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
                     color: p.id == 'favorites'
-                        ? theme.colorScheme.tertiary.withValues(alpha: 0.4)
-                        : theme.colorScheme.secondary.withValues(alpha: 0.4),
+                        ? theme.colorScheme.tertiary.withValues(alpha: isSolid ? 0.6 : 0.4)
+                        : theme.colorScheme.secondary.withValues(alpha: isSolid ? 0.6 : 0.4),
                     width: 1.0,
                   ),
                 ),
@@ -931,9 +933,12 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: p.id == 'favorites'
-                          ? theme.colorScheme.tertiary.withValues(alpha: 0.15)
-                          : theme.colorScheme.secondary.withValues(alpha: 0.15),
+                      color: StudioSurfaceTheme.tintedContainer(
+                        context,
+                        p.id == 'favorites' ? theme.colorScheme.tertiary : theme.colorScheme.secondary,
+                        isSolid: isSolid,
+                        translucentAlpha: 0.15,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -1005,11 +1010,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Material(
-                color: theme.colorScheme.surface,
+                color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
-                    color: primary.withValues(alpha: 0.25),
+                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                     width: 1.0,
                   ),
                 ),
@@ -1019,7 +1024,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.12),
+                      color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -1044,7 +1049,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.tertiary.withValues(alpha: 0.15),
+                            color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.tertiary, isSolid: isSolid, translucentAlpha: 0.15),
                             borderRadius: BorderRadius.circular(5),
                           ),
                           child: Text(
@@ -1208,9 +1213,9 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid, translucentAlpha: 0.3),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
+                border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1248,10 +1253,10 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
               (p) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Material(
-                  color: theme.colorScheme.surface,
+                  color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.4)),
+                    side: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -1259,7 +1264,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.15),
+                        color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../settings/presentation/sub_screens/audio_hardware_settings_screen.dart';
 import '../../../pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
@@ -14,6 +15,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final eqState = ref.watch(eqControllerProvider);
     final playback = ref.watch(playerControllerProvider);
     final currentTrack = playback.currentTrack;
@@ -36,20 +38,9 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: theme.dividerColor.withValues(alpha: 0.6),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        decoration: StudioSurfaceTheme.cardDecoration(
+          context: context,
+          isSolid: isSolid,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +54,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.15),
+                          color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: HugeIcon(
@@ -108,10 +99,10 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.12),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: primary.withValues(alpha: 0.35),
+                      color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.35),
                       width: 0.8,
                     ),
                   ),
@@ -150,6 +141,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                 Expanded(
                   child: _buildMetricTile(
                     context,
+                    isSolid: isSolid,
                     label: 'SOURCE SPEC',
                     value: '$formatStr $bitDepthStr',
                     color: primary,
@@ -160,6 +152,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                 Expanded(
                   child: _buildMetricTile(
                     context,
+                    isSolid: isSolid,
                     label: 'ENGINE BUFFER',
                     value: 'Low-Latency',
                     color: theme.colorScheme.secondary,
@@ -170,6 +163,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                 Expanded(
                   child: _buildMetricTile(
                     context,
+                    isSolid: isSolid,
                     label: 'HEADROOM',
                     value: preampStr,
                     color: theme.colorScheme.tertiary,
@@ -186,6 +180,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
 
   Widget _buildMetricTile(
     BuildContext context, {
+    required bool isSolid,
     required String label,
     required String value,
     required Color color,
@@ -195,10 +190,10 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.6),
+        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 0.8,
         ),
       ),

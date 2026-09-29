@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/studio_alphabetical_scroller.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
 import '../../player/domain/track.dart';
@@ -298,6 +299,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     final controller = ref.read(unifiedLibraryProvider.notifier);
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     ref.listen<UnifiedLibraryState>(unifiedLibraryProvider, (previous, next) {
       if (!next.isScanning && next.statusMessage != null && next.statusMessage != previous?.statusMessage) {
@@ -340,10 +342,10 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   key: const ValueKey('search_bar_container'),
                   height: 40,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: primaryColor.withValues(alpha: 0.4),
+                      color: isSolid ? theme.colorScheme.outline : primaryColor.withValues(alpha: 0.4),
                       width: 1.0,
                     ),
                   ),
@@ -406,9 +408,11 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: primaryColor.withValues(alpha: 0.15),
+                        color: StudioSurfaceTheme.tintedContainer(context, primaryColor, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
+                        border: Border.all(
+                          color: isSolid ? theme.colorScheme.outline : primaryColor.withValues(alpha: 0.4),
+                        ),
                       ),
                       child: HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, color: primaryColor, size: 18),
                     ),
@@ -754,6 +758,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     ThemeData theme,
     UnifiedLibraryController controller,
   ) {
+    final isSolid = ref.isSolidStyle;
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 2, 14, 4),
       child: InkWell(
@@ -765,10 +770,10 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: primaryColor.withValues(alpha: 0.08),
+            color: StudioSurfaceTheme.tintedContainer(context, primaryColor, isSolid: isSolid, translucentAlpha: 0.08, solidBlendAlpha: 0.14),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: primaryColor.withValues(alpha: 0.25),
+              color: isSolid ? theme.colorScheme.outline : primaryColor.withValues(alpha: 0.25),
               width: 0.9,
             ),
           ),
@@ -777,7 +782,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: primaryColor.withValues(alpha: 0.15),
+                  color: StudioSurfaceTheme.tintedContainer(context, primaryColor, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: HugeIcon(
@@ -818,7 +823,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: primaryColor.withValues(alpha: 0.15),
+                  color: StudioSurfaceTheme.tintedContainer(context, primaryColor, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -868,6 +873,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   }) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return InkWell(
       onTap: () {
@@ -878,10 +884,14 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? primary.withValues(alpha: 0.15) : theme.colorScheme.surface,
+          color: isSelected
+              ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid)
+              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? primary.withValues(alpha: 0.4) : theme.dividerColor,
+            color: isSelected
+                ? (isSolid ? primary : primary.withValues(alpha: 0.4))
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: 0.8,
           ),
         ),
@@ -1031,6 +1041,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   Widget _buildAlbumsView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
     final albums = state.albums;
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     if (albums.isEmpty) {
       return _buildEmptyState(context, 'No albums found.');
@@ -1054,9 +1065,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 6),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
+                border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
               ),
               child: Material(
                 color: Colors.transparent,
@@ -1120,12 +1131,12 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               borderRadius: BorderRadius.circular(18),
               child: Container(
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
+                  color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: album.isHiRes
-                        ? const Color(0xFFFF9F0A).withValues(alpha: 0.4)
-                        : theme.dividerColor.withValues(alpha: 0.4),
+                        ? (isSolid ? theme.colorScheme.primary : const Color(0xFFFF9F0A).withValues(alpha: 0.4))
+                        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                     width: 1.0,
                   ),
                 ),
@@ -1185,15 +1196,15 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.2),
+                                    color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
                                     borderRadius: BorderRadius.circular(3),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'HI-RES',
                                     style: TextStyle(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w900,
-                                      color: Color(0xFFFF9F0A),
+                                      color: theme.colorScheme.primary,
                                     ),
                                   ),
                                 ),
@@ -1216,6 +1227,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   Widget _buildArtistsView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
     final artists = state.artists;
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     if (artists.isEmpty) {
       return _buildEmptyState(context, 'No artists found.');
@@ -1238,9 +1250,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           return Container(
             margin: const EdgeInsets.only(bottom: 6),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
+              color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
+              border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
             ),
             child: Material(
               color: Colors.transparent,
@@ -1269,6 +1281,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   Widget _buildGenresView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
     final genres = state.genres;
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     if (genres.isEmpty) {
       return _buildEmptyState(context, 'No genres found.');
@@ -1296,9 +1309,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 6),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
+                border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
               ),
               child: Material(
                 color: Colors.transparent,
@@ -1307,7 +1320,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                      color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: HugeIcon(
@@ -1333,6 +1346,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   Widget _buildFoldersView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
     final folders = state.folders;
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     if (folders.isEmpty) {
       return _buildEmptyState(context, 'No audio folders found.');
@@ -1360,9 +1374,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 6),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
+                border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
               ),
               child: Material(
                 color: Colors.transparent,
@@ -1371,7 +1385,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                      color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: HugeIcon(icon: HugeIcons.strokeRoundedFolder01, color: theme.colorScheme.primary, size: 20),
@@ -1444,6 +1458,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   Widget _buildEmptyState(BuildContext context, String message) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final controller = ref.read(unifiedLibraryProvider.notifier);
     final libraryState = ref.watch(unifiedLibraryProvider);
     final totalCount = libraryState.totalTracksCount;
@@ -1455,10 +1470,10 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1.0),
+            decoration: StudioSurfaceTheme.cardDecoration(
+              context: context,
+              isSolid: isSolid,
+              radius: 24,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1467,9 +1482,11 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.12),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Center(
                     child: HugeIcon(
@@ -1520,7 +1537,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -1546,10 +1563,10 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1.0),
+            decoration: StudioSurfaceTheme.cardDecoration(
+              context: context,
+              isSolid: isSolid,
+              radius: 24,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1558,9 +1575,11 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.12),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Center(
                     child: HugeIcon(

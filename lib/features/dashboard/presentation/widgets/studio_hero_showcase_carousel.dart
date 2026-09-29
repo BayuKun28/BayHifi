@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
@@ -221,12 +222,15 @@ class _StudioHeroShowcaseCarouselState
       return;
     }
 
+    final isSolid = ref.isSolidStyle;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _StudioMixDetailSheet(
         mix: mix,
+        isSolid: isSolid,
         onPlayAll: () {
           Navigator.of(context).pop();
           _playMix(mix, shuffle: false);
@@ -247,6 +251,7 @@ class _StudioHeroShowcaseCarouselState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final libraryState = ref.watch(unifiedLibraryProvider);
     final mixes = _generateMixes(libraryState.tracks);
 
@@ -301,7 +306,7 @@ class _StudioHeroShowcaseCarouselState
             itemCount: mixes.length,
             itemBuilder: (context, index) {
               final mix = mixes[index];
-              return _buildMixCard(context, mix, theme, primary);
+              return _buildMixCard(context, mix, theme, primary, isSolid);
             },
           ),
         ),
@@ -320,7 +325,7 @@ class _StudioHeroShowcaseCarouselState
               width: isSelected ? 18 : 6,
               height: 5,
               decoration: BoxDecoration(
-                color: isSelected ? primary : theme.dividerColor.withValues(alpha: 0.6),
+                color: isSelected ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(4),
               ),
             );
@@ -335,6 +340,7 @@ class _StudioHeroShowcaseCarouselState
     StudioMixItem mix,
     ThemeData theme,
     Color primary,
+    bool isSolid,
   ) {
     final firstTrack = mix.tracks.isNotEmpty ? mix.tracks.first : null;
 
@@ -342,20 +348,9 @@ class _StudioHeroShowcaseCarouselState
       onTap: () => _openMixDetailSheet(context, mix),
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: theme.dividerColor.withValues(alpha: 0.6),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        decoration: StudioSurfaceTheme.cardDecoration(
+          context: context,
+          isSolid: isSolid,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(19),
@@ -680,12 +675,14 @@ class _StudioHeroShowcaseCarouselState
 /// Modal Bottom Sheet displaying the full tracklist of a Studio Mix
 class _StudioMixDetailSheet extends StatelessWidget {
   final StudioMixItem mix;
+  final bool isSolid;
   final VoidCallback onPlayAll;
   final VoidCallback onShuffle;
   final ValueChanged<int> onSelectTrack;
 
   const _StudioMixDetailSheet({
     required this.mix,
+    this.isSolid = false,
     required this.onPlayAll,
     required this.onShuffle,
     required this.onSelectTrack,
@@ -705,14 +702,17 @@ class _StudioMixDetailSheet extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.78,
       decoration: BoxDecoration(
-        color: const Color(0xFF0F131C),
+        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(color: const Color(0xFF222938), width: 1.2),
-        boxShadow: const [
+        border: Border.all(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 1.2,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black87,
+            color: Colors.black.withValues(alpha: 0.35),
             blurRadius: 32,
-            offset: Offset(0, -6),
+            offset: const Offset(0, -6),
           ),
         ],
       ),
@@ -726,7 +726,7 @@ class _StudioMixDetailSheet extends StatelessWidget {
               width: 38,
               height: 4.5,
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -745,7 +745,10 @@ class _StudioMixDetailSheet extends StatelessWidget {
                     margin: const EdgeInsets.only(right: 14),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: primary.withValues(alpha: 0.4), width: 1.0),
+                      border: Border.all(
+                        color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
+                        width: 1.0,
+                      ),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
@@ -764,7 +767,7 @@ class _StudioMixDetailSheet extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.15),
+                          color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -780,19 +783,19 @@ class _StudioMixDetailSheet extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         mix.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         '${mix.trackCount} tracks • ${mix.formattedDuration}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Color(0xFF94A3B8),
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -839,22 +842,22 @@ class _StudioMixDetailSheet extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onShuffle,
-                    icon: const HugeIcon(
+                    icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedShuffle,
                       size: 16,
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
-                    label: const Text(
+                    label: Text(
                       'Shuffle Play',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,
-                        color: Colors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF334155)),
-                      backgroundColor: const Color(0xFF161C28),
+                      side: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
+                      backgroundColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -867,7 +870,7 @@ class _StudioMixDetailSheet extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF1E2636), height: 1),
+          Divider(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), height: 1),
 
           // Scrollable Tracklist
           Expanded(
@@ -879,9 +882,12 @@ class _StudioMixDetailSheet extends StatelessWidget {
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131824),
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF202838), width: 0.8),
+                    border: Border.all(
+                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                      width: 0.8,
+                    ),
                   ),
                   child: Material(
                     color: Colors.transparent,
@@ -892,18 +898,21 @@ class _StudioMixDetailSheet extends StatelessWidget {
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1B2232),
+                          color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF2A3448), width: 0.8),
+                          border: Border.all(
+                            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                            width: 0.8,
+                          ),
                         ),
                         child: Center(
                           child: Text(
                             (index + 1).toString().padLeft(2, '0'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF64748B),
-                              fontFeatures: [FontFeature.tabularFigures()],
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
                         ),
@@ -913,8 +922,8 @@ class _StudioMixDetailSheet extends StatelessWidget {
                           Expanded(
                             child: Text(
                               track.title,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -927,17 +936,17 @@ class _StudioMixDetailSheet extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFF9F0A).withValues(alpha: 0.18),
+                                color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: const Color(0xFFFF9F0A).withValues(alpha: 0.6),
+                                  color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.6),
                                   width: 0.6,
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Hi-Res',
                                 style: TextStyle(
-                                  color: Color(0xFFFF9F0A),
+                                  color: primary,
                                   fontSize: 8.5,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -951,8 +960,8 @@ class _StudioMixDetailSheet extends StatelessWidget {
                           Expanded(
                             child: Text(
                               '${track.artist} • ${track.album}',
-                              style: const TextStyle(
-                                color: Color(0xFF8E9EB2),
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant,
                                 fontSize: 11,
                               ),
                               maxLines: 1,
@@ -962,19 +971,19 @@ class _StudioMixDetailSheet extends StatelessWidget {
                           if (track.duration > Duration.zero)
                             Text(
                               _formatDuration(track.duration),
-                              style: const TextStyle(
-                                color: Color(0xFF64748B),
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant,
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w600,
-                                fontFeatures: [FontFeature.tabularFigures()],
+                                fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             ),
                         ],
                       ),
-                      trailing: const HugeIcon(
+                      trailing: HugeIcon(
                         icon: HugeIcons.strokeRoundedPlay,
                         size: 16,
-                        color: Color(0xFF64748B),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
@@ -46,7 +47,6 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
     // Re-check stats when playback changes
     ref.listen(playerControllerProvider, (_, _) => _loadStats());
 
-
     final totalTracks = _stats['totalTracksPlayed'] as int? ?? 0;
     final totalSec = _stats['totalListeningSeconds'] as int? ?? 0;
     final hiResCount = _stats['hiResTracksPlayed'] as int? ?? 0;
@@ -57,17 +57,14 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
     final primary = theme.colorScheme.primary;
     final secondary = theme.colorScheme.secondary;
     final tertiary = theme.colorScheme.tertiary;
+    final isSolid = ref.isSolidStyle;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.6),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,10 +98,10 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainer,
+                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: theme.dividerColor.withValues(alpha: 0.5),
+                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                         width: 0.8,
                       ),
                     ),
@@ -129,6 +126,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
               Expanded(
                 child: _buildMetricTile(
                   context: context,
+                  isSolid: isSolid,
                   label: 'Listening Time',
                   value: _formatListeningTime(totalSec),
                   icon: HugeIcons.strokeRoundedClock01,
@@ -139,6 +137,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
               Expanded(
                 child: _buildMetricTile(
                   context: context,
+                  isSolid: isSolid,
                   label: 'Total Plays',
                   value: '$totalTracks',
                   icon: HugeIcons.strokeRoundedMusicNote01,
@@ -149,6 +148,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
               Expanded(
                 child: _buildMetricTile(
                   context: context,
+                  isSolid: isSolid,
                   label: 'Hi-Res Ratio',
                   value: '${hiResPct.toStringAsFixed(0)}%',
                   icon: HugeIcons.strokeRoundedShieldEnergy,
@@ -228,10 +228,10 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainer,
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: theme.dividerColor.withValues(alpha: 0.4),
+                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                       width: 0.8,
                     ),
                   ),
@@ -242,9 +242,12 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                         width: 22,
                         height: 22,
                         decoration: BoxDecoration(
-                          color: rankColor.withValues(alpha: 0.15),
+                          color: StudioSurfaceTheme.tintedContainer(context, rankColor, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: rankColor.withValues(alpha: 0.6), width: 0.8),
+                          border: Border.all(
+                            color: isSolid ? theme.colorScheme.outline : rankColor.withValues(alpha: 0.6),
+                            width: 0.8,
+                          ),
                         ),
                         child: Center(
                           child: Text(
@@ -291,10 +294,10 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                           decoration: BoxDecoration(
-                            color: primary.withValues(alpha: 0.12),
+                            color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                              color: primary.withValues(alpha: 0.3),
+                              color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.3),
                               width: 0.6,
                             ),
                           ),
@@ -320,9 +323,11 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                           width: 28,
                           height: 28,
                           decoration: BoxDecoration(
-                            color: primary.withValues(alpha: 0.15),
+                            color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                             shape: BoxShape.circle,
-                            border: Border.all(color: primary.withValues(alpha: 0.6)),
+                            border: Border.all(
+                              color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.6),
+                            ),
                           ),
                           child: Center(
                             child: HugeIcon(
@@ -346,6 +351,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
 
   Widget _buildMetricTile({
     required BuildContext context,
+    required bool isSolid,
     required String label,
     required String value,
     required dynamic icon,
@@ -355,10 +361,10 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
+        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 0.8,
         ),
       ),

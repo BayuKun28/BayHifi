@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../app/theme/studio_surface_theme.dart';
 import 'widgets/engine_telemetry_bento_card.dart';
 import 'widgets/listening_statistics_card.dart';
 import 'widgets/recent_sessions_bento_carousel.dart';
@@ -125,10 +126,10 @@ class DashboardScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
           decoration: BoxDecoration(
-            color: primary.withValues(alpha: 0.12),
+            color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: ref.isSolidStyle),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: primary.withValues(alpha: 0.4),
+              color: ref.isSolidStyle ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
               width: 0.8,
             ),
           ),

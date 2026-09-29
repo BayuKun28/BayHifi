@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../library/data/storage_cache_manager.dart';
 import '../../../library/presentation/widgets/duplicate_tracks_resolver_modal.dart';
 import '../../../library/presentation/widgets/missing_tracks_resolver_sheet.dart';
@@ -95,9 +96,10 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('STORAGE & CACHE QUOTA'),
         centerTitle: true,
@@ -121,7 +123,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               children: [
                 // 1. Hero Disk Quota Gauge Bento Banner
-                _buildStorageOverviewCard(theme, primary),
+                _buildStorageOverviewCard(theme, primary, isSolid),
                 const SizedBox(height: 16),
 
                 // 2. Cache Categories Section Header
@@ -137,6 +139,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   onClear: _clearArtworkCache,
                   theme: theme,
                   primary: primary,
+                  isSolid: isSolid,
                 ),
                 const SizedBox(height: 8),
 
@@ -149,6 +152,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   onClear: _clearLyricsCache,
                   theme: theme,
                   primary: primary,
+                  isSolid: isSolid,
                 ),
                 const SizedBox(height: 8),
 
@@ -161,6 +165,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   onClear: _clearPlaybackHistory,
                   theme: theme,
                   primary: primary,
+                  isSolid: isSolid,
                 ),
                 const SizedBox(height: 16),
 
@@ -177,6 +182,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   onTap: () => MissingTracksResolverSheet.show(context),
                   theme: theme,
                   primary: primary,
+                  isSolid: isSolid,
                 ),
                 const SizedBox(height: 8),
 
@@ -189,6 +195,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   onTap: () => DuplicateTracksResolverModal.show(context),
                   theme: theme,
                   primary: primary,
+                  isSolid: isSolid,
                 ),
                 const SizedBox(height: 20),
 
@@ -216,13 +223,13 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
     );
   }
 
-  Widget _buildStorageOverviewCard(ThemeData theme, Color primary) {
+  Widget _buildStorageOverviewCard(ThemeData theme, Color primary, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1.0),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,13 +293,17 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
     required VoidCallback onClear,
     required ThemeData theme,
     required Color primary,
+    required bool isSolid,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6), width: 0.8),
+        border: Border.all(
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Row(
         children: [
@@ -344,9 +355,10 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
     required VoidCallback onTap,
     required ThemeData theme,
     required Color primary,
+    required bool isSolid,
   }) {
     return Material(
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () {
@@ -358,7 +370,10 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6), width: 0.8),
+            border: Border.all(
+              color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+              width: 0.8,
+            ),
           ),
           child: Row(
             children: [
@@ -383,7 +398,13 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.15),
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.15,
+                    solidBlendAlpha: 0.20,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(

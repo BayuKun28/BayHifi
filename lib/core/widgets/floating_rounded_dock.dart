@@ -1,11 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../app/theme/studio_surface_theme.dart';
 
 /// Studio Floating Rounded Dock Navigation Bar
 /// Clean, ergonomic, anti-AI-slop floating capsule dock with HugeIcons.
-class FloatingRoundedDock extends StatelessWidget {
+class FloatingRoundedDock extends ConsumerWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
 
@@ -16,9 +18,10 @@ class FloatingRoundedDock extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     final items = [
       _DockItemData(
@@ -54,10 +57,12 @@ class FloatingRoundedDock extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(4, 0, 4, 6),
         height: 66,
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withValues(alpha: 0.94),
+          color: isSolid
+              ? StudioSurfaceTheme.surfaceContainer(context, isSolid: true)
+              : theme.colorScheme.surface.withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: theme.dividerColor.withValues(alpha: 0.6),
+            color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
             width: 1.0,
           ),
           boxShadow: [
@@ -71,7 +76,9 @@ class FloatingRoundedDock extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(28),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            filter: isSolid
+                ? ImageFilter.blur(sigmaX: 0, sigmaY: 0)
+                : ImageFilter.blur(sigmaX: 12, sigmaY: 12),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
               child: Row(
@@ -97,12 +104,21 @@ class FloatingRoundedDock extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? primary.withValues(alpha: 0.16)
+                              ? (isSolid
+                                  ? theme.colorScheme.surfaceContainerHighest
+                                  : StudioSurfaceTheme.tintedContainer(
+                                      context,
+                                      primary,
+                                      isSolid: false,
+                                      translucentAlpha: 0.16,
+                                    ))
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
                           border: isSelected
                               ? Border.all(
-                                  color: primary.withValues(alpha: 0.4),
+                                  color: isSolid
+                                      ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                                      : primary.withValues(alpha: 0.4),
                                   width: 1.0,
                                 )
                               : Border.all(color: Colors.transparent),
@@ -115,7 +131,7 @@ class FloatingRoundedDock extends StatelessWidget {
                               icon: isSelected ? item.selectedIcon : item.icon,
                               color: isSelected
                                   ? primary
-                                  : theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                                  : theme.colorScheme.onSurfaceVariant,
                               size: 20,
                             ),
                             const SizedBox(height: 3),
@@ -128,7 +144,7 @@ class FloatingRoundedDock extends StatelessWidget {
                                     : FontWeight.w500,
                                 color: isSelected
                                     ? primary
-                                    : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                                    : theme.colorScheme.onSurfaceVariant,
                                 letterSpacing: 0.2,
                               ),
                               maxLines: 1,

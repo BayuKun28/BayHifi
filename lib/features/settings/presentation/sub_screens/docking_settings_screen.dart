@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../player/presentation/studio_desk_docking_screen.dart';
 
-class DockingSettingsScreen extends StatelessWidget {
+class DockingSettingsScreen extends ConsumerWidget {
   const DockingSettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -27,12 +30,12 @@ class DockingSettingsScreen extends StatelessWidget {
         children: [
           _buildSectionHeader(context, 'DOCKING MODE OVERVIEW', HugeIcons.strokeRoundedCar01),
           const SizedBox(height: 8),
-          _buildDeskDockingCard(context),
+          _buildDeskDockingCard(context, isSolid),
           const SizedBox(height: 20),
 
           _buildSectionHeader(context, 'DISPLAY BEHAVIOR & FEATURES', HugeIcons.strokeRoundedTv01),
           const SizedBox(height: 8),
-          _buildFeaturesCard(context),
+          _buildFeaturesCard(context, isSolid),
         ],
       ),
     );
@@ -57,16 +60,16 @@ class DockingSettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDeskDockingCard(BuildContext context) {
+  Widget _buildDeskDockingCard(BuildContext context, bool isSolid) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 12,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +79,13 @@ class DockingSettingsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF9F0A).withValues(alpha: 0.15),
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    const Color(0xFFFF9F0A),
+                    isSolid: isSolid,
+                    translucentAlpha: 0.15,
+                    solidBlendAlpha: 0.20,
+                  ),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: const Color(0xFFFF9F0A).withValues(alpha: 0.4)),
                 ),
@@ -143,15 +152,13 @@ class DockingSettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeaturesCard(BuildContext context) {
-    final theme = Theme.of(context);
-
+  Widget _buildFeaturesCard(BuildContext context, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 12,
       ),
       child: Column(
         children: [

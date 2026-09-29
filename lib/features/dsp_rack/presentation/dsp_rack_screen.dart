@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../domain/dsp_models.dart';
 import 'controllers/dsp_rack_controller.dart';
 import '../../pro_q_studio/presentation/pro_q_studio_screen.dart';
@@ -23,6 +24,7 @@ class DspRackScreen extends ConsumerWidget {
     final controller = ref.read(dspRackControllerProvider.notifier);
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -32,9 +34,16 @@ class DspRackScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.15),
+                color: StudioSurfaceTheme.tintedContainer(
+                  context,
+                  primaryColor,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.15,
+                ),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: isSolid ? theme.colorScheme.outline : primaryColor.withValues(alpha: 0.4),
+                ),
               ),
               child: HugeIcon(
                 icon: HugeIcons.strokeRoundedSlidersVertical,
@@ -81,7 +90,7 @@ class DspRackScreen extends ConsumerWidget {
               color: primaryColor,
             ),
             tooltip: 'Save Custom DSP Profile',
-            onPressed: () => _showSaveProfileDialog(context, controller),
+            onPressed: () => _showSaveProfileDialog(context, controller, isSolid),
           ),
           // Reset Rack Button with Confirmation Modal
           IconButton(
@@ -91,7 +100,7 @@ class DspRackScreen extends ConsumerWidget {
               color: null,
             ),
             tooltip: 'Reset to Flat Reference',
-            onPressed: () => _showResetConfirmationDialog(context, controller),
+            onPressed: () => _showResetConfirmationDialog(context, controller, isSolid),
           ),
           const SizedBox(width: 8),
         ],
@@ -100,14 +109,14 @@ class DspRackScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
           // 0. PRO-Q STUDIO EQ LAUNCHER BANNER
-          _buildProQStudioBanner(context),
+          _buildProQStudioBanner(context, isSolid),
 
           // 1. MASTER HEADER & A/B COMPARISON STRIP
-          _buildMasterSection(context, dspState, controller),
+          _buildMasterSection(context, dspState, controller, isSolid),
           const SizedBox(height: 16),
 
           // 2. STUDIO PRESETS SELECTOR
-          _buildPresetsSelector(context, dspState, controller),
+          _buildPresetsSelector(context, dspState, controller, isSolid),
           const SizedBox(height: 20),
 
           // UNIT 01: PRE-AMP GAIN STAGE
@@ -150,17 +159,17 @@ class DspRackScreen extends ConsumerWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _buildQuickGainChip(context, '-12 dB', -12.0, dspState.preampDb, controller),
+                      _buildQuickGainChip(context, '-12 dB', -12.0, dspState.preampDb, controller, isSolid),
                       const SizedBox(width: 6),
-                      _buildQuickGainChip(context, '-6 dB', -6.0, dspState.preampDb, controller),
+                      _buildQuickGainChip(context, '-6 dB', -6.0, dspState.preampDb, controller, isSolid),
                       const SizedBox(width: 6),
-                      _buildQuickGainChip(context, '-3 dB', -3.0, dspState.preampDb, controller),
+                      _buildQuickGainChip(context, '-3 dB', -3.0, dspState.preampDb, controller, isSolid),
                       const SizedBox(width: 6),
-                      _buildQuickGainChip(context, '-1 dB', -1.0, dspState.preampDb, controller),
+                      _buildQuickGainChip(context, '-1 dB', -1.0, dspState.preampDb, controller, isSolid),
                       const SizedBox(width: 6),
-                      _buildQuickGainChip(context, '0 dB (Flat)', 0.0, dspState.preampDb, controller),
+                      _buildQuickGainChip(context, '0 dB (Flat)', 0.0, dspState.preampDb, controller, isSolid),
                       const SizedBox(width: 6),
-                      _buildQuickGainChip(context, '+3 dB', 3.0, dspState.preampDb, controller),
+                      _buildQuickGainChip(context, '+3 dB', 3.0, dspState.preampDb, controller, isSolid),
                     ],
                   ),
                 ),
@@ -559,6 +568,7 @@ class DspRackScreen extends ConsumerWidget {
     BuildContext context,
     DspRackState state,
     DspRackController controller,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
@@ -566,21 +576,29 @@ class DspRackScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: state.isBypassed
-              ? theme.dividerColor.withValues(alpha: 0.5)
-              : primaryColor.withValues(alpha: 0.5),
+              ? StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)
+              : (isSolid ? primaryColor : primaryColor.withValues(alpha: 0.5)),
           width: 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isSolid
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -628,13 +646,23 @@ class DspRackScreen extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     color: state.isBypassed
-                        ? const Color(0xFFFF3B30).withValues(alpha: 0.12)
-                        : const Color(0xFF34C759).withValues(alpha: 0.12),
+                        ? StudioSurfaceTheme.tintedContainer(
+                            context,
+                            const Color(0xFFFF3B30),
+                            isSolid: isSolid,
+                            translucentAlpha: 0.12,
+                          )
+                        : StudioSurfaceTheme.tintedContainer(
+                            context,
+                            const Color(0xFF34C759),
+                            isSolid: isSolid,
+                            translucentAlpha: 0.12,
+                          ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: state.isBypassed
-                          ? const Color(0xFFFF3B30).withValues(alpha: 0.6)
-                          : const Color(0xFF34C759).withValues(alpha: 0.6),
+                          ? (isSolid ? theme.colorScheme.outline : const Color(0xFFFF3B30).withValues(alpha: 0.6))
+                          : (isSolid ? theme.colorScheme.outline : const Color(0xFF34C759).withValues(alpha: 0.6)),
                       width: 1.0,
                     ),
                   ),
@@ -690,6 +718,7 @@ class DspRackScreen extends ConsumerWidget {
     BuildContext context,
     DspRackState state,
     DspRackController controller,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
     final studioPresets = DspPreset.studioPresets;
@@ -719,10 +748,14 @@ class DspRackScreen extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        color: StudioSurfaceTheme.surfaceContainerHigh(
+          context,
+          isSolid: isSolid,
+          translucentAlpha: 0.35,
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 1.0,
         ),
       ),
@@ -761,15 +794,22 @@ class DspRackScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               InkWell(
-                onTap: () => _showSaveProfileDialog(context, controller),
+                onTap: () => _showSaveProfileDialog(context, controller, isSolid),
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                    color: StudioSurfaceTheme.tintedContainer(
+                      context,
+                      theme.colorScheme.primary,
+                      isSolid: isSolid,
+                      translucentAlpha: 0.12,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                      color: isSolid
+                          ? theme.colorScheme.outline
+                          : theme.colorScheme.primary.withValues(alpha: 0.4),
                       width: 0.8,
                     ),
                   ),
@@ -801,11 +841,11 @@ class DspRackScreen extends ConsumerWidget {
 
           // COMBO BOX / DROPDOWN SELECTOR
           PopupMenuButton<dynamic>(
-            color: theme.colorScheme.surfaceContainerHighest,
+            color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
               side: BorderSide(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                 width: 1.0,
               ),
             ),
@@ -815,7 +855,7 @@ class DspRackScreen extends ConsumerWidget {
               if (val is DspPreset) {
                 controller.applyPreset(val);
               } else if (val == '__SAVE_NEW__') {
-                _showSaveProfileDialog(context, controller);
+                _showSaveProfileDialog(context, controller, isSolid);
               }
             },
             itemBuilder: (context) {
@@ -830,7 +870,12 @@ class DspRackScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                          color: StudioSurfaceTheme.tintedContainer(
+                            context,
+                            theme.colorScheme.primary,
+                            isSolid: isSolid,
+                            translucentAlpha: 0.15,
+                          ),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: HugeIcon(
@@ -867,7 +912,7 @@ class DspRackScreen extends ConsumerWidget {
                         fontSize: 9.5,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.0,
-                        color: theme.colorScheme.primary.withValues(alpha: 0.9),
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -932,7 +977,7 @@ class DspRackScreen extends ConsumerWidget {
                             constraints: const BoxConstraints(),
                             onPressed: () {
                               Navigator.of(context).pop();
-                              _showDeleteProfileDialog(context, controller, p);
+                              _showDeleteProfileDialog(context, controller, p, isSolid);
                             },
                           ),
                         ],
@@ -1014,12 +1059,12 @@ class DspRackScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: activePreset != null
-                      ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                      : theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                      ? (isSolid ? theme.colorScheme.outline : theme.colorScheme.primary.withValues(alpha: 0.5))
+                      : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                   width: activePreset != null ? 1.2 : 0.8,
                 ),
               ),
@@ -1028,8 +1073,12 @@ class DspRackScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: (activePreset != null ? theme.colorScheme.primary : theme.colorScheme.onSurface)
-                          .withValues(alpha: 0.12),
+                      color: StudioSurfaceTheme.tintedContainer(
+                        context,
+                        (activePreset != null ? theme.colorScheme.primary : theme.colorScheme.onSurface),
+                        isSolid: isSolid,
+                        translucentAlpha: 0.12,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: HugeIcon(
@@ -1067,12 +1116,16 @@ class DspRackScreen extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: (isCustomActive
-                                        ? const Color(0xFF00E676)
-                                        : (activePreset != null
-                                            ? theme.colorScheme.primary
-                                            : theme.colorScheme.outline))
-                                    .withValues(alpha: 0.15),
+                                color: StudioSurfaceTheme.tintedContainer(
+                                  context,
+                                  (isCustomActive
+                                      ? const Color(0xFF00E676)
+                                      : (activePreset != null
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.outline)),
+                                  isSolid: isSolid,
+                                  translucentAlpha: 0.15,
+                                ),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -1116,7 +1169,7 @@ class DspRackScreen extends ConsumerWidget {
                       ),
                       tooltip: 'Delete Profile',
                       visualDensity: VisualDensity.compact,
-                      onPressed: () => _showDeleteProfileDialog(context, controller, activePreset!),
+                      onPressed: () => _showDeleteProfileDialog(context, controller, activePreset!, isSolid),
                     ),
                   HugeIcon(
                     icon: HugeIcons.strokeRoundedArrowDown01,
@@ -1132,26 +1185,34 @@ class DspRackScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProQStudioBanner(BuildContext context) {
+  Widget _buildProQStudioBanner(BuildContext context, bool isSolid) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.6),
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isSolid
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -1171,10 +1232,15 @@ class DspRackScreen extends ConsumerWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.15),
+                    color: StudioSurfaceTheme.tintedContainer(
+                      context,
+                      primary,
+                      isSolid: isSolid,
+                      translucentAlpha: 0.15,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: primary.withValues(alpha: 0.4),
+                      color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
                       width: 1.0,
                     ),
                   ),
@@ -1233,10 +1299,15 @@ class DspRackScreen extends ConsumerWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.15),
+                    color: StudioSurfaceTheme.tintedContainer(
+                      context,
+                      primary,
+                      isSolid: isSolid,
+                      translucentAlpha: 0.15,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: primary.withValues(alpha: 0.4),
+                      color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
                       width: 0.8,
                     ),
                   ),
@@ -1272,6 +1343,7 @@ class DspRackScreen extends ConsumerWidget {
   void _showResetConfirmationDialog(
     BuildContext context,
     DspRackController controller,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
 
@@ -1279,11 +1351,11 @@ class DspRackScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: theme.dividerColor.withValues(alpha: 0.6),
+            color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid),
             width: 1.0,
           ),
         ),
@@ -1318,7 +1390,7 @@ class DspRackScreen extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              side: BorderSide(color: theme.dividerColor, width: 1.0),
+              side: BorderSide(color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid), width: 1.0),
             ),
             onPressed: () => Navigator.of(dialogCtx).pop(),
             child: Text(
@@ -1363,6 +1435,7 @@ class DspRackScreen extends ConsumerWidget {
     double gainDb,
     double currentDb,
     DspRackController controller,
+    bool isSolid,
   ) {
     final isSelected = (currentDb - gainDb).abs() < 0.05;
     final theme = Theme.of(context);
@@ -1379,11 +1452,17 @@ class DspRackScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected
-              ? accent.withValues(alpha: 0.18)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              ? StudioSurfaceTheme.tintedContainer(
+                  context,
+                  accent,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.18,
+                  solidBlendAlpha: 0.2,
+                )
+              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? accent : theme.dividerColor.withValues(alpha: 0.3),
+            color: isSelected ? (isSolid ? theme.colorScheme.outline : accent) : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: isSelected ? 1.2 : 0.8,
           ),
         ),
@@ -1403,6 +1482,7 @@ class DspRackScreen extends ConsumerWidget {
   void _showSaveProfileDialog(
     BuildContext context,
     DspRackController controller,
+    bool isSolid,
   ) {
     final textController = TextEditingController(text: 'My Studio Mastering');
     final descController = TextEditingController();
@@ -1412,17 +1492,22 @@ class DspRackScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.6), width: 1.0),
+          side: BorderSide(color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid), width: 1.0),
         ),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                color: StudioSurfaceTheme.tintedContainer(
+                  dialogCtx,
+                  theme.colorScheme.primary,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.15,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: HugeIcon(
@@ -1497,17 +1582,16 @@ class DspRackScreen extends ConsumerWidget {
     BuildContext context,
     DspRackController controller,
     DspPreset preset,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
-
     HapticFeedback.lightImpact();
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.6), width: 1.0),
+          side: BorderSide(color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid), width: 1.0),
         ),
         title: const Text('Delete DSP Profile', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         content: Text('Are you sure you want to delete "${preset.name}"?'),

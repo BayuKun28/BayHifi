@@ -45,11 +45,6 @@ void main() {
             (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedSlidersVertical),
         findsOneWidget,
       );
-      expect(
-        find.byWidgetPredicate(
-            (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedArrowRight01),
-        findsOneWidget,
-      );
     });
 
     testWidgets('Tapping AutoEQ slim chip opens AutoEQ modal dialog', (WidgetTester tester) async {

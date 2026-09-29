@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../domain/player_playback_settings.dart';
 import '../controllers/playback_settings_controller.dart';
@@ -16,6 +17,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     final primary = theme.colorScheme.primary;
     final settings = ref.watch(playbackSettingsProvider);
     final notifier = ref.read(playbackSettingsProvider.notifier);
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -26,7 +28,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
         children: [
           // ─── 1. STATUS HERO BANNER ──────────────────────────────────────
-          _buildStatusHero(context, theme, primary, settings),
+          _buildStatusHero(context, theme, primary, settings, isSolid),
           const SizedBox(height: 18),
 
           // ─── 2. SMOOTH PLAY / PAUSE VOLUME FADE ────────────────────────
@@ -38,7 +40,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             subtitle: 'Prevents sudden audio clicks or volume snaps on play & pause',
           ),
           const SizedBox(height: 8),
-          _buildVolumeFadeCard(context, theme, primary, settings, notifier),
+          _buildVolumeFadeCard(context, theme, primary, settings, notifier, isSolid),
           const SizedBox(height: 20),
 
           // ─── 3. AUDIO DEVICE INTERRUPTION & HEADPHONE POLICIES ──────────
@@ -50,7 +52,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             subtitle: 'Auto-pause and intelligent auto-resume for DACs, earphones & Bluetooth',
           ),
           const SizedBox(height: 8),
-          _buildInterruptionPolicyCard(context, theme, primary, settings, notifier),
+          _buildInterruptionPolicyCard(context, theme, primary, settings, notifier, isSolid),
           const SizedBox(height: 20),
 
           // ─── 4. SPEED & PITCH SEMITONE ENGINE ───────────────────────────
@@ -62,7 +64,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             subtitle: 'Granular time-stretch and semitone tuning with lock linkage',
           ),
           const SizedBox(height: 8),
-          _buildSpeedPitchCard(context, theme, primary, settings, notifier),
+          _buildSpeedPitchCard(context, theme, primary, settings, notifier, isSolid),
           const SizedBox(height: 20),
 
           // ─── 5. REPLAYGAIN NORMALIZATION & SKIP SILENCE ─────────────────
@@ -74,7 +76,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             subtitle: 'Loudness normalization standard (-18 LUFS) & silent intro trimming',
           ),
           const SizedBox(height: 8),
-          _buildReplayGainCard(context, theme, primary, settings, notifier),
+          _buildReplayGainCard(context, theme, primary, settings, notifier, isSolid),
           const SizedBox(height: 20),
 
           // ─── 6. CUSTOM SEEK STEPPER & TIME DISPLAY MODES ────────────────
@@ -86,14 +88,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             subtitle: 'Configure fast forward/rewind jump step and countdown format',
           ),
           const SizedBox(height: 8),
-          _buildSeekStepperCard(context, theme, primary, settings, notifier),
+          _buildSeekStepperCard(context, theme, primary, settings, notifier, isSolid),
           const SizedBox(height: 24),
 
           // ─── 7. RESET TO DEFAULTS ───────────────────────────────────────
           OutlinedButton.icon(
             onPressed: () {
               HapticFeedback.mediumImpact();
-              _showResetConfirmation(context, notifier);
+              _showResetConfirmation(context, notifier, isSolid);
             },
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedRotateLeft01,
@@ -131,16 +133,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     ThemeData theme,
     Color primary,
     PlayerPlaybackSettings settings,
+    bool isSolid,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 20,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,7 +150,13 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.12),
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.12,
+                    solidBlendAlpha: 0.16,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: HugeIcon(
@@ -191,30 +197,38 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             runSpacing: 8,
             children: [
               _buildStatusPill(
+                context,
                 theme,
                 label: settings.enableSmoothFade
                     ? 'Fade: ${settings.fadeInDurationMs}ms / ${settings.fadeOutDurationMs}ms'
                     : 'Fade: Instant',
                 isActive: settings.enableSmoothFade,
                 color: primary,
+                isSolid: isSolid,
               ),
               _buildStatusPill(
+                context,
                 theme,
                 label: settings.pauseOnHeadphoneUnplug ? 'Unplug Guard: ON' : 'Unplug Guard: OFF',
                 isActive: settings.pauseOnHeadphoneUnplug,
                 color: theme.colorScheme.secondary,
+                isSolid: isSolid,
               ),
               _buildStatusPill(
+                context,
                 theme,
                 label: 'ReplayGain: ${settings.replayGainMode.label}',
                 isActive: settings.replayGainMode != ReplayGainMode.off,
                 color: theme.colorScheme.tertiary,
+                isSolid: isSolid,
               ),
               _buildStatusPill(
+                context,
                 theme,
                 label: 'Speed: ${settings.playbackSpeed.toStringAsFixed(2)}x',
                 isActive: settings.playbackSpeed != 1.0,
                 color: primary,
+                isSolid: isSolid,
               ),
             ],
           ),
@@ -224,22 +238,30 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildStatusPill(
+    BuildContext context,
     ThemeData theme, {
     required String label,
     required bool isActive,
     required Color color,
+    required bool isSolid,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
       decoration: BoxDecoration(
         color: isActive
-            ? color.withValues(alpha: 0.12)
-            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+            ? StudioSurfaceTheme.tintedContainer(
+                context,
+                color,
+                isSolid: isSolid,
+                translucentAlpha: 0.12,
+                solidBlendAlpha: 0.16,
+              )
+            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.4),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isActive
               ? color.withValues(alpha: 0.4)
-              : theme.dividerColor.withValues(alpha: 0.3),
+              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 0.8,
         ),
       ),
@@ -301,16 +323,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     Color primary,
     PlayerPlaybackSettings settings,
     PlaybackSettingsController notifier,
+    bool isSolid,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,16 +450,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     Color primary,
     PlayerPlaybackSettings settings,
     PlaybackSettingsController notifier,
+    bool isSolid,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,16 +623,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     Color primary,
     PlayerPlaybackSettings settings,
     PlaybackSettingsController notifier,
+    bool isSolid,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -733,16 +749,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     Color primary,
     PlayerPlaybackSettings settings,
     PlaybackSettingsController notifier,
+    bool isSolid,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -923,16 +937,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     Color primary,
     PlayerPlaybackSettings settings,
     PlaybackSettingsController notifier,
+    bool isSolid,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.4),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1063,10 +1075,15 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showResetConfirmation(BuildContext context, PlaybackSettingsController notifier) {
+  void _showResetConfirmation(BuildContext context, PlaybackSettingsController notifier, bool isSolid) {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
+        backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid)),
+        ),
         title: const Text('Reset Playback Engine'),
         content: const Text(
           'Are you sure you want to reset all playback transitions, interruption policies, ReplayGain settings, and speed/pitch parameters to factory studio defaults?',

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
@@ -20,6 +21,7 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final libraryState = ref.watch(unifiedLibraryProvider);
     final tracks = libraryState.tracks;
 
@@ -32,13 +34,9 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.6),
-          width: 1.0,
-        ),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +52,7 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.12),
+                        color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: HugeIcon(
@@ -118,7 +116,7 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
               separatorBuilder: (context, index) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final track = recentTracks[index];
-                return _buildTrackCard(context, ref, track, primary, theme);
+                return _buildTrackCard(context, ref, track, primary, theme, isSolid);
               },
             ),
           ),
@@ -133,6 +131,7 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
     Track track,
     Color primary,
     ThemeData theme,
+    bool isSolid,
   ) {
     final playback = ref.watch(playerControllerProvider);
     final isCurrent = playback.currentTrack?.id == track.id;
@@ -149,11 +148,13 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: isCurrent
-              ? primary.withValues(alpha: 0.12)
-              : theme.colorScheme.surfaceContainer,
+              ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid)
+              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isCurrent ? primary : theme.dividerColor.withValues(alpha: 0.4),
+            color: isCurrent
+                ? primary
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: isCurrent ? 1.2 : 0.8,
           ),
         ),
@@ -182,10 +183,10 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surface.withValues(alpha: 0.85),
+                        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
-                          color: primary.withValues(alpha: 0.5),
+                          color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5),
                           width: 0.6,
                         ),
                       ),

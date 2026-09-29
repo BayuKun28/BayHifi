@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/playback_state.dart';
 import '../../domain/track.dart';
 import '../controllers/player_controller.dart';
@@ -95,18 +96,22 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
     final controller = ref.read(playerControllerProvider.notifier);
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: BoxDecoration(
-        color: const Color(0xFF0F131C),
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(color: const Color(0xFF222938), width: 1.2),
-        boxShadow: const [
+        border: Border.all(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 1.2,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black87,
+            color: Colors.black.withValues(alpha: isSolid ? 0.7 : 0.5),
             blurRadius: 32,
-            offset: Offset(0, -6),
+            offset: const Offset(0, -6),
           ),
         ],
       ),
@@ -293,6 +298,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                             isCurrent: isCurrent,
                             isBuffering: isBuffering,
                             primaryColor: primary,
+                            isSolid: isSolid,
                             onTap: () {
                               HapticFeedback.lightImpact();
                               controller.skipToQueueIndex(index);
@@ -319,6 +325,7 @@ class _QueueTrackTile extends StatelessWidget {
   final bool isCurrent;
   final bool isBuffering;
   final Color primaryColor;
+  final bool isSolid;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
@@ -329,6 +336,7 @@ class _QueueTrackTile extends StatelessWidget {
     required this.isCurrent,
     this.isBuffering = false,
     required this.primaryColor,
+    required this.isSolid,
     required this.onTap,
     required this.onRemove,
   });
@@ -345,13 +353,23 @@ class _QueueTrackTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 3.5),
       decoration: BoxDecoration(
         color: isCurrent
-            ? primaryColor.withValues(alpha: 0.12)
-            : const Color(0xFF131824),
+            ? StudioSurfaceTheme.tintedContainer(
+                context,
+                primaryColor,
+                isSolid: isSolid,
+              )
+            : StudioSurfaceTheme.surfaceContainerLow(
+                context,
+                isSolid: isSolid,
+              ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCurrent
-              ? primaryColor.withValues(alpha: 0.5)
-              : const Color(0xFF202838),
+              ? primaryColor.withValues(alpha: isSolid ? 0.8 : 0.5)
+              : StudioSurfaceTheme.subtleOutline(
+                  context,
+                  isSolid: isSolid,
+                ),
           width: isCurrent ? 1.2 : 0.8,
         ),
       ),
@@ -365,13 +383,21 @@ class _QueueTrackTile extends StatelessWidget {
             height: 34,
             decoration: BoxDecoration(
               color: isCurrent
-                  ? primaryColor.withValues(alpha: 0.2)
-                  : const Color(0xFF1B2232),
+                  ? (isSolid
+                      ? primaryColor.withValues(alpha: 0.25)
+                      : primaryColor.withValues(alpha: 0.2))
+                  : StudioSurfaceTheme.surfaceContainer(
+                      context,
+                      isSolid: isSolid,
+                    ),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isCurrent
-                    ? primaryColor.withValues(alpha: 0.6)
-                    : const Color(0xFF2A3448),
+                    ? primaryColor.withValues(alpha: isSolid ? 0.7 : 0.6)
+                    : StudioSurfaceTheme.outline(
+                        context,
+                        isSolid: isSolid,
+                      ),
                 width: 0.8,
               ),
             ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../controllers/sleep_timer_controller.dart';
 
 class SleepTimerSheet extends ConsumerStatefulWidget {
@@ -35,13 +36,14 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
     final timerController = ref.read(sleepTimerControllerProvider.notifier);
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F131C),
+        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(color: const Color(0xFF222938), width: 1.2),
+        border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.2),
         boxShadow: const [
           BoxShadow(
             color: Colors.black87,
@@ -61,7 +63,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                 width: 38,
                 height: 4.5,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF374151),
+                  color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -90,9 +92,19 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                      color: StudioSurfaceTheme.tintedContainer(
+                        context,
+                        const Color(0xFF00E676),
+                        isSolid: isSolid,
+                        translucentAlpha: 0.15,
+                        solidBlendAlpha: 0.18,
+                      ),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF00E676).withValues(alpha: 0.5)),
+                      border: Border.all(
+                        color: isSolid
+                            ? theme.colorScheme.outline
+                            : const Color(0xFF00E676).withValues(alpha: 0.5),
+                      ),
                     ),
                     child: const Text(
                       'RUNNING',
@@ -114,10 +126,10 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141924),
+                  color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: primary.withValues(alpha: 0.4),
+                    color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
                     width: 1.2,
                   ),
                 ),
@@ -142,7 +154,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                         fontSize: 11.5,
                         color: timerState.isFadingOut
                             ? const Color(0xFFFF9F0A)
-                            : const Color(0xFF94A3B8),
+                            : theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -156,9 +168,9 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildQuickExtendChip(context, '+5 Min', 5, timerController),
-                  _buildQuickExtendChip(context, '+15 Min', 15, timerController),
-                  _buildQuickExtendChip(context, '+30 Min', 30, timerController),
+                  _buildQuickExtendChip(context, '+5 Min', 5, timerController, isSolid),
+                  _buildQuickExtendChip(context, '+15 Min', 15, timerController, isSolid),
+                  _buildQuickExtendChip(context, '+30 Min', 30, timerController, isSolid),
                 ],
               ),
 
@@ -188,7 +200,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                   ),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                      color: AppColors.crimsonAlert.withValues(alpha: 0.6),
+                      color: isSolid ? theme.colorScheme.outline : AppColors.crimsonAlert.withValues(alpha: 0.6),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -198,10 +210,10 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               ),
             ] else ...[
               // ─── INACTIVE / TIMER SETUP VIEW ─────────────────────────────
-              const Text(
+              Text(
                 'QUICK PRESETS',
                 style: TextStyle(
-                  color: Color(0xFF90A4AE),
+                  color: theme.colorScheme.onSurfaceVariant,
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.6,
@@ -226,13 +238,19 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? primary.withValues(alpha: 0.18)
-                                : const Color(0xFF141924),
+                                ? StudioSurfaceTheme.tintedContainer(
+                                    context,
+                                    primary,
+                                    isSolid: isSolid,
+                                    translucentAlpha: 0.18,
+                                    solidBlendAlpha: 0.22,
+                                  )
+                                : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isSelected
-                                  ? primary
-                                  : const Color(0xFF222B3D),
+                                  ? (isSolid ? theme.colorScheme.outline : primary)
+                                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                               width: isSelected ? 1.2 : 0.8,
                             ),
                           ),
@@ -240,7 +258,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                             child: Text(
                               '${mins}m',
                               style: TextStyle(
-                                color: isSelected ? primary : Colors.white70,
+                                color: isSelected ? primary : theme.colorScheme.onSurface,
                                 fontSize: 12,
                                 fontWeight: isSelected
                                     ? FontWeight.w900
@@ -261,10 +279,10 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'CUSTOM DURATION',
                     style: TextStyle(
-                      color: Color(0xFF90A4AE),
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
@@ -295,6 +313,8 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
 
               // Options
               _buildOptionTile(
+                context: context,
+                isSolid: isSolid,
                 title: 'Stop at End of Track',
                 subtitle: 'Finishes playing active song before stopping',
                 icon: HugeIcons.strokeRoundedMusicNote01,
@@ -306,6 +326,8 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               const SizedBox(height: 8),
 
               _buildOptionTile(
+                context: context,
+                isSolid: isSolid,
                 title: '15s Gentle Fade-Out',
                 subtitle: 'Gradually lowers volume smoothly to avoid jarring stops',
                 icon: HugeIcons.strokeRoundedVolumeLow,
@@ -363,7 +385,9 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
     String label,
     int minutes,
     SleepTimerController controller,
+    bool isSolid,
   ) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -373,14 +397,17 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A2232),
+          color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF2A374E), width: 0.8),
+          border: Border.all(
+            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+            width: 0.8,
+          ),
         ),
         child: Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
@@ -390,6 +417,8 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
   }
 
   Widget _buildOptionTile({
+    required BuildContext context,
+    required bool isSolid,
     required String title,
     required String subtitle,
     required dynamic icon,
@@ -397,12 +426,16 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
     required Color primaryColor,
     required ValueChanged<bool> onChanged,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF141924),
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF222B3D), width: 0.8),
+        border: Border.all(
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Row(
         children: [
@@ -414,16 +447,16 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
                     fontSize: 12.5,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Color(0xFF8E9EB2),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 10.5,
                   ),
                 ),
@@ -443,3 +476,4 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
     );
   }
 }
+

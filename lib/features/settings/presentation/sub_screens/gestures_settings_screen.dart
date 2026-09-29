@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/player_customization_settings.dart';
 import '../controllers/player_customization_controller.dart';
 
@@ -13,6 +14,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final settings = ref.watch(playerCustomizationProvider);
     final controller = ref.read(playerCustomizationProvider.notifier);
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -37,7 +39,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedActivity01,
           ),
           const SizedBox(height: 8),
-          _buildArtworkGesturesCard(context, settings, controller),
+          _buildArtworkGesturesCard(context, settings, controller, isSolid),
           const SizedBox(height: 20),
 
           // 2. TRACK TILE LAYOUT
@@ -47,7 +49,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedMusicNote01,
           ),
           const SizedBox(height: 8),
-          _buildTrackTileLayoutCard(context, settings, controller),
+          _buildTrackTileLayoutCard(context, settings, controller, isSolid),
           const SizedBox(height: 20),
 
           // 3. TRACK TILE SWIPE ACTIONS
@@ -57,7 +59,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedSlidersVertical,
           ),
           const SizedBox(height: 8),
-          _buildTrackTileSwipeCard(context, settings, controller),
+          _buildTrackTileSwipeCard(context, settings, controller, isSolid),
         ],
       ),
     );
@@ -86,47 +88,47 @@ class GesturesSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+    return Container(
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 14,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Touch & Gesture Triggers on Album Art',
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            _buildGestureDropdownRow(
-              context,
-              'Single Tap Action',
-              settings.singleTapAction,
-              (act) => controller.setSingleTapAction(act),
-            ),
-            const Divider(height: 16),
-            _buildGestureDropdownRow(
-              context,
-              'Double Tap Action',
-              settings.doubleTapAction,
-              (act) => controller.setDoubleTapAction(act),
-            ),
-            const Divider(height: 16),
-            _buildGestureDropdownRow(
-              context,
-              'Long Press Action',
-              settings.longPressAction,
-              (act) => controller.setLongPressAction(act),
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Touch & Gesture Triggers on Album Art',
+            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          _buildGestureDropdownRow(
+            context,
+            'Single Tap Action',
+            settings.singleTapAction,
+            (act) => controller.setSingleTapAction(act),
+            isSolid,
+          ),
+          const Divider(height: 16),
+          _buildGestureDropdownRow(
+            context,
+            'Double Tap Action',
+            settings.doubleTapAction,
+            (act) => controller.setDoubleTapAction(act),
+            isSolid,
+          ),
+          const Divider(height: 16),
+          _buildGestureDropdownRow(
+            context,
+            'Long Press Action',
+            settings.longPressAction,
+            (act) => controller.setLongPressAction(act),
+            isSolid,
+          ),
+        ],
       ),
     );
   }
@@ -136,8 +138,8 @@ class GesturesSettingsScreen extends ConsumerWidget {
     String label,
     ArtworkGestureAction currentAction,
     ValueChanged<ArtworkGestureAction> onChanged,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -150,7 +152,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
         DropdownButton<ArtworkGestureAction>(
           value: currentAction,
           underline: const SizedBox(),
-          dropdownColor: theme.colorScheme.surfaceContainerHighest,
+          dropdownColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(12),
           items: ArtworkGestureAction.values.map((action) {
             return DropdownMenuItem(
@@ -176,14 +178,16 @@ class GesturesSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
-
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -283,92 +287,89 @@ class GesturesSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+    return Container(
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 14,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Swipe Gestures on Library Items',
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Swipe Right (Left-to-Right)',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Swipe Gestures on Library Items',
+            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Swipe Right (Left-to-Right)',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
-                DropdownButton<TrackTileSwipeAction>(
-                  value: settings.trackSwipeRight,
-                  underline: const SizedBox(),
-                  dropdownColor: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  items: TrackTileSwipeAction.values.map((action) {
-                    return DropdownMenuItem(
-                      value: action,
-                      child: Text(
-                        action.label,
-                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      HapticFeedback.selectionClick();
-                      controller.setTrackSwipeRight(val);
-                    }
-                  },
+              ),
+              DropdownButton<TrackTileSwipeAction>(
+                value: settings.trackSwipeRight,
+                underline: const SizedBox(),
+                dropdownColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                borderRadius: BorderRadius.circular(12),
+                items: TrackTileSwipeAction.values.map((action) {
+                  return DropdownMenuItem(
+                    value: action,
+                    child: Text(
+                      action.label,
+                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    HapticFeedback.selectionClick();
+                    controller.setTrackSwipeRight(val);
+                  }
+                },
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Swipe Left (Right-to-Left)',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
-              ],
-            ),
-            const Divider(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Swipe Left (Right-to-Left)',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                ),
-                DropdownButton<TrackTileSwipeAction>(
-                  value: settings.trackSwipeLeft,
-                  underline: const SizedBox(),
-                  dropdownColor: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  items: TrackTileSwipeAction.values.map((action) {
-                    return DropdownMenuItem(
-                      value: action,
-                      child: Text(
-                        action.label,
-                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      HapticFeedback.selectionClick();
-                      controller.setTrackSwipeLeft(val);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              DropdownButton<TrackTileSwipeAction>(
+                value: settings.trackSwipeLeft,
+                underline: const SizedBox(),
+                dropdownColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                borderRadius: BorderRadius.circular(12),
+                items: TrackTileSwipeAction.values.map((action) {
+                  return DropdownMenuItem(
+                    value: action,
+                    child: Text(
+                      action.label,
+                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    HapticFeedback.selectionClick();
+                    controller.setTrackSwipeLeft(val);
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

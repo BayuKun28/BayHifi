@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../data/metadata_tagger_service.dart';
@@ -260,7 +261,9 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final primary = cs.primary;
-    final outline = cs.outline.withAlpha(40);
+    final isSolid = ref.isSolidStyle;
+    final surfaceContainer = StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid);
+    final outline = StudioSurfaceTheme.outline(context, isSolid: isSolid);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -271,7 +274,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
           maxHeight: MediaQuery.of(context).size.height * 0.90,
         ),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: surfaceContainer,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(color: outline, width: 1.0),
           boxShadow: const [
@@ -323,7 +326,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                       decoration: BoxDecoration(
-                        color: cs.surfaceContainer,
+                        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: outline, width: 0.8),
                       ),
@@ -346,14 +349,14 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
               // ─── BODY / FORM OR PROCESSING STATE ─────────────────────────
               Flexible(
                 child: _isProcessing
-                    ? _buildProcessingState(cs, primary)
+                    ? _buildProcessingState(cs, primary, isSolid)
                     : SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // ─── SHARED COVER ART BENTO ────────────────────
-                            _buildSharedArtworkCard(cs, outline, primary),
+                            _buildSharedArtworkCard(cs, outline, primary, isSolid),
                             const SizedBox(height: 16),
 
                             // ─── SHARED METADATA FIELDS ────────────────────
@@ -369,6 +372,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                               cs: cs,
                               outline: outline,
                               primary: primary,
+                              isSolid: isSolid,
                             ),
                             const SizedBox(height: 10),
 
@@ -381,6 +385,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                               cs: cs,
                               outline: outline,
                               primary: primary,
+                              isSolid: isSolid,
                             ),
                             const SizedBox(height: 10),
 
@@ -393,6 +398,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                               cs: cs,
                               outline: outline,
                               primary: primary,
+                              isSolid: isSolid,
                             ),
                             const SizedBox(height: 10),
 
@@ -409,6 +415,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                     cs: cs,
                                     outline: outline,
                                     primary: primary,
+                                    isSolid: isSolid,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -424,6 +431,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                     outline: outline,
                                     primary: primary,
                                     keyboardType: TextInputType.number,
+                                    isSolid: isSolid,
                                   ),
                                 ),
                               ],
@@ -446,8 +454,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                       ),
                                       padding: EdgeInsets.zero,
                                       backgroundColor: _genreController.text == g
-                                          ? primary.withAlpha(30)
-                                          : cs.surfaceContainerHighest,
+                                          ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20)
+                                          : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                                       side: BorderSide(
                                         color: _genreController.text == g ? primary : outline,
                                         width: 0.8,
@@ -470,17 +478,17 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                             const SizedBox(height: 20),
 
                             // ─── AUTO NUMBERING BENTO ──────────────────────
-                            _buildAutoNumberingCard(cs, outline, primary),
+                            _buildAutoNumberingCard(cs, outline, primary, isSolid),
                             const SizedBox(height: 16),
 
                             // ─── FILENAME PATTERN TAGGER ───────────────────
-                            _buildPatternTaggerCard(cs, outline, primary),
+                            _buildPatternTaggerCard(cs, outline, primary, isSolid),
                             const SizedBox(height: 16),
 
                             // ─── TRACK ORDER REORDERABLE PREVIEW ───────────
                             _buildSectionHeader('SELECTED TRACKS QUEUE', HugeIcons.strokeRoundedPlaylist01, primary),
                             const SizedBox(height: 8),
-                            _buildTracksPreviewList(cs, outline, primary),
+                            _buildTracksPreviewList(cs, outline, primary, isSolid),
                             const SizedBox(height: 12),
                           ],
                         ),
@@ -568,11 +576,11 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     );
   }
 
-  Widget _buildSharedArtworkCard(ColorScheme cs, Color outline, Color primary) {
+  Widget _buildSharedArtworkCard(ColorScheme cs, Color outline, Color primary, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: outline, width: 0.8),
       ),
@@ -582,7 +590,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
+              color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: outline, width: 0.8),
             ),
@@ -643,7 +651,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: primary.withAlpha(25),
+                          color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: primary.withAlpha(80), width: 0.8),
                         ),
@@ -665,7 +673,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: cs.surfaceContainerHighest,
+                            color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: outline, width: 0.8),
                           ),
@@ -690,11 +698,11 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     );
   }
 
-  Widget _buildAutoNumberingCard(ColorScheme cs, Color outline, Color primary) {
+  Widget _buildAutoNumberingCard(ColorScheme cs, Color outline, Color primary, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: outline, width: 0.8),
       ),
@@ -774,11 +782,11 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     );
   }
 
-  Widget _buildPatternTaggerCard(ColorScheme cs, Color outline, Color primary) {
+  Widget _buildPatternTaggerCard(ColorScheme cs, Color outline, Color primary, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: outline, width: 0.8),
       ),
@@ -813,7 +821,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _selectedPattern,
-              dropdownColor: cs.surfaceContainerHighest,
+              dropdownColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               decoration: InputDecoration(
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -845,11 +853,11 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     );
   }
 
-  Widget _buildTracksPreviewList(ColorScheme cs, Color outline, Color primary) {
+  Widget _buildTracksPreviewList(ColorScheme cs, Color outline, Color primary, bool isSolid) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 180),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: outline, width: 0.8),
       ),
@@ -872,7 +880,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
               height: 28,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest,
+                color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: outline, width: 0.8),
               ),
@@ -927,12 +935,13 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     required ColorScheme cs,
     required Color outline,
     required Color primary,
+    required bool isSolid,
     TextInputType? keyboardType,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: isChecked ? primary.withAlpha(90) : outline, width: 0.8),
       ),
@@ -978,7 +987,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     );
   }
 
-  Widget _buildProcessingState(ColorScheme cs, Color primary) {
+  Widget _buildProcessingState(ColorScheme cs, Color primary, bool isSolid) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -991,7 +1000,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
               value: _progress > 0 ? _progress : null,
               strokeWidth: 4,
               color: primary,
-              backgroundColor: cs.surfaceContainerHighest,
+              backgroundColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
             ),
           ),
           const SizedBox(height: 24),

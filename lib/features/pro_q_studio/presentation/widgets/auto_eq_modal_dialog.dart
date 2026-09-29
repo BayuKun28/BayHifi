@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/fr_curve_data.dart';
 import '../controllers/eq_controller.dart';
@@ -85,6 +86,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
   Widget build(BuildContext context) {
     final eqState = ref.watch(eqControllerProvider);
     final notifier = ref.read(eqControllerProvider.notifier);
+    final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     final selectedDriver = eqState.driverFr;
     final selectedTarget = eqState.targetFr;
@@ -104,12 +107,12 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
               maxHeight: MediaQuery.of(context).size.height * 0.90,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFF111620),
+              color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF222C3A), width: 1.2),
+              border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.2),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.7),
+                  color: Colors.black.withValues(alpha: isSolid ? 0.4 : 0.7),
                   blurRadius: 32,
                   spreadRadius: 6,
                   offset: const Offset(0, 8),
@@ -127,7 +130,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                     width: 38,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF374151),
+                      color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -141,13 +144,18 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00E676).withValues(alpha: 0.12),
+                        color: StudioSurfaceTheme.tintedContainer(
+                          context,
+                          theme.colorScheme.primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.12,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const HugeIcon(
+                      child: HugeIcon(
                         icon: HugeIcons.strokeRoundedSparkles,
                         size: 18,
-                        color: Color(0xFF00E676),
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -155,21 +163,21 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Text(
                             'AUTO EQ STUDIO & TARGET MATCHING',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: theme.colorScheme.onSurface,
                               fontSize: 12.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.6,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             'Match headphone driver FR against target curve or import Squiglink files',
                             style: TextStyle(
-                              color: Color(0xFF8899A6),
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 10.0,
                               fontWeight: FontWeight.w500,
                             ),
@@ -181,10 +189,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const HugeIcon(
+                      icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
                         size: 18,
-                        color: Color(0xFF8899A6),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       tooltip: 'Close',
                     ),
@@ -203,16 +211,17 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                           title: 'HEADPHONE / SPEAKER DRIVER',
                           hasRemove: selectedDriver != null,
                           onRemove: () => notifier.deleteDriver(),
+                          theme: theme,
                         ),
                         const SizedBox(height: 5),
-                        _buildDriverDropdown(eqState, notifier),
+                        _buildDriverDropdown(eqState, notifier, isSolid, theme),
                         const SizedBox(height: 6),
                         _buildActionOutlinedButton(
                           icon: HugeIcons.strokeRoundedHeadphones,
                           label: 'IMPORT DRIVER FR (TXT/CSV)',
-                          borderColor: const Color(0xFF0288D1),
-                          color: const Color(0xFF29B6F6),
-                          bgColor: const Color(0xFF131D28),
+                          borderColor: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6),
+                          color: theme.colorScheme.secondary,
+                          bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.secondary, isSolid: isSolid, translucentAlpha: 0.12),
                           onTap: () => _handleImportDriver(context, notifier),
                         ),
                         const SizedBox(height: 10),
@@ -222,9 +231,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                           title: 'TARGET RESPONSE CURVE',
                           hasRemove: selectedTarget != null,
                           onRemove: () => notifier.deleteTarget(),
+                          theme: theme,
                         ),
                         const SizedBox(height: 5),
-                        _buildTargetDropdown(eqState, notifier),
+                        _buildTargetDropdown(eqState, notifier, isSolid, theme),
                         const SizedBox(height: 6),
                         Row(
                           children: [
@@ -232,9 +242,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               child: _buildActionOutlinedButton(
                                 icon: HugeIcons.strokeRoundedTarget02,
                                 label: 'IMPORT TARGET',
-                                borderColor: const Color(0xFF00897B),
-                                color: const Color(0xFF00E676),
-                                bgColor: const Color(0xFF132620),
+                                borderColor: isSolid ? const Color(0xFFFF9F0A) : const Color(0xFFFF9F0A).withValues(alpha: 0.6),
+                                color: const Color(0xFFFF9F0A),
+                                bgColor: StudioSurfaceTheme.tintedContainer(context, const Color(0xFFFF9F0A), isSolid: isSolid, translucentAlpha: 0.12),
                                 onTap: () => _handleImportTarget(context, notifier),
                               ),
                             ),
@@ -243,9 +253,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               child: _buildActionOutlinedButton(
                                 icon: HugeIcons.strokeRoundedCloudDownload,
                                 label: 'CLOUD DB',
-                                borderColor: const Color(0xFF00ACC1),
-                                color: const Color(0xFF00E5FF),
-                                bgColor: const Color(0xFF0E222B),
+                                borderColor: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6),
+                                color: theme.colorScheme.primary,
+                                bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid, translucentAlpha: 0.12),
                                 onTap: () => AutoEqCloudBrowserDialog.show(context),
                               ),
                             ),
@@ -254,9 +264,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               child: _buildActionOutlinedButton(
                                 icon: HugeIcons.strokeRoundedSparkles,
                                 label: 'SQUIGLINK',
-                                borderColor: const Color(0xFF7B1FA2),
-                                color: const Color(0xFFCE93D8),
-                                bgColor: const Color(0xFF22162A),
+                                borderColor: isSolid ? theme.colorScheme.tertiary : theme.colorScheme.tertiary.withValues(alpha: 0.6),
+                                color: theme.colorScheme.tertiary,
+                                bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.tertiary, isSolid: isSolid, translucentAlpha: 0.12),
                                 onTap: () {
                                   showDialog<void>(
                                     context: context,
@@ -270,10 +280,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                         const SizedBox(height: 10),
 
                         // ─── SECTION 3: BAND RESOLUTION ─────────────────────────
-                        const Text(
+                        Text(
                           'BAND RESOLUTION',
                           style: TextStyle(
-                            color: Color(0xFF90A4AE),
+                            color: theme.colorScheme.onSurfaceVariant,
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
@@ -294,13 +304,19 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? const Color(0xFF132A20)
-                                          : const Color(0xFF161D27),
+                                          ? StudioSurfaceTheme.tintedContainer(
+                                              context,
+                                              theme.colorScheme.primary,
+                                              isSolid: isSolid,
+                                              translucentAlpha: 0.2,
+                                              solidBlendAlpha: 0.25,
+                                            )
+                                          : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
                                         color: isSelected
-                                            ? const Color(0xFF00E676)
-                                            : const Color(0xFF26323F),
+                                            ? (isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.8))
+                                            : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                                         width: isSelected ? 1.2 : 0.8,
                                       ),
                                     ),
@@ -308,8 +324,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                       res.label,
                                       style: TextStyle(
                                         color: isSelected
-                                            ? const Color(0xFF00E676)
-                                            : const Color(0xFF90A4AE),
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.onSurfaceVariant,
                                         fontSize: 10.5,
                                         fontWeight: isSelected
                                             ? FontWeight.w900
@@ -333,10 +349,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'TUNING MODE',
                                     style: TextStyle(
-                                      color: Color(0xFF90A4AE),
+                                      color: theme.colorScheme.onSurfaceVariant,
                                       fontSize: 9.0,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 0.5,
@@ -346,10 +362,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                   Container(
                                     height: 30,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF161D27),
+                                      color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
-                                        color: const Color(0xFF26323F),
+                                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                                         width: 0.8,
                                       ),
                                     ),
@@ -359,11 +375,15 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                           label: 'Normal',
                                           isSelected: eqState.tuningMode == TuningMode.normal,
                                           onTap: () => notifier.setTuningMode(TuningMode.normal),
+                                          isSolid: isSolid,
+                                          theme: theme,
                                         ),
                                         _buildTuningModeChip(
                                           label: 'Safe',
                                           isSelected: eqState.tuningMode == TuningMode.safe,
                                           onTap: () => notifier.setTuningMode(TuningMode.safe),
+                                          isSolid: isSolid,
+                                          theme: theme,
                                         ),
                                       ],
                                     ),
@@ -379,10 +399,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'A/B COMPARISON',
                                     style: TextStyle(
-                                      color: Color(0xFF90A4AE),
+                                      color: theme.colorScheme.onSurfaceVariant,
                                       fontSize: 9.0,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 0.5,
@@ -392,10 +412,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                   Container(
                                     height: 30,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF161D27),
+                                      color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
-                                        color: const Color(0xFF26323F),
+                                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                                         width: 0.8,
                                       ),
                                     ),
@@ -404,14 +424,16 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                         _buildAbChip(
                                           label: 'A: RAW',
                                           isSelected: eqState.abMode == AbComparisonMode.aRaw,
-                                          activeColor: const Color(0xFF29B6F6),
+                                          activeColor: theme.colorScheme.secondary,
                                           onTap: () => notifier.setAbComparison(AbComparisonMode.aRaw),
+                                          isSolid: isSolid,
                                         ),
                                         _buildAbChip(
                                           label: 'B: ACTIVE',
                                           isSelected: eqState.abMode == AbComparisonMode.bActive,
-                                          activeColor: const Color(0xFF00E676),
+                                          activeColor: theme.colorScheme.primary,
                                           onTap: () => notifier.setAbComparison(AbComparisonMode.bActive),
+                                          isSolid: isSolid,
                                         ),
                                       ],
                                     ),
@@ -436,16 +458,16 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                                     content: Text(
                                       'AutoEQ Applied! Fitted ${eqState.bandResolution.count} biquads (${_cleanName(selectedDriver?.name) != "" ? _cleanName(selectedDriver?.name) : "Driver"} → ${_cleanName(selectedTarget?.name) != "" ? _cleanName(selectedTarget?.name) : "Target"}). Preamp: ${eqState.safePreampDb.toStringAsFixed(1)} dB',
                                     ),
-                                    backgroundColor: const Color(0xFF1B5E20),
+                                    backgroundColor: theme.colorScheme.primary,
                                     duration: const Duration(seconds: 3),
                                   ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please select both a Driver and Target curve before applying.'),
-                                    backgroundColor: Color(0xFFB71C1C),
-                                    duration: Duration(seconds: 2),
+                                  SnackBar(
+                                    content: const Text('Please select both a Driver and Target curve before applying.'),
+                                    backgroundColor: theme.colorScheme.error,
+                                    duration: const Duration(seconds: 2),
                                   ),
                                 );
                               }
@@ -454,11 +476,13 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00E676),
+                                color: theme.colorScheme.primary,
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF00E676).withValues(alpha: 0.35),
+                                    color: isSolid
+                                        ? Colors.black.withValues(alpha: 0.3)
+                                        : theme.colorScheme.primary.withValues(alpha: 0.35),
                                     blurRadius: 14,
                                     offset: const Offset(0, 3),
                                   ),
@@ -466,17 +490,17 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   HugeIcon(
                                     icon: HugeIcons.strokeRoundedChartBarLine,
                                     size: 20,
-                                    color: Color(0xFF091A10),
+                                    color: theme.colorScheme.onPrimary,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
                                     'APPLY TO DSP',
                                     style: TextStyle(
-                                      color: Color(0xFF091A10),
+                                      color: theme.colorScheme.onPrimary,
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 0.8,
@@ -495,10 +519,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             onTap: () {
                               notifier.clearFrCurves();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Visualizer FR curves cleared from canvas.'),
-                                  duration: Duration(seconds: 2),
-                                  backgroundColor: Color(0xFF263238),
+                                SnackBar(
+                                  content: const Text('Visualizer FR curves cleared from canvas.'),
+                                  duration: const Duration(seconds: 2),
+                                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
                                 ),
                               );
                             },
@@ -507,17 +531,17 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
+                                children: [
                                   HugeIcon(
                                     icon: HugeIcons.strokeRoundedCancelSquare,
                                     size: 13,
-                                    color: Color(0xFFEF5350),
+                                    color: theme.colorScheme.error,
                                   ),
-                                  SizedBox(width: 5),
+                                  const SizedBox(width: 5),
                                   Text(
                                     'CLEAR VISUALIZER FR CURVES',
                                     style: TextStyle(
-                                      color: Color(0xFFEF5350),
+                                      color: theme.colorScheme.error,
                                       fontSize: 10.0,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 0.4,
@@ -544,6 +568,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     required String title,
     required bool hasRemove,
     required VoidCallback onRemove,
+    required ThemeData theme,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -551,8 +576,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF90A4AE),
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
               fontSize: 9.5,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.5,
@@ -569,17 +594,17 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   HugeIcon(
                     icon: HugeIcons.strokeRoundedDelete02,
                     size: 12,
-                    color: Color(0xFFEF5350),
+                    color: theme.colorScheme.error,
                   ),
-                  SizedBox(width: 3),
+                  const SizedBox(width: 3),
                   Text(
                     'REMOVE',
                     style: TextStyle(
-                      color: Color(0xFFEF5350),
+                      color: theme.colorScheme.error,
                       fontSize: 9.5,
                       fontWeight: FontWeight.w800,
                     ),
@@ -592,7 +617,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     );
   }
 
-  Widget _buildDriverDropdown(EqState state, EqController notifier) {
+  Widget _buildDriverDropdown(EqState state, EqController notifier, bool isSolid, ThemeData theme) {
     final driver = state.driverFr;
     final allDrivers = [
       ..._defaultDrivers,
@@ -600,10 +625,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     ];
 
     return PopupMenuButton<FrCurveData>(
-      color: const Color(0xFF141922),
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: Color(0xFF2C3542), width: 1),
+        side: BorderSide(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1),
       ),
       onSelected: (d) => notifier.selectDriver(d),
       itemBuilder: (context) => allDrivers.map((d) {
@@ -615,14 +640,14 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
               HugeIcon(
                 icon: HugeIcons.strokeRoundedHeadphones,
                 size: 14,
-                color: isSelected ? const Color(0xFF29B6F6) : const Color(0xFF90A4AE),
+                color: isSelected ? theme.colorScheme.secondary : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   _cleanName(d.name),
                   style: TextStyle(
-                    color: isSelected ? const Color(0xFF29B6F6) : Colors.white,
+                    color: isSelected ? theme.colorScheme.secondary : theme.colorScheme.onSurface,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 11,
                   ),
@@ -638,23 +663,23 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         height: 36,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF19202B),
+          color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFF2A3545), width: 1.0),
+          border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
         ),
         child: Row(
           children: [
-            const HugeIcon(
+            HugeIcon(
               icon: HugeIcons.strokeRoundedCloud,
               size: 15,
-              color: Color(0xFF29B6F6),
+              color: theme.colorScheme.secondary,
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 driver != null ? _cleanName(driver.name) : 'Select Headphone Driver...',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
                   fontSize: 11.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -662,10 +687,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const HugeIcon(
+            HugeIcon(
               icon: HugeIcons.strokeRoundedArrowDown01,
               size: 16,
-              color: Color(0xFF90A4AE),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),
@@ -673,7 +698,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     );
   }
 
-  Widget _buildTargetDropdown(EqState state, EqController notifier) {
+  Widget _buildTargetDropdown(EqState state, EqController notifier, bool isSolid, ThemeData theme) {
     final target = state.targetFr;
     final allTargets = [
       ..._defaultTargets,
@@ -681,10 +706,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     ];
 
     return PopupMenuButton<FrCurveData>(
-      color: const Color(0xFF141922),
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: Color(0xFF2C3542), width: 1),
+        side: BorderSide(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1),
       ),
       onSelected: (t) => notifier.selectTarget(t),
       itemBuilder: (context) => allTargets.map((t) {
@@ -696,14 +721,14 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
               HugeIcon(
                 icon: HugeIcons.strokeRoundedTarget02,
                 size: 14,
-                color: isSelected ? const Color(0xFF00E676) : const Color(0xFF90A4AE),
+                color: isSelected ? const Color(0xFFFF9F0A) : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   _cleanName(t.name),
                   style: TextStyle(
-                    color: isSelected ? const Color(0xFF00E676) : Colors.white,
+                    color: isSelected ? const Color(0xFFFF9F0A) : theme.colorScheme.onSurface,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 11,
                   ),
@@ -719,23 +744,23 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         height: 36,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF19202B),
+          color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFF2A3545), width: 1.0),
+          border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
         ),
         child: Row(
           children: [
             const HugeIcon(
               icon: HugeIcons.strokeRoundedCloud,
               size: 15,
-              color: Color(0xFF00E676),
+              color: Color(0xFFFF9F0A),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 target != null ? _cleanName(target.name) : 'Select Target Response...',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
                   fontSize: 11.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -743,10 +768,10 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const HugeIcon(
+            HugeIcon(
               icon: HugeIcons.strokeRoundedArrowDown01,
               size: 16,
-              color: Color(0xFF90A4AE),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),
@@ -758,6 +783,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
+    required bool isSolid,
+    required ThemeData theme,
   }) {
     return Expanded(
       child: InkWell(
@@ -767,13 +794,21 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
           margin: const EdgeInsets.all(2),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0288D1) : Colors.transparent,
+            color: isSelected
+                ? StudioSurfaceTheme.tintedContainer(
+                    context,
+                    theme.colorScheme.primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.3,
+                    solidBlendAlpha: 0.35,
+                  )
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(5),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.white : const Color(0xFF90A4AE),
+              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
               fontSize: 10.0,
               fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
             ),
@@ -788,6 +823,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     required bool isSelected,
     required Color activeColor,
     required VoidCallback onTap,
+    required bool isSolid,
   }) {
     return Expanded(
       child: InkWell(
@@ -797,14 +833,27 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
           margin: const EdgeInsets.all(2),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? activeColor.withValues(alpha: 0.18) : Colors.transparent,
+            color: isSelected
+                ? StudioSurfaceTheme.tintedContainer(
+                    context,
+                    activeColor,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.18,
+                    solidBlendAlpha: 0.25,
+                  )
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(5),
-            border: isSelected ? Border.all(color: activeColor, width: 1.0) : null,
+            border: isSelected
+                ? Border.all(
+                    color: isSolid ? activeColor : activeColor.withValues(alpha: 0.8),
+                    width: 1.0,
+                  )
+                : null,
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? activeColor : const Color(0xFF90A4AE),
+              color: isSelected ? activeColor : Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 9.5,
               fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
             ),

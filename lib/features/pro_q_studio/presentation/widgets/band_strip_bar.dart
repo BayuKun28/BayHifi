@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/eq_band.dart';
 import '../controllers/eq_controller.dart';
 
@@ -12,6 +13,8 @@ class BandStripBar extends ConsumerWidget {
     final eqState = ref.watch(eqControllerProvider);
     final notifier = ref.read(eqControllerProvider.notifier);
     final selectedBand = eqState.selectedBand;
+    final isSolid = ref.isSolidStyle;
+    final theme = Theme.of(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -21,11 +24,11 @@ class BandStripBar extends ConsumerWidget {
           // Mobile Portrait View: Two neat tiers
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: const BoxDecoration(
-              color: Color(0xFF090B0E),
+            decoration: BoxDecoration(
+              color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
               border: Border(
                 top: BorderSide(
-                  color: Color(0xFF1E232B),
+                  color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                   width: 1.0,
                 ),
               ),
@@ -48,6 +51,7 @@ class BandStripBar extends ConsumerWidget {
                         band: band,
                         isSelected: isSelected,
                         compact: true,
+                        isSolid: isSolid,
                         onTap: () => notifier.selectBand(band.index),
                       );
                     },
@@ -63,6 +67,7 @@ class BandStripBar extends ConsumerWidget {
                         icon: HugeIcons.strokeRoundedAdd01,
                         tooltip: 'Add Band',
                         color: const Color(0xFF00E5FF),
+                        isSolid: isSolid,
                         onPressed: () => notifier.addBand(),
                       ),
                       const SizedBox(width: 4),
@@ -70,6 +75,7 @@ class BandStripBar extends ConsumerWidget {
                         icon: HugeIcons.strokeRoundedDelete02,
                         tooltip: 'Delete Selected Band',
                         color: const Color(0xFFEF5350),
+                        isSolid: isSolid,
                         onPressed: selectedBand != null && eqState.bands.length > 1
                             ? () => notifier.removeBand(selectedBand.index)
                             : null,
@@ -78,14 +84,16 @@ class BandStripBar extends ConsumerWidget {
                       _ActionButton(
                         icon: HugeIcons.strokeRoundedRefresh,
                         tooltip: 'Reset Active Band Gain',
-                        color: const Color(0xFF90A4AE),
+                        color: theme.colorScheme.onSurfaceVariant,
+                        isSolid: isSolid,
                         onPressed: selectedBand != null ? () => notifier.resetActiveBand() : null,
                       ),
                       const Spacer(),
                       _ReadoutBox(
                         label: 'FREQ',
                         value: selectedBand != null ? '${selectedBand.formattedFreq}Hz' : '--',
-                        color: const Color(0xFFCFD8DC),
+                        color: theme.colorScheme.onSurface,
+                        isSolid: isSolid,
                       ),
                       const SizedBox(width: 4),
                       _ReadoutBox(
@@ -94,18 +102,21 @@ class BandStripBar extends ConsumerWidget {
                         color: selectedBand != null && selectedBand.gainDb > 0
                             ? const Color(0xFFFF9F0A)
                             : const Color(0xFF64D2FF),
+                        isSolid: isSolid,
                       ),
                       const SizedBox(width: 4),
                       _ReadoutBox(
                         label: 'Q',
                         value: selectedBand != null ? selectedBand.q.toStringAsFixed(2) : '--',
-                        color: const Color(0xFFB0BEC5),
+                        color: theme.colorScheme.onSurfaceVariant,
+                        isSolid: isSolid,
                       ),
                       const SizedBox(width: 6),
                       _PreampBox(
                         safePreampDb: eqState.safePreampDb,
                         isAuto: eqState.autoPreampEnabled,
-                        onTap: () => _showPreampModalSheet(context, ref),
+                        isSolid: isSolid,
+                        onTap: () => _showPreampModalSheet(context, ref, isSolid),
                       ),
                     ],
                   ),
@@ -119,11 +130,11 @@ class BandStripBar extends ConsumerWidget {
         return Container(
           height: 60,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: const BoxDecoration(
-            color: Color(0xFF090B0E),
+          decoration: BoxDecoration(
+            color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
             border: Border(
               top: BorderSide(
-                color: Color(0xFF1E232B),
+                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                 width: 1.0,
               ),
             ),
@@ -144,6 +155,7 @@ class BandStripBar extends ConsumerWidget {
                       band: band,
                       isSelected: isSelected,
                       compact: false,
+                      isSolid: isSolid,
                       onTap: () => notifier.selectBand(band.index),
                     );
                   },
@@ -157,6 +169,7 @@ class BandStripBar extends ConsumerWidget {
                 icon: HugeIcons.strokeRoundedAdd01,
                 tooltip: 'Add Band',
                 color: const Color(0xFF00E5FF),
+                isSolid: isSolid,
                 onPressed: () => notifier.addBand(),
               ),
               const SizedBox(width: 6),
@@ -164,6 +177,7 @@ class BandStripBar extends ConsumerWidget {
                 icon: HugeIcons.strokeRoundedDelete02,
                 tooltip: 'Delete Selected Band',
                 color: const Color(0xFFEF5350),
+                isSolid: isSolid,
                 onPressed: selectedBand != null && eqState.bands.length > 1
                     ? () => notifier.removeBand(selectedBand.index)
                     : null,
@@ -172,7 +186,8 @@ class BandStripBar extends ConsumerWidget {
               _ActionButton(
                 icon: HugeIcons.strokeRoundedRefresh,
                 tooltip: 'Reset Active Band Gain',
-                color: const Color(0xFF90A4AE),
+                color: theme.colorScheme.onSurfaceVariant,
+                isSolid: isSolid,
                 onPressed: selectedBand != null ? () => notifier.resetActiveBand() : null,
               ),
 
@@ -182,7 +197,8 @@ class BandStripBar extends ConsumerWidget {
               _ReadoutBox(
                 label: 'FREQ',
                 value: selectedBand != null ? '${selectedBand.formattedFreq}Hz' : '--',
-                color: const Color(0xFFCFD8DC),
+                color: theme.colorScheme.onSurface,
+                isSolid: isSolid,
               ),
               const SizedBox(width: 6),
               _ReadoutBox(
@@ -191,12 +207,14 @@ class BandStripBar extends ConsumerWidget {
                 color: selectedBand != null && selectedBand.gainDb > 0
                     ? const Color(0xFFFF9F0A)
                     : const Color(0xFF64D2FF),
+                isSolid: isSolid,
               ),
               const SizedBox(width: 6),
               _ReadoutBox(
                 label: 'Q',
                 value: selectedBand != null ? selectedBand.q.toStringAsFixed(2) : '--',
-                color: const Color(0xFFB0BEC5),
+                color: theme.colorScheme.onSurfaceVariant,
+                isSolid: isSolid,
               ),
 
               const SizedBox(width: 10),
@@ -205,7 +223,8 @@ class BandStripBar extends ConsumerWidget {
               _PreampBox(
                 safePreampDb: eqState.safePreampDb,
                 isAuto: eqState.autoPreampEnabled,
-                onTap: () => _showPreampModalSheet(context, ref),
+                isSolid: isSolid,
+                onTap: () => _showPreampModalSheet(context, ref, isSolid),
               ),
             ],
           ),
@@ -214,7 +233,7 @@ class BandStripBar extends ConsumerWidget {
     );
   }
 
-  static void _showPreampModalSheet(BuildContext context, WidgetRef ref) {
+  static void _showPreampModalSheet(BuildContext context, WidgetRef ref, bool isSolid) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -224,20 +243,32 @@ class BandStripBar extends ConsumerWidget {
           builder: (context, ref, _) {
             final state = ref.watch(eqControllerProvider);
             final notifier = ref.read(eqControllerProvider.notifier);
+            final theme = Theme.of(context);
 
             return Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
               decoration: BoxDecoration(
-                color: const Color(0xFF111622),
+                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                border: Border.all(color: const Color(0xFF243042), width: 1.2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    blurRadius: 28,
-                    spreadRadius: 4,
-                  ),
-                ],
+                border: Border.all(
+                  color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                  width: 1.2,
+                ),
+                boxShadow: isSolid
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 24,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 16,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -249,7 +280,7 @@ class BandStripBar extends ConsumerWidget {
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF374151),
+                        color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -262,10 +293,15 @@ class BandStripBar extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEF5350).withValues(alpha: 0.15),
+                          color: StudioSurfaceTheme.tintedContainer(
+                            context,
+                            const Color(0xFFEF5350),
+                            isSolid: isSolid,
+                            translucentAlpha: 0.15,
+                          ),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: const Color(0xFFEF5350).withValues(alpha: 0.4),
+                            color: isSolid ? theme.colorScheme.outline : const Color(0xFFEF5350).withValues(alpha: 0.4),
                           ),
                         ),
                         child: const HugeIcon(
@@ -279,10 +315,10 @@ class BandStripBar extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'PRE-AMP & DIGITAL HEADROOM',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: theme.colorScheme.onSurface,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.6,
@@ -295,7 +331,7 @@ class BandStripBar extends ConsumerWidget {
                               style: TextStyle(
                                 color: state.autoPreampEnabled
                                     ? const Color(0xFF00E676)
-                                    : const Color(0xFF90A4AE),
+                                    : theme.colorScheme.onSurfaceVariant,
                                 fontSize: 10.5,
                               ),
                             ),
@@ -304,10 +340,10 @@ class BandStripBar extends ConsumerWidget {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(sheetContext),
-                        icon: const HugeIcon(
+                        icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
                           size: 18,
-                          color: Color(0xFF8899A6),
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -318,21 +354,21 @@ class BandStripBar extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0B0F17),
+                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: state.safePreampDb < -0.05
-                            ? const Color(0xFFEF5350).withValues(alpha: 0.6)
-                            : const Color(0xFF263345),
+                            ? (isSolid ? theme.colorScheme.outline : const Color(0xFFEF5350).withValues(alpha: 0.6))
+                            : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                       ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'PRE-AMP GAIN',
                           style: TextStyle(
-                            color: Color(0xFF90A4AE),
+                            color: theme.colorScheme.onSurfaceVariant,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.8,
@@ -345,7 +381,7 @@ class BandStripBar extends ConsumerWidget {
                                 ? const Color(0xFFEF5350)
                                 : (state.safePreampDb > 0
                                     ? const Color(0xFFFF9F0A)
-                                    : Colors.white),
+                                    : theme.colorScheme.onSurface),
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
                             fontFeatures: const [FontFeature.tabularFigures()],
@@ -360,7 +396,7 @@ class BandStripBar extends ConsumerWidget {
                   SliderTheme(
                     data: SliderThemeData(
                       activeTrackColor: const Color(0xFFEF5350),
-                      inactiveTrackColor: const Color(0xFF1E2838),
+                      inactiveTrackColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       thumbColor: const Color(0xFFEF5350),
                       overlayColor: const Color(0xFFEF5350).withValues(alpha: 0.2),
                       trackHeight: 3.5,
@@ -386,13 +422,18 @@ class BandStripBar extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color: state.autoPreampEnabled
-                            ? const Color(0xFF00E676).withValues(alpha: 0.12)
-                            : const Color(0xFF161E2C),
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                const Color(0xFF00E676),
+                                isSolid: isSolid,
+                                translucentAlpha: 0.12,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: state.autoPreampEnabled
-                              ? const Color(0xFF00E676)
-                              : const Color(0xFF263345),
+                              ? (isSolid ? theme.colorScheme.outline : const Color(0xFF00E676))
+                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: 1.0,
                         ),
                       ),
@@ -405,17 +446,17 @@ class BandStripBar extends ConsumerWidget {
                             size: 18,
                             color: state.autoPreampEnabled
                                 ? const Color(0xFF00E676)
-                                : const Color(0xFF90A4AE),
+                                : theme.colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
+                              children: [
                                 Text(
                                   'Auto-Headroom Calculation',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: theme.colorScheme.onSurface,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -423,7 +464,7 @@ class BandStripBar extends ConsumerWidget {
                                 Text(
                                   'Automatically sets -max(EQ Boost) - 0.5 dB to prevent clipping',
                                   style: TextStyle(
-                                    color: Color(0xFF90A4AE),
+                                    color: theme.colorScheme.onSurfaceVariant,
                                     fontSize: 10,
                                   ),
                                 ),
@@ -447,27 +488,37 @@ class BandStripBar extends ConsumerWidget {
                     child: Row(
                       children: [
                         _buildQuickPreampChip(
+                          context: context,
                           label: '0 dB FLAT',
+                          isSolid: isSolid,
                           onTap: () => notifier.setPreamp(0.0, isAuto: false),
                         ),
                         const SizedBox(width: 6),
                         _buildQuickPreampChip(
+                          context: context,
                           label: '-1.0 dB',
+                          isSolid: isSolid,
                           onTap: () => notifier.setPreamp(-1.0, isAuto: false),
                         ),
                         const SizedBox(width: 6),
                         _buildQuickPreampChip(
+                          context: context,
                           label: '-3.0 dB',
+                          isSolid: isSolid,
                           onTap: () => notifier.setPreamp(-3.0, isAuto: false),
                         ),
                         const SizedBox(width: 6),
                         _buildQuickPreampChip(
+                          context: context,
                           label: '-6.0 dB',
+                          isSolid: isSolid,
                           onTap: () => notifier.setPreamp(-6.0, isAuto: false),
                         ),
                         const SizedBox(width: 6),
                         _buildQuickPreampChip(
+                          context: context,
                           label: '-12.0 dB',
+                          isSolid: isSolid,
                           onTap: () => notifier.setPreamp(-12.0, isAuto: false),
                         ),
                       ],
@@ -483,26 +534,32 @@ class BandStripBar extends ConsumerWidget {
   }
 
   static Widget _buildQuickPreampChip({
+    required BuildContext context,
     required String label,
+    required bool isSolid,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFF161E2C),
+          color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFF263345), width: 0.8),
+          border: Border.all(
+            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+            width: 0.8,
+          ),
         ),
         child: Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFFCFD8DC),
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontSize: 10.5,
             fontWeight: FontWeight.bold,
-            fontFeatures: [FontFeature.tabularFigures()],
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ),
@@ -513,34 +570,44 @@ class BandStripBar extends ConsumerWidget {
 class _PreampBox extends StatelessWidget {
   final double safePreampDb;
   final bool isAuto;
+  final bool isSolid;
   final VoidCallback onTap;
 
   const _PreampBox({
     required this.safePreampDb,
     this.isAuto = true,
+    this.isSolid = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-          color: const Color(0xFF261012),
+          color: StudioSurfaceTheme.tintedContainer(
+            context,
+            const Color(0xFFEF5350),
+            isSolid: isSolid,
+            translucentAlpha: 0.15,
+          ),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: const Color(0xFFEF5350).withValues(alpha: 0.8),
+            color: isSolid ? theme.colorScheme.outline : const Color(0xFFEF5350).withValues(alpha: 0.8),
             width: 1.2,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFEF5350).withValues(alpha: 0.2),
-              blurRadius: 6,
-            ),
-          ],
+          boxShadow: isSolid
+              ? null
+              : [
+                  BoxShadow(
+                    color: const Color(0xFFEF5350).withValues(alpha: 0.2),
+                    blurRadius: 6,
+                  ),
+                ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -573,11 +640,11 @@ class _PreampBox extends StatelessWidget {
             ),
             Text(
               '${safePreampDb >= 0 ? '+' : ''}${safePreampDb.toStringAsFixed(1)} dB',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
                 fontSize: 11.5,
                 fontWeight: FontWeight.bold,
-                fontFeatures: [FontFeature.tabularFigures()],
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],
@@ -591,17 +658,20 @@ class _BandPill extends StatelessWidget {
   final EqBand band;
   final bool isSelected;
   final bool compact;
+  final bool isSolid;
   final VoidCallback onTap;
 
   const _BandPill({
     required this.band,
     required this.isSelected,
     this.compact = false,
+    this.isSolid = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -611,16 +681,22 @@ class _BandPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF1C222B)
-              : const Color(0xFF11141A),
+              ? StudioSurfaceTheme.tintedContainer(
+                  context,
+                  band.color,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.2,
+                  solidBlendAlpha: 0.2,
+                )
+              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: isSelected
-                ? band.color.withValues(alpha: 0.8)
-                : const Color(0xFF262C36),
+                ? (isSolid ? theme.colorScheme.outline : band.color.withValues(alpha: 0.8))
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: isSelected ? 1.4 : 0.8,
           ),
-          boxShadow: isSelected
+          boxShadow: isSelected && !isSolid
               ? [
                   BoxShadow(
                     color: band.color.withValues(alpha: 0.25),
@@ -650,7 +726,7 @@ class _BandPill extends StatelessWidget {
                 Text(
                   'B${band.index}',
                   style: TextStyle(
-                    color: isSelected ? Colors.white : const Color(0xFFB0BEC5),
+                    color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
                   ),
@@ -667,10 +743,10 @@ class _BandPill extends StatelessWidget {
                 children: [
                   Text(
                     band.formattedFreq,
-                    style: const TextStyle(
-                      color: Color(0xFF90A4AE),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 9.0,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                   const SizedBox(width: 2),
@@ -679,10 +755,10 @@ class _BandPill extends StatelessWidget {
                     style: TextStyle(
                       color: band.gainDb > 0
                           ? const Color(0xFF00E676)
-                          : (band.gainDb < 0 ? const Color(0xFFFFB74D) : const Color(0xFF78909C)),
+                          : (band.gainDb < 0 ? const Color(0xFFFFB74D) : theme.colorScheme.onSurfaceVariant),
                       fontSize: 9.0,
                       fontWeight: FontWeight.w600,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],
@@ -699,17 +775,20 @@ class _ActionButton extends StatelessWidget {
   final dynamic icon;
   final String tooltip;
   final Color color;
+  final bool isSolid;
   final VoidCallback? onPressed;
 
   const _ActionButton({
     required this.icon,
     required this.tooltip,
     required this.color,
+    this.isSolid = false,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isEnabled = onPressed != null;
 
     return Tooltip(
@@ -721,12 +800,12 @@ class _ActionButton extends StatelessWidget {
           width: 34,
           height: 34,
           decoration: BoxDecoration(
-            color: const Color(0xFF141820),
+            color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
               color: isEnabled
-                  ? color.withValues(alpha: 0.5)
-                  : const Color(0xFF263238),
+                  ? (isSolid ? theme.colorScheme.outline : color.withValues(alpha: 0.5))
+                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
               width: 1.0,
             ),
           ),
@@ -734,7 +813,7 @@ class _ActionButton extends StatelessWidget {
             child: HugeIcon(
               icon: icon,
               size: 16,
-              color: isEnabled ? color : const Color(0xFF546E7A),
+              color: isEnabled ? color : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
           ),
         ),
@@ -747,30 +826,36 @@ class _ReadoutBox extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
+  final bool isSolid;
 
   const _ReadoutBox({
     required this.label,
     required this.value,
     required this.color,
+    this.isSolid = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: 50,
       padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFF11141A),
+        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFF202630), width: 0.8),
+        border: Border.all(
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFF78909C),
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
               fontSize: 7.0,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,

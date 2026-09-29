@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:baydev_hifi/features/library/domain/genre_icon_helper.dart';
@@ -106,12 +107,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (ctx) => ElevatedButton(
-                onPressed: () => AudioFileInspectorSheet.show(ctx, track),
-                child: const Text('Inspect'),
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (ctx) => ElevatedButton(
+                  onPressed: () => AudioFileInspectorSheet.show(ctx, track),
+                  child: const Text('Inspect'),
+                ),
               ),
             ),
           ),

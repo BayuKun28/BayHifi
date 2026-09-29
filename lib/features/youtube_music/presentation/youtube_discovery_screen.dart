@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../app/theme/app_typography.dart';
+import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../library/presentation/widgets/studio_track_action_sheet.dart';
@@ -91,6 +92,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final ytState = ref.watch(youtubeMusicControllerProvider);
     final ytController = ref.read(youtubeMusicControllerProvider.notifier);
     final currentPlayingId =
@@ -113,12 +115,12 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 child: Container(
                   height: 48,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                    color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: _searchFocusNode.hasFocus
                           ? primary.withValues(alpha: 0.6)
-                          : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                          : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                       width: 1,
                     ),
                   ),
@@ -180,7 +182,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     height: 48,
                     width: 48,
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.12),
+                      color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: primary.withValues(alpha: 0.35),
@@ -227,12 +229,12 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   ),
                 ),
                 selected: isSelected,
-                selectedColor: primary.withValues(alpha: 0.15),
-                backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                selectedColor: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20),
+                backgroundColor: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                 side: BorderSide(
                   color: isSelected
                       ? primary.withValues(alpha: 0.6)
-                      : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                   width: 1,
                 ),
                 shape: RoundedRectangleBorder(
@@ -260,6 +262,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             ytController: ytController,
             theme: theme,
             bottomPadding: effectiveBottomPadding,
+            isSolid: isSolid,
           ),
         ),
       ],
@@ -270,9 +273,9 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     }
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -363,6 +366,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     required YouTubeMusicController ytController,
     required ThemeData theme,
     required double bottomPadding,
+    required bool isSolid,
   }) {
     final primary = theme.colorScheme.primary;
 
@@ -458,7 +462,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.12),
+                          color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: primary.withValues(alpha: 0.3),
@@ -500,10 +504,10 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                          color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                             width: 0.8,
                           ),
                         ),
@@ -555,6 +559,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   },
                   onStartRadio: () => ytController.startRadio(track),
                   theme: theme,
+                  isSolid: isSolid,
                 );
               },
             ),
@@ -574,13 +579,10 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           borderRadius: BorderRadius.circular(20),
           child: Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
-                width: 1,
-              ),
+            decoration: StudioSurfaceTheme.cardDecoration(
+              context: context,
+              isSolid: isSolid,
+              radius: 20,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -591,7 +593,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       width: 38,
                       height: 38,
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.12),
+                        color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: primary.withValues(alpha: 0.3),
@@ -666,21 +668,25 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       context,
                       HugeIcons.strokeRoundedSlidersHorizontal,
                       'Pro-Q 10-Band EQ',
+                      isSolid,
                     ),
                     _buildBentoFeatureTag(
                       context,
                       HugeIcons.strokeRoundedHeadphones,
                       'AutoEQ IEM Calibration',
+                      isSolid,
                     ),
                     _buildBentoFeatureTag(
                       context,
                       HugeIcons.strokeRoundedFlame,
                       'Analog Tube Warmth',
+                      isSolid,
                     ),
                     _buildBentoFeatureTag(
                       context,
                       HugeIcons.strokeRoundedShield01,
                       'Inter-Sample Peak Limiter',
+                      isSolid,
                     ),
                   ],
                 ),
@@ -696,6 +702,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           children: [
             Expanded(
               child: _buildDiscoveryBentoTile(
+                context: context,
                 theme: theme,
                 primary: primary,
                 title: 'Global Top 50',
@@ -703,11 +710,13 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 icon: HugeIcons.strokeRoundedChartHistogram,
                 badge: 'TRENDING',
                 onTap: () => _onFilterSelected('Top 100 Charts'),
+                isSolid: isSolid,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _buildDiscoveryBentoTile(
+                context: context,
                 theme: theme,
                 primary: primary,
                 title: 'Audiophile Mix',
@@ -715,6 +724,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 icon: HugeIcons.strokeRoundedDisc,
                 badge: 'LOSSLESS',
                 onTap: () => _onFilterSelected('Audiophile Masters'),
+                isSolid: isSolid,
               ),
             ),
           ],
@@ -724,6 +734,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           children: [
             Expanded(
               child: _buildDiscoveryBentoTile(
+                context: context,
                 theme: theme,
                 primary: primary,
                 title: 'Acoustic Sessions',
@@ -731,11 +742,13 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 icon: HugeIcons.strokeRoundedMic01,
                 badge: 'STUDIO',
                 onTap: () => _onFilterSelected('Acoustic Live'),
+                isSolid: isSolid,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _buildDiscoveryBentoTile(
+                context: context,
                 theme: theme,
                 primary: primary,
                 title: 'Import Playlist',
@@ -743,6 +756,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 icon: HugeIcons.strokeRoundedPlayList,
                 badge: 'IMPORT',
                 onTap: _openImportPlaylistDialog,
+                isSolid: isSolid,
               ),
             ),
           ],
@@ -763,10 +777,10 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     color: primary,
                   ),
                   const SizedBox(width: 8),
-                  Flexible(
+                  const Flexible(
                     child: Text(
                       'GLOBAL TOP MUSIC CHARTS',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.8,
@@ -793,7 +807,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.12),
+                        color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: primary.withValues(alpha: 0.3),
@@ -907,6 +921,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               },
               onStartRadio: () => ytController.startRadio(track),
               theme: theme,
+              isSolid: isSolid,
             );
           }),
       ],
@@ -914,6 +929,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
   }
 
   Widget _buildDiscoveryBentoTile({
+    required BuildContext context,
     required ThemeData theme,
     required Color primary,
     required String title,
@@ -921,19 +937,17 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     required dynamic icon,
     required String badge,
     required VoidCallback onTap,
+    required bool isSolid,
   }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-            width: 1,
-          ),
+        decoration: StudioSurfaceTheme.cardDecoration(
+          context: context,
+          isSolid: isSolid,
+          radius: 16,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -945,7 +959,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.12),
+                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -959,7 +973,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -1000,15 +1014,15 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     );
   }
 
-  Widget _buildBentoFeatureTag(BuildContext context, dynamic icon, String label) {
+  Widget _buildBentoFeatureTag(BuildContext context, dynamic icon, String label, bool isSolid) {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 0.8,
         ),
       ),
@@ -1041,6 +1055,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     required VoidCallback onTap,
     required VoidCallback onStartRadio,
     required ThemeData theme,
+    required bool isSolid,
   }) {
     final primary = theme.colorScheme.primary;
 
@@ -1053,14 +1068,14 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
       padding: const EdgeInsets.only(bottom: 6),
       child: Material(
         color: isTileActive
-            ? primary.withValues(alpha: 0.08)
-            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+            ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.08, solidBlendAlpha: 0.16)
+            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(
             color: isTileActive
                 ? primary.withValues(alpha: 0.5)
-                : theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: 1,
           ),
         ),
@@ -1076,7 +1091,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                     width: 0.8,
                   ),
                 ),
@@ -1129,7 +1144,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.12),
+                  color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

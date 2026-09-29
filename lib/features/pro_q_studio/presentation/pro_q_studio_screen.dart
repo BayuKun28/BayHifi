@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import 'controllers/eq_controller.dart';
 import 'controllers/eq_state.dart';
@@ -46,14 +47,16 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
   Widget build(BuildContext context) {
     final eqState = ref.watch(eqControllerProvider);
     final notifier = ref.read(eqControllerProvider.notifier);
+    final isSolid = ref.isSolidStyle;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF090B0E),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             // 1. Top Studio Toolbar & Legend with Exit (Left) and Power (Right) Fixed
-            _buildTopBar(context, eqState, notifier),
+            _buildTopBar(context, eqState, notifier, isSolid),
 
             // 2. Interactive Pro-Q Studio Canvas
             const Expanded(
@@ -72,15 +75,19 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
     BuildContext context,
     EqState state,
     EqController notifier,
+    bool isSolid,
   ) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0D0F14),
+      decoration: BoxDecoration(
+        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFF1E232B),
+            color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
             width: 1.0,
           ),
         ),
@@ -99,15 +106,18 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: const Color(0xFF141820),
+                color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFF2C3542), width: 1.0),
+                border: Border.all(
+                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                  width: 1.0,
+                ),
               ),
-              child: const Center(
+              child: Center(
                 child: HugeIcon(
                   icon: HugeIcons.strokeRoundedArrowLeft01,
                   size: 15,
-                  color: Color(0xFFFFB74D),
+                  color: primary,
                 ),
               ),
             ),
@@ -116,16 +126,16 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const HugeIcon(
+              HugeIcon(
                 icon: HugeIcons.strokeRoundedSlidersVertical,
                 size: 15,
-                color: Color(0xFFFF9F0A),
+                color: primary,
               ),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'PRO-Q STUDIO',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.8,
                   fontSize: 12.5,
@@ -138,12 +148,15 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF546E7A), width: 1),
+                    border: Border.all(
+                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                      width: 1,
+                    ),
                   ),
-                  child: const HugeIcon(
+                  child: HugeIcon(
                     icon: HugeIcons.strokeRoundedHelpCircle,
                     size: 9.0,
-                    color: Color(0xFF90A4AE),
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -160,7 +173,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                 children: [
                   _buildLegendItem(
                     label: 'EQ',
-                    color: const Color(0xFFFFA726),
+                    color: primary,
                     isDashed: false,
                   ),
                   const SizedBox(width: 8),
@@ -184,14 +197,10 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
-                        color: state.showFrCurves
-                            ? const Color(0xFF19202A)
-                            : const Color(0xFF14171D),
+                        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
-                          color: state.showFrCurves
-                              ? const Color(0xFF37474F)
-                              : const Color(0xFF263238),
+                          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: 0.8,
                         ),
                       ),
@@ -199,8 +208,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                         state.showFrCurves ? 'HIDE FR' : 'SHOW FR',
                         style: TextStyle(
                           color: state.showFrCurves
-                              ? const Color(0xFFB0BEC5)
-                              : const Color(0xFF78909C),
+                              ? theme.colorScheme.onSurface
+                              : theme.colorScheme.onSurfaceVariant,
                           fontSize: 9.0,
                           fontWeight: FontWeight.w600,
                         ),
@@ -220,10 +229,12 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   // [∿ RTA] Button
                   _buildToolbarButton(
+                    context: context,
                     icon: HugeIcons.strokeRoundedAudioWaveform,
                     label: 'RTA',
                     color: const Color(0xFF00E5FF),
                     isActive: state.isRtaEnabled,
+                    isSolid: isSolid,
                     onTap: () => notifier.toggleRta(),
                   ),
 
@@ -231,10 +242,12 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   // [AUTO EQ] Button
                   _buildToolbarButton(
+                    context: context,
                     icon: HugeIcons.strokeRoundedSparkles,
                     label: 'AUTO EQ •',
                     color: const Color(0xFF00E676),
                     isActive: true,
+                    isSolid: isSolid,
                     onTap: () => AutoEqModalDialog.show(context),
                   ),
 
@@ -242,10 +255,12 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   // [CLOUD DB] Button
                   _buildToolbarButton(
+                    context: context,
                     icon: HugeIcons.strokeRoundedCloudDownload,
                     label: 'CLOUD DB',
                     color: const Color(0xFF00E5FF),
                     isActive: true,
+                    isSolid: isSolid,
                     onTap: () => AutoEqCloudBrowserDialog.show(context),
                   ),
 
@@ -253,12 +268,14 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   // [A/B] Quick Comparison Button
                   _buildToolbarButton(
+                    context: context,
                     icon: HugeIcons.strokeRoundedExchange01,
                     label: state.abMode == AbComparisonMode.aRaw ? 'A: RAW' : 'B: ACTIVE',
                     color: state.abMode == AbComparisonMode.aRaw
                         ? const Color(0xFF29B6F6)
                         : const Color(0xFF00E676),
                     isActive: true,
+                    isSolid: isSolid,
                     onTap: () {
                       final next = state.abMode == AbComparisonMode.aRaw
                           ? AbComparisonMode.bActive
@@ -272,7 +289,6 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                                 : 'A/B: Switched to [B: ACTIVE Target Tuned Equalizer]',
                           ),
                           duration: const Duration(seconds: 1),
-                          backgroundColor: const Color(0xFF1E2836),
                         ),
                       );
                     },
@@ -282,10 +298,13 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   // [PRESETS] Popup Button
                   PopupMenuButton<String>(
-                    color: const Color(0xFF141820),
+                    color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Color(0xFF263238), width: 1),
+                      side: BorderSide(
+                        color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                        width: 1,
+                      ),
                     ),
                     onSelected: (val) => notifier.applyPreset(val),
                     itemBuilder: (context) => [
@@ -306,13 +325,13 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                                   ? HugeIcons.strokeRoundedCheckmarkCircle02
                                   : HugeIcons.strokeRoundedCircle,
                               size: 14,
-                              color: isCurr ? const Color(0xFFBA68C8) : const Color(0xFF546E7A),
+                              color: isCurr ? primary : theme.colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               p,
                               style: TextStyle(
-                                color: isCurr ? Colors.white : const Color(0xFFCFD8DC),
+                                color: isCurr ? primary : theme.colorScheme.onSurface,
                                 fontSize: 12,
                                 fontWeight: isCurr ? FontWeight.bold : FontWeight.normal,
                               ),
@@ -322,10 +341,12 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                       );
                     }).toList(),
                     child: _buildToolbarButton(
+                      context: context,
                       icon: HugeIcons.strokeRoundedBookmark02,
                       label: 'PRESETS',
-                      color: const Color(0xFFBA68C8),
+                      color: primary,
                       isActive: false,
+                      isSolid: isSolid,
                       onTap: null,
                     ),
                   ),
@@ -334,10 +355,12 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   // [RESET] Button
                   _buildToolbarButton(
+                    context: context,
                     icon: HugeIcons.strokeRoundedRefresh,
                     label: 'RESET',
-                    color: const Color(0xFFEF5350),
+                    color: theme.colorScheme.error,
                     isActive: false,
+                    isSolid: isSolid,
                     onTap: () => notifier.resetToDefault(),
                   ),
                 ],
@@ -351,16 +374,21 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
           Tooltip(
             message: 'Save Pro-Q Preset & Target Profile',
             child: InkWell(
-              onTap: () => _showSavePresetDialog(context, state, notifier),
+              onTap: () => _showSavePresetDialog(context, state, notifier, isSolid),
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 height: 32,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    const Color(0xFF00E676),
+                    isSolid: isSolid,
+                    translucentAlpha: 0.15,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFF00E676).withValues(alpha: 0.6),
+                    color: isSolid ? theme.colorScheme.outline : const Color(0xFF00E676).withValues(alpha: 0.6),
                     width: 1.0,
                   ),
                 ),
@@ -403,18 +431,23 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: state.isEnabled
-                      ? const Color(0xFF00E5FF).withValues(alpha: 0.15)
-                      : const Color(0xFF1E232B),
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.15,
+                        )
+                      : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                   border: Border.all(
                     color: state.isEnabled
-                        ? const Color(0xFF00E5FF)
-                        : const Color(0xFF455A64),
+                        ? (isSolid ? theme.colorScheme.outline : primary)
+                        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                     width: 1.5,
                   ),
                   boxShadow: state.isEnabled
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF00E5FF).withValues(alpha: 0.4),
+                            color: primary.withValues(alpha: isSolid ? 0.2 : 0.4),
                             blurRadius: 8,
                           ),
                         ]
@@ -425,8 +458,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                     icon: HugeIcons.strokeRoundedPower,
                     size: 16,
                     color: state.isEnabled
-                        ? const Color(0xFF00E5FF)
-                        : const Color(0xFF78909C),
+                        ? primary
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -463,28 +496,40 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
   }
 
   Widget _buildToolbarButton({
+    required BuildContext context,
     required dynamic icon,
     required String label,
     required Color color,
     required bool isActive,
+    required bool isSolid,
     VoidCallback? onTap,
   }) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
         decoration: BoxDecoration(
-          color: isActive ? color.withValues(alpha: 0.12) : const Color(0xFF141820),
+          color: isActive
+              ? StudioSurfaceTheme.tintedContainer(
+                  context,
+                  color,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.12,
+                )
+              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isActive ? color.withValues(alpha: 0.8) : const Color(0xFF263238),
+            color: isActive
+                ? (isSolid ? theme.colorScheme.outline : color.withValues(alpha: 0.8))
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: 1.0,
           ),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: color.withValues(alpha: 0.25),
+                    color: color.withValues(alpha: isSolid ? 0.15 : 0.25),
                     blurRadius: 6,
                   ),
                 ]
@@ -518,7 +563,9 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
     BuildContext context,
     EqState state,
     EqController notifier,
+    bool isSolid,
   ) {
+    final theme = Theme.of(context);
     final textController = TextEditingController(
       text: state.targetFr != null
           ? '${state.targetFr!.name} Tuned'
@@ -528,10 +575,13 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF141820),
+        backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF2C3542), width: 1),
+          side: BorderSide(
+            color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid),
+            width: 1,
+          ),
         ),
         title: const Row(
           children: [
@@ -543,7 +593,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
             SizedBox(width: 10),
             Text(
               'Save EQ Preset',
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -553,21 +603,21 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
           children: [
             Text(
               'Save current 10-band parametric curves, gain levels, and target matching profile.',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+              style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 12),
             ),
             const SizedBox(height: 14),
             TextField(
               controller: textController,
               autofocus: true,
-              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 13, fontWeight: FontWeight.w600),
               decoration: InputDecoration(
                 labelText: 'Preset Name',
-                labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+                labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
                 filled: true,
-                fillColor: const Color(0xFF1E2430),
+                fillColor: StudioSurfaceTheme.surfaceContainerHigh(dialogCtx, isSolid: isSolid),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF37474F)),
+                  borderSide: BorderSide(color: StudioSurfaceTheme.subtleOutline(dialogCtx, isSolid: isSolid)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -580,7 +630,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: const Text('CANCEL', style: TextStyle(color: Color(0xFF90A4AE))),
+            child: Text('CANCEL', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -605,7 +655,6 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Saved Pro-Q preset "$name" successfully'),
-                    backgroundColor: const Color(0xFF1E2836),
                     duration: const Duration(seconds: 2),
                   ),
                 );

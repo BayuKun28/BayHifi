@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../app/theme/studio_surface_theme.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../library/domain/library_collection_models.dart';
 import '../../library/presentation/controllers/library_controller.dart';
@@ -279,6 +280,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     UnifiedLibraryController libraryController,
     SleepTimerState sleepTimer,
   ) {
+    final isSolid = ref.isSolidStyle;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -369,11 +371,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: sleepTimer.isActive
-                      ? const Color(0xFFFF9F0A).withValues(alpha: 0.15)
+                      ? StudioSurfaceTheme.tintedContainer(context, const Color(0xFFFF9F0A), isSolid: isSolid, translucentAlpha: 0.15)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
                   border: sleepTimer.isActive
-                      ? Border.all(color: const Color(0xFFFF9F0A).withValues(alpha: 0.45), width: 1.0)
+                      ? Border.all(color: const Color(0xFFFF9F0A).withValues(alpha: isSolid ? 0.6 : 0.45), width: 1.0)
                       : null,
                 ),
                 child: Row(
@@ -640,12 +642,14 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
   }
 
   // ─── MAIN PLAYBACK CONTROLS DECK ──────────────────────────────────────────
+  // ─── MAIN PLAYBACK CONTROLS DECK ──────────────────────────────────────────
   Widget _buildPlaybackControlsDeck(
     BuildContext context,
     PlaybackState playback,
     Color primary,
     ThemeData theme,
   ) {
+    final isSolid = ref.isSolidStyle;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -655,13 +659,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           height: 44,
           decoration: BoxDecoration(
             color: playback.isShuffle
-                ? primary.withValues(alpha: 0.15)
-                : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
+                ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15)
+                : (isSolid ? theme.colorScheme.surfaceContainer : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: playback.isShuffle
-                  ? primary.withValues(alpha: 0.6)
-                  : theme.dividerColor.withValues(alpha: 0.5),
+                  ? primary.withValues(alpha: isSolid ? 0.8 : 0.6)
+                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
               width: 1.0,
             ),
           ),
@@ -687,9 +691,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainer,
+            color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.dividerColor, width: 1.0),
+            border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
           ),
           child: GestureDetector(
             onLongPress: () {
@@ -712,18 +716,20 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           ),
         ),
 
-        // Glowing Play/Pause Centerpiece
+        // Play/Pause Centerpiece
         Container(
           width: 66,
           height: 66,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
             color: primary,
-            border: Border.all(color: primary.withValues(alpha: 0.8), width: 1.0),
+            border: isSolid ? null : Border.all(color: primary.withValues(alpha: 0.8), width: 1.0),
             boxShadow: [
               BoxShadow(
-                color: primary.withValues(alpha: 0.35),
-                blurRadius: 18,
+                color: isSolid
+                    ? Colors.black.withValues(alpha: 0.25)
+                    : primary.withValues(alpha: 0.35),
+                blurRadius: isSolid ? 10 : 18,
                 offset: const Offset(0, 3),
               ),
             ],
@@ -762,9 +768,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainer,
+            color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.dividerColor, width: 1.0),
+            border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
           ),
           child: GestureDetector(
             onLongPress: () {
@@ -793,13 +799,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           height: 44,
           decoration: BoxDecoration(
             color: playback.repeatMode != PlaybackRepeatMode.off
-                ? primary.withValues(alpha: 0.15)
-                : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
+                ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15)
+                : (isSolid ? theme.colorScheme.surfaceContainer : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: playback.repeatMode != PlaybackRepeatMode.off
-                  ? primary.withValues(alpha: 0.6)
-                  : theme.dividerColor.withValues(alpha: 0.5),
+                  ? primary.withValues(alpha: isSolid ? 0.8 : 0.6)
+                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
               width: 1.0,
             ),
           ),
@@ -825,8 +831,6 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     );
   }
 
-
-
   // ─── AUDIO SPECS BANNER ───────────────────────────────────────────────────
   Widget _buildAudioSpecsBanner(
     BuildContext context,
@@ -835,6 +839,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     Color primary,
   ) {
     if (track == null) return const SizedBox.shrink();
+    final isSolid = ref.isSolidStyle;
 
     final formatStr = track.format.name.toUpperCase();
     final sampleRateStr = track.sampleRate != null
@@ -846,12 +851,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.4),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isHiRes
-              ? const Color(0xFFFF9F0A).withValues(alpha: 0.45)
-              : theme.dividerColor.withValues(alpha: 0.5),
+              ? const Color(0xFFFF9F0A).withValues(alpha: isSolid ? 0.6 : 0.45)
+              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 0.8,
         ),
       ),
@@ -863,9 +868,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
               decoration: BoxDecoration(
-                color: isHiRes
-                    ? const Color(0xFFFF9F0A).withValues(alpha: 0.2)
-                    : primary.withValues(alpha: 0.15),
+                color: StudioSurfaceTheme.tintedContainer(
+                  context,
+                  isHiRes ? const Color(0xFFFF9F0A) : primary,
+                  isSolid: isSolid,
+                  translucentAlpha: isHiRes ? 0.2 : 0.15,
+                ),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -914,12 +922,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     ThemeData theme,
     Color primary,
   ) {
+    final isSolid = ref.isSolidStyle;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.dividerColor, width: 0.8),
+        border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 0.8),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

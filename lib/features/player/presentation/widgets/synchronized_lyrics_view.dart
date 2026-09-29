@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../../core/lyrics/east_asian_romanizer.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../data/lyrics_service.dart';
 import '../../domain/lyrics_line.dart';
 import '../controllers/player_controller.dart';
@@ -175,9 +176,11 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     if (widget.isLoading) {
       return Center(
@@ -246,7 +249,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: primary.withValues(alpha: 0.5)),
+                  side: BorderSide(color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
@@ -323,12 +326,18 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? primary.withValues(alpha: 0.15)
+                          ? StudioSurfaceTheme.tintedContainer(
+                              context,
+                              primary,
+                              isSolid: isSolid,
+                              translucentAlpha: 0.15,
+                              solidBlendAlpha: 0.18,
+                            )
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isActive
-                            ? primary.withValues(alpha: 0.4)
+                            ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4))
                             : Colors.transparent,
                         width: 1.0,
                       ),
@@ -350,17 +359,17 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // 1. Display Mode Switcher Capsule
-              _buildModeSwitcherCapsule(theme, primary),
+              _buildModeSwitcherCapsule(theme, primary, isSolid),
 
               // 2. Right Actions: Timing Offset Stepper & Source Badge
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isSynced) ...[
-                    _buildTimingOffsetButton(context, theme, primary),
+                    _buildTimingOffsetButton(context, theme, primary, isSolid),
                     const SizedBox(width: 6),
                   ],
-                  _buildSourceBadge(context, widget.lyricsResult.source, isSynced, primary, theme),
+                  _buildSourceBadge(context, widget.lyricsResult.source, isSynced, primary, theme, isSolid),
                 ],
               ),
             ],
@@ -477,14 +486,14 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     }
   }
 
-  Widget _buildModeSwitcherCapsule(ThemeData theme, Color primary) {
+  Widget _buildModeSwitcherCapsule(ThemeData theme, Color primary, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(2.5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 0.8,
         ),
       ),
@@ -528,7 +537,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     );
   }
 
-  Widget _buildTimingOffsetButton(BuildContext context, ThemeData theme, Color primary) {
+  Widget _buildTimingOffsetButton(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
     final hasOffset = _timingOffset != Duration.zero;
     final offsetMs = _timingOffset.inMilliseconds;
     final label = hasOffset
@@ -536,16 +545,18 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
         : 'SYNC';
 
     return GestureDetector(
-      onTap: () => _showTimingOffsetSheet(context),
+      onTap: () => _showTimingOffsetSheet(context, isSolid),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
         decoration: BoxDecoration(
           color: hasOffset
-              ? primary.withValues(alpha: 0.15)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+              ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15)
+              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: hasOffset ? primary : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+            color: hasOffset
+                ? (isSolid ? theme.colorScheme.outline : primary)
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: 0.8,
           ),
         ),
@@ -573,13 +584,13 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     );
   }
 
-  void _showTimingOffsetSheet(BuildContext context) {
+  void _showTimingOffsetSheet(BuildContext context, bool isSolid) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: theme.colorScheme.surfaceContainer,
+      backgroundColor: StudioSurfaceTheme.surface(context, isSolid: isSolid),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -599,7 +610,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                         width: 36,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.outlineVariant,
+                          color: StudioSurfaceTheme.outline(ctx, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -657,10 +668,12 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
+                        color: StudioSurfaceTheme.surfaceContainerHigh(ctx, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: offsetMs != 0 ? primary : theme.colorScheme.outlineVariant,
+                          color: offsetMs != 0
+                              ? (isSolid ? theme.colorScheme.outline : primary)
+                              : StudioSurfaceTheme.subtleOutline(ctx, isSolid: isSolid),
                           width: 1.0,
                         ),
                       ),
@@ -693,10 +706,10 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildStepperBtn('-500ms', -500, setModalState, theme),
-                        _buildStepperBtn('-100ms', -100, setModalState, theme),
-                        _buildStepperBtn('+100ms', 100, setModalState, theme),
-                        _buildStepperBtn('+500ms', 500, setModalState, theme),
+                        _buildStepperBtn('-500ms', -500, setModalState, theme, isSolid),
+                        _buildStepperBtn('-100ms', -100, setModalState, theme, isSolid),
+                        _buildStepperBtn('+100ms', 100, setModalState, theme, isSolid),
+                        _buildStepperBtn('+500ms', 500, setModalState, theme, isSolid),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -705,7 +718,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                     SliderTheme(
                       data: SliderTheme.of(context).copyWith(
                         activeTrackColor: primary,
-                        inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
+                        inactiveTrackColor: StudioSurfaceTheme.surfaceContainerHigh(ctx, isSolid: isSolid),
                         thumbColor: primary,
                         overlayColor: primary.withValues(alpha: 0.15),
                         trackHeight: 3,
@@ -748,6 +761,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     int deltaMs,
     StateSetter setModalState,
     ThemeData theme,
+    bool isSolid,
   ) {
     return OutlinedButton(
       onPressed: () {
@@ -758,7 +772,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        side: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
       ),
       child: Text(
         label,
@@ -777,6 +791,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     bool isSynced,
     Color primary,
     ThemeData theme,
+    bool isSolid,
   ) {
     String label;
     dynamic icon;
@@ -810,9 +825,12 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: StudioSurfaceTheme.tintedContainer(context, color, isSolid: isSolid, translucentAlpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.35), width: 0.8),
+        border: Border.all(
+          color: isSolid ? theme.colorScheme.outline : color.withValues(alpha: 0.35),
+          width: 0.8,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

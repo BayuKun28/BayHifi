@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/database/local_persistence_service.dart';
 import 'sub_screens/audio_hardware_settings_screen.dart';
@@ -22,6 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     final themeState = ref.watch(themeControllerProvider);
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -32,10 +34,19 @@ class SettingsScreen extends ConsumerWidget {
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.12),
+              color: isSolid
+                  ? theme.colorScheme.surfaceContainerHighest
+                  : StudioSurfaceTheme.tintedContainer(
+                      context,
+                      primary,
+                      isSolid: false,
+                      translucentAlpha: 0.12,
+                    ),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: primary.withValues(alpha: 0.35),
+                color: isSolid
+                    ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                    : primary.withValues(alpha: 0.35),
                 width: 0.8,
               ),
             ),
@@ -61,7 +72,7 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 120), // Extra bottom padding for floating dock & miniplayer
         children: [
           // ─── 1. STUDIO CONFIGURATION STATUS HERO ─────────────────────────
-          _buildStudioOverviewHero(context, themeState),
+          _buildStudioOverviewHero(context, themeState, isSolid),
           const SizedBox(height: 20),
 
           // ─── SECTION HEADER ──────────────────────────────────────────────
@@ -95,6 +106,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const ThemingSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -111,6 +123,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const VisualizerSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -127,6 +140,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const GesturesSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -143,6 +157,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const DockingSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -159,6 +174,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const AudioHardwareSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -175,6 +191,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const PlaybackEngineSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -191,6 +208,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const LibraryScannerSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -207,6 +225,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const StorageCacheSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 12),
 
@@ -223,6 +242,7 @@ class SettingsScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const BackupRestoreSettingsScreen()),
               );
             },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 28),
 
@@ -293,7 +313,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStudioOverviewHero(BuildContext context, ThemeSettingsState themeState) {
+  Widget _buildStudioOverviewHero(BuildContext context, ThemeSettingsState themeState, bool isSolid) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final storage = LocalPersistenceService.instance;
@@ -304,15 +324,15 @@ class SettingsScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.6),
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
+            color: Colors.black.withValues(alpha: isSolid ? 0.2 : 0.15),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -349,9 +369,16 @@ class SettingsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.15),
+                  color: isSolid
+                      ? theme.colorScheme.surfaceContainerHighest
+                      : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: primary.withValues(alpha: 0.4), width: 0.8),
+                  border: Border.all(
+                    color: isSolid
+                        ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                        : primary.withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
                 ),
                 child: Text(
                   '48kHz SOLOUD ONLINE',
@@ -372,20 +399,23 @@ class SettingsScreen extends ConsumerWidget {
                 label: 'THEME',
                 value: themeState.currentPalette.name,
                 accent: primary,
+                isSolid: isSolid,
               ),
               const SizedBox(width: 16),
               _buildHeroMetric(
                 context,
                 label: 'DAC ENGINE',
                 value: isBitPerfect ? 'Bit-Perfect' : 'Standard PCM',
-                accent: const Color(0xFF00E676),
+                accent: theme.colorScheme.primary,
+                isSolid: isSolid,
               ),
               const SizedBox(width: 16),
               _buildHeroMetric(
                 context,
                 label: 'RTA DISPLAY',
                 value: visualizerStyle,
-                accent: const Color(0xFF00E5FF),
+                accent: theme.colorScheme.secondary,
+                isSolid: isSolid,
               ),
             ],
           ),
@@ -399,15 +429,17 @@ class SettingsScreen extends ConsumerWidget {
     required String label,
     required String value,
     required Color accent,
+    required bool isSolid,
   }) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFF90A4AE),
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
               fontSize: 9.5,
               fontWeight: FontWeight.w700,
             ),
@@ -416,7 +448,7 @@ class SettingsScreen extends ConsumerWidget {
           Text(
             value,
             style: TextStyle(
-              color: accent,
+              color: isSolid ? theme.colorScheme.onSurface : accent,
               fontSize: 11.5,
               fontWeight: FontWeight.bold,
             ),
@@ -436,6 +468,7 @@ class SettingsScreen extends ConsumerWidget {
     required String subtitle,
     required String badgeText,
     required VoidCallback onTap,
+    required bool isSolid,
   }) {
     final theme = Theme.of(context);
 
@@ -445,15 +478,15 @@ class SettingsScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: theme.dividerColor,
+            color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
             width: 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: isSolid ? 0.2 : 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -466,10 +499,14 @@ class SettingsScreen extends ConsumerWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.15),
+                color: isSolid
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : StudioSurfaceTheme.tintedContainer(context, accentColor, isSolid: false, translucentAlpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: accentColor.withValues(alpha: 0.4),
+                  color: isSolid
+                      ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                      : accentColor.withValues(alpha: 0.4),
                   width: 1.0,
                 ),
               ),
@@ -507,7 +544,7 @@ class SettingsScreen extends ConsumerWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 11,
                       height: 1.3,
                     ),
@@ -518,17 +555,21 @@ class SettingsScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.12),
+                      color: isSolid
+                          ? theme.colorScheme.surfaceContainerHighest
+                          : StudioSurfaceTheme.tintedContainer(context, accentColor, isSolid: false, translucentAlpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: accentColor.withValues(alpha: 0.3),
+                        color: isSolid
+                            ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                            : accentColor.withValues(alpha: 0.3),
                         width: 0.8,
                       ),
                     ),
                     child: Text(
                       badgeText,
                       style: TextStyle(
-                        color: accentColor,
+                        color: isSolid ? theme.colorScheme.onSurfaceVariant : accentColor,
                         fontSize: 9.5,
                         fontWeight: FontWeight.bold,
                       ),
@@ -541,7 +582,7 @@ class SettingsScreen extends ConsumerWidget {
             HugeIcon(
               icon: HugeIcons.strokeRoundedArrowRight01,
               size: 18,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
           ],
         ),

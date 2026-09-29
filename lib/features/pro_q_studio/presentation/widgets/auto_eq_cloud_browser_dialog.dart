@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../data/auto_eq_cloud_service.dart';
 import '../../domain/auto_eq_cloud_model.dart';
 import '../controllers/eq_controller.dart';
@@ -69,6 +70,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
   Widget build(BuildContext context) {
     final eqState = ref.watch(eqControllerProvider);
     final eqNotifier = ref.read(eqControllerProvider.notifier);
+    final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     final items = _onlineResults ??
         _service.searchItems(
@@ -91,12 +94,12 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
               maxHeight: MediaQuery.of(context).size.height * 0.88,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFF10151E),
+              color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF263345), width: 1.2),
+              border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.2),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.7),
+                  color: Colors.black.withValues(alpha: isSolid ? 0.4 : 0.7),
                   blurRadius: 30,
                   spreadRadius: 8,
                 ),
@@ -112,25 +115,32 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                     Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00E5FF).withValues(alpha: 0.15),
+                        color: StudioSurfaceTheme.tintedContainer(
+                          context,
+                          theme.colorScheme.primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.15,
+                        ),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFF00E5FF).withValues(alpha: 0.4)),
+                        border: Border.all(
+                          color: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.4),
+                        ),
                       ),
-                      child: const HugeIcon(
+                      child: HugeIcon(
                         icon: HugeIcons.strokeRoundedCloudDownload,
                         size: 18,
-                        color: Color(0xFF00E5FF),
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             'AUTOEQ & SQUIGLINK CLOUD DATABASE',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: theme.colorScheme.onSurface,
                               fontSize: 12.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.6,
@@ -138,11 +148,11 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             'Search & download curves directly to Pro-Q DSP',
                             style: TextStyle(
-                              color: Color(0xFF8899A6),
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 10.0,
                             ),
                             maxLines: 1,
@@ -153,10 +163,10 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const HugeIcon(
+                      icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
                         size: 18,
-                        color: Color(0xFF8899A6),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       tooltip: 'Close',
                     ),
@@ -167,51 +177,51 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                 // ─── 2. SEARCH BAR ───────────────────────────────────────────────
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF161E2C),
+                    color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF263345)),
+                    border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
                     children: [
-                      const HugeIcon(
+                      HugeIcon(
                         icon: HugeIcons.strokeRoundedSearch01,
                         size: 15,
-                        color: Color(0xFF78909C),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
                           controller: _searchController,
-                          style: const TextStyle(color: Colors.white, fontSize: 12.0),
-                          decoration: const InputDecoration(
+                          style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 12.0),
+                          decoration: InputDecoration(
                             hintText: 'Search model (Castor, Chu II, HD600, Harman)...',
-                            hintStyle: TextStyle(color: Color(0xFF546E7A), fontSize: 11.0),
+                            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6), fontSize: 11.0),
                             border: InputBorder.none,
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 9),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 9),
                           ),
                           onChanged: _onSearchChanged,
                         ),
                       ),
                       if (_isSearchingOnline)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: SizedBox(
                             width: 13,
                             height: 13,
                             child: CircularProgressIndicator(
                               strokeWidth: 1.5,
-                              color: Color(0xFF00E5FF),
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                         ),
                       if (_searchQuery.isNotEmpty)
                         IconButton(
-                          icon: const HugeIcon(
+                          icon: HugeIcon(
                             icon: HugeIcons.strokeRoundedCancel01,
                             size: 13,
-                            color: Color(0xFF78909C),
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                           onPressed: () {
                             _searchController.clear();
@@ -235,6 +245,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           _selectedCategory = null;
                           _onlyDownloaded = false;
                         }),
+                        isSolid: isSolid,
+                        theme: theme,
                       ),
                       const SizedBox(width: 6),
                       _buildFilterTab(
@@ -244,6 +256,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           _selectedCategory = AutoEqCloudCategory.target;
                           _onlyDownloaded = false;
                         }),
+                        isSolid: isSolid,
+                        theme: theme,
                       ),
                       const SizedBox(width: 6),
                       _buildFilterTab(
@@ -253,6 +267,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           _selectedCategory = AutoEqCloudCategory.iem;
                           _onlyDownloaded = false;
                         }),
+                        isSolid: isSolid,
+                        theme: theme,
                       ),
                       const SizedBox(width: 6),
                       _buildFilterTab(
@@ -262,6 +278,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           _selectedCategory = AutoEqCloudCategory.headphone;
                           _onlyDownloaded = false;
                         }),
+                        isSolid: isSolid,
+                        theme: theme,
                       ),
                       const SizedBox(width: 6),
                       _buildFilterTab(
@@ -271,6 +289,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           _onlyDownloaded = true;
                           _selectedCategory = null;
                         }),
+                        isSolid: isSolid,
+                        theme: theme,
                       ),
                     ],
                   ),
@@ -283,16 +303,16 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                       ? Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
+                            children: [
                               HugeIcon(
                                 icon: HugeIcons.strokeRoundedSearch01,
                                 size: 30,
-                                color: Color(0xFF546E7A),
+                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                               ),
-                              SizedBox(height: 6),
+                              const SizedBox(height: 6),
                               Text(
                                 'No measurement or target curve matches your query.',
-                                style: TextStyle(color: Color(0xFF78909C), fontSize: 11.5),
+                                style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 11.5),
                               ),
                             ],
                           ),
@@ -305,6 +325,10 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                             final isTarget = item.category == AutoEqCloudCategory.target;
                             final isSelectedAsDriver = eqState.driverFr?.name == item.name;
                             final isSelectedAsTarget = eqState.targetFr?.name == item.name;
+                            final isSelected = isSelectedAsDriver || isSelectedAsTarget;
+
+                            final Color targetColor = const Color(0xFFFF9F0A);
+                            final Color driverColor = theme.colorScheme.secondary;
 
                             final Widget setButton = isTarget
                                 ? ElevatedButton.icon(
@@ -323,9 +347,11 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: isSelectedAsTarget
-                                          ? const Color(0xFF00E676)
-                                          : const Color(0xFFFF9F0A),
-                                      foregroundColor: Colors.black,
+                                          ? theme.colorScheme.primary
+                                          : targetColor,
+                                      foregroundColor: isSelectedAsTarget
+                                          ? theme.colorScheme.onPrimary
+                                          : Colors.black,
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
@@ -334,7 +360,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                           ? HugeIcons.strokeRoundedCheckmarkCircle02
                                           : HugeIcons.strokeRoundedTarget02,
                                       size: 13,
-                                      color: Colors.black,
+                                      color: isSelectedAsTarget ? theme.colorScheme.onPrimary : Colors.black,
                                     ),
                                     label: Text(
                                       isSelectedAsTarget ? 'ACTIVE TARGET' : 'SET TARGET',
@@ -359,9 +385,11 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: isSelectedAsDriver
-                                          ? const Color(0xFF00E676)
-                                          : const Color(0xFF00E5FF),
-                                      foregroundColor: Colors.black,
+                                          ? theme.colorScheme.primary
+                                          : driverColor,
+                                      foregroundColor: isSelectedAsDriver
+                                          ? theme.colorScheme.onPrimary
+                                          : theme.colorScheme.onSecondary,
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
@@ -370,7 +398,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                           ? HugeIcons.strokeRoundedCheckmarkCircle02
                                           : HugeIcons.strokeRoundedHeadphones,
                                       size: 13,
-                                      color: Colors.black,
+                                      color: isSelectedAsDriver ? theme.colorScheme.onPrimary : theme.colorScheme.onSecondary,
                                     ),
                                     label: Text(
                                       isSelectedAsDriver ? 'ACTIVE DRIVER' : 'SET DRIVER',
@@ -394,13 +422,13 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                   if (context.mounted) {
                                     Navigator.of(context).pop();
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        backgroundColor: Color(0xFF00E676),
+                                      SnackBar(
+                                        backgroundColor: theme.colorScheme.primary,
                                         content: Text(
                                           'AutoEQ Solved and Applied directly to Pro-Q DSP!',
-                                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                          style: TextStyle(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold),
                                         ),
-                                        duration: Duration(seconds: 3),
+                                        duration: const Duration(seconds: 3),
                                       ),
                                     );
                                   }
@@ -421,13 +449,16 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                               },
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                side: const BorderSide(color: Color(0xFF00E676), width: 0.8),
+                                side: BorderSide(
+                                  color: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.8),
+                                  width: 0.8,
+                                ),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'SOLVE',
                                 style: TextStyle(
-                                  color: Color(0xFF00E676),
+                                  color: theme.colorScheme.primary,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -439,13 +470,13 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                               return Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF141B26),
+                                  color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: isSelectedAsDriver || isSelectedAsTarget
-                                        ? const Color(0xFF00E676)
-                                        : const Color(0xFF202B3A),
-                                    width: isSelectedAsDriver || isSelectedAsTarget ? 1.4 : 1.0,
+                                    color: isSelected
+                                        ? (isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.8))
+                                        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                                    width: isSelected ? 1.4 : 1.0,
                                   ),
                                 ),
                                 child: Column(
@@ -458,14 +489,17 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                           width: 32,
                                           height: 32,
                                           decoration: BoxDecoration(
-                                            color: isTarget
-                                                ? const Color(0xFFFF9F0A).withValues(alpha: 0.15)
-                                                : const Color(0xFF00E5FF).withValues(alpha: 0.15),
+                                            color: StudioSurfaceTheme.tintedContainer(
+                                              context,
+                                              isTarget ? targetColor : driverColor,
+                                              isSolid: isSolid,
+                                              translucentAlpha: 0.15,
+                                            ),
                                             borderRadius: BorderRadius.circular(8),
                                             border: Border.all(
-                                              color: isTarget
-                                                  ? const Color(0xFFFF9F0A).withValues(alpha: 0.4)
-                                                  : const Color(0xFF00E5FF).withValues(alpha: 0.4),
+                                              color: isSolid
+                                                  ? (isTarget ? targetColor : driverColor)
+                                                  : (isTarget ? targetColor : driverColor).withValues(alpha: 0.4),
                                             ),
                                           ),
                                           child: Center(
@@ -476,7 +510,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                                       ? HugeIcons.strokeRoundedHeadphones
                                                       : HugeIcons.strokeRoundedAudioWaveform),
                                               size: 16,
-                                              color: isTarget ? const Color(0xFFFF9F0A) : const Color(0xFF00E5FF),
+                                              color: isTarget ? targetColor : driverColor,
                                             ),
                                           ),
                                         ),
@@ -490,8 +524,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                                   Expanded(
                                                     child: Text(
                                                       item.name,
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
+                                                      style: TextStyle(
+                                                        color: theme.colorScheme.onSurface,
                                                         fontSize: 12.0,
                                                         fontWeight: FontWeight.bold,
                                                       ),
@@ -503,14 +537,17 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                                   Container(
                                                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0xFF1E2838),
+                                                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                                                       borderRadius: BorderRadius.circular(4),
-                                                      border: Border.all(color: const Color(0xFF2C3C54), width: 0.6),
+                                                      border: Border.all(
+                                                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                                                        width: 0.6,
+                                                      ),
                                                     ),
                                                     child: Text(
                                                       item.source,
-                                                      style: const TextStyle(
-                                                        color: Color(0xFF90A4AE),
+                                                      style: TextStyle(
+                                                        color: theme.colorScheme.onSurfaceVariant,
                                                         fontSize: 8.5,
                                                         fontWeight: FontWeight.w600,
                                                       ),
@@ -521,8 +558,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                               const SizedBox(height: 2),
                                               Text(
                                                 item.description,
-                                                style: const TextStyle(
-                                                  color: Color(0xFF78909C),
+                                                style: TextStyle(
+                                                  color: theme.colorScheme.onSurfaceVariant,
                                                   fontSize: 10.0,
                                                 ),
                                                 maxLines: 1,
@@ -550,13 +587,13 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                             return Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF141B26),
+                                color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelectedAsDriver || isSelectedAsTarget
-                                      ? const Color(0xFF00E676)
-                                      : const Color(0xFF202B3A),
-                                  width: isSelectedAsDriver || isSelectedAsTarget ? 1.4 : 1.0,
+                                  color: isSelected
+                                      ? (isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.8))
+                                      : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                                  width: isSelected ? 1.4 : 1.0,
                                 ),
                               ),
                               child: Row(
@@ -566,14 +603,17 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                     width: 38,
                                     height: 38,
                                     decoration: BoxDecoration(
-                                      color: isTarget
-                                          ? const Color(0xFFFF9F0A).withValues(alpha: 0.15)
-                                          : const Color(0xFF00E5FF).withValues(alpha: 0.15),
+                                      color: StudioSurfaceTheme.tintedContainer(
+                                        context,
+                                        isTarget ? targetColor : driverColor,
+                                        isSolid: isSolid,
+                                        translucentAlpha: 0.15,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: isTarget
-                                            ? const Color(0xFFFF9F0A).withValues(alpha: 0.4)
-                                            : const Color(0xFF00E5FF).withValues(alpha: 0.4),
+                                        color: isSolid
+                                            ? (isTarget ? targetColor : driverColor)
+                                            : (isTarget ? targetColor : driverColor).withValues(alpha: 0.4),
                                       ),
                                     ),
                                     child: Center(
@@ -584,7 +624,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                                 ? HugeIcons.strokeRoundedHeadphones
                                                 : HugeIcons.strokeRoundedAudioWaveform),
                                         size: 18,
-                                        color: isTarget ? const Color(0xFFFF9F0A) : const Color(0xFF00E5FF),
+                                        color: isTarget ? targetColor : driverColor,
                                       ),
                                     ),
                                   ),
@@ -600,8 +640,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                             Expanded(
                                               child: Text(
                                                 item.name,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
+                                                style: TextStyle(
+                                                  color: theme.colorScheme.onSurface,
                                                   fontSize: 12.5,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -613,14 +653,17 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFF1E2838),
+                                                color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                                                 borderRadius: BorderRadius.circular(4),
-                                                border: Border.all(color: const Color(0xFF2C3C54), width: 0.6),
+                                                border: Border.all(
+                                                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                                                  width: 0.6,
+                                                ),
                                               ),
                                               child: Text(
                                                 item.source,
-                                                style: const TextStyle(
-                                                  color: Color(0xFF90A4AE),
+                                                style: TextStyle(
+                                                  color: theme.colorScheme.onSurfaceVariant,
                                                   fontSize: 9,
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -631,8 +674,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                         const SizedBox(height: 3),
                                         Text(
                                           item.description,
-                                          style: const TextStyle(
-                                            color: Color(0xFF78909C),
+                                          style: TextStyle(
+                                            color: theme.colorScheme.onSurfaceVariant,
                                             fontSize: 10.5,
                                           ),
                                           maxLines: 1,
@@ -673,6 +716,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
+    required bool isSolid,
+    required ThemeData theme,
   }) {
     return InkWell(
       onTap: onTap,
@@ -680,17 +725,27 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF00E5FF).withValues(alpha: 0.18) : const Color(0xFF141B26),
+          color: isSelected
+              ? StudioSurfaceTheme.tintedContainer(
+                  context,
+                  theme.colorScheme.primary,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.18,
+                  solidBlendAlpha: 0.25,
+                )
+              : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? const Color(0xFF00E5FF) : const Color(0xFF263345),
+            color: isSelected
+                ? (isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.8))
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: isSelected ? 1.2 : 0.8,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF90A4AE),
+            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
             fontSize: 10.5,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
           ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
@@ -97,6 +98,7 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final playback = ref.watch(playerControllerProvider);
     final currentPlayingTrack = playback.currentTrack;
     final isPlaying = playback.isPlaying;
@@ -125,15 +127,15 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
               expandedHeight: expandedHeight,
               collapsedHeight: kToolbarHeight,
               pinned: true,
-              backgroundColor: theme.colorScheme.surface,
+              backgroundColor: StudioSurfaceTheme.surface(context, isSolid: isSolid),
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
                 icon: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.85),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
+                    border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid, translucentAlpha: 0.5)),
                   ),
                   child: const HugeIcon(
                     icon: HugeIcons.strokeRoundedArrowLeft01,
@@ -149,9 +151,9 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                   icon: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
+                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.85),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
+                      border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid, translucentAlpha: 0.5)),
                     ),
                     child: HugeIcon(
                       icon: HugeIcons.strokeRoundedEdit02,
@@ -241,16 +243,18 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: (widget.album.isHiRes
-                                                  ? const Color(0xFFFFD700)
-                                                  : primary)
-                                              .withValues(alpha: 0.15),
+                                          color: StudioSurfaceTheme.tintedContainer(
+                                            context,
+                                            widget.album.isHiRes ? const Color(0xFFFFD700) : primary,
+                                            isSolid: isSolid,
+                                            translucentAlpha: 0.15,
+                                          ),
                                           borderRadius: BorderRadius.circular(6),
                                           border: Border.all(
                                             color: (widget.album.isHiRes
                                                     ? const Color(0xFFFFD700)
                                                     : primary)
-                                                .withValues(alpha: 0.4),
+                                                .withValues(alpha: isSolid ? 0.6 : 0.4),
                                             width: 0.8,
                                           ),
                                         ),
@@ -383,7 +387,7 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
               delegate: _StickyActionBarDelegate(
                 height: 56,
                 child: Container(
-                  color: theme.colorScheme.surface,
+                  color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
@@ -437,7 +441,7 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 11),
-                            side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.7)),
+                            side: BorderSide(color: StudioSurfaceTheme.outline(context, isSolid: isSolid)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           onPressed: () {
@@ -483,11 +487,11 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                       margin: const EdgeInsets.only(bottom: 4),
                       decoration: BoxDecoration(
                         color: isTrackActive
-                            ? primary.withValues(alpha: 0.1)
+                            ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.1, solidBlendAlpha: 0.14)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
                         border: isTrackActive
-                            ? Border.all(color: primary.withValues(alpha: 0.35), width: 0.8)
+                            ? Border.all(color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.35), width: 0.8)
                             : null,
                       ),
                       child: Material(

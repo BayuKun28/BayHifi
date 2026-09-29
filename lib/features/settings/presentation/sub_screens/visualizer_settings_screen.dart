@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/player_customization_settings.dart';
 import '../controllers/player_customization_controller.dart';
 
@@ -13,6 +14,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final settings = ref.watch(playerCustomizationProvider);
     final controller = ref.read(playerCustomizationProvider.notifier);
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -37,7 +39,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedCpuCharge,
           ),
           const SizedBox(height: 8),
-          _buildPerformanceModeCard(context, settings, controller),
+          _buildPerformanceModeCard(context, settings, controller, isSolid),
           const SizedBox(height: 20),
 
           // 2. 3D PARALLAX & MOTION PHYSICS
@@ -47,7 +49,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedLayers01,
           ),
           const SizedBox(height: 8),
-          _buildParallaxCard(context, settings, controller),
+          _buildParallaxCard(context, settings, controller, isSolid),
           const SizedBox(height: 20),
 
           // 3. BACKDROP BLUR & AMBIENT GLOW
@@ -57,7 +59,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedSparkles,
           ),
           const SizedBox(height: 8),
-          _buildBlurGlowCard(context, settings, controller),
+          _buildBlurGlowCard(context, settings, controller, isSolid),
           const SizedBox(height: 20),
 
           // 4. ALBUM ART & COVER DISPLAY
@@ -67,7 +69,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedAlbum01,
           ),
           const SizedBox(height: 8),
-          _buildAlbumArtCard(context, settings, controller),
+          _buildAlbumArtCard(context, settings, controller, isSolid),
           const SizedBox(height: 20),
 
           // 5. SPECTRUM VISUALIZER STYLING
@@ -77,7 +79,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedAudioWaveform,
           ),
           const SizedBox(height: 8),
-          _buildSpectrumCard(context, settings, controller),
+          _buildSpectrumCard(context, settings, controller, isSolid),
           const SizedBox(height: 20),
 
           // 6. TIME BAR & SEEKBAR STYLING
@@ -87,7 +89,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             HugeIcons.strokeRoundedSlidersVertical,
           ),
           const SizedBox(height: 8),
-          _buildTimeBarCard(context, settings, controller),
+          _buildTimeBarCard(context, settings, controller, isSolid),
         ],
       ),
     );
@@ -116,15 +118,19 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -151,11 +157,17 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color: isSel
-                            ? primary.withValues(alpha: 0.12)
-                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                primary,
+                                isSolid: isSolid,
+                                translucentAlpha: 0.12,
+                                solidBlendAlpha: 0.16,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isSel ? primary : theme.dividerColor.withValues(alpha: 0.4),
+                          color: isSel ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: isSel ? 1.2 : 0.8,
                         ),
                       ),
@@ -213,14 +225,16 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
-
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -286,14 +300,16 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
-
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -376,15 +392,19 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -411,11 +431,17 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color: isSel
-                            ? primary.withValues(alpha: 0.12)
-                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                primary,
+                                isSolid: isSolid,
+                                translucentAlpha: 0.12,
+                                solidBlendAlpha: 0.16,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isSel ? primary : theme.dividerColor.withValues(alpha: 0.4),
+                          color: isSel ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: isSel ? 1.2 : 0.8,
                         ),
                       ),
@@ -473,15 +499,19 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -507,7 +537,13 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                       controller.setSpectrumStyle(style);
                     }
                   },
-                  selectedColor: primary.withValues(alpha: 0.2),
+                  selectedColor: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.2,
+                    solidBlendAlpha: 0.22,
+                  ),
                   labelStyle: TextStyle(
                     color: isSel ? primary : theme.colorScheme.onSurface,
                     fontSize: 11,
@@ -527,7 +563,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                 DropdownButton<int>(
                   value: settings.fftBins,
                   underline: const SizedBox(),
-                  dropdownColor: theme.colorScheme.surfaceContainerHighest,
+                  dropdownColor: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(12),
                   items: [256, 512, 1024, 2048].map((bins) {
                     return DropdownMenuItem(
@@ -554,15 +590,19 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: theme.dividerColor, width: 0.8),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -589,11 +629,17 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color: isSel
-                            ? primary.withValues(alpha: 0.12)
-                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                primary,
+                                isSolid: isSolid,
+                                translucentAlpha: 0.12,
+                                solidBlendAlpha: 0.16,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isSel ? primary : theme.dividerColor.withValues(alpha: 0.4),
+                          color: isSel ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: isSel ? 1.2 : 0.8,
                         ),
                       ),

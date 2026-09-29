@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
@@ -29,6 +30,7 @@ class ThemingSettingsScreen extends ConsumerWidget {
     final themeState = ref.watch(themeControllerProvider);
     final themeNotifier = ref.read(themeControllerProvider.notifier);
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -49,37 +51,37 @@ class ThemingSettingsScreen extends ConsumerWidget {
           // 1. LIVE PREVIEW CARD
           _buildSectionHeader(context, 'ACTIVE THEME PREVIEW', HugeIcons.strokeRoundedView),
           const SizedBox(height: 8),
-          _buildLiveThemePreview(context, themeState),
+          _buildLiveThemePreview(context, themeState, isSolid),
           const SizedBox(height: 20),
 
           // 2. THEME MODE
           _buildSectionHeader(context, 'THEME MODE', HugeIcons.strokeRoundedSun01),
           const SizedBox(height: 8),
-          _buildThemeModeSelector(context, themeState, themeNotifier),
+          _buildThemeModeSelector(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 20),
 
           // 2b. SURFACE & COMPONENT FILL STYLE
           _buildSectionHeader(context, 'SURFACE & COMPONENT FILL STYLE', HugeIcons.strokeRoundedPaintBoard),
           const SizedBox(height: 8),
-          _buildSurfaceFillStyleSelector(context, themeState, themeNotifier),
+          _buildSurfaceFillStyleSelector(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 20),
 
           // 3. STUDIO COLOR PALETTES
           _buildSectionHeader(context, 'STUDIO COLOR PALETTES', HugeIcons.strokeRoundedLayers01),
           const SizedBox(height: 8),
-          _buildPalettesGrid(context, themeState, themeNotifier),
+          _buildPalettesGrid(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 20),
 
           // 4. CUSTOM ACCENT COLOR
           _buildSectionHeader(context, 'CUSTOM ACCENT COLOR', HugeIcons.strokeRoundedColorPicker),
           const SizedBox(height: 8),
-          _buildAccentPicker(context, themeState, themeNotifier),
+          _buildAccentPicker(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 20),
 
           // 5. DYNAMIC MONET THEME
           _buildSectionHeader(context, 'DYNAMIC ALBUM ART PALETTE', HugeIcons.strokeRoundedSparkles),
           const SizedBox(height: 8),
-          _buildDynamicAlbumArtTile(context, themeState, themeNotifier, ref),
+          _buildDynamicAlbumArtTile(context, themeState, themeNotifier, ref, isSolid),
         ],
       ),
     );
@@ -104,23 +106,16 @@ class ThemingSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLiveThemePreview(BuildContext context, ThemeSettingsState state) {
+  Widget _buildLiveThemePreview(BuildContext context, ThemeSettingsState state, bool isSolid) {
     final theme = Theme.of(context);
     final palette = state.currentPalette;
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +166,13 @@ class ThemingSettingsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: palette.primary.withValues(alpha: 0.15),
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    palette.primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.15,
+                    solidBlendAlpha: 0.20,
+                  ),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: palette.primary, width: 0.8),
                 ),
@@ -224,6 +225,7 @@ class ThemingSettingsScreen extends ConsumerWidget {
     BuildContext context,
     ThemeSettingsState state,
     ThemeController notifier,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
 
@@ -241,13 +243,19 @@ class ThemingSettingsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                      : theme.colorScheme.surface,
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          theme.colorScheme.primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.15,
+                          solidBlendAlpha: 0.18,
+                        )
+                      : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : theme.dividerColor,
+                        : StudioSurfaceTheme.outline(context, isSolid: isSolid),
                     width: isSelected ? 1.8 : 1.0,
                   ),
                 ),
@@ -285,6 +293,7 @@ class ThemingSettingsScreen extends ConsumerWidget {
     BuildContext context,
     ThemeSettingsState state,
     ThemeController notifier,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
     final activeStyle = state.surfaceFillStyle ?? SurfaceFillStyle.translucent;
@@ -306,13 +315,19 @@ class ThemingSettingsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                      : theme.colorScheme.surface,
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          theme.colorScheme.primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.15,
+                          solidBlendAlpha: 0.18,
+                        )
+                      : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : theme.dividerColor,
+                        : StudioSurfaceTheme.outline(context, isSolid: isSolid),
                     width: isSelected ? 1.8 : 1.0,
                   ),
                 ),
@@ -362,6 +377,7 @@ class ThemingSettingsScreen extends ConsumerWidget {
     BuildContext context,
     ThemeSettingsState state,
     ThemeController notifier,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
 
@@ -376,10 +392,18 @@ class ThemingSettingsScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: isSelected
+                    ? StudioSurfaceTheme.tintedContainer(
+                        context,
+                        theme.colorScheme.primary,
+                        isSolid: isSolid,
+                        translucentAlpha: 0.10,
+                        solidBlendAlpha: 0.14,
+                      )
+                    : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
+                  color: isSelected ? theme.colorScheme.primary : StudioSurfaceTheme.outline(context, isSolid: isSolid),
                   width: isSelected ? 1.8 : 1.0,
                 ),
               ),
@@ -453,15 +477,14 @@ class ThemingSettingsScreen extends ConsumerWidget {
     BuildContext context,
     ThemeSettingsState state,
     ThemeController notifier,
+    bool isSolid,
   ) {
-    final theme = Theme.of(context);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor, width: 1.0),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 12,
       ),
       child: Wrap(
         spacing: 12,
@@ -507,14 +530,18 @@ class ThemingSettingsScreen extends ConsumerWidget {
     ThemeSettingsState state,
     ThemeController notifier,
     WidgetRef ref,
+    bool isSolid,
   ) {
     final theme = Theme.of(context);
 
     return Material(
-      color: theme.colorScheme.surface,
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.dividerColor, width: 1.0),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 1.0,
+        ),
       ),
       child: SwitchListTile(
         value: state.dynamicAlbumArtEnabled,

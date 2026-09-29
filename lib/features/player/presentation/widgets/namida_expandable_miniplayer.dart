@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/track.dart';
 import '../controllers/player_controller.dart';
 import '../controllers/player_expansion_controller.dart';
@@ -93,6 +94,7 @@ class _NamidaExpandableMiniPlayerState
     final playback = ref.watch(playerControllerProvider);
     final track = playback.currentTrack;
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
 
@@ -168,7 +170,7 @@ class _NamidaExpandableMiniPlayerState
               Positioned(
                 right: 10,
                 bottom: currentBottom + miniPlayerHeight + 8.0,
-                child: _buildFloatingCategoryDock(context, theme),
+                child: _buildFloatingCategoryDock(context, theme, isSolid),
               ),
 
             // ─── 2. MAIN EXPANDABLE MINIPLAYER ──────────────────────────────
@@ -195,10 +197,11 @@ class _NamidaExpandableMiniPlayerState
                     borderRadius: BorderRadius.circular(borderRadius),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
+                        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(borderRadius),
                         border: Border.all(
-                          color: theme.dividerColor.withValues(alpha: (1.0 - progress * 0.8)),
+                          color: StudioSurfaceTheme.outline(context, isSolid: isSolid)
+                              .withValues(alpha: (1.0 - progress * 0.8)),
                           width: 1.0,
                         ),
                         boxShadow: [
@@ -247,6 +250,7 @@ class _NamidaExpandableMiniPlayerState
                                   currentTrack,
                                   playback,
                                   theme,
+                                  isSolid,
                                 ),
                               ),
                             ),
@@ -267,7 +271,7 @@ class _NamidaExpandableMiniPlayerState
                 height: miniPlayerHeight,
                 child: Opacity(
                   opacity: (1.0 - progress * 3.0).clamp(0.0, 1.0),
-                  child: _buildCategoryFab(context, theme),
+                  child: _buildCategoryFab(context, theme, isSolid),
                 ),
               ),
           ],
@@ -277,7 +281,7 @@ class _NamidaExpandableMiniPlayerState
   );
 }
 
-  Widget _buildCategoryFab(BuildContext context, ThemeData theme) {
+  Widget _buildCategoryFab(BuildContext context, ThemeData theme, bool isSolid) {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final primary = theme.colorScheme.primary;
 
@@ -297,12 +301,12 @@ class _NamidaExpandableMiniPlayerState
             width: 58,
             height: 66,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _isCategoryDockExpanded
                     ? primary
-                    : theme.dividerColor,
+                    : StudioSurfaceTheme.outline(context, isSolid: isSolid),
                 width: 1.0,
               ),
               boxShadow: [
@@ -341,7 +345,7 @@ class _NamidaExpandableMiniPlayerState
     );
   }
 
-  Widget _buildFloatingCategoryDock(BuildContext context, ThemeData theme) {
+  Widget _buildFloatingCategoryDock(BuildContext context, ThemeData theme, bool isSolid) {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final primary = theme.colorScheme.primary;
 
@@ -351,20 +355,10 @@ class _NamidaExpandableMiniPlayerState
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: theme.dividerColor.withValues(alpha: 0.8),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
+        decoration: StudioSurfaceTheme.cardDecoration(
+          context: context,
+          isSolid: isSolid,
+          radius: 18,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -383,12 +377,16 @@ class _NamidaExpandableMiniPlayerState
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? primary.withValues(alpha: 0.15)
+                        ? (isSolid
+                            ? theme.colorScheme.surfaceContainerHighest
+                            : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.15))
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: isSelected
                         ? Border.all(
-                            color: primary.withValues(alpha: 0.5),
+                            color: isSolid
+                                ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                                : primary.withValues(alpha: 0.5),
                             width: 1.0,
                           )
                         : null,
@@ -416,7 +414,7 @@ class _NamidaExpandableMiniPlayerState
               );
             }),
             const SizedBox(height: 4),
-            Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.4)),
+            Divider(height: 1, color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
             const SizedBox(height: 4),
             InkWell(
               onTap: () {
@@ -461,6 +459,7 @@ class _NamidaExpandableMiniPlayerState
     Track track,
     dynamic playback,
     ThemeData theme,
+    bool isSolid,
   ) {
     final isPlaying = playback.isPlaying as bool;
     final position = playback.position as Duration;
@@ -492,10 +491,10 @@ class _NamidaExpandableMiniPlayerState
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainer,
+                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: theme.dividerColor,
+                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                         width: 1.0,
                       ),
                       boxShadow: [
@@ -549,17 +548,21 @@ class _NamidaExpandableMiniPlayerState
                               vertical: 1.5,
                             ),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                              color: isSolid
+                                  ? theme.colorScheme.surfaceContainerHighest
+                                  : StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: false, translucentAlpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                                color: isSolid
+                                    ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                                    : theme.colorScheme.primary.withValues(alpha: 0.5),
                                 width: 0.8,
                               ),
                             ),
                             child: Text(
                               '${track.format.name.toUpperCase()} 24/96',
                               style: TextStyle(
-                                color: theme.colorScheme.primary,
+                                color: isSolid ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.primary,
                                 fontSize: 8.5,
                                 fontWeight: FontWeight.w900,
                                 fontFeatures: AppTypography.audioFigures,
@@ -600,8 +603,10 @@ class _NamidaExpandableMiniPlayerState
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.35),
-                            blurRadius: 8,
+                            color: isSolid
+                                ? Colors.black.withValues(alpha: 0.25)
+                                : theme.colorScheme.primary.withValues(alpha: 0.35),
+                            blurRadius: isSolid ? 6 : 8,
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -675,7 +680,7 @@ class _NamidaExpandableMiniPlayerState
               height: 2.5,
               child: LinearProgressIndicator(
                 value: progressRatio,
-                backgroundColor: theme.dividerColor.withValues(alpha: 0.3),
+                backgroundColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                 valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
               ),
             ),

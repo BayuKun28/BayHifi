@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../audio_engine/audio_cache_service.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
@@ -85,6 +86,8 @@ class TrackTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final settings = ref.watch(playerCustomizationProvider);
     final libraryState = ref.watch(unifiedLibraryProvider);
     final playback = ref.watch(playerControllerProvider);
@@ -102,17 +105,17 @@ class TrackTile extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 6),
       decoration: BoxDecoration(
         color: isSelected
-            ? theme.colorScheme.primary.withValues(alpha: 0.16)
+            ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.16, solidBlendAlpha: 0.22)
             : (isTileActive
-                ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                : theme.colorScheme.surface),
+                ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.1, solidBlendAlpha: 0.14)
+                : StudioSurfaceTheme.surface(context, isSolid: isSolid)),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isSelected
-              ? theme.colorScheme.primary
+              ? primary
               : (isTileActive
-                  ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                  : theme.dividerColor.withValues(alpha: 0.4)),
+                  ? (isSolid ? primary : primary.withValues(alpha: 0.5))
+                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
           width: isSelected ? 1.4 : 1.0,
         ),
       ),

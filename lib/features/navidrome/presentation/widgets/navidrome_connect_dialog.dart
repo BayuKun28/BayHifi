@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/subsonic_models.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 
@@ -43,10 +44,17 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
     final isConnecting = libraryState.isConnectingNavidrome;
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return Dialog(
-      backgroundColor: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 1.0,
+        ),
+      ),
       child: Container(
         width: 380,
         padding: const EdgeInsets.all(20),
@@ -62,7 +70,13 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: primaryColor.withValues(alpha: 0.15),
+                      color: StudioSurfaceTheme.tintedContainer(
+                        context,
+                        primaryColor,
+                        isSolid: isSolid,
+                        translucentAlpha: 0.15,
+                        solidBlendAlpha: 0.20,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, color: primaryColor, size: 24),
@@ -91,7 +105,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                     ),
                   ),
                   IconButton(
-                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20, color: Color(0xFF90A4AE)),
+                    icon: HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20, color: theme.colorScheme.onSurfaceVariant),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -103,8 +117,8 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: isConnected
-                      ? const Color(0xFF00E676).withValues(alpha: 0.15)
-                      : Colors.orange.withValues(alpha: 0.12),
+                      ? StudioSurfaceTheme.tintedContainer(context, const Color(0xFF00E676), isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20)
+                      : StudioSurfaceTheme.tintedContainer(context, Colors.orange, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isConnected ? const Color(0xFF00E676) : Colors.orangeAccent,
@@ -145,9 +159,9 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                   labelStyle: const TextStyle(fontSize: 13),
                   hintText: 'http://192.168.1.100:4533',
                   prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedServer, size: 18, color: Color(0xFF90A4AE)),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: HugeIcon(icon: HugeIcons.strokeRoundedServer, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -164,9 +178,9 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                   labelText: 'Username',
                   labelStyle: const TextStyle(fontSize: 13),
                   prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 18, color: Color(0xFF90A4AE)),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -184,15 +198,15 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                   labelText: 'Password',
                   labelStyle: const TextStyle(fontSize: 13),
                   prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedLockPassword, size: 18, color: Color(0xFF90A4AE)),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: HugeIcon(icon: HugeIcons.strokeRoundedLockPassword, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   ),
                   suffixIcon: IconButton(
                     icon: HugeIcon(
                       icon: _obscurePassword ? HugeIcons.strokeRoundedViewOffSlash : HugeIcons.strokeRoundedView,
                       size: 18,
-                      color: const Color(0xFF90A4AE),
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),

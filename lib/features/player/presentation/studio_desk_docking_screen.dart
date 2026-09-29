@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../app/theme/studio_surface_theme.dart';
 import '../../dsp_rack/domain/dsp_models.dart';
 import '../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import '../../dsp_rack/presentation/widgets/vu_level_meter.dart';
@@ -82,12 +83,13 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
     final dspState = ref.watch(dspRackControllerProvider);
     final dspNotifier = ref.read(dspRackControllerProvider.notifier);
     final track = playback.currentTrack;
+    final isSolid = ref.isSolidStyle;
 
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF07090D),
+      backgroundColor: StudioSurfaceTheme.surface(context, isSolid: isSolid),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -101,20 +103,20 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               child: Column(
                 children: [
                   // ─── 1. TOP STUDIO STATUS & CLOCK BAR ─────────────────────
-                  _buildStudioTopBar(context, primary, track, isLandscape),
+                  _buildStudioTopBar(context, primary, track, isLandscape, isSolid),
                   const SizedBox(height: 10),
 
                   // ─── 2. MAIN CENTER BODY (LANDSCAPE OR PORTRAIT) ──────────
                   Expanded(
                     child: isLandscape
-                        ? _buildLandscapeBody(context, playback, playerNotifier, dspState, dspNotifier, primary)
-                        : _buildPortraitBody(context, playback, playerNotifier, dspState, dspNotifier, primary),
+                        ? _buildLandscapeBody(context, playback, playerNotifier, dspState, dspNotifier, primary, isSolid)
+                        : _buildPortraitBody(context, playback, playerNotifier, dspState, dspNotifier, primary, isSolid),
                   ),
 
                   const SizedBox(height: 8),
 
                   // ─── 3. BOTTOM GLANCEABLE PRESET & MASTER STRIP ───────────
-                  _buildBottomDspPresetsStrip(context, dspState, dspNotifier, playback, playerNotifier, primary, isLandscape),
+                  _buildBottomDspPresetsStrip(context, dspState, dspNotifier, playback, playerNotifier, primary, isLandscape, isSolid),
                 ],
               ),
             );
@@ -125,15 +127,15 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
   }
 
   // ─── STUDIO TOP BAR ───────────────────────────────────────────────────────
-  Widget _buildStudioTopBar(BuildContext context, Color primary, Track? track, bool isLandscape) {
+  Widget _buildStudioTopBar(BuildContext context, Color primary, Track? track, bool isLandscape, bool isSolid) {
     final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6), width: 1.0),
+        border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -151,9 +153,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainer,
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.6), width: 0.8),
+                    border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 0.8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -185,9 +187,12 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.15),
+                      color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: primary.withValues(alpha: 0.4), width: 0.8),
+                      border: Border.all(
+                        color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
+                        width: 0.8,
+                      ),
                     ),
                     child: Text(
                       '${track.format.name.toUpperCase()} • ${track.sampleRate != null ? (track.sampleRate! / 1000).toStringAsFixed(1) : 44.1}kHz / ${track.bitDepth ?? 16}bit',
@@ -228,7 +233,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           fontFeatures: AppTypography.audioFigures,
                           fontSize: isLandscape ? 16 : 13.5,
                           fontWeight: FontWeight.w900,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                           letterSpacing: 0.6,
                         ),
                         maxLines: 1,
@@ -239,10 +244,10 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 ),
                 Text(
                   _formatDate(_currentTime),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 8.5,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF7A8B9E),
+                    color: theme.colorScheme.onSurfaceVariant,
                     letterSpacing: 0.4,
                   ),
                   maxLines: 1,
@@ -265,9 +270,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 child: Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF161B26),
+                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: const Color(0xFF2D3748), width: 0.8),
+                    border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 0.8),
                   ),
                   child: HugeIcon(
                     icon: _showVuMeters ? HugeIcons.strokeRoundedSlidersVertical : HugeIcons.strokeRoundedAudioWaveform,
@@ -280,9 +285,18 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    const Color(0xFF00E676),
+                    isSolid: isSolid,
+                    translucentAlpha: 0.15,
+                    solidBlendAlpha: 0.18,
+                  ),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFF00E676), width: 0.6),
+                  border: Border.all(
+                    color: isSolid ? theme.colorScheme.outline : const Color(0xFF00E676).withValues(alpha: 0.6),
+                    width: 0.6,
+                  ),
                 ),
                 child: const Text(
                   'AWAKE',
@@ -309,8 +323,10 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
     DspRackState dspState,
     DspRackController dspNotifier,
     Color primary,
+    bool isSolid,
   ) {
     final track = playback.currentTrack;
+    final theme = Theme.of(context);
 
     return Row(
       children: [
@@ -320,9 +336,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF0C0F16),
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF1E2533), width: 1.0),
+              border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -338,7 +354,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('L-CH', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primary)),
-                              const Text('ANALOG VU MONITOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF6B7C93))),
+                              Text('ANALOG VU MONITOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurfaceVariant)),
                               Text('R-CH', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primary)),
                             ],
                           ),
@@ -365,15 +381,15 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                         width: 160,
                         height: 160,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF141923),
+                          color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: playback.isPlaying ? primary.withValues(alpha: 0.5) : const Color(0xFF283142),
+                            color: playback.isPlaying ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5)) : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: (playback.isPlaying ? primary : Colors.black).withValues(alpha: 0.3),
+                              color: (playback.isPlaying ? primary : Colors.black).withValues(alpha: isSolid ? 0.15 : 0.3),
                               blurRadius: 30,
                               offset: const Offset(0, 6),
                             ),
@@ -383,7 +399,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           child: HugeIcon(
                             icon: HugeIcons.strokeRoundedAlbum01,
                             size: 64,
-                            color: playback.isPlaying ? primary : const Color(0xFF5A6A80),
+                            color: playback.isPlaying ? primary : theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -395,10 +411,10 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 const SizedBox(height: 10),
                 Text(
                   track?.title ?? 'No Track Playing',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     letterSpacing: 0.2,
                   ),
                   maxLines: 1,
@@ -407,9 +423,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 const SizedBox(height: 3),
                 Text(
                   track != null ? '${track.artist} • ${track.album}' : 'Select music from library',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
-                    color: Color(0xFF8E9EB2),
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -427,9 +443,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF0C0F16),
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF1E2533), width: 1.0),
+              border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -440,7 +456,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                     trackHeight: 5,
                     thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
                     activeTrackColor: primary,
-                    inactiveTrackColor: const Color(0xFF1F2837),
+                    inactiveTrackColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     thumbColor: primary,
                   ),
                   child: Slider(
@@ -469,11 +485,11 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                       ),
                       Text(
                         _formatDuration(playback.duration),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFeatures: AppTypography.audioFigures,
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF7A8B9E),
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -495,7 +511,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedShuffle,
                         size: 24,
-                        color: playback.isShuffle ? primary : const Color(0xFF6B7C93),
+                        color: playback.isShuffle ? primary : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
 
@@ -504,9 +520,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF141924),
+                        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFF253042), width: 1.0),
+                        border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
                       ),
                       child: IconButton(
                         iconSize: 30,
@@ -514,10 +530,10 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           HapticFeedback.lightImpact();
                           playerNotifier.skipPrevious();
                         },
-                        icon: const HugeIcon(
+                        icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedPrevious,
                           size: 26,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -531,7 +547,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                         color: primary,
                         boxShadow: [
                           BoxShadow(
-                            color: primary.withValues(alpha: 0.5),
+                            color: primary.withValues(alpha: isSolid ? 0.3 : 0.5),
                             blurRadius: 24,
                             spreadRadius: 2,
                             offset: const Offset(0, 4),
@@ -567,9 +583,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF141924),
+                        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFF253042), width: 1.0),
+                        border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
                       ),
                       child: IconButton(
                         iconSize: 30,
@@ -577,10 +593,10 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           HapticFeedback.lightImpact();
                           playerNotifier.skipNext();
                         },
-                        icon: const HugeIcon(
+                        icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedNext,
                           size: 26,
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -597,7 +613,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                             ? HugeIcons.strokeRoundedRepeatOne01
                             : HugeIcons.strokeRoundedRepeat,
                         size: 24,
-                        color: playback.repeatMode != PlaybackRepeatMode.off ? primary : const Color(0xFF6B7C93),
+                        color: playback.repeatMode != PlaybackRepeatMode.off ? primary : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -618,15 +634,17 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
     DspRackState dspState,
     DspRackController dspNotifier,
     Color primary,
+    bool isSolid,
   ) {
     final track = playback.currentTrack;
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF0C0F16),
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF1E2533), width: 1.0),
+        border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
       ),
       child: Column(
         children: [
@@ -642,7 +660,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text('L-CH', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primary)),
-                            const Text('ANALOG STEREO MONITOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF6B7C93))),
+                            Text('ANALOG STEREO MONITOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurfaceVariant)),
                             Text('R-CH', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primary)),
                           ],
                         ),
@@ -668,15 +686,15 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                         width: 180,
                         height: 180,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF141923),
+                          color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(26),
                           border: Border.all(
-                            color: playback.isPlaying ? primary.withValues(alpha: 0.5) : const Color(0xFF283142),
+                            color: playback.isPlaying ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5)) : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: (playback.isPlaying ? primary : Colors.black).withValues(alpha: 0.3),
+                              color: (playback.isPlaying ? primary : Colors.black).withValues(alpha: isSolid ? 0.15 : 0.3),
                               blurRadius: 36,
                               offset: const Offset(0, 8),
                             ),
@@ -686,7 +704,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           child: HugeIcon(
                             icon: HugeIcons.strokeRoundedAlbum01,
                             size: 72,
-                            color: playback.isPlaying ? primary : const Color(0xFF5A6A80),
+                            color: playback.isPlaying ? primary : theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -701,10 +719,10 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           // High Contrast Track Information
           Text(
             track?.title ?? 'No Track Playing',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
               letterSpacing: 0.2,
             ),
             textAlign: TextAlign.center,
@@ -714,9 +732,9 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           const SizedBox(height: 4),
           Text(
             track != null ? '${track.artist} • ${track.album}' : 'Tap library to begin playback',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: Color(0xFF8E9EB2),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -730,7 +748,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               trackHeight: 5,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
               activeTrackColor: primary,
-              inactiveTrackColor: const Color(0xFF1F2837),
+              inactiveTrackColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               thumbColor: primary,
             ),
             child: Slider(
@@ -759,11 +777,11 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 ),
                 Text(
                   _formatDuration(playback.duration),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFeatures: AppTypography.audioFigures,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF7A8B9E),
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -783,23 +801,23 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedShuffle,
                   size: 22,
-                  color: playback.isShuffle ? primary : const Color(0xFF6B7C93),
+                  color: playback.isShuffle ? primary : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               Container(
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141924),
+                  color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF253042), width: 1.0),
+                  border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
                 ),
                 child: IconButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     playerNotifier.skipPrevious();
                   },
-                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedPrevious, size: 24, color: Colors.white),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedPrevious, size: 24, color: theme.colorScheme.onSurface),
                 ),
               ),
               Container(
@@ -810,7 +828,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                   color: primary,
                   boxShadow: [
                     BoxShadow(
-                      color: primary.withValues(alpha: 0.5),
+                      color: primary.withValues(alpha: isSolid ? 0.3 : 0.5),
                       blurRadius: 24,
                       offset: const Offset(0, 4),
                     ),
@@ -842,16 +860,16 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141924),
+                  color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF253042), width: 1.0),
+                  border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 1.0),
                 ),
                 child: IconButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     playerNotifier.skipNext();
                   },
-                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedNext, size: 24, color: Colors.white),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedNext, size: 24, color: theme.colorScheme.onSurface),
                 ),
               ),
               IconButton(
@@ -864,7 +882,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                       ? HugeIcons.strokeRoundedRepeatOne01
                       : HugeIcons.strokeRoundedRepeat,
                   size: 22,
-                  color: playback.repeatMode != PlaybackRepeatMode.off ? primary : const Color(0xFF6B7C93),
+                  color: playback.repeatMode != PlaybackRepeatMode.off ? primary : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -883,13 +901,15 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
     PlayerController playerNotifier,
     Color primary,
     bool isLandscape,
+    bool isSolid,
   ) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F131C),
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF222B38), width: 1.0),
+        border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
       ),
       child: Row(
         children: [
@@ -928,10 +948,12 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: isSelected ? primary.withValues(alpha: 0.2) : const Color(0xFF161C26),
+                          color: isSelected
+                              ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.2)
+                              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(
-                            color: isSelected ? primary : const Color(0xFF2A3444),
+                            color: isSelected ? (isSolid ? theme.colorScheme.outline : primary) : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                             width: isSelected ? 1.0 : 0.7,
                           ),
                         ),
@@ -940,7 +962,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                           style: TextStyle(
                             fontSize: 9.5,
                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? primary : const Color(0xFF94A3B8),
+                            color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -955,7 +977,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           HugeIcon(
             icon: HugeIcons.strokeRoundedVolumeHigh,
             size: 15,
-            color: const Color(0xFF7A8B9E),
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           SizedBox(
             width: isLandscape ? 80 : 60,
@@ -970,7 +992,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 min: 0.0,
                 max: 1.0,
                 activeColor: primary,
-                inactiveColor: const Color(0xFF222B38),
+                inactiveColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                 onChanged: (v) => playerNotifier.setVolume(v),
               ),
             ),
@@ -980,3 +1002,4 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
     );
   }
 }
+

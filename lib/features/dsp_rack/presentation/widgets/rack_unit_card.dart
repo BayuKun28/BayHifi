@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 
 /// Reusable Studio Rackmount Unit Frame with collapsible minimization
-class RackUnitCard extends StatefulWidget {
+class RackUnitCard extends ConsumerStatefulWidget {
   const RackUnitCard({
     super.key,
     required this.unitNumber,
@@ -28,10 +30,10 @@ class RackUnitCard extends StatefulWidget {
   final bool? initiallyExpanded;
 
   @override
-  State<RackUnitCard> createState() => _RackUnitCardState();
+  ConsumerState<RackUnitCard> createState() => _RackUnitCardState();
 }
 
-class _RackUnitCardState extends State<RackUnitCard> {
+class _RackUnitCardState extends ConsumerState<RackUnitCard> {
   late bool _isExpanded;
 
   @override
@@ -59,12 +61,13 @@ class _RackUnitCardState extends State<RackUnitCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isSolid = ref.isSolidStyle;
     final color = widget.accentColor ?? theme.colorScheme.primary;
 
-    final chassisBg = theme.colorScheme.surface;
+    final chassisBg = StudioSurfaceTheme.surface(context, isSolid: isSolid);
     final borderColor = widget.isActive
-        ? color.withValues(alpha: 0.5)
-        : theme.dividerColor.withValues(alpha: 0.5);
+        ? (isSolid ? color : color.withValues(alpha: 0.5))
+        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -72,13 +75,21 @@ class _RackUnitCardState extends State<RackUnitCard> {
         color: chassisBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor, width: widget.isActive ? 1.2 : 1.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.18),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isSolid
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.22),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.14),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,7 +104,7 @@ class _RackUnitCardState extends State<RackUnitCard> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainer,
+                color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                 borderRadius: BorderRadius.vertical(
                   top: const Radius.circular(15),
                   bottom: _isExpanded ? Radius.zero : const Radius.circular(15),
@@ -101,7 +112,7 @@ class _RackUnitCardState extends State<RackUnitCard> {
                 border: _isExpanded
                     ? Border(
                         bottom: BorderSide(
-                          color: theme.dividerColor.withValues(alpha: 0.5),
+                          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: 0.8,
                         ),
                       )
@@ -117,10 +128,20 @@ class _RackUnitCardState extends State<RackUnitCard> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: widget.isActive ? color.withValues(alpha: 0.2) : Colors.transparent,
+                      color: widget.isActive
+                          ? StudioSurfaceTheme.tintedContainer(
+                              context,
+                              color,
+                              isSolid: isSolid,
+                              translucentAlpha: 0.2,
+                              solidBlendAlpha: 0.2,
+                            )
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: widget.isActive ? color : (isDark ? Colors.white24 : Colors.black26),
+                        color: widget.isActive
+                            ? color
+                            : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                         width: 1,
                       ),
                     ),
@@ -182,11 +203,19 @@ class _RackUnitCardState extends State<RackUnitCard> {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: widget.isActive
-                            ? color.withValues(alpha: 0.15)
-                            : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                color,
+                                isSolid: isSolid,
+                                translucentAlpha: 0.15,
+                                solidBlendAlpha: 0.2,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: widget.isActive ? color : Colors.transparent,
+                          color: widget.isActive
+                              ? (isSolid ? theme.colorScheme.outline : color)
+                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                           width: 1,
                         ),
                       ),
@@ -201,7 +230,7 @@ class _RackUnitCardState extends State<RackUnitCard> {
                               shape: BoxShape.circle,
                               color: widget.isActive ? color : (isDark ? Colors.white24 : Colors.black26),
                               boxShadow: widget.isActive
-                                 ? [
+                                  ? [
                                       BoxShadow(
                                         color: color.withValues(alpha: 0.8),
                                         blurRadius: 6,

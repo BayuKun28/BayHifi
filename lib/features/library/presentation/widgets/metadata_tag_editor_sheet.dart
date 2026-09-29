@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../data/metadata_tagger_service.dart';
@@ -202,8 +203,9 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final primary = cs.primary;
-    final surfaceContainer = cs.surfaceContainer;
-    final outline = cs.outline.withAlpha(40);
+    final isSolid = ref.isSolidStyle;
+    final surfaceContainer = StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid);
+    final outline = StudioSurfaceTheme.outline(context, isSolid: isSolid);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -214,7 +216,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
           maxHeight: MediaQuery.of(context).size.height * 0.88,
         ),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: surfaceContainer,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(color: outline, width: 1.0),
           boxShadow: const [
@@ -266,7 +268,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: surfaceContainer,
+                        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: outline, width: 0.8),
                       ),
@@ -294,7 +296,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ─── ARTWORK PICKER BENTO CARD ───────────────────────
-                      _buildArtworkPicker(cs, outline, primary),
+                      _buildArtworkPicker(cs, outline, primary, isSolid),
                       const SizedBox(height: 16),
 
                       // ─── PRIMARY TRACK DETAILS ───────────────────────────
@@ -305,6 +307,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                         primaryColor: primary,
                         colorScheme: cs,
                         outline: outline,
+                        isSolid: isSolid,
                       ),
                       const SizedBox(height: 12),
 
@@ -318,6 +321,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
+                              isSolid: isSolid,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -329,6 +333,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
+                              isSolid: isSolid,
                             ),
                           ),
                         ],
@@ -346,6 +351,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
+                              isSolid: isSolid,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -359,6 +365,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               colorScheme: cs,
                               outline: outline,
                               keyboardType: TextInputType.number,
+                              isSolid: isSolid,
                             ),
                           ),
                         ],
@@ -377,6 +384,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               colorScheme: cs,
                               outline: outline,
                               keyboardType: TextInputType.number,
+                              isSolid: isSolid,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -389,6 +397,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               colorScheme: cs,
                               outline: outline,
                               keyboardType: TextInputType.number,
+                              isSolid: isSolid,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -401,6 +410,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               colorScheme: cs,
                               outline: outline,
                               keyboardType: TextInputType.number,
+                              isSolid: isSolid,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -413,6 +423,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                               colorScheme: cs,
                               outline: outline,
                               keyboardType: TextInputType.number,
+                              isSolid: isSolid,
                             ),
                           ),
                         ],
@@ -427,6 +438,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                         primaryColor: primary,
                         colorScheme: cs,
                         outline: outline,
+                        isSolid: isSolid,
                       ),
                       const SizedBox(height: 8),
                       SingleChildScrollView(
@@ -446,8 +458,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                                 ),
                                 padding: EdgeInsets.zero,
                                 backgroundColor: _genreController.text == g
-                                    ? primary.withAlpha(30)
-                                    : cs.surfaceContainerHighest,
+                                    ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20)
+                                    : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                                 side: BorderSide(
                                   color: _genreController.text == g
                                       ? primary
@@ -479,6 +491,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                         colorScheme: cs,
                         outline: outline,
                         maxLines: 4,
+                        isSolid: isSolid,
                       ),
                       const SizedBox(height: 16),
 
@@ -488,7 +501,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: cs.surfaceContainer,
+                            color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: outline, width: 0.8),
                           ),
@@ -604,11 +617,11 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
     );
   }
 
-  Widget _buildArtworkPicker(ColorScheme cs, Color outline, Color primary) {
+  Widget _buildArtworkPicker(ColorScheme cs, Color outline, Color primary, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: outline, width: 0.8),
       ),
@@ -619,7 +632,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
+              color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: outline, width: 0.8),
             ),
@@ -673,7 +686,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: primary.withAlpha(25),
+                          color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: primary.withAlpha(80), width: 0.8),
                         ),
@@ -706,7 +719,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                           decoration: BoxDecoration(
-                            color: cs.surfaceContainerHighest,
+                            color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: outline, width: 0.8),
                           ),
@@ -749,6 +762,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
     required Color primaryColor,
     required ColorScheme colorScheme,
     required Color outline,
+    required bool isSolid,
     TextInputType? keyboardType,
     int maxLines = 1,
   }) {
@@ -767,7 +781,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainer,
+            color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: outline, width: 0.8),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 import '../../data/backup_restore_service.dart';
@@ -69,13 +70,18 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
 
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.read(themeControllerProvider).isSolidStyle;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: theme.colorScheme.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      backgroundColor: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 1.0,
+        ),
       ),
       builder: (modalCtx) {
         return StatefulBuilder(
@@ -131,7 +137,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                       hintText: 'Paste .bayhifi backup JSON payload here...',
                       hintStyle: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
                       filled: true,
-                      fillColor: theme.colorScheme.surfaceContainerHighest,
+                      fillColor: StudioSurfaceTheme.surfaceContainerLow(ctx, isSolid: isSolid),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -258,9 +264,10 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('BACKUP & RESTORE'),
         centerTitle: true,
@@ -271,7 +278,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // 1. Hero Backup Engine Banner
-          _buildHeroBanner(theme, primary),
+          _buildHeroBanner(theme, primary, isSolid),
           const SizedBox(height: 16),
 
           // 2. Export Section Header
@@ -280,14 +287,16 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
 
           // Export Configuration Card
           Material(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.colorScheme.outlineVariant, width: 1.0),
+            color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                width: 1.0,
               ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -369,23 +378,31 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
 
           // Restore Card
           Material(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(16),
+            color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                width: 1.0,
+              ),
+            ),
             child: InkWell(
               onTap: _showRestoreDialog,
               borderRadius: BorderRadius.circular(16),
-              child: Container(
+              child: Padding(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6), width: 1.0),
-                ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.12),
+                        color: StudioSurfaceTheme.tintedContainer(
+                          context,
+                          primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.12,
+                          solidBlendAlpha: 0.16,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, size: 24, color: primary),
@@ -423,20 +440,26 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
     );
   }
 
-  Widget _buildHeroBanner(ThemeData theme, Color primary) {
+  Widget _buildHeroBanner(ThemeData theme, Color primary, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1.0),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 16,
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.12),
+              color: StudioSurfaceTheme.tintedContainer(
+                context,
+                primary,
+                isSolid: isSolid,
+                translucentAlpha: 0.12,
+                solidBlendAlpha: 0.16,
+              ),
               shape: BoxShape.circle,
             ),
             child: HugeIcon(icon: HugeIcons.strokeRoundedDatabase, size: 24, color: primary),

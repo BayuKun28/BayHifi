@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
 import '../controllers/player_controller.dart';
 
@@ -23,6 +24,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final playback = ref.watch(playerControllerProvider);
     final settingsNotifier = ref.read(playbackSettingsProvider.notifier);
     final playerNotifier = ref.read(playerControllerProvider.notifier);
@@ -34,10 +36,10 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 1.0,
         ),
       ),
@@ -122,10 +124,10 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainer,
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: theme.dividerColor.withValues(alpha: 0.3),
+                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                 width: 1.0,
               ),
             ),
@@ -200,13 +202,13 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: isSel
-                              ? primary.withValues(alpha: 0.2)
-                              : theme.colorScheme.surface,
+                              ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.2)
+                              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isSel
-                                ? primary
-                                : theme.dividerColor.withValues(alpha: 0.5),
+                                ? (isSolid ? theme.colorScheme.outline : primary)
+                                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                             width: 0.8,
                           ),
                         ),
@@ -232,10 +234,10 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainer,
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: theme.dividerColor.withValues(alpha: 0.3),
+                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                 width: 1.0,
               ),
             ),
@@ -337,10 +339,12 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainer,
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isLinked ? primary.withValues(alpha: 0.5) : theme.dividerColor.withValues(alpha: 0.3),
+                color: isLinked
+                    ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5))
+                    : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                 width: 1.0,
               ),
             ),

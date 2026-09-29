@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 31 Fase (Fase 31 Dalam Pengerjaan)
-- **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
-- **Status Proyek**: _Phase 31: Lyrics Viewport Centering, YouTube Instant Streaming, Compact Empty State & Solid Theming Mode_
+- **Total Fase**: 32 Fase (Fase 32 Selesai • 100% Passing Tests)
+- **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, StudioSurfaceTheme (Solid & Translucent), Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
+- **Status Proyek**: _Phase 32: System-Wide SurfaceFillStyle Integration & Pure Solid M3 Consistency (Completed)_
 
 ---
 
@@ -761,30 +761,94 @@ Perbaikan UX untuk koneksi Navidrome dan presisi auto-scroll lyric sinkronisasi.
 
 ---
 
-## Fase 31: Lyrics Viewport Centering, YouTube Instant Streaming, Compact Empty State & Solid Theming Mode (In Progress)
+## Fase 31: Lyrics Viewport Centering, YouTube Instant Streaming, Compact Empty State & Solid Theming Mode (Completed)
 
-Penyempurnaan presisi viewport centering lirik di semua mode pemutaran, eliminasi infinite spinner YouTube, perapian UI empty state library ke Bento 2x2, serta pengaturan gaya warna solid vs transparan.
+Penyempurnaan presisi viewport centering lirik di semua mode pemutaran, implementasi streaming WebM-to-Ogg remuxer untuk pemutaran native SoLoud, perapian UI empty state library ke Bento 2x2, serta penambahan state & selector gaya warna solid vs translucent.
 
-- [ ] **31.1 Synchronized Lyrics Active Viewport Centering (All Sources)**
-  - [ ] Implementasi `Scrollable.ensureVisible` dengan `alignment: 0.5` (`curve: Curves.easeOutCubic`, 300ms) untuk menempatkan baris lirik aktif selalu tepat di tengah vertikal viewport.
-  - [ ] Memastikan centering presisi berfungsi konsisten untuk trek Lokal/Offline, Navidrome Cloud stream, dan YouTube Music stream.
-  - [ ] Auto-scroll langsung pada inisialisasi awal, saat scrubbing/seeking, dan saat pergantian offset waktu.
+- [x] **31.1 Synchronized Lyrics Active Viewport Centering (All Sources)**
+  - [x] Implementasi `Scrollable.ensureVisible` dengan `alignment: 0.5` (`curve: Curves.easeOutCubic`, 300ms) menggunakan per-line `GlobalKey` untuk menempatkan baris lirik aktif selalu tepat di tengah vertikal viewport.
+  - [x] Centering presisi berfungsi konsisten untuk trek Lokal/Offline, Navidrome Cloud stream, dan YouTube Music stream.
+  - [x] Auto-scroll langsung pada inisialisasi awal, saat scrubbing/seeking, dan saat pergantian offset waktu.
 
-- [ ] **31.2 YouTube Instant Streaming & Non-Blocking Audio Pipeline**
-  - [ ] Refaktor `PlayerController.playTrack` untuk memutar stream YouTube secara instan (<1–2s) tanpa menunggu download 100% selesai.
-  - [ ] Background caching pipeline tetap berjalan secara fire-and-forget untuk pemutaran ulang 0ms offline.
-  - [ ] Penambahan guard timeout dan error fallback agar tombol Play/Pause tidak stuck di loading spinner.
+- [x] **31.2 WebM to Ogg Opus Real-Time Streaming Remuxer & Native SoLoud Pipeline**
+  - [x] Implementasi `WebmToOggRemuxer` (pure Dart EBML parser & Ogg Opus packager RFC 3533/7845/6716) untuk mengonversi stream WebM Opus YouTube menjadi Ogg Opus ber-header valid secara real-time.
+  - [x] Refaktor `YouTubeMusicService.getOggOpusAudioByteStream()` dan `downloadAudio()` agar data stream dan cache lokal tersimpan sebagai Ogg Opus yang dapat didecode langsung oleh engine C++ `flutter_soloud`.
+  - [x] Refaktor `PlayerController.playTrack()` untuk melakukan pre-buffering header Ogg (`OpusHead` & `OpusTags`) sebelum `playAudioSource` dipanggil, memulihkan pemutaran YouTube audio instan tanpa tertahan di loading/pause.
 
-- [ ] **31.3 Compact Bento 2x2 Library Empty State Quick Actions**
-  - [ ] Redesain layout kartu empty state library dari 4 tombol vertikal yang terlalu tinggi menjadi Bento Grid 2x2 yang ringkas dan proporsional.
-  - [ ] Mengelompokkan tombol sumber lokal (`Select Folder`, `Pick Files`) dan sumber online (`Navidrome`, `YouTube HiFi`) dengan visual studio yang rapi.
-  - [ ] Penambahan pill badge format audiophile compact di bagian footer kartu.
+- [x] **31.3 Compact Bento 2x2 Library Empty State Quick Actions**
+  - [x] Redesain layout kartu empty state library dari list vertikal panjang menjadi Bento Grid 2x2 yang ringkas dan proporsional.
+  - [x] Mengelompokkan tombol sumber lokal (`SELECT MUSIC FOLDER`, `PICK AUDIO FILES`) dan sumber online (`CONNECT NAVIDROME CLOUD`, `EXPLORE YOUTUBE MUSIC HIFI`) dengan visual studio yang rapi.
+  - [x] Penambahan pill badge format audiophile compact di bagian footer kartu.
 
-- [ ] **31.4 Theming Color Surface Fill Style Setting (Solid vs Translucent)**
-  - [ ] Penambahan enum `SurfaceFillStyle` (`translucent`, `solid`) dan integrasi ke `ThemeSettingsState` serta `LocalPersistenceService`.
-  - [ ] Penambahan Segmented Control selector pada `ThemingSettingsScreen` di bawah section `SURFACE & COMPONENT FILL STYLE`.
-  - [ ] Penerapan gaya warna solid vs transparan secara dinamis pada kartu, container, dock navigation, dan tombol.
+- [x] **31.4 Theming Color Surface Fill Style Setting (Solid vs Translucent State & Selector)**
+  - [x] Penambahan enum `SurfaceFillStyle` (`translucent`, `solid`) dan integrasi ke `ThemeSettingsState` serta `LocalPersistenceService` (`surface_fill_style`).
+  - [x] Penambahan Segmented Control selector pada `ThemingSettingsScreen` di bawah section `SURFACE & COMPONENT FILL STYLE`.
+  - [x] State tersimpan persisten dan hot-reload resilient.
 
-- [ ] **31.5 Unit & Widget Test Suite Validation**
-  - [ ] Pembuatan test file `test/phase_31_features_test.dart` untuk memvalidasi centering lirik, YouTube non-blocking stream, layout Bento empty state, dan konfigurasi solid theming.
-  - [ ] Memastikan 100% test passing dan 0 issues pada `flutter analyze`.
+- [x] **31.5 Unit & Widget Test Suite Validation**
+  - [x] Pembuatan test file `test/phase_31_features_test.dart` dan `test/webm_to_ogg_remuxer_test.dart`.
+  - [x] Memastikan 100% test passing (264 tests lulus) dan 0 issues pada `flutter analyze`.
+
+---
+
+## Fase 32: System-Wide SurfaceFillStyle Integration & Pure Solid M3 Consistency (Completed)
+
+Penerapan menyeluruh pengaturan gaya warna `SurfaceFillStyle` (`translucent` / Translucent Soft Tint vs `solid` / Pure Solid M3) ke seluruh antarmuka, kartu bento, modal, bottom sheet, dock navigasi, dan komponen di seluruh aplikasi Baydev HiFi.
+
+- [x] **32.1 Centralized `StudioSurfaceTheme` & Context Extension Helpers**
+  - [x] Pembuatan `StudioSurfaceTheme` helper class dan extension `ref.isSolidStyle` di `lib/app/theme/studio_surface_theme.dart` yang menyediakan resolusi warna container dinamis berdasarkan `surfaceFillStyle`:
+    - `surface(context, {bool isSolid = false, double translucentAlpha = 0.7})`: Mengembalikan `colorScheme.surface` solid 100% pada mode `solid`, atau `surface.withValues(alpha: translucentAlpha)` pada mode `translucent`.
+    - `surfaceContainer(context, {bool isSolid = false, double translucentAlpha = 0.6})`: Mengembalikan `colorScheme.surfaceContainer` solid 100% pada mode `solid`, atau `surfaceContainer.withValues(alpha: translucentAlpha)` pada mode `translucent`.
+    - `surfaceContainerHigh(context, {bool isSolid = false, double translucentAlpha = 0.7})`: Mengembalikan `colorScheme.surfaceContainerHigh` solid 100% pada mode `solid`.
+    - `surfaceContainerLow(context, {bool isSolid = false, double translucentAlpha = 0.5})`: Mengembalikan `colorScheme.surfaceContainerLow` solid 100% pada mode `solid`.
+    - `tintedContainer(context, Color tintColor, {bool isSolid = false, double translucentAlpha = 0.12})`: Mengembalikan `Color.alphaBlend(tintColor.withValues(alpha: 0.15), theme.colorScheme.surfaceContainer)` (100% opaque solid blend) pada mode `solid`.
+    - `outline(context, {bool isSolid = false, double translucentAlpha = 0.4})`: Mengembalikan `colorScheme.outline` solid pada mode `solid`.
+    - `subtleOutline(context, {bool isSolid = false, double translucentAlpha = 0.25})`: Mengembalikan `colorScheme.outlineVariant` solid pada mode `solid`.
+    - `cardDecoration(...)`: Helper standar dekorasi card Bento dengan border dan shadow solid vs translucent.
+
+- [x] **32.2 Dashboard Bento Grid & Hero Cards SurfaceFillStyle Application**
+  - [x] Penerapan ke `DashboardScreen`: Background gradient/solid surface container.
+  - [x] Penerapan ke `EngineTelemetryBentoCard`: Card container, spec badge, telemetry gauges.
+  - [x] Penerapan ke `ListeningStatisticsCard`: Lossless breakdown container, rank badge, format pills.
+  - [x] Penerapan ke `MasteringDspBentoCard`: Unit status pills, bypass badges, launcher container.
+  - [x] Penerapan ke `ProQMiniLauncherBentoCard`: Mini RTA container, frequency zone pills.
+  - [x] Penerapan ke `RecentLosslessSessionsCarousel`: Track tile containers, Hi-Res format badges.
+  - [x] Penerapan ke `StudioHeroShowcaseCarousel`: Showcase cards, action buttons, page indicator container.
+
+- [x] **32.3 Unified Library & Detail Screens SurfaceFillStyle Application**
+  - [x] Penerapan ke `UnifiedLibraryScreen`: Search bar container, empty state Bento 2x2 cards, multi-selection bottom action bar (`LibraryBatchActionsBar`).
+  - [x] Penerapan ke `TrackTile` dan `StudioTrackActionSheet` (Action item rows, metadata header card).
+  - [x] Penerapan ke detail screens: `AlbumDetailScreen`, `ArtistDetailScreen`, `GenreDetailScreen`, `FolderDetailScreen`, `PlaylistsScreen`.
+
+- [x] **32.4 NowPlaying Screen, Lyrics & Modal Sheets SurfaceFillStyle Application**
+  - [x] Penerapan ke `NowPlayingScreen`: Top header pills, format badge container, playback control containers, volume & speed bars, studio action strip.
+  - [x] Penerapan ke `NowPlayingQueueSheet`: Queue container, reorder tiles, clear/shuffle pills.
+  - [x] Penerapan ke `SynchronizedLyricsView`: Active line container, mode toggle pill container.
+  - [x] Penerapan ke `StudioDeskDockingScreen` & `StudioCarDockingScreen`: Dashboard container, big transport buttons.
+  - [x] Penerapan ke `PlaybackSpeedPitchSheet`, `SleepTimerSheet`, `AudioFileInspectorSheet`, `StudioDspBentoCapsule`, `DualPaneWorkstationPane`.
+
+- [x] **32.5 DSP Rack, Pro-Q Studio & Parametric Canvas SurfaceFillStyle Application**
+  - [x] Penerapan ke `DspRackScreen`: `RackUnitCard` containers (expanded & collapsed), knob background discs, bypass switches, profile dialogs.
+  - [x] Penerapan ke `ProQStudioScreen`: Bottom control strip (`BandStripBar`), band pills (`B1`, `B2`, ...), action buttons (`Add Band`, `Delete`, `Undo`), filter type selectors.
+  - [x] Penerapan ke `AutoEqCloudBrowserDialog`, `AutoEqModalDialog`, `SquiglinkDialog`.
+
+- [x] **32.6 Settings Screens & Dialogs SurfaceFillStyle Application**
+  - [x] Penerapan ke `SettingsScreen`: Settings overview hero card, category cards, navigation containers.
+  - [x] Penerapan ke sub-screens: `ThemingSettingsScreen`, `PlaybackEngineSettingsScreen`, `StorageCacheSettingsScreen`, `BackupRestoreSettingsScreen`, `LibraryScannerSettingsScreen`, `VisualizerSettingsScreen`, `GesturesSettingsScreen`, `DockingSettingsScreen`, `AudioHardwareSettingsScreen`.
+  - [x] Penerapan ke dialogs & modals: `NavidromeConnectDialog`, `MetadataTagEditorSheet`, `BatchTrackTagEditorModal`.
+
+- [x] **32.7 YouTube Music HiFi Discovery Screen SurfaceFillStyle Application**
+  - [x] Penerapan ke `YouTubeDiscoveryScreen`: Search input container, quick category chips, trending cards, related songs ribbons, video item tiles.
+
+- [x] **32.8 Audio Dock & MiniPlayer Navigation SurfaceFillStyle Application**
+  - [x] Penerapan ke `FloatingRoundedDock`: Floating capsule dock background (solid vs translucent blur), active tab indicator pill.
+  - [x] Penerapan ke `NamidaExpandableMiniPlayer`: Collapsed miniplayer container, progress bar, play/pause capsule button.
+
+- [x] **32.9 Pure Solid M3 Anti-Neon Surface & Studio Neutral Palette Standardization**
+  - [x] Standardisasi seluruh preset `AppPalette` (`namidaCyan`, `pastelSage`, `amberTube`, `emeraldHiFi`, `electricPurple`, `crimsonPassion`, `pastelLavender`, `pastelSky`, `pastelPeach`, `pastelBlush`, `pastelButter`) ke neutral studio dark surfaces (`0xFF0C0E12`, `0xFF14161C`, `0xFF1C1F27`, `0xFF242833`) dan neutral light surfaces, menghapus murky green/tinted background wash.
+  - [x] Pembaruan `StudioSurfaceTheme.tintedContainer` pada mode solid mengembalikan `surfaceContainerHighest` murni untuk kartu icon, pill badges, dan chip kontrol.
+  - [x] Penghapusan glowing neon colored `BoxShadow` pada tombol Play MiniPlayer & NowPlayingScreen, digantikan dengan neutral soft shadow.
+  - [x] Pembaruan `_buildCategoryCard`, hero metrics, dan badge pill di `SettingsScreen` agar menggunakan neutral solid containers dan neutral subtle outlines.
+  - [x] Pembaruan active tab capsule pada `FloatingRoundedDock` dengan neutral solid surface.
+  - [x] Suite test di `test/phase_32_surface_fill_style_test.dart` lulus 100% (277/277 tests) dengan 0 issues pada `flutter analyze`.
+
