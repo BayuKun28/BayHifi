@@ -71,36 +71,26 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 120), // Extra bottom padding for floating dock & miniplayer
         children: [
-          // ─── 1. STUDIO CONFIGURATION STATUS HERO ─────────────────────────
+          // ─── 1. INTERACTIVE STUDIO COCKPIT TELEMETRY HERO ────────────────
           _buildStudioOverviewHero(context, themeState, isSolid),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-          // ─── SECTION HEADER ──────────────────────────────────────────────
-          Row(
-            children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedGrid, size: 15, color: primary),
-              const SizedBox(width: 8),
-              Text(
-                'SETTINGS CATEGORIES',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.6,
-                ),
-              ),
-            ],
+          // ─── 2. SECTION 1: AESTHETICS & ATMOSPHERE ──────────────────────
+          _buildSectionHeader(
+            context,
+            title: 'AESTHETICS & ATMOSPHERE',
+            icon: HugeIcons.strokeRoundedLayers01,
+            color: primary,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ─── 1. THEMING & COLOR PALETTES ─────────────────────────────────
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedLayers01,
+            icon: HugeIcons.strokeRoundedColorPicker,
             accentColor: primary,
             title: 'THEMING & COLOR PALETTES',
-            subtitle: '7 Studio Palettes, Light/Dark/System Mode, Custom Neon Accents & Dynamic Monet Palette',
-            badgeText: '${themeState.currentPalette.name} • ${themeState.themeMode.label}',
+            subtitle: '19 Studio Palettes, Light/Dark/System Mode, Pure Solid M3 Surface Fills & Monet Dynamic Art',
+            badgeText: '${themeState.currentPalette.name} • ${themeState.isSolidStyle ? "Pure Solid" : "Translucent"}',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ThemingSettingsScreen()),
@@ -108,16 +98,15 @@ class SettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ─── 2. VISUALIZER & DISPLAY ──────────────────────────────────────
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedAudioWaveform,
             accentColor: theme.colorScheme.secondary,
             title: 'VISUALIZER & DISPLAY',
-            subtitle: '120fps HiFi Profile, 3D Parallax, Gaussian Blur, Ambient Glow, Spectrum Bars & Vinyl Disc',
-            badgeText: '3D Parallax • Ambient Glow',
+            subtitle: 'Turntable Tonearm, Cassette, CD Jewel, Dual VU Meters, Mirror Wave & Precision Studio Ruler',
+            badgeText: 'Live RTA • 20 Expressive Styles',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const VisualizerSettingsScreen()),
@@ -125,32 +114,14 @@ class SettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ─── 3. GESTURES & TRACK TILES ────────────────────────────────────
-          _buildCategoryCard(
-            context,
-            icon: HugeIcons.strokeRoundedActivity01,
-            accentColor: const Color(0xFF00E5FF),
-            title: 'GESTURES & TRACK TILES',
-            subtitle: 'Artwork tap triggers (Lyrics, Fav, Inspector), swipe-to-queue/favorite & track tile layout options',
-            badgeText: 'Touch Gestures • Swipe Actions',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const GesturesSettingsScreen()),
-              );
-            },
-            isSolid: isSolid,
-          ),
-          const SizedBox(height: 12),
-
-          // ─── 3. STUDIO WORKSTATION & CAR DOCK ────────────────────────────
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCar01,
             accentColor: theme.colorScheme.tertiary,
             title: 'STUDIO WORKSTATION & CAR DOCK',
-            subtitle: 'High-contrast studio clock, dual analog VU level meters & extra-large buttons for desk & car stands',
+            subtitle: 'High-contrast studio timecode clock, dual analog VU level dials & large controls for desk stands',
             badgeText: 'Fullscreen Stand Mode',
             onTap: () {
               Navigator.of(context).push(
@@ -159,15 +130,23 @@ class SettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
 
-          // ─── 4. AUDIO HARDWARE & DAC ENGINE ──────────────────────────────
+          // ─── 3. SECTION 2: AUDIO ARCHITECTURE & DSP ─────────────────────
+          _buildSectionHeader(
+            context,
+            title: 'AUDIO ARCHITECTURE & DSP WORKSTATION',
+            icon: HugeIcons.strokeRoundedCpu,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 10),
+
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCpu,
             accentColor: primary,
             title: 'AUDIO HARDWARE & DAC ENGINE',
-            subtitle: 'SoLoud C++ Engine, Bit-Perfect DAC Direct Bypass, Output Audio Devices & Latency Buffer Tuning',
+            subtitle: 'SoLoud C++ Engine, Bit-Perfect Direct Stream Bypass, Output Devices & Latency Buffer Tuning',
             badgeText: 'Bit-Perfect PCM Ready',
             onTap: () {
               Navigator.of(context).push(
@@ -176,14 +155,13 @@ class SettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ─── 5. ADVANCED PLAYBACK & INTERRUPTION ────────────────────────
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedDashboardSpeed01,
-            accentColor: primary,
-            title: 'ADVANCED PLAYBACK & INTERRUPTION',
+            accentColor: theme.colorScheme.secondary,
+            title: 'ADVANCED PLAYBACK ENGINE & FADES',
             subtitle: 'Smooth volume fades, headphone unplug guard, speed/pitch semitones, ReplayGain & seek stepper',
             badgeText: 'Engine Transitions & Policies',
             onTap: () {
@@ -193,15 +171,23 @@ class SettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
 
-          // ─── 6. LIBRARY SCANNER & SLEEP TIMER ────────────────────────────
+          // ─── 4. SECTION 3: MEDIA, LIBRARY & STORAGE ──────────────────────
+          _buildSectionHeader(
+            context,
+            title: 'MEDIA, LIBRARY & STORAGE',
+            icon: HugeIcons.strokeRoundedFolder01,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 10),
+
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedFolder01,
             accentColor: theme.colorScheme.secondary,
             title: 'LIBRARY SCANNER & SLEEP TIMER',
-            subtitle: 'Automated 15s volume attenuation sleep timer, startup library scan & short clip duration filters',
+            subtitle: 'Automated 15s/30s volume attenuation sleep timer, startup library scan & audio clip filters',
             badgeText: 'Scanner Rules Active',
             onTap: () {
               Navigator.of(context).push(
@@ -210,15 +196,14 @@ class SettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ─── 7. STORAGE & CACHE QUOTA ──────────────────────────────────
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedDatabase,
             accentColor: const Color(0xFF00E5FF),
             title: 'STORAGE & CACHE QUOTA',
-            subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & duplicate resolver',
+            subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & database vacuum',
             badgeText: 'Cache & Integrity',
             onTap: () {
               Navigator.of(context).push(
@@ -227,13 +212,37 @@ class SettingsScreen extends ConsumerWidget {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
 
-          // ─── 8. BACKUP & RESTORE ARCHIVE ────────────────────────────────
+          // ─── 5. SECTION 4: SYSTEM, GESTURES & ARCHIVE ────────────────────
+          _buildSectionHeader(
+            context,
+            title: 'SYSTEM, GESTURES & ARCHIVE',
+            icon: HugeIcons.strokeRoundedSettings01,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 10),
+
+          _buildCategoryCard(
+            context,
+            icon: HugeIcons.strokeRoundedActivity01,
+            accentColor: primary,
+            title: 'GESTURES & TRACK TILES',
+            subtitle: 'Artwork tap triggers (Lyrics, Fav, Inspector), swipe-to-queue/favorite & track tile layouts',
+            badgeText: 'Touch Gestures • Swipe Actions',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const GesturesSettingsScreen()),
+              );
+            },
+            isSolid: isSolid,
+          ),
+          const SizedBox(height: 10),
+
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCloudSync,
-            accentColor: primary,
+            accentColor: theme.colorScheme.secondary,
             title: 'BACKUP & RESTORE ARCHIVE',
             subtitle: 'Export and import portable .bayhifi JSON snapshots containing playlists, smart rules & presets',
             badgeText: '.bayhifi Snapshot Engine',
@@ -313,6 +322,33 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildSectionHeader(
+    BuildContext context, {
+    required String title,
+    required dynamic icon,
+    required Color color,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0, bottom: 2.0),
+      child: Row(
+        children: [
+          HugeIcon(icon: icon, size: 14, color: color),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              fontSize: 11.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStudioOverviewHero(BuildContext context, ThemeSettingsState themeState, bool isSolid) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
@@ -324,16 +360,18 @@ class SettingsScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-        borderRadius: BorderRadius.circular(16),
+        color: isSolid ? theme.colorScheme.surfaceContainer : StudioSurfaceTheme.surfaceContainer(context, isSolid: false),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          color: isSolid
+              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+              : StudioSurfaceTheme.outline(context, isSolid: false),
           width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isSolid ? 0.2 : 0.15),
-            blurRadius: 12,
+            color: Colors.black.withValues(alpha: isSolid ? 0.25 : 0.15),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -352,27 +390,33 @@ class SettingsScreen extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: primary,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: primary.withValues(alpha: 0.5),
+                          blurRadius: 6,
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'STUDIO SYSTEM PROFILE',
+                    'STUDIO SYSTEM COCKPIT',
                     style: TextStyle(
                       color: primary,
-                      fontSize: 10.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
+                      letterSpacing: 0.9,
                     ),
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
                 decoration: BoxDecoration(
                   color: isSolid
                       ? theme.colorScheme.surfaceContainerHighest
                       : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isSolid
                         ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
@@ -380,13 +424,20 @@ class SettingsScreen extends ConsumerWidget {
                     width: 0.8,
                   ),
                 ),
-                child: Text(
-                  '48kHz SOLOUD ONLINE',
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(icon: HugeIcons.strokeRoundedCpu, size: 11, color: primary),
+                    const SizedBox(width: 5),
+                    Text(
+                      '48kHz SOLOUD ENGINE',
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -394,28 +445,46 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              _buildHeroMetric(
+              _buildInteractiveTelemetryChip(
                 context,
-                label: 'THEME',
+                icon: HugeIcons.strokeRoundedPaintBoard,
+                label: 'PALETTE',
                 value: themeState.currentPalette.name,
                 accent: primary,
                 isSolid: isSolid,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ThemingSettingsScreen()),
+                  );
+                },
               ),
-              const SizedBox(width: 16),
-              _buildHeroMetric(
+              const SizedBox(width: 8),
+              _buildInteractiveTelemetryChip(
                 context,
-                label: 'DAC ENGINE',
-                value: isBitPerfect ? 'Bit-Perfect' : 'Standard PCM',
-                accent: theme.colorScheme.primary,
-                isSolid: isSolid,
-              ),
-              const SizedBox(width: 16),
-              _buildHeroMetric(
-                context,
-                label: 'RTA DISPLAY',
-                value: visualizerStyle,
+                icon: HugeIcons.strokeRoundedCpu,
+                label: 'AUDIO DAC',
+                value: isBitPerfect ? 'Bit-Perfect' : 'Standard',
                 accent: theme.colorScheme.secondary,
                 isSolid: isSolid,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AudioHardwareSettingsScreen()),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              _buildInteractiveTelemetryChip(
+                context,
+                icon: HugeIcons.strokeRoundedAudioWaveform,
+                label: 'RTA PROFILE',
+                value: visualizerStyle,
+                accent: theme.colorScheme.tertiary,
+                isSolid: isSolid,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const VisualizerSettingsScreen()),
+                  );
+                },
               ),
             ],
           ),
@@ -424,38 +493,70 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeroMetric(
+  Widget _buildInteractiveTelemetryChip(
     BuildContext context, {
+    required dynamic icon,
     required String label,
     required String value,
     required Color accent,
     required bool isSolid,
+    required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
     return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 9.5,
-              fontWeight: FontWeight.w700,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSolid
+                ? theme.colorScheme.surfaceContainerHighest
+                : StudioSurfaceTheme.tintedContainer(context, accent, isSolid: false, translucentAlpha: 0.10),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSolid
+                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                  : accent.withValues(alpha: 0.25),
+              width: 0.8,
             ),
           ),
-          const SizedBox(height: 3),
-          Text(
-            value,
-            style: TextStyle(
-              color: isSolid ? theme.colorScheme.onSurface : accent,
-              fontSize: 11.5,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  HugeIcon(icon: icon, size: 11, color: isSolid ? theme.colorScheme.onSurfaceVariant : accent),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  color: isSolid ? theme.colorScheme.onSurface : accent,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

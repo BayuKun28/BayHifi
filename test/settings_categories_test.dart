@@ -26,7 +26,7 @@ void main() {
 
     // 1. Verify Main Category Hub renders
     expect(find.text('SETTINGS & PREFERENCES'), findsOneWidget);
-    expect(find.text('STUDIO SYSTEM PROFILE'), findsOneWidget);
+    expect(find.text('STUDIO SYSTEM COCKPIT'), findsOneWidget);
     expect(find.text('THEMING & COLOR PALETTES'), findsOneWidget);
 
     // 2. Test Navigating to Theming Sub-screen

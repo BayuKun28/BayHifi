@@ -283,8 +283,120 @@ class AppPalette {
     surfaceContainerLight: Color(0xFFF1F5F9),
   );
 
+  static const AppPalette nordicSlate = AppPalette(
+    id: 'nordic_slate',
+    name: 'Nordic Slate Frost',
+    description: 'Minimalist Scandinavian studio slate blue and cool brushed silver tone',
+    primary: Color(0xFF64748B),
+    secondary: Color(0xFF475569),
+    accent: Color(0xFF94A3B8),
+    backgroundDark: Color(0xFF0D1017),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF131722),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF1B202E),
+    surfaceContainerLight: Color(0xFFF1F5F9),
+  );
+
+  static const AppPalette terracottaClay = AppPalette(
+    id: 'terracotta_clay',
+    name: 'Terracotta Clay',
+    description: 'Warm acoustic earth, organic ceramic kiln and burnt sienna tone',
+    primary: Color(0xFFC2410C),
+    secondary: Color(0xFF9A3412),
+    accent: Color(0xFFEA580C),
+    backgroundDark: Color(0xFF110D0B),
+    backgroundLight: Color(0xFFFFFBF8),
+    surfaceDark: Color(0xFF1A1411),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF241C18),
+    surfaceContainerLight: Color(0xFFFBF4EF),
+  );
+
+  static const AppPalette matchaBotanical = AppPalette(
+    id: 'matcha_botanical',
+    name: 'Matcha Botanical',
+    description: 'Deep organic matcha green tea and bamboo studio tranquility',
+    primary: Color(0xFF15803D),
+    secondary: Color(0xFF166534),
+    accent: Color(0xFF22C55E),
+    backgroundDark: Color(0xFF0C120E),
+    backgroundLight: Color(0xFFF7FCF8),
+    surfaceDark: Color(0xFF121B15),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF1A261E),
+    surfaceContainerLight: Color(0xFFF0F8F2),
+  );
+
+  static const AppPalette midnightSapphire = AppPalette(
+    id: 'midnight_sapphire',
+    name: 'Midnight Sapphire',
+    description: 'Deep naval sapphire blue and cobalt mastering console tone',
+    primary: Color(0xFF2563EB),
+    secondary: Color(0xFF1D4ED8),
+    accent: Color(0xFF3B82F6),
+    backgroundDark: Color(0xFF0A0E17),
+    backgroundLight: Color(0xFFF8FAFC),
+    surfaceDark: Color(0xFF101726),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF172036),
+    surfaceContainerLight: Color(0xFFF0F4FA),
+  );
+
+  static const AppPalette vintageBrass = AppPalette(
+    id: 'vintage_brass',
+    name: 'Vintage Brass & Walnut',
+    description: 'Luxury vintage vacuum tube amplifier brass and dark walnut aesthetic',
+    primary: Color(0xFFCA8A04),
+    secondary: Color(0xFFA16207),
+    accent: Color(0xFFEAB308),
+    backgroundDark: Color(0xFF12100A),
+    backgroundLight: Color(0xFFFCFAF5),
+    surfaceDark: Color(0xFF1C1810),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF262116),
+    surfaceContainerLight: Color(0xFFF7F3E9),
+  );
+
+  static const AppPalette mochaEspresso = AppPalette(
+    id: 'mocha_espresso',
+    name: 'Mocha Espresso',
+    description: 'Rich artisanal dark roast coffee and warm roasted cacao studio tone',
+    primary: Color(0xFF78350F),
+    secondary: Color(0xFF92400E),
+    accent: Color(0xFFB45309),
+    backgroundDark: Color(0xFF110D0B),
+    backgroundLight: Color(0xFFFCFAF8),
+    surfaceDark: Color(0xFF1A1310),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF241C17),
+    surfaceContainerLight: Color(0xFFF7F2EE),
+  );
+
+  static const AppPalette proCarbon = AppPalette(
+    id: 'pro_carbon',
+    name: 'Monochrome Pro Carbon',
+    description: 'High-contrast pure grayscale studio reference mastering monitor aesthetic',
+    primary: Color(0xFF71717A),
+    secondary: Color(0xFF52525B),
+    accent: Color(0xFFA1A1AA),
+    backgroundDark: Color(0xFF0F0F11),
+    backgroundLight: Color(0xFFFAFAFA),
+    surfaceDark: Color(0xFF18181B),
+    surfaceLight: Color(0xFFFFFFFF),
+    surfaceContainerDark: Color(0xFF27272A),
+    surfaceContainerLight: Color(0xFFF4F4F5),
+  );
+
   static const List<AppPalette> allPresets = [
     namidaCyan,
+    nordicSlate,
+    terracottaClay,
+    matchaBotanical,
+    midnightSapphire,
+    vintageBrass,
+    mochaEspresso,
+    proCarbon,
     pastelLavender,
     pastelSage,
     pastelSky,

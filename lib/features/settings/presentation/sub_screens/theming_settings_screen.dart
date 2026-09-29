@@ -12,6 +12,13 @@ class ThemingSettingsScreen extends ConsumerWidget {
 
   static const List<Color> _accentOptions = [
     Color(0xFF38BDF8), // Sky Studio
+    Color(0xFF64748B), // Nordic Slate
+    Color(0xFFC2410C), // Terracotta Clay
+    Color(0xFF15803D), // Matcha Botanical
+    Color(0xFF2563EB), // Midnight Sapphire
+    Color(0xFFCA8A04), // Vintage Brass
+    Color(0xFF78350F), // Mocha Espresso
+    Color(0xFF71717A), // Pro Carbon
     Color(0xFFF59E0B), // Tube Amber
     Color(0xFF10B981), // Precision Mint
     Color(0xFFA855F7), // Studio Violet
