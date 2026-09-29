@@ -7,6 +7,7 @@ import 'package:baydev_hifi/features/settings/presentation/settings_screen.dart'
 import 'package:baydev_hifi/features/settings/presentation/sub_screens/theming_settings_screen.dart';
 import 'package:baydev_hifi/features/settings/presentation/sub_screens/audio_hardware_settings_screen.dart';
 import 'package:baydev_hifi/features/settings/presentation/sub_screens/docking_settings_screen.dart';
+import 'package:baydev_hifi/features/settings/presentation/sub_screens/playback_engine_settings_screen.dart';
 import 'package:baydev_hifi/core/database/local_persistence_service.dart';
 
 void main() {
@@ -178,6 +179,36 @@ void main() {
       expect(find.text('Output Audio Device'), findsOneWidget);
       expect(find.text('Buffer Latency Tuning'), findsOneWidget);
       expect(find.text('Bit-Perfect Resampling Bypass'), findsOneWidget);
+    });
+
+    testWidgets('PlaybackEngineSettingsScreen renders compact Bento ComboBox dropdowns', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppThemeBuilder.buildTheme(AppPalette.namidaCyan, isDark: true),
+            home: const PlaybackEngineSettingsScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('PLAYBACK ENGINE & INTERRUPTION'), findsOneWidget);
+      expect(find.text('REPLAYGAIN LOUDNESS NORMALIZATION'), findsOneWidget);
+      expect(find.text('SEEK STEPPER JUMP MODE'), findsOneWidget);
+      expect(find.text('TIME BAR DISPLAY MODE'), findsOneWidget);
+      expect(find.text('Track Gain'), findsOneWidget);
+      expect(find.text('Constant Seconds'), findsOneWidget);
+      expect(find.text('Remaining Time'), findsOneWidget);
     });
 
     testWidgets('DockingSettingsScreen renders desk docking action and feature overview', (tester) async {

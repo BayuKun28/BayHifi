@@ -761,26 +761,30 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'ReplayGain Loudness Mode',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SegmentedButton<ReplayGainMode>(
-            segments: const [
-              ButtonSegment(value: ReplayGainMode.off, label: Text('Off')),
-              ButtonSegment(value: ReplayGainMode.track, label: Text('Track')),
-              ButtonSegment(value: ReplayGainMode.album, label: Text('Album')),
-            ],
-            selected: {settings.replayGainMode},
-            onSelectionChanged: (val) {
-              HapticFeedback.selectionClick();
-              notifier.setReplayGainMode(val.first);
+          _buildBentoDropdownSelector<ReplayGainMode>(
+            context: context,
+            title: 'REPLAYGAIN LOUDNESS NORMALIZATION',
+            currentValue: settings.replayGainMode,
+            items: ReplayGainMode.values,
+            itemLabel: (m) => m.label,
+            itemDescription: (m) => m.description,
+            itemIcon: (m) {
+              switch (m) {
+                case ReplayGainMode.off:
+                  return HugeIcons.strokeRoundedCancel01;
+                case ReplayGainMode.track:
+                  return HugeIcons.strokeRoundedMusicNote01;
+                case ReplayGainMode.album:
+                  return HugeIcons.strokeRoundedDisc;
+              }
             },
+            onChanged: (val) {
+              if (val != null) {
+                HapticFeedback.selectionClick();
+                notifier.setReplayGainMode(val);
+              }
+            },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 14),
 
@@ -796,13 +800,28 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              Text(
-                '${settings.replayGainPreampDb >= 0 ? '+' : ''}${settings.replayGainPreampDb.toStringAsFixed(1)} dB',
-                style: TextStyle(
-                  fontFeatures: AppTypography.audioFigures,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
-                  color: primary,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isSolid
+                      ? theme.colorScheme.surfaceContainerHighest
+                      : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isSolid
+                        ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                        : primary.withValues(alpha: 0.3),
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  '${settings.replayGainPreampDb >= 0 ? '+' : ''}${settings.replayGainPreampDb.toStringAsFixed(1)} dB',
+                  style: TextStyle(
+                    fontFeatures: AppTypography.audioFigures,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: primary,
+                  ),
                 ),
               ),
             ],
@@ -905,13 +924,28 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                Text(
-                  '${settings.silenceThresholdDb.toStringAsFixed(0)} dBFS',
-                  style: TextStyle(
-                    fontFeatures: AppTypography.audioFigures,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w800,
-                    color: primary,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSolid
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isSolid
+                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                          : primary.withValues(alpha: 0.3),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${settings.silenceThresholdDb.toStringAsFixed(0)} dBFS',
+                    style: TextStyle(
+                      fontFeatures: AppTypography.audioFigures,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: primary,
+                    ),
                   ),
                 ),
               ],
@@ -949,31 +983,28 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Seek Stepper Mode',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SegmentedButton<SeekStepMode>(
-            segments: const [
-              ButtonSegment(
-                value: SeekStepMode.constantSeconds,
-                label: Text('Fixed Seconds'),
-              ),
-              ButtonSegment(
-                value: SeekStepMode.percentage,
-                label: Text('Percentage'),
-              ),
-            ],
-            selected: {settings.seekStepMode},
-            onSelectionChanged: (val) {
-              HapticFeedback.selectionClick();
-              notifier.setSeekStepMode(val.first);
+          _buildBentoDropdownSelector<SeekStepMode>(
+            context: context,
+            title: 'SEEK STEPPER JUMP MODE',
+            currentValue: settings.seekStepMode,
+            items: SeekStepMode.values,
+            itemLabel: (s) => s.label,
+            itemDescription: (s) => s.description,
+            itemIcon: (s) {
+              switch (s) {
+                case SeekStepMode.constantSeconds:
+                  return HugeIcons.strokeRoundedHourglass;
+                case SeekStepMode.percentage:
+                  return HugeIcons.strokeRoundedPieChart;
+              }
             },
+            onChanged: (val) {
+              if (val != null) {
+                HapticFeedback.selectionClick();
+                notifier.setSeekStepMode(val);
+              }
+            },
+            isSolid: isSolid,
           ),
           const SizedBox(height: 14),
 
@@ -989,13 +1020,28 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                Text(
-                  '${settings.seekStepSeconds} seconds',
-                  style: TextStyle(
-                    fontFeatures: AppTypography.audioFigures,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w800,
-                    color: primary,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSolid
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isSolid
+                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                          : primary.withValues(alpha: 0.3),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${settings.seekStepSeconds} s',
+                    style: TextStyle(
+                      fontFeatures: AppTypography.audioFigures,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: primary,
+                    ),
                   ),
                 ),
               ],
@@ -1020,13 +1066,28 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                Text(
-                  '${(settings.seekStepPercent * 100).toStringAsFixed(0)} %',
-                  style: TextStyle(
-                    fontFeatures: AppTypography.audioFigures,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w800,
-                    color: primary,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSolid
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isSolid
+                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+                          : primary.withValues(alpha: 0.3),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${(settings.seekStepPercent * 100).toStringAsFixed(0)} %',
+                    style: TextStyle(
+                      fontFeatures: AppTypography.audioFigures,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: primary,
+                    ),
                   ),
                 ),
               ],
@@ -1043,32 +1104,130 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
 
           const Divider(height: 20),
 
-          // Time Display Mode Toggle
+          // Time Display Mode Bento ComboBox
+          _buildBentoDropdownSelector<TimeDisplayMode>(
+            context: context,
+            title: 'TIME BAR DISPLAY MODE',
+            currentValue: settings.timeDisplayMode,
+            items: TimeDisplayMode.values,
+            itemLabel: (t) => t.label,
+            itemDescription: (t) => t.description,
+            itemIcon: (t) {
+              switch (t) {
+                case TimeDisplayMode.remaining:
+                  return HugeIcons.strokeRoundedHourglass;
+                case TimeDisplayMode.total:
+                  return HugeIcons.strokeRoundedClock01;
+              }
+            },
+            onChanged: (val) {
+              if (val != null) {
+                HapticFeedback.selectionClick();
+                notifier.setTimeDisplayMode(val);
+              }
+            },
+            isSolid: isSolid,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── REUSABLE BENTO DROPDOWN SELECTOR HELPER ─────────────────────────────
+  Widget _buildBentoDropdownSelector<T>({
+    required BuildContext context,
+    required String title,
+    required T currentValue,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required String Function(T) itemDescription,
+    required dynamic Function(T) itemIcon,
+    required ValueChanged<T?> onChanged,
+    required bool isSolid,
+  }) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isSolid
+            ? theme.colorScheme.surfaceContainerHighest
+            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: false),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSolid
+              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
+              : StudioSurfaceTheme.outline(context, isSolid: false),
+          width: 0.8,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            'Default Time Bar Display Mode',
+            title,
             style: TextStyle(
-              fontSize: 11,
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 9.5,
               fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurface,
+              letterSpacing: 0.6,
             ),
           ),
-          const SizedBox(height: 8),
-          SegmentedButton<TimeDisplayMode>(
-            segments: const [
-              ButtonSegment(
-                value: TimeDisplayMode.remaining,
-                label: Text('Remaining (-mm:ss)'),
+          const SizedBox(height: 4),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: currentValue,
+              isExpanded: true,
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowDown01,
+                size: 15,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              ButtonSegment(
-                value: TimeDisplayMode.total,
-                label: Text('Total (mm:ss)'),
-              ),
-            ],
-            selected: {settings.timeDisplayMode},
-            onSelectionChanged: (val) {
-              HapticFeedback.selectionClick();
-              notifier.setTimeDisplayMode(val.first);
-            },
+              dropdownColor: isSolid
+                  ? theme.colorScheme.surfaceContainerHigh
+                  : theme.colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+              items: items.map((item) {
+                final isSelected = item == currentValue;
+                return DropdownMenuItem<T>(
+                  value: item,
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: itemIcon(item),
+                        size: 16,
+                        color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          itemLabel(item),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: isSelected ? primary : theme.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            itemDescription(currentValue),
+            style: TextStyle(
+              fontSize: 10,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+              height: 1.25,
+            ),
           ),
         ],
       ),
