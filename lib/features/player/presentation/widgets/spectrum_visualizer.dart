@@ -6,7 +6,7 @@ import '../../../../audio_engine/fft_processor.dart';
 import '../../../settings/domain/player_customization_settings.dart';
 import '../../../settings/presentation/controllers/player_customization_controller.dart';
 
-/// Widget visualizer spektrum FFT (RTA bars / Wave / Dots / Beam) real-time 60fps dengan Material 3 Expressive glow.
+/// Widget visualizer spektrum FFT (RTA bars / Wave / Dots / Beam / Mirror Wave / VU Meter / Circular) real-time.
 class SpectrumVisualizer extends ConsumerWidget {
   final double height;
   final Color? barColor;
@@ -53,7 +53,6 @@ class _RtaCustomPainter extends CustomPainter {
   final bool showPeakHold;
   final SpectrumStyle style;
 
-  // Cached paint objects
   final Paint _paint = Paint()..isAntiAlias = true;
   final Paint _strokePaint = Paint()
     ..isAntiAlias = true
@@ -87,6 +86,15 @@ class _RtaCustomPainter extends CustomPainter {
         break;
       case SpectrumStyle.beam:
         _paintBeam(canvas, size, count);
+        break;
+      case SpectrumStyle.mirrorWave:
+        _paintMirrorWave(canvas, size, count);
+        break;
+      case SpectrumStyle.vuMeter:
+        _paintVuMeter(canvas, size, count);
+        break;
+      case SpectrumStyle.circular:
+        _paintCircular(canvas, size, count);
         break;
     }
   }
@@ -157,7 +165,6 @@ class _RtaCustomPainter extends CustomPainter {
     fillPath.lineTo(size.width, size.height);
     fillPath.close();
 
-    // Fill gradient
     final fillGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -172,7 +179,6 @@ class _RtaCustomPainter extends CustomPainter {
     canvas.drawPath(fillPath, _paint);
     _paint.shader = null;
 
-    // Stroke line
     _strokePaint.color = barColor;
     _strokePaint.strokeWidth = 2.0;
     canvas.drawPath(path, _strokePaint);
@@ -228,11 +234,155 @@ class _RtaCustomPainter extends CustomPainter {
     _strokePaint.strokeWidth = 1.4;
     canvas.drawPath(btmPath, _strokePaint);
 
-    // Center laser line
     final Paint centerLine = Paint()
       ..color = const Color(0xFF00F0FF).withValues(alpha: 0.9)
       ..strokeWidth = 1.0;
     canvas.drawLine(Offset(0, midY), Offset(size.width, midY), centerLine);
+  }
+
+  void _paintMirrorWave(Canvas canvas, Size size, int count) {
+    final double midY = size.height * 0.5;
+    final Path topPath = Path();
+    final Path btmPath = Path();
+    final Path fillArea = Path();
+
+    final double step = size.width / (count - 1);
+    topPath.moveTo(0, midY - (magnitudes[0].clamp(0.0, 1.0) * midY * 0.9));
+    btmPath.moveTo(0, midY + (magnitudes[0].clamp(0.0, 1.0) * midY * 0.9));
+    fillArea.moveTo(0, midY);
+
+    for (int i = 1; i < count; i++) {
+      final double x = i * step;
+      final double amp = magnitudes[i].clamp(0.0, 1.0) * midY * 0.9;
+      final double prevX = (i - 1) * step;
+      final double prevAmp = magnitudes[i - 1].clamp(0.0, 1.0) * midY * 0.9;
+
+      final double cX = prevX + (x - prevX) / 2;
+      topPath.cubicTo(cX, midY - prevAmp, cX, midY - amp, x, midY - amp);
+      btmPath.cubicTo(cX, midY + prevAmp, cX, midY + amp, x, midY + amp);
+    }
+
+    // Fill area between curves
+    fillArea.addPath(topPath, Offset.zero);
+    fillArea.lineTo(size.width, midY);
+    fillArea.addPath(btmPath, Offset.zero);
+    fillArea.close();
+
+    _paint.color = barColor.withValues(alpha: 0.18);
+    _paint.style = PaintingStyle.fill;
+    canvas.drawPath(fillArea, _paint);
+
+    _strokePaint.color = barColor;
+    _strokePaint.strokeWidth = 1.8;
+    canvas.drawPath(topPath, _strokePaint);
+    canvas.drawPath(btmPath, _strokePaint);
+
+    // Subtle 1px axis line
+    final axisPaint = Paint()
+      ..color = barColor.withValues(alpha: 0.4)
+      ..strokeWidth = 0.8;
+    canvas.drawLine(Offset(0, midY), Offset(size.width, midY), axisPaint);
+  }
+
+  void _paintVuMeter(Canvas canvas, Size size, int count) {
+    final halfWidth = size.width / 2;
+
+    // Calculate RMS energy for Left (lower half) & Right (upper half)
+    double leftEnergy = 0.0;
+    double rightEnergy = 0.0;
+    final halfCount = count ~/ 2;
+
+    for (int i = 0; i < halfCount; i++) {
+      leftEnergy += magnitudes[i];
+    }
+    for (int i = halfCount; i < count; i++) {
+      rightEnergy += magnitudes[i];
+    }
+    leftEnergy = (leftEnergy / halfCount * 2.2).clamp(0.0, 1.0);
+    rightEnergy = (rightEnergy / (count - halfCount) * 2.2).clamp(0.0, 1.0);
+
+    _paintSingleVuDial(canvas, Rect.fromLTWH(4, 2, halfWidth - 8, size.height - 4), leftEnergy, 'CH-L');
+    _paintSingleVuDial(canvas, Rect.fromLTWH(halfWidth + 4, 2, halfWidth - 8, size.height - 4), rightEnergy, 'CH-R');
+  }
+
+  void _paintSingleVuDial(Canvas canvas, Rect bounds, double energy, String label) {
+    // Dial frame background
+    final frameRRect = RRect.fromRectAndRadius(bounds, const Radius.circular(6));
+    final bgPaint = Paint()..color = const Color(0xFF14171E);
+    canvas.drawRRect(frameRRect, bgPaint);
+
+    final borderPaint = Paint()
+      ..color = const Color(0xFF262D3D)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+    canvas.drawRRect(frameRRect, borderPaint);
+
+    // Arc track
+    final pivot = Offset(bounds.center.dx, bounds.bottom + 6);
+    final radius = bounds.height * 1.1;
+
+    final arcPaint = Paint()
+      ..color = const Color(0xFF334155)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: pivot, radius: radius),
+      math.pi * 1.25,
+      math.pi * 0.5,
+      false,
+      arcPaint,
+    );
+
+    // Needle Angle: -40 deg to +40 deg
+    final needleAngle = (math.pi * 1.5) + ((energy - 0.5) * (math.pi * 0.45));
+    final needleEnd = Offset(
+      pivot.dx + radius * math.cos(needleAngle),
+      pivot.dy + radius * math.sin(needleAngle),
+    );
+
+    final needlePaint = Paint()
+      ..color = energy > 0.85 ? const Color(0xFFFF453A) : barColor
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawLine(pivot, needleEnd, needlePaint);
+
+    // Pivot cap
+    canvas.drawCircle(pivot, 3, Paint()..color = const Color(0xFF64748B));
+  }
+
+  void _paintCircular(Canvas canvas, Size size, int count) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final baseRadius = size.height * 0.35;
+
+    for (int i = 0; i < count; i++) {
+      final angle = (i / count) * 2 * math.pi;
+      final mag = magnitudes[i].clamp(0.0, 1.0);
+      final barLen = 2.0 + (mag * size.height * 0.45);
+
+      final startOffset = Offset(
+        center.dx + baseRadius * math.cos(angle),
+        center.dy + baseRadius * math.sin(angle),
+      );
+      final endOffset = Offset(
+        center.dx + (baseRadius + barLen) * math.cos(angle),
+        center.dy + (baseRadius + barLen) * math.sin(angle),
+      );
+
+      final color = Color.lerp(
+        barColor.withValues(alpha: 0.5),
+        const Color(0xFF00E5FF),
+        mag,
+      )!;
+
+      final paint = Paint()
+        ..color = color
+        ..strokeWidth = 1.5
+        ..strokeCap = StrokeCap.round;
+
+      canvas.drawLine(startOffset, endOffset, paint);
+    }
   }
 
   @override

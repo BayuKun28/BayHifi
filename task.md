@@ -852,3 +852,39 @@ Penerapan menyeluruh pengaturan gaya warna `SurfaceFillStyle` (`translucent` / T
   - [x] Pembaruan active tab capsule pada `FloatingRoundedDock` dengan neutral solid surface.
   - [x] Suite test di `test/phase_32_surface_fill_style_test.dart` lulus 100% (277/277 tests) dengan 0 issues pada `flutter analyze`.
 
+---
+
+## Fase 33: Visual Dynamics Expansion & Compact Bento ComboBox Selectors
+
+Ekspansi mode visualisasi audio (*Album Art Styles*, *RTA Spectrum Styles*, *Time Bar Seekbar Styles*) serta perombakan antarmuka pengaturan `VisualizerSettingsScreen` menjadi Bento Dropdown (ComboBox) yang ringkas, rapi, dan cepat.
+
+- [x] **33.1 Expanded Album Art & Cover Display Modes**
+  - [x] `squircle`: Default 28px Squircle dengan dynamic ambient glow.
+  - [x] `square`: Square Studio 8px monitor card dengan 1px studio border.
+  - [x] `disc`: Minimalist CD disc dengan orbital rim.
+  - [x] `vinyl`: Classic spinning vinyl record dengan concentric groove ridges.
+  - [x] `turntable`: Spinning vinyl turntable dengan animasi tonearm needle interaktif (otomatis mendarat saat play dan terangkat saat pause).
+  - [x] `cassette`: Retro analog cassette tape dengan dual rotating white gear spools, magnetic brown tape bridge, dan printed track label.
+  - [x] `cdJewel`: Acrylic transparent CD jewel case dengan left spine hinge tray dan holographic optical sheen.
+- [x] **33.2 Expanded RTA Spectrum Visualizer Styles**
+  - [x] `bars`: Multi-Band high-density FFT bars dengan peak-hold.
+  - [x] `wave`: Liquid Bezier wave dengan gradient fill.
+  - [x] `dots`: Peak dots matrix.
+  - [x] `beam`: Laser beam center-line.
+  - [x] `mirrorWave`: Symmetrical mirror wave terpusat di garis horizontal.
+  - [x] `vuMeter`: Dual analog VU needle dials (Left & Right channels) responsif real-time.
+  - [x] `circular`: 360-degree radial orbit spectrum ring.
+- [x] **33.3 Expanded Time Bar & Seekbar Styles**
+  - [x] `slim`: Slim Studio 3.5px slider dengan tabular numbers.
+  - [x] `capsule`: Solid Hi-Fi capsule seekbar.
+  - [x] `segmented`: 32-segment VU LED meter timebar.
+  - [x] `waveform`: Acoustic waveform profile seekbar.
+  - [x] `ruler`: Studio Timecode Precision Ruler dengan sub-second tick marks dan needle playhead.
+  - [x] `glowingPill`: Continuous floating pill seekbar.
+- [x] **33.4 Compact Bento ComboBox Settings UI (`VisualizerSettingsScreen`)**
+  - [x] Mengubah seluruh daftar kartu vertikal panjang menjadi Bento Dropdown ComboBox yang ringkas dan responsif.
+  - [x] Dropdown menampilkan icon HugeIcons, judul tebal, deskripsi aktif, dan indikator panah Material 3.
+- [x] **33.5 Unit & Widget Test Suite Validation (298/298 Tests Passing)**
+  - [x] Pembuatan test suite di `test/phase_33_visualizer_expansion_test.dart` menguji rendering ke-7 mode album art, ke-7 mode spektrum, ke-6 mode seekbar, serta interaksi Bento dropdown.
+  - [x] Seluruh 298 pengujian lulus 100% dengan 0 issues pada `flutter analyze`.
+

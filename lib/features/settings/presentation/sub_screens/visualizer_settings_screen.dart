@@ -32,17 +32,71 @@ class VisualizerSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: [
-          // 1. PERFORMANCE MODE SELECTOR
-          _buildSectionHeader(
-            context,
-            'ADAPTIVE PERFORMANCE PROFILE',
-            HugeIcons.strokeRoundedCpuCharge,
+          // 1. ALBUM ART & COVER DISPLAY (COMBOBOX)
+          _buildBentoDropdownSelector<AlbumArtStyle>(
+            context: context,
+            sectionTitle: 'ALBUM ART & COVER STYLE',
+            sectionIcon: HugeIcons.strokeRoundedAlbum01,
+            currentValue: settings.albumArtStyle,
+            items: AlbumArtStyle.values,
+            itemLabel: (s) => s.label,
+            itemDescription: (s) => s.description,
+            itemIcon: _getAlbumStyleIcon,
+            onChanged: (val) {
+              if (val != null) {
+                HapticFeedback.selectionClick();
+                controller.setAlbumArtStyle(val);
+              }
+            },
+            isSolid: isSolid,
           ),
-          const SizedBox(height: 8),
-          _buildPerformanceModeCard(context, settings, controller, isSolid),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
-          // 2. 3D PARALLAX & MOTION PHYSICS
+          // 2. SPECTRUM VISUALIZER STYLING (COMBOBOX + FFT RESOLUTION)
+          _buildSpectrumVisualizerCard(context, settings, controller, isSolid),
+          const SizedBox(height: 14),
+
+          // 3. TIME BAR & SEEKBAR STYLING (COMBOBOX)
+          _buildBentoDropdownSelector<TimeBarStyle>(
+            context: context,
+            sectionTitle: 'TIME BAR & SEEKBAR STYLE',
+            sectionIcon: HugeIcons.strokeRoundedSlidersVertical,
+            currentValue: settings.timeBarStyle,
+            items: TimeBarStyle.values,
+            itemLabel: (s) => s.label,
+            itemDescription: (s) => s.description,
+            itemIcon: _getTimeBarStyleIcon,
+            onChanged: (val) {
+              if (val != null) {
+                HapticFeedback.selectionClick();
+                controller.setTimeBarStyle(val);
+              }
+            },
+            isSolid: isSolid,
+          ),
+          const SizedBox(height: 14),
+
+          // 4. PERFORMANCE PROFILE (COMBOBOX)
+          _buildBentoDropdownSelector<PerformanceMode>(
+            context: context,
+            sectionTitle: 'ADAPTIVE PERFORMANCE PROFILE',
+            sectionIcon: HugeIcons.strokeRoundedCpuCharge,
+            currentValue: settings.performanceMode,
+            items: PerformanceMode.values,
+            itemLabel: (m) => m.label,
+            itemDescription: (m) => m.description,
+            itemIcon: _getPerfModeIcon,
+            onChanged: (val) {
+              if (val != null) {
+                HapticFeedback.selectionClick();
+                controller.setPerformanceMode(val);
+              }
+            },
+            isSolid: isSolid,
+          ),
+          const SizedBox(height: 14),
+
+          // 5. 3D PARALLAX & MOTION PHYSICS
           _buildSectionHeader(
             context,
             '3D PARALLAX MOTION & BREATHING PULSE',
@@ -50,9 +104,9 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           _buildParallaxCard(context, settings, controller, isSolid),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
-          // 3. BACKDROP BLUR & AMBIENT GLOW
+          // 6. BACKDROP BLUR & AMBIENT GLOW
           _buildSectionHeader(
             context,
             'DYNAMIC BACKDROP BLUR & AMBIENT GLOW',
@@ -60,36 +114,6 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           _buildBlurGlowCard(context, settings, controller, isSolid),
-          const SizedBox(height: 20),
-
-          // 4. ALBUM ART & COVER DISPLAY
-          _buildSectionHeader(
-            context,
-            'ALBUM ART & COVER STYLE',
-            HugeIcons.strokeRoundedAlbum01,
-          ),
-          const SizedBox(height: 8),
-          _buildAlbumArtCard(context, settings, controller, isSolid),
-          const SizedBox(height: 20),
-
-          // 5. SPECTRUM VISUALIZER STYLING
-          _buildSectionHeader(
-            context,
-            'RTA SPECTRUM VISUALIZER',
-            HugeIcons.strokeRoundedAudioWaveform,
-          ),
-          const SizedBox(height: 8),
-          _buildSpectrumCard(context, settings, controller, isSolid),
-          const SizedBox(height: 20),
-
-          // 6. TIME BAR & SEEKBAR STYLING
-          _buildSectionHeader(
-            context,
-            'TIME BAR & SEEKBAR STYLE',
-            HugeIcons.strokeRoundedSlidersVertical,
-          ),
-          const SizedBox(height: 8),
-          _buildTimeBarCard(context, settings, controller, isSolid),
         ],
       ),
     );
@@ -114,7 +138,139 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPerformanceModeCard(
+  /// Compact, high-density Bento Dropdown (ComboBox) Selector
+  Widget _buildBentoDropdownSelector<T>({
+    required BuildContext context,
+    required String sectionTitle,
+    required dynamic sectionIcon,
+    required T currentValue,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required String Function(T) itemDescription,
+    required dynamic Function(T) itemIcon,
+    required ValueChanged<T?> onChanged,
+    required bool isSolid,
+  }) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
+    return Material(
+      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                HugeIcon(icon: sectionIcon, size: 15, color: primary),
+                const SizedBox(width: 8),
+                Text(
+                  sectionTitle,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Dropdown ComboBox Container
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSolid
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                  width: 1.0,
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<T>(
+                  value: currentValue,
+                  isExpanded: true,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowDown01,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  dropdownColor: isSolid
+                      ? theme.colorScheme.surfaceContainerHigh
+                      : theme.colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(14),
+                  items: items.map((item) {
+                    final isSelected = item == currentValue;
+                    return DropdownMenuItem<T>(
+                      value: item,
+                      child: Row(
+                        children: [
+                          HugeIcon(
+                            icon: itemIcon(item),
+                            size: 18,
+                            color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  itemLabel(item),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                    color: isSelected ? primary : theme.colorScheme.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            // Active Description
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                itemDescription(currentValue),
+                style: TextStyle(
+                  fontSize: 10.5,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpectrumVisualizerCard(
     BuildContext context,
     PlayerCustomizationSettings settings,
     PlayerCustomizationNotifier controller,
@@ -126,7 +282,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     return Material(
       color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 0.8,
@@ -137,83 +293,163 @@ class VisualizerSettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Target Rendering & Refresh Profile',
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+            // Header
+            Row(
+              children: [
+                HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 15, color: primary),
+                const SizedBox(width: 8),
+                Text(
+                  'RTA SPECTRUM VISUALIZER',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
-            Column(
-              children: PerformanceMode.values.map((mode) {
-                final isSel = settings.performanceMode == mode;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      controller.setPerformanceMode(mode);
-                    },
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSel
-                            ? StudioSurfaceTheme.tintedContainer(
-                                context,
-                                primary,
-                                isSolid: isSolid,
-                                translucentAlpha: 0.12,
-                                solidBlendAlpha: 0.16,
-                              )
-                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isSel ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                          width: isSel ? 1.2 : 0.8,
-                        ),
-                      ),
+
+            // Spectrum Style Dropdown ComboBox
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSolid
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                  width: 1.0,
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<SpectrumStyle>(
+                  value: settings.spectrumStyle,
+                  isExpanded: true,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowDown01,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  dropdownColor: isSolid
+                      ? theme.colorScheme.surfaceContainerHigh
+                      : theme.colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(14),
+                  items: SpectrumStyle.values.map((style) {
+                    final isSelected = style == settings.spectrumStyle;
+                    return DropdownMenuItem<SpectrumStyle>(
+                      value: style,
                       child: Row(
                         children: [
                           HugeIcon(
-                            icon: _getPerfModeIcon(mode),
+                            icon: _getSpectrumStyleIcon(style),
                             size: 18,
-                            color: isSel ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  mode.label,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: isSel ? primary : theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  mode.description,
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              style.label,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                color: isSelected ? primary : theme.colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (isSel)
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                              size: 16,
-                              color: primary,
-                            ),
                         ],
                       ),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      HapticFeedback.selectionClick();
+                      controller.setSpectrumStyle(val);
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                settings.spectrumStyle.description,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.3,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Divider(height: 1, color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
+            const SizedBox(height: 10),
+
+            // FFT Resolution Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'FFT Frequency Resolution',
+                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Analysis frequency bin density',
+                      style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSolid
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                      width: 0.8,
                     ),
                   ),
-                );
-              }).toList(),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: settings.fftBins,
+                      dropdownColor: isSolid
+                          ? theme.colorScheme.surfaceContainerHigh
+                          : theme.colorScheme.surfaceContainer,
+                      borderRadius: BorderRadius.circular(10),
+                      items: [256, 512, 1024, 2048].map((bins) {
+                        return DropdownMenuItem(
+                          value: bins,
+                          child: Text(
+                            '$bins Bins',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: bins == settings.fftBins ? FontWeight.w800 : FontWeight.w500,
+                              color: bins == settings.fftBins ? primary : theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          HapticFeedback.selectionClick();
+                          controller.setFftBins(val);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -230,7 +466,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     return Material(
       color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 0.8,
@@ -305,7 +541,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     return Material(
       color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 0.8,
@@ -388,311 +624,6 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAlbumArtCard(
-    BuildContext context,
-    PlayerCustomizationSettings settings,
-    PlayerCustomizationNotifier controller,
-    bool isSolid,
-  ) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Cover Artwork Display Mode',
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Column(
-              children: AlbumArtStyle.values.map((style) {
-                final isSel = settings.albumArtStyle == style;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      controller.setAlbumArtStyle(style);
-                    },
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSel
-                            ? StudioSurfaceTheme.tintedContainer(
-                                context,
-                                primary,
-                                isSolid: isSolid,
-                                translucentAlpha: 0.12,
-                                solidBlendAlpha: 0.16,
-                              )
-                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isSel ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                          width: isSel ? 1.2 : 0.8,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          HugeIcon(
-                            icon: _getAlbumStyleIcon(style),
-                            size: 18,
-                            color: isSel ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  style.label,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: isSel ? primary : theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  style.description,
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isSel)
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                              size: 16,
-                              color: primary,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSpectrumCard(
-    BuildContext context,
-    PlayerCustomizationSettings settings,
-    PlayerCustomizationNotifier controller,
-    bool isSolid,
-  ) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Visualizer Rendering Style',
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: SpectrumStyle.values.map((style) {
-                final isSel = settings.spectrumStyle == style;
-                return ChoiceChip(
-                  label: Text(style.label),
-                  selected: isSel,
-                  onSelected: (val) {
-                    if (val) {
-                      HapticFeedback.selectionClick();
-                      controller.setSpectrumStyle(style);
-                    }
-                  },
-                  selectedColor: StudioSurfaceTheme.tintedContainer(
-                    context,
-                    primary,
-                    isSolid: isSolid,
-                    translucentAlpha: 0.2,
-                    solidBlendAlpha: 0.22,
-                  ),
-                  labelStyle: TextStyle(
-                    color: isSel ? primary : theme.colorScheme.onSurface,
-                    fontSize: 11,
-                    fontWeight: isSel ? FontWeight.w800 : FontWeight.w500,
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'FFT Frequency Resolution',
-                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
-                ),
-                DropdownButton<int>(
-                  value: settings.fftBins,
-                  underline: const SizedBox(),
-                  dropdownColor: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-                  borderRadius: BorderRadius.circular(12),
-                  items: [256, 512, 1024, 2048].map((bins) {
-                    return DropdownMenuItem(
-                      value: bins,
-                      child: Text('$bins Bins', style: const TextStyle(fontSize: 11)),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      HapticFeedback.selectionClick();
-                      controller.setFftBins(val);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeBarCard(
-    BuildContext context,
-    PlayerCustomizationSettings settings,
-    PlayerCustomizationNotifier controller,
-    bool isSolid,
-  ) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Seekbar & Track Progress Style',
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Column(
-              children: TimeBarStyle.values.map((style) {
-                final isSel = settings.timeBarStyle == style;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      controller.setTimeBarStyle(style);
-                    },
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSel
-                            ? StudioSurfaceTheme.tintedContainer(
-                                context,
-                                primary,
-                                isSolid: isSolid,
-                                translucentAlpha: 0.12,
-                                solidBlendAlpha: 0.16,
-                              )
-                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isSel ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                          width: isSel ? 1.2 : 0.8,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          HugeIcon(
-                            icon: _getTimeBarStyleIcon(style),
-                            size: 18,
-                            color: isSel ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  style.label,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: isSel ? primary : theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  style.description,
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isSel)
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                              size: 16,
-                              color: primary,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   dynamic _getPerfModeIcon(PerformanceMode mode) {
     switch (mode) {
       case PerformanceMode.studioHiFi:
@@ -710,12 +641,37 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     switch (style) {
       case AlbumArtStyle.squircle:
         return HugeIcons.strokeRoundedSparkles;
-      case AlbumArtStyle.vinyl:
-        return HugeIcons.strokeRoundedAlbum01;
       case AlbumArtStyle.square:
         return HugeIcons.strokeRoundedGridTable;
       case AlbumArtStyle.disc:
+        return HugeIcons.strokeRoundedDisc;
+      case AlbumArtStyle.vinyl:
+        return HugeIcons.strokeRoundedAlbum01;
+      case AlbumArtStyle.turntable:
+        return HugeIcons.strokeRoundedDisc;
+      case AlbumArtStyle.cassette:
         return HugeIcons.strokeRoundedRadio;
+      case AlbumArtStyle.cdJewel:
+        return HugeIcons.strokeRoundedSquareLock02;
+    }
+  }
+
+  dynamic _getSpectrumStyleIcon(SpectrumStyle style) {
+    switch (style) {
+      case SpectrumStyle.bars:
+        return HugeIcons.strokeRoundedAudioWaveform;
+      case SpectrumStyle.wave:
+        return HugeIcons.strokeRoundedActivity01;
+      case SpectrumStyle.dots:
+        return HugeIcons.strokeRoundedGrid;
+      case SpectrumStyle.beam:
+        return HugeIcons.strokeRoundedMinusSign;
+      case SpectrumStyle.mirrorWave:
+        return HugeIcons.strokeRoundedLayers01;
+      case SpectrumStyle.vuMeter:
+        return HugeIcons.strokeRoundedDashboardSpeed01;
+      case SpectrumStyle.circular:
+        return HugeIcons.strokeRoundedCompass01;
     }
   }
 
@@ -729,6 +685,10 @@ class VisualizerSettingsScreen extends ConsumerWidget {
         return HugeIcons.strokeRoundedVolumeHigh;
       case TimeBarStyle.waveform:
         return HugeIcons.strokeRoundedAudioWaveform;
+      case TimeBarStyle.ruler:
+        return HugeIcons.strokeRoundedRuler;
+      case TimeBarStyle.glowingPill:
+        return HugeIcons.strokeRoundedSquare;
     }
   }
 }

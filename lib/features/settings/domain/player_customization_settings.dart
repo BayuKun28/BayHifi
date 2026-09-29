@@ -2,9 +2,12 @@ import 'package:flutter/foundation.dart';
 
 enum AlbumArtStyle {
   squircle('Default Squircle', 'Modern 28px squircle with dynamic ambient glow'),
-  vinyl('Vinyl Record', 'Classic spinning piringan hitam with groove ridges and center label'),
   square('Square Studio', 'Sharp 8px studio monitor card with crisp 1px borders'),
-  disc('Minimalist Disc', 'Circular CD audio disc with neon orbital rim');
+  disc('Minimalist Disc', 'Circular CD audio disc with orbital rim'),
+  vinyl('Vinyl Record', 'Classic spinning vinyl with groove ridges and center label'),
+  turntable('Turntable & Tonearm', 'Spinning vinyl record with animated metallic tonearm needle'),
+  cassette('Retro Cassette Tape', 'Analog cassette tape with dual rotating spools and tape window'),
+  cdJewel('CD Jewel Case', 'Acrylic jewel case with spine tray and hologram optical sheen');
 
   final String label;
   final String description;
@@ -19,10 +22,13 @@ enum AlbumArtStyle {
 }
 
 enum SpectrumStyle {
-  bars('Multi-Band Bars', 'High-density multi-frequency FFT neon bars'),
+  bars('Multi-Band Bars', 'High-density multi-frequency FFT studio bars'),
   wave('Liquid Wave', 'Smooth anti-aliased gradient Bezier sound wave'),
   dots('Peak Dots', 'Pulsing audiophile matrix peak dots'),
-  beam('Laser Beam', 'Minimalist glowing cyber beam line');
+  beam('Laser Beam', 'Minimalist glowing laser beam line'),
+  mirrorWave('Mirror Symmetrical Wave', 'Center-aligned dual vertical mirror wave'),
+  vuMeter('Dual Analog VU Dials', 'Classic stereo L/R analog needle VU meters'),
+  circular('Circular Orbit Ring', '360-degree radial frequency orbit ring');
 
   final String label;
   final String description;
@@ -38,9 +44,11 @@ enum SpectrumStyle {
 
 enum TimeBarStyle {
   slim('Slim Studio', 'Precision 3.5px studio track with tabular figures'),
-  capsule('Hi-Fi Capsule', 'Thick 8px illuminated neon capsule seekbar'),
+  capsule('Hi-Fi Capsule', 'Thick 8px solid capsule seekbar'),
   segmented('Segmented LED', 'Multi-segment audiophile VU meter time bar'),
-  waveform('Waveform Bar', 'Acoustic waveform profile seekbar');
+  waveform('Waveform Bar', 'Acoustic waveform profile seekbar'),
+  ruler('Timecode Precision Ruler', 'Studio ruler grid with sub-second tick marks'),
+  glowingPill('Floating Pill Indicator', 'Clean continuous floating pill seekbar');
 
   final String label;
   final String description;
