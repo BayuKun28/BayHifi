@@ -6,9 +6,29 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 34 Fase (Fase 34 Selesai • 100% Passing Tests • 305/305 Passed)
+- **Total Fase**: 36 Fase (Fase 36 Selesai • 100% Passing Tests • 312/312 Passed)
 - **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, StudioSurfaceTheme (Solid & Translucent), 19 Studio Color Palettes, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
-- **Status Proyek**: _Phase 34: Material 3 Expressive Settings Hub Redesign, 19 Studio Color Palettes & Audiophile Customization Expansion (Completed)_
+- **Status Proyek**: _Phase 36: Material 3 Expressive Playlist Redesign, Merged Studio Collections, Compact Dialog Modals, StudioPlaylistActionSheet, Dedicated PlaylistDetailScreen & Interactive Scrollbar (Completed)_
+
+---
+
+## Fase 36: Playlist Screen Redesign, Merged Studio Collections, Studio Playlist Action Sheet, Dedicated Playlist Detail Screen & Scrollbar
+
+Standardisasi dan perombakan komprehensif antarmuka Playlist, modal pembuatan playlist custom/smart, navigasi bertingkat, bottom action sheet, dan detail screen dengan scrollbar interaktif.
+
+- [x] **36.1 Merged Studio Collections & Dynamic Smart Playlists Row di `PlaylistsScreen`**
+  - [x] Menggabungkan Dynamic Smart Playlists ke dalam baris Studio Collections (bersama Favorite Tracks dan Hi-Res Lossless Masters).
+  - [x] Menavigasi ke `SmartPlaylistsScreen` saat kartu Dynamic Smart Playlists ditekan untuk penjelajahan aturan filter dan preset studio.
+- [x] **36.2 Redesign Modal Pembuatan Playlist Custom & Smart Rule**
+  - [x] Pembuatan `CreateCustomPlaylistModal` bento modern dengan ikon ringkas (18px) dan validasi input.
+  - [x] Redesain `CreateSmartPlaylistDialog` dengan proporsi studio terukur (16-18px), evaluasi langsung jumlah lagu yang cocok, dan styling solid/translucent yang konsisten.
+- [x] **36.3 Standardisasi Menu 3-Dots dengan `StudioPlaylistActionSheet`**
+  - [x] Mengganti popup menu legacy dengan modal bottom sheet modern bersudut 24px yang mendukung aksi Play Now, Shuffle, Add to Queue, Rename, Duplicate, Export M3U8, dan Delete.
+- [x] **36.4 Dedicated `PlaylistDetailScreen` & Interactivity**
+  - [x] Collapsing sliver header dengan indikator jumlah lagu, durasi terformat, status custom/smart/preset, dan sticky action bar (Play All, Shuffle).
+  - [x] Integrasi `TrackTile` dengan `StudioTrackActionSheet` dan `Scrollbar` interaktif.
+- [x] **36.5 Unit & Widget Test Suite Validation**
+  - [x] Penambahan suite pengujian `test/playlist_redesign_and_detail_screen_test.dart` dan pembaruan `test/smart_playlists_engine_test.dart` dengan 100% lulus (312/312 tests) dan 0 issues pada `flutter analyze`.
 
 ---
 

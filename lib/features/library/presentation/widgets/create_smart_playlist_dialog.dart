@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+
+import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../app/theme/app_typography.dart';
 import '../../domain/smart_playlist_evaluator.dart';
 import '../../domain/smart_playlist_models.dart';
 import '../controllers/library_controller.dart';
@@ -24,7 +27,7 @@ class CreateSmartPlaylistDialog extends ConsumerStatefulWidget {
       isScrollControlled: true,
       backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => CreateSmartPlaylistDialog(initialPlaylist: initialPlaylist),
     );
@@ -124,6 +127,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isSolid = ref.isSolidStyle;
     final libraryState = ref.watch(unifiedLibraryProvider);
 
     // Live preview evaluation
@@ -142,8 +146,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
       builder: (_, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -154,7 +158,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: theme.dividerColor,
+                    color: theme.dividerColor.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -163,19 +167,27 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
 
               // Top Title & Live Counter Bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.15),
+                        color: StudioSurfaceTheme.tintedContainer(
+                          context,
+                          primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.15,
+                        ),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: primary.withValues(alpha: 0.4)),
+                        border: Border.all(
+                          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                          width: 0.8,
+                        ),
                       ),
                       child: HugeIcon(
                         icon: HugeIcons.strokeRoundedFilterHorizontal,
-                        size: 20,
+                        size: 18,
                         color: primary,
                       ),
                     ),
@@ -189,15 +201,15 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                                 ? 'EDIT SMART PLAYLIST'
                                 : 'NEW SMART PLAYLIST',
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13.5,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 0.8,
+                              letterSpacing: 0.6,
                             ),
                           ),
                           Text(
-                            'Dynamic rule engine automatically updates playlist contents',
+                            'Dynamic rules automatically evaluate and update tracks',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
@@ -206,11 +218,19 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                     ),
                     // Live Matched Count Badge
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: primary.withValues(alpha: 0.5), width: 1),
+                        color: StudioSurfaceTheme.tintedContainer(
+                          context,
+                          primary,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.15,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: primary.withValues(alpha: isSolid ? 0.6 : 0.4),
+                          width: 0.8,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -226,7 +246,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              fontFeatures: const [FontFeature.tabularFigures()],
+                              fontFeatures: AppTypography.audioFigures,
                               color: primary,
                             ),
                           ),
@@ -237,27 +257,45 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                 ),
               ),
 
-              const Divider(height: 24),
+              const Divider(height: 20),
 
               // Main Form Body
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   children: [
                     // Name input
                     TextField(
                       controller: _nameController,
                       onChanged: (_) => setState(() {}),
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
                       decoration: InputDecoration(
                         labelText: 'Playlist Name',
                         hintText: 'e.g. 24-bit 96k Studio Acoustic',
-                        prefixIcon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedPlaylist01,
-                          size: 18,
-                          color: primary,
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedPlaylist01,
+                            size: 18,
+                            color: primary,
+                          ),
                         ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                        filled: true,
+                        fillColor: isSolid
+                            ? theme.colorScheme.surfaceContainerHighest
+                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: primary, width: 1.5),
+                        ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       ),
                     ),
@@ -267,15 +305,33 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                     TextField(
                       controller: _descController,
                       onChanged: (_) => setState(() {}),
+                      style: const TextStyle(fontSize: 13),
                       decoration: InputDecoration(
                         labelText: 'Description (Optional)',
                         hintText: 'Filter definition notes',
-                        prefixIcon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedNote01,
-                          size: 18,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedNote01,
+                            size: 18,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
                         ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                        filled: true,
+                        fillColor: isSolid
+                            ? theme.colorScheme.surfaceContainerHighest
+                            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: primary, width: 1.5),
+                        ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       ),
                     ),
@@ -287,7 +343,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
+                        letterSpacing: 0.6,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
@@ -297,7 +353,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                         Expanded(
                           child: ChoiceChip(
                             label: const Center(
-                              child: Text('Match ALL (AND)', style: TextStyle(fontSize: 12)),
+                              child: Text('Match ALL (AND)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                             ),
                             selected: _matchMode == SmartPlaylistMatchMode.all,
                             onSelected: (val) {
@@ -309,7 +365,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                         Expanded(
                           child: ChoiceChip(
                             label: const Center(
-                              child: Text('Match ANY (OR)', style: TextStyle(fontSize: 12)),
+                              child: Text('Match ANY (OR)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                             ),
                             selected: _matchMode == SmartPlaylistMatchMode.any,
                             onSelected: (val) {
@@ -320,7 +376,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                       ],
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
 
                     // Rules Header & Add Button
                     Row(
@@ -331,14 +387,30 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
+                            letterSpacing: 0.6,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: _addRule,
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 16, color: null),
-                          label: const Text('Add Rule', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        InkWell(
+                          onTap: _addRule,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            child: Row(
+                              children: [
+                                HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 15, color: primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '+ Add Condition',
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -348,10 +420,10 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                     ..._rules.asMap().entries.map((entry) {
                       final index = entry.key;
                       final rule = entry.value;
-                      return _buildRuleCard(context, index, rule);
+                      return _buildRuleCard(context, index, rule, isSolid);
                     }),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
 
                     // Sorting & Limit Row
                     Text(
@@ -359,17 +431,17 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
+                        letterSpacing: 0.6,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
+                      padding: const EdgeInsets.all(12),
+                      decoration: StudioSurfaceTheme.cardDecoration(
+                        context: context,
+                        isSolid: isSolid,
+                        radius: 16,
                       ),
                       child: Column(
                         children: [
@@ -379,19 +451,20 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                                 flex: 3,
                                 child: DropdownButtonFormField<String>(
                                   initialValue: _sortBy,
+                                  isDense: true,
                                   decoration: InputDecoration(
                                     labelText: 'Sort By',
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   ),
                                   items: const [
-                                    DropdownMenuItem(value: 'title', child: Text('Track Title')),
-                                    DropdownMenuItem(value: 'artist', child: Text('Artist Name')),
-                                    DropdownMenuItem(value: 'album', child: Text('Album Name')),
-                                    DropdownMenuItem(value: 'duration', child: Text('Duration')),
-                                    DropdownMenuItem(value: 'sampleRate', child: Text('Sample Rate')),
-                                    DropdownMenuItem(value: 'bitDepth', child: Text('Bit Depth')),
-                                    DropdownMenuItem(value: 'dateAdded', child: Text('Date Added')),
+                                    DropdownMenuItem(value: 'title', child: Text('Track Title', style: TextStyle(fontSize: 12))),
+                                    DropdownMenuItem(value: 'artist', child: Text('Artist Name', style: TextStyle(fontSize: 12))),
+                                    DropdownMenuItem(value: 'album', child: Text('Album Name', style: TextStyle(fontSize: 12))),
+                                    DropdownMenuItem(value: 'duration', child: Text('Duration', style: TextStyle(fontSize: 12))),
+                                    DropdownMenuItem(value: 'sampleRate', child: Text('Sample Rate', style: TextStyle(fontSize: 12))),
+                                    DropdownMenuItem(value: 'bitDepth', child: Text('Bit Depth', style: TextStyle(fontSize: 12))),
+                                    DropdownMenuItem(value: 'dateAdded', child: Text('Date Added', style: TextStyle(fontSize: 12))),
                                   ],
                                   onChanged: (val) {
                                     if (val != null) setState(() => _sortBy = val);
@@ -402,14 +475,17 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                               Expanded(
                                 flex: 2,
                                 child: InkWell(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(10),
                                   onTap: () => setState(() => _sortAscending = !_sortAscending),
                                   child: Container(
-                                    height: 48,
+                                    height: 42,
                                     padding: const EdgeInsets.symmetric(horizontal: 8),
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: theme.dividerColor),
-                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid)),
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: isSolid
+                                          ? theme.colorScheme.surfaceContainerHighest
+                                          : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
                                     ),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
@@ -418,13 +494,13 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                                           icon: _sortAscending
                                               ? HugeIcons.strokeRoundedSorting01
                                               : HugeIcons.strokeRoundedSorting02,
-                                          size: 16,
+                                          size: 15,
                                           color: primary,
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
                                           _sortAscending ? 'Asc' : 'Desc',
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),
@@ -433,21 +509,25 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           TextField(
                             controller: _limitController,
                             keyboardType: TextInputType.number,
                             onChanged: (_) => setState(() {}),
+                            style: const TextStyle(fontSize: 12),
                             decoration: InputDecoration(
                               labelText: 'Max Tracks Limit (Optional)',
                               hintText: 'e.g. 50 (leave empty for unlimited)',
-                              prefixIcon: HugeIcon(
-                                icon: HugeIcons.strokeRoundedLayers01,
-                                size: 18,
-                                color: primary,
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: HugeIcon(
+                                  icon: HugeIcons.strokeRoundedLayers01,
+                                  size: 16,
+                                  color: primary,
+                                ),
                               ),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             ),
                           ),
                         ],
@@ -459,23 +539,32 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
 
               // Bottom Confirmation Actions
               Container(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  border: Border(top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.4))),
+                  color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+                  border: Border(top: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid))),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: BorderSide(color: StudioSurfaceTheme.outline(context, isSolid: isSolid)),
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w600)),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 12),
                     Expanded(
                       flex: 2,
                       child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                         onPressed: () {
                           final name = _nameController.text.trim();
                           if (name.isEmpty) {
@@ -491,11 +580,11 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                         icon: const HugeIcon(
                           icon: HugeIcons.strokeRoundedCheckmarkCircle02,
                           size: 18,
-                          color: null,
+                          color: Colors.black,
                         ),
                         label: Text(
                           widget.initialPlaylist != null ? 'Update Playlist' : 'Save Smart Playlist',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
                         ),
                       ),
                     ),
@@ -509,18 +598,23 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
     );
   }
 
-  Widget _buildRuleCard(BuildContext context, int index, SmartPlaylistRule rule) {
+  Widget _buildRuleCard(BuildContext context, int index, SmartPlaylistRule rule, bool isSolid) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final operators = SmartPlaylistOperator.operatorsForType(rule.field.type);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.4)),
+        color: isSolid
+            ? theme.colorScheme.surfaceContainerHighest
+            : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          width: 0.8,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,10 +632,10 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                   child: Text(
                     '${index + 1}',
                     style: TextStyle(
-                      fontSize: 10.5,
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
                       color: primary,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontFeatures: AppTypography.audioFigures,
                     ),
                   ),
                 ),
@@ -553,13 +647,13 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                   isDense: true,
                   decoration: InputDecoration(
                     labelText: 'Field',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   ),
                   items: SmartPlaylistField.values.map((f) {
                     return DropdownMenuItem(
                       value: f,
-                      child: Text(f.label, style: const TextStyle(fontSize: 12.5)),
+                      child: Text(f.label, style: const TextStyle(fontSize: 12)),
                     );
                   }).toList(),
                   onChanged: (newField) {
@@ -578,22 +672,22 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                 ),
               ),
               if (_rules.length > 1) ...[
-                const SizedBox(width: 6),
+                const SizedBox(width: 4),
                 IconButton(
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedDelete02,
-                    size: 18,
+                    size: 16,
                     color: theme.colorScheme.error,
                   ),
                   onPressed: () => _removeRule(index),
                   tooltip: 'Delete Condition',
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                 ),
               ],
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Row(
             children: [
               // Operator Dropdown
@@ -604,15 +698,15 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                   isDense: true,
                   decoration: InputDecoration(
                     labelText: 'Operator',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   ),
                   items: operators.map((op) {
                     return DropdownMenuItem(
                       value: op,
                       child: Text(
                         op.label,
-                        style: const TextStyle(fontSize: 11.5),
+                        style: const TextStyle(fontSize: 11),
                         overflow: TextOverflow.ellipsis,
                       ),
                     );
@@ -634,19 +728,19 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
           ),
           // Secondary input for "between" operator
           if (rule.operator == SmartPlaylistOperator.between) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Row(
               children: [
-                const SizedBox(width: 24, child: Text('to', style: TextStyle(fontSize: 11))),
+                const SizedBox(width: 20, child: Text('to', style: TextStyle(fontSize: 10.5))),
                 Expanded(
                   child: TextFormField(
                     initialValue: rule.secondaryValue ?? '',
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 11.5),
                     decoration: InputDecoration(
                       labelText: 'Upper Range Limit',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     ),
                     onChanged: (val) {
                       _updateRule(index, rule.copyWith(secondaryValue: val));
@@ -668,12 +762,12 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
         isDense: true,
         decoration: InputDecoration(
           labelText: 'Value',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         ),
         items: const [
-          DropdownMenuItem(value: 'true', child: Text('Yes / True', style: TextStyle(fontSize: 12))),
-          DropdownMenuItem(value: 'false', child: Text('No / False', style: TextStyle(fontSize: 12))),
+          DropdownMenuItem(value: 'true', child: Text('Yes / True', style: TextStyle(fontSize: 11.5))),
+          DropdownMenuItem(value: 'false', child: Text('No / False', style: TextStyle(fontSize: 11.5))),
         ],
         onChanged: (val) {
           if (val != null) {
@@ -688,12 +782,12 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
       keyboardType: rule.field.type == SmartPlaylistFieldType.number
           ? TextInputType.number
           : TextInputType.text,
-      style: const TextStyle(fontSize: 12),
+      style: const TextStyle(fontSize: 11.5),
       decoration: InputDecoration(
         labelText: rule.field.type == SmartPlaylistFieldType.number ? 'Target Value' : 'Keyword',
-        hintText: rule.field == SmartPlaylistField.duration ? 'Seconds (e.g. 180)' : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        hintText: rule.field == SmartPlaylistField.duration ? 'Seconds' : null,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       ),
       onChanged: (val) {
         _updateRule(index, rule.copyWith(value: val));

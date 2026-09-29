@@ -343,12 +343,14 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     SubsonicClient? subsonicClient,
     MetadataTaggerService? tagger,
     List<Track>? initialTracks,
+    List<PlaylistModel>? initialCustomPlaylists,
     List<SmartPlaylist>? initialSmartPlaylists,
   })  : _scanner = scanner ?? const LocalAudioScanner(),
         _subsonicClient = subsonicClient ?? SubsonicClient(),
         _tagger = tagger ?? const MetadataTaggerService(),
         super(UnifiedLibraryState(
           tracks: initialTracks ?? _loadSavedTracks(),
+          customPlaylists: initialCustomPlaylists ?? const [],
           smartPlaylists: initialSmartPlaylists ?? _loadSavedSmartPlaylists(),
           favoriteTrackIds: LocalPersistenceService.instance.getFavoriteTrackIds().toSet(),
         )) {
@@ -1095,6 +1097,46 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     state = state.copyWith(
       customPlaylists: updated,
       statusMessage: 'Playlist deleted.',
+    );
+  }
+
+  /// Rename and update description for a custom playlist
+  void renamePlaylist(String playlistId, String newName, {String? newDescription}) {
+    final updated = state.customPlaylists.map((p) {
+      if (p.id == playlistId) {
+        return PlaylistModel(
+          id: p.id,
+          name: newName,
+          description: newDescription ?? p.description,
+          tracks: p.tracks,
+          isCustom: true,
+          createdAt: p.createdAt,
+        );
+      }
+      return p;
+    }).toList();
+    state = state.copyWith(
+      customPlaylists: updated,
+      statusMessage: 'Playlist "$newName" updated.',
+    );
+  }
+
+  /// Duplicate a custom playlist
+  void duplicatePlaylist(String playlistId) {
+    final index = state.customPlaylists.indexWhere((p) => p.id == playlistId);
+    if (index < 0) return;
+    final original = state.customPlaylists[index];
+    final copy = PlaylistModel(
+      id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
+      name: '${original.name} (Copy)',
+      description: original.description,
+      tracks: List.from(original.tracks),
+      isCustom: true,
+      createdAt: DateTime.now(),
+    );
+    state = state.copyWith(
+      customPlaylists: [...state.customPlaylists, copy],
+      statusMessage: 'Playlist "${original.name}" duplicated.',
     );
   }
 

@@ -529,19 +529,24 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Verify Headers
+      // Verify Headers & Merged Studio Collections
       expect(find.text('STUDIO PLAYLISTS'), findsOneWidget);
       expect(find.text('STUDIO COLLECTIONS'), findsOneWidget);
-      expect(find.textContaining('DYNAMIC SMART PLAYLISTS'), findsOneWidget);
+      expect(find.text('Dynamic Smart Playlists'), findsOneWidget);
 
-      // Verify Smart Playlist Item
+      // Tap Dynamic Smart Playlists row to navigate to SmartPlaylistsScreen
+      await tester.tap(find.text('Dynamic Smart Playlists'));
+      await tester.pumpAndSettle();
+
+      // Verify SmartPlaylistsScreen renders the smart playlist
+      expect(find.text('DYNAMIC SMART PLAYLISTS'), findsOneWidget);
       expect(find.text('Studio Master Series'), findsOneWidget);
 
-      // Tap Smart Playlist to open detail sheet
+      // Tap Smart Playlist to open PlaylistDetailScreen
       await tester.tap(find.text('Studio Master Series'));
       await tester.pumpAndSettle();
 
-      // Verify Detail Sheet contains evaluated track
+      // Verify Detail Screen contains evaluated track and actions
       expect(find.text('Autumn Leaves'), findsOneWidget);
       expect(find.text('Play All'), findsOneWidget);
       expect(find.text('Shuffle'), findsOneWidget);
