@@ -140,18 +140,19 @@ void main() {
         password: 'pass123',
       );
 
-      // 1. Connect
+      // 1. Connect manually (non-silent)
       final success = await controller.connectNavidrome(config);
       expect(success, isTrue);
       expect(controller.state.navidromeConnectionStatus, equals(NavidromeConnectionStatus.connected));
       expect(controller.state.tracks.any((t) => t.id == 'navidrome_song_101'), isTrue);
+      expect(controller.state.statusMessage, equals('1 cloud tracks successfully synchronized.'));
 
       // 2. Verify stored in persistence
       final savedMap = LocalPersistenceService.instance.getSetting<Map<String, dynamic>>('navidrome_config');
       expect(savedMap, isNotNull);
       expect(savedMap!['username'], equals('bayu'));
 
-      // 3. Test restoreNavidromeSession
+      // 3. Test restoreNavidromeSession on startup (silent by default)
       final newController = UnifiedLibraryController(
         subsonicClient: mockSubsonic,
         initialTracks: const [],
@@ -159,12 +160,34 @@ void main() {
       await newController.restoreNavidromeSession();
       expect(newController.state.navidromeConnectionStatus, equals(NavidromeConnectionStatus.connected));
       expect(newController.state.navidromeConfig?.username, equals('bayu'));
+      expect(newController.state.statusMessage, isNull);
 
       // 4. Test disconnectNavidrome clears persistence
       newController.disconnectNavidrome();
       expect(newController.state.navidromeConnectionStatus, equals(NavidromeConnectionStatus.disconnected));
       final clearedMap = LocalPersistenceService.instance.getSetting<Map<String, dynamic>>('navidrome_config');
       expect(clearedMap, isNull);
+    });
+
+    test('restoreNavidromeSession populates statusMessage when connection fails', () async {
+      await LocalPersistenceService.instance.saveSetting('navidrome_config', {
+        'serverUrl': 'http://192.168.1.99:4533',
+        'username': 'offline_user',
+        'password': 'bad_password',
+      });
+
+      final mockSubsonic = MockSubsonicClient();
+      mockSubsonic.pingResult = false;
+
+      final controller = UnifiedLibraryController(
+        subsonicClient: mockSubsonic,
+        initialTracks: const [],
+      );
+
+      await controller.restoreNavidromeSession(isSilent: true);
+      expect(controller.state.navidromeConnectionStatus, equals(NavidromeConnectionStatus.error));
+      expect(controller.state.statusMessage, isNotNull);
+      expect(controller.state.statusMessage, contains('Failed to connect to Navidrome server'));
     });
 
     test('BackupRestoreService includes navidrome_config in archive', () async {

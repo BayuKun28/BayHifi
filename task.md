@@ -957,3 +957,48 @@ Standardisasi menyeluruh terhadap seluruh sub-screen pengaturan (Theming, Playba
 - [x] **35.4 Unit & Widget Test Suite Validation**
   - [x] Verifikasi regresi nol pada seluruh sub-screen pengaturan dengan 100% tests passing dan 0 lint errors.
 
+---
+
+## Fase 36: Playlist Screen Redesign, Studio Collection Dynamic Integration & Modern 3-Dots Sheet
+
+Penyelarasan antarmuka menu Playlist dengan Studio Collection, redesign modal pembuatan playlist & smart rules dengan icon proporsional, serta pembaruan menu opsi 3-dots menjadi standard bottom sheet studio.
+
+- [x] **36.1 Dynamic Smart Playlist Single-Row Integration**
+  - [x] Integrasi Smart Rules ke single-row card "Dynamic Smart Rules" berdampingan dengan Studio Collection.
+  - [x] Navigasi instan ke daftar Smart Playlists saat di-klik.
+- [x] **36.2 Redesign Modal Create Playlist & Smart Rules**
+  - [x] Mengurangi ukuran icon yang terlalu besar menjadi 20-22px studio squircle.
+  - [x] Tata letak bento compact dengan input field yang rapi.
+- [x] **36.3 Modern 3-Dots Bottom Sheet Standardization**
+  - [x] Standardisasi menu konteks opsi lagu/playlist ke floating bottom sheet modern selaras dengan library.
+  - [x] Dukungan detail playlist screen tersendiri dengan custom studio scrollbar.
+
+---
+
+## Fase 37: YouTube Streaming Pipeline & Simple UI/UX Library Screen
+
+Optimalisasi pipeline pemutaran streaming audio YouTube Music dan penyederhanaan UI/UX Library YouTube agar lebih intuitif dan bebas hambatan.
+
+- [x] **37.1 YouTube Audio Streaming Pre-buffering & Native Playback Fix**
+  - [x] Penanganan loading status dan perbaikan decoding WebM/Ogg Opus stream ke engine audio.
+  - [x] State tombol Play/Pause konsisten saat stream mulai berjalan tanpa kembali ke pause.
+- [x] **37.2 Clean & Simple YouTube Music Library UI/UX**
+  - [x] Penyederhanaan layout pencarian dan penjelajahan YouTube Music.
+  - [x] Status visual indikator loading & streaming yang halus dan non-intrusif.
+
+---
+
+## Fase 38: Silent Navidrome Startup Restore & Error-Only Notifications
+
+Menghilangkan notifikasi snackbar yang mengganggu saat auto-reconnect Navidrome di awal pembukaan aplikasi, serta memastikan error tetap ditampilkan secara tepat saat terjadi kegagalan.
+
+- [x] **38.1 Silent Startup Reconnection & Synchronization**
+  - [x] Parameterisasi `isSilent = true` pada `restoreNavidromeSession()`, `connectNavidrome()`, dan `syncNavidromeLibrary()`.
+  - [x] Membersihkan `statusMessage` dari toast/snackbar saat auto-connect dan auto-sync berjalan sukses di startup.
+- [x] **38.2 Error Notification Preservation**
+  - [x] Memastikan saat server offline, URL/kredensial salah, atau sinkronisasi gagal, `statusMessage` tetap terisi dan SnackBar error tetap muncul di UI.
+  - [x] Menjaga feedback interaktif non-silent saat user melakukan koneksi manual via `NavidromeConnectDialog`.
+- [x] **38.3 Unit & Widget Test Suite Validation**
+  - [x] Pengujian unit di `test/phase_29_and_30_features_test.dart` memvalidasi `restoreNavidromeSession(isSilent: true)` tidak menampilkan status message saat sukses dan menampilkan error message saat koneksi gagal.
+  - [x] 100% tests passing dan 0 analyzer issues.
+

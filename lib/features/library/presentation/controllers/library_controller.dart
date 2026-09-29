@@ -875,11 +875,12 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   }
 
   /// Connect to Navidrome Subsonic API server
-  Future<bool> connectNavidrome(SubsonicServerConfig config) async {
+  Future<bool> connectNavidrome(SubsonicServerConfig config, {bool isSilent = false}) async {
     state = state.copyWith(
       isConnectingNavidrome: true,
       navidromeConnectionStatus: NavidromeConnectionStatus.connecting,
-      statusMessage: 'Connecting to ${config.sanitizedUrl}...',
+      statusMessage: isSilent ? null : 'Connecting to ${config.sanitizedUrl}...',
+      clearStatusMessage: isSilent,
     );
 
     try {
@@ -890,11 +891,12 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
           isConnectingNavidrome: false,
           navidromeConnectionStatus: NavidromeConnectionStatus.connected,
           navidromeConfig: config,
-          statusMessage: 'Connected to Navidrome server.',
+          statusMessage: isSilent ? null : 'Connected to Navidrome server.',
+          clearStatusMessage: isSilent,
         );
 
         await LocalPersistenceService.instance.saveSetting('navidrome_config', config.toMap());
-        await syncNavidromeLibrary();
+        await syncNavidromeLibrary(isSilent: isSilent);
         return true;
       } else {
         state = state.copyWith(
@@ -914,8 +916,8 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     }
   }
 
-  /// Restore saved Navidrome session on startup
-  Future<void> restoreNavidromeSession() async {
+  /// Restore saved Navidrome session on startup (silent unless error)
+  Future<void> restoreNavidromeSession({bool isSilent = true}) async {
     if (state.navidromeConnectionStatus == NavidromeConnectionStatus.connected || state.isConnectingNavidrome) {
       return;
     }
@@ -924,20 +926,27 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
       if (configMap != null) {
         final config = SubsonicServerConfig.fromMap(configMap);
         if (config.serverUrl.isNotEmpty && config.username.isNotEmpty) {
-          await connectNavidrome(config);
+          await connectNavidrome(config, isSilent: isSilent);
         }
       }
     } catch (e) {
       debugPrint('[UnifiedLibraryController] Error restoring Navidrome session: $e');
+      state = state.copyWith(
+        statusMessage: 'Failed to restore Navidrome session: $e',
+      );
     }
   }
 
   /// Synchronize catalog from Navidrome
-  Future<void> syncNavidromeLibrary() async {
+  Future<void> syncNavidromeLibrary({bool isSilent = false}) async {
     final config = state.navidromeConfig;
     if (config == null) return;
 
-    state = state.copyWith(isScanning: true, statusMessage: 'Syncing Navidrome library...');
+    state = state.copyWith(
+      isScanning: true,
+      statusMessage: isSilent ? null : 'Syncing Navidrome library...',
+      clearStatusMessage: isSilent,
+    );
 
     try {
       final songs = await _subsonicClient.fetchAllSongs(config);
@@ -949,7 +958,8 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
       state = state.copyWith(
         tracks: combined,
         isScanning: false,
-        statusMessage: '${cloudTracks.length} cloud tracks successfully synchronized.',
+        statusMessage: isSilent ? null : '${cloudTracks.length} cloud tracks successfully synchronized.',
+        clearStatusMessage: isSilent,
       );
     } catch (e) {
       state = state.copyWith(
