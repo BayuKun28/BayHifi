@@ -27,11 +27,33 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
 /build/
 /coverage/
+
+# Platform Ephemeral Build Artifacts
+/linux/flutter/ephemeral/
+/windows/flutter/ephemeral/
+/macos/Flutter/ephemeral/
+
+# Native Packaging & Distribution Artifacts
+*.apk
+*.aab
+*.aar
+*.deb
+*.rpm
+*.AppImage
+*.flatpak
+*.snap
+*.tar.gz
+*.tar.xz
+*.tar.bz2
+AppDir/
+appimage_build/
+bundle/
 
 # Symbolication related
 app.*.symbols
@@ -46,6 +68,3 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
-
-# APK and build artifacts
-*.apk
