@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -172,7 +172,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                     solidBlendAlpha: 0.20,
                   ),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: primary.withValues(alpha: 0.6), width: 1.0),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -230,10 +229,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
             decoration: BoxDecoration(
               color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                width: 1.0,
-              ),
             ),
             child: Column(
               children: [
@@ -294,7 +289,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                       decoration: BoxDecoration(
                         color: primary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: primary.withValues(alpha: 0.4), width: 0.8),
                       ),
                       child: Text(
                         'HI-RES',
@@ -381,7 +375,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 3.0),
                   child: InkWell(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       notifier.setThemeMode(modeOption);
                     },
                     borderRadius: BorderRadius.circular(12),
@@ -399,12 +393,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                               )
                             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                          width: isSelected ? 1.6 : 1.0,
-                        ),
                       ),
                       child: Column(
                         children: [
@@ -456,7 +444,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 3.0),
                   child: InkWell(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       notifier.setSurfaceFillStyle(fillOption);
                     },
                     borderRadius: BorderRadius.circular(12),
@@ -474,12 +462,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                               )
                             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                          width: isSelected ? 1.6 : 1.0,
-                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -543,7 +525,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
           child: SwitchListTile(
             value: state.dynamicAlbumArtEnabled,
             onChanged: (val) {
-              HapticFeedback.lightImpact();
+              AppHaptics.lightImpact();
               final currentTrack = ref.read(playerControllerProvider).currentTrack;
               notifier.toggleDynamicAlbumArt(val, currentTrack);
             },
@@ -602,7 +584,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
         // True OLED Black Mode Card
         InkWell(
           onTap: () {
-            HapticFeedback.selectionClick();
+            AppHaptics.selectionClick();
             notifier.setPalette(AppPalette.trueOledBlack);
             notifier.setThemeMode(AppThemeMode.dark);
           },
@@ -626,7 +608,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white24, width: 1.0),
                   ),
                   child: const Center(
                     child: HugeIcon(
@@ -700,7 +681,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
             padding: const EdgeInsets.only(right: 8.0),
             child: InkWell(
               onTap: () {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 setState(() => _selectedCategory = filter);
               },
               borderRadius: BorderRadius.circular(20),
@@ -718,12 +699,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                         )
                       : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? primary
-                        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                    width: isSelected ? 1.5 : 1.0,
-                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -798,7 +773,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
 
         return InkWell(
           onTap: () {
-            HapticFeedback.selectionClick();
+            AppHaptics.selectionClick();
             notifier.setPalette(palette);
           },
           borderRadius: BorderRadius.circular(14),
@@ -816,12 +791,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                     )
                   : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isSelected
-                    ? primary
-                    : StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                width: isSelected ? 1.6 : 1.0,
-              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -889,7 +858,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white24, width: 0.8),
       ),
     );
 
@@ -920,7 +888,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
           final isSelected = state.customAccentColor.toARGB32() == accentColor.toARGB32();
           return InkWell(
             onTap: () {
-              HapticFeedback.selectionClick();
+              AppHaptics.selectionClick();
               notifier.setCustomAccent(accentColor);
             },
             borderRadius: BorderRadius.circular(20),
@@ -938,10 +906,12 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                       spreadRadius: 2,
                     ),
                 ],
-                border: Border.all(
-                  color: isSelected ? Colors.white : Colors.black26,
-                  width: isSelected ? 2.2 : 0.8,
-                ),
+                border: isSelected
+                    ? Border.all(
+                        color: Colors.white,
+                        width: 2.0,
+                      )
+                    : null,
               ),
               child: isSelected
                   ? Center(

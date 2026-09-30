@@ -43,12 +43,6 @@ class SettingsScreen extends ConsumerWidget {
                       translucentAlpha: 0.12,
                     ),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isSolid
-                    ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                    : primary.withValues(alpha: 0.35),
-                width: 0.8,
-              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -80,14 +74,14 @@ class SettingsScreen extends ConsumerWidget {
             context,
             title: 'AESTHETICS & ATMOSPHERE',
             icon: HugeIcons.strokeRoundedLayers01,
-            color: primary,
+            color: StudioCategoryColors.themingPalettes,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedColorPicker,
-            accentColor: primary,
+            accentColor: StudioCategoryColors.themingPalettes,
             title: 'THEMING & COLOR PALETTES',
             subtitle: '19 Studio Palettes, Light/Dark/System Mode, Pure Solid M3 Surface Fills & Monet Dynamic Art',
             badgeText: '${themeState.currentPalette.name} • ${themeState.isSolidStyle ? "Pure Solid" : "Translucent"}',
@@ -103,7 +97,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedAudioWaveform,
-            accentColor: theme.colorScheme.secondary,
+            accentColor: StudioCategoryColors.visualizer,
             title: 'VISUALIZER & DISPLAY',
             subtitle: 'Turntable Tonearm, Cassette, CD Jewel, Dual VU Meters, Mirror Wave & Precision Studio Ruler',
             badgeText: 'Live RTA • 20 Expressive Styles',
@@ -119,7 +113,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCar01,
-            accentColor: theme.colorScheme.tertiary,
+            accentColor: StudioCategoryColors.dockingDesk,
             title: 'STUDIO WORKSTATION & CAR DOCK',
             subtitle: 'High-contrast studio timecode clock, dual analog VU level dials & large controls for desk stands',
             badgeText: 'Fullscreen Stand Mode',
@@ -137,14 +131,14 @@ class SettingsScreen extends ConsumerWidget {
             context,
             title: 'AUDIO ARCHITECTURE & DSP WORKSTATION',
             icon: HugeIcons.strokeRoundedCpu,
-            color: theme.colorScheme.primary,
+            color: StudioCategoryColors.audioHardware,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCpu,
-            accentColor: primary,
+            accentColor: StudioCategoryColors.audioHardware,
             title: 'AUDIO HARDWARE & DAC ENGINE',
             subtitle: 'SoLoud C++ Engine, Bit-Perfect Direct Stream Bypass, Output Devices & Latency Buffer Tuning',
             badgeText: 'Bit-Perfect PCM Ready',
@@ -160,7 +154,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedDashboardSpeed01,
-            accentColor: theme.colorScheme.secondary,
+            accentColor: StudioCategoryColors.proQEqualizer,
             title: 'ADVANCED PLAYBACK ENGINE & FADES',
             subtitle: 'Smooth volume fades, headphone unplug guard, speed/pitch semitones, ReplayGain & seek stepper',
             badgeText: 'Engine Transitions & Policies',
@@ -178,14 +172,14 @@ class SettingsScreen extends ConsumerWidget {
             context,
             title: 'MEDIA, LIBRARY & STORAGE',
             icon: HugeIcons.strokeRoundedFolder01,
-            color: theme.colorScheme.primary,
+            color: StudioCategoryColors.libraryScanner,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedFolder01,
-            accentColor: theme.colorScheme.secondary,
+            accentColor: StudioCategoryColors.libraryScanner,
             title: 'LIBRARY SCANNER & SLEEP TIMER',
             subtitle: 'Automated 15s/30s volume attenuation sleep timer, startup library scan & audio clip filters',
             badgeText: 'Scanner Rules Active',
@@ -201,7 +195,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedDatabase,
-            accentColor: const Color(0xFF00E5FF),
+            accentColor: StudioCategoryColors.storageCache,
             title: 'STORAGE & CACHE QUOTA',
             subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & database vacuum',
             badgeText: 'Cache & Integrity',
@@ -219,14 +213,14 @@ class SettingsScreen extends ConsumerWidget {
             context,
             title: 'SYSTEM, GESTURES & ARCHIVE',
             icon: HugeIcons.strokeRoundedSettings01,
-            color: theme.colorScheme.primary,
+            color: StudioCategoryColors.gestures,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedActivity01,
-            accentColor: primary,
+            accentColor: StudioCategoryColors.gestures,
             title: 'GESTURES & TRACK TILES',
             subtitle: 'Artwork tap triggers (Lyrics, Fav, Inspector), swipe-to-queue/favorite & track tile layouts',
             badgeText: 'Touch Gestures • Swipe Actions',
@@ -242,7 +236,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCloudSync,
-            accentColor: theme.colorScheme.secondary,
+            accentColor: StudioCategoryColors.backupVault,
             title: 'BACKUP & RESTORE ARCHIVE',
             subtitle: 'Export and import portable .bayhifi JSON snapshots containing playlists, smart rules & presets',
             badgeText: '.bayhifi Snapshot Engine',
@@ -276,10 +270,6 @@ class SettingsScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: theme.dividerColor.withValues(alpha: 0.5),
-                  width: 0.8,
-                ),
               ),
               child: Image.asset(
                 'assets/images/baydev_logo.png',
@@ -362,12 +352,6 @@ class SettingsScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: isSolid ? theme.colorScheme.surfaceContainer : StudioSurfaceTheme.surfaceContainer(context, isSolid: false),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSolid
-              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-              : StudioSurfaceTheme.outline(context, isSolid: false),
-          width: 1.0,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isSolid ? 0.25 : 0.15),
@@ -417,12 +401,6 @@ class SettingsScreen extends ConsumerWidget {
                       ? theme.colorScheme.surfaceContainerHighest
                       : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSolid
-                        ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                        : primary.withValues(alpha: 0.4),
-                    width: 0.8,
-                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -450,7 +428,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: HugeIcons.strokeRoundedPaintBoard,
                 label: 'PALETTE',
                 value: themeState.currentPalette.name,
-                accent: primary,
+                accent: StudioCategoryColors.themingPalettes,
                 isSolid: isSolid,
                 onTap: () {
                   Navigator.of(context).push(
@@ -464,7 +442,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: HugeIcons.strokeRoundedCpu,
                 label: 'AUDIO DAC',
                 value: isBitPerfect ? 'Bit-Perfect' : 'Standard',
-                accent: theme.colorScheme.secondary,
+                accent: StudioCategoryColors.bitPerfect,
                 isSolid: isSolid,
                 onTap: () {
                   Navigator.of(context).push(
@@ -478,7 +456,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: HugeIcons.strokeRoundedAudioWaveform,
                 label: 'RTA PROFILE',
                 value: visualizerStyle,
-                accent: theme.colorScheme.tertiary,
+                accent: StudioCategoryColors.visualizer,
                 isSolid: isSolid,
                 onTap: () {
                   Navigator.of(context).push(
@@ -502,7 +480,6 @@ class SettingsScreen extends ConsumerWidget {
     required bool isSolid,
     required VoidCallback onTap,
   }) {
-    final theme = Theme.of(context);
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -510,29 +487,21 @@ class SettingsScreen extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: isSolid
-                ? theme.colorScheme.surfaceContainerHighest
-                : StudioSurfaceTheme.tintedContainer(context, accent, isSolid: false, translucentAlpha: 0.10),
+            color: accent.withValues(alpha: isSolid ? 0.14 : 0.10),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : accent.withValues(alpha: 0.25),
-              width: 0.8,
-            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  HugeIcon(icon: icon, size: 11, color: isSolid ? theme.colorScheme.onSurfaceVariant : accent),
+                  HugeIcon(icon: icon, size: 11, color: accent),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       label,
                       style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: accent,
                         fontSize: 8.5,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
@@ -547,7 +516,7 @@ class SettingsScreen extends ConsumerWidget {
               Text(
                 value,
                 style: TextStyle(
-                  color: isSolid ? theme.colorScheme.onSurface : accent,
+                  color: accent,
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                 ),
@@ -581,10 +550,6 @@ class SettingsScreen extends ConsumerWidget {
         decoration: BoxDecoration(
           color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-            width: 1.0,
-          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isSolid ? 0.2 : 0.1),
@@ -600,16 +565,8 @@ class SettingsScreen extends ConsumerWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: isSolid
-                    ? theme.colorScheme.surfaceContainerHighest
-                    : StudioSurfaceTheme.tintedContainer(context, accentColor, isSolid: false, translucentAlpha: 0.15),
+                color: accentColor.withValues(alpha: isSolid ? 0.16 : 0.14),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSolid
-                      ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                      : accentColor.withValues(alpha: 0.4),
-                  width: 1.0,
-                ),
               ),
               child: Center(
                 child: HugeIcon(
@@ -656,21 +613,13 @@ class SettingsScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: isSolid
-                          ? theme.colorScheme.surfaceContainerHighest
-                          : StudioSurfaceTheme.tintedContainer(context, accentColor, isSolid: false, translucentAlpha: 0.12),
+                      color: accentColor.withValues(alpha: isSolid ? 0.14 : 0.12),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: isSolid
-                            ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                            : accentColor.withValues(alpha: 0.3),
-                        width: 0.8,
-                      ),
                     ),
                     child: Text(
                       badgeText,
                       style: TextStyle(
-                        color: isSolid ? theme.colorScheme.onSurfaceVariant : accentColor,
+                        color: accentColor,
                         fontSize: 9.5,
                         fontWeight: FontWeight.bold,
                       ),

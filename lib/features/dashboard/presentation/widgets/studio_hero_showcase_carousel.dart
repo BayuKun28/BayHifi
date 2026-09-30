@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
@@ -193,7 +194,7 @@ class _StudioHeroShowcaseCarouselState
       return;
     }
 
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     final tracksToPlay = shuffle
         ? (List<Track>.from(mix.tracks)..shuffle())
         : mix.tracks;
@@ -214,7 +215,7 @@ class _StudioHeroShowcaseCarouselState
   }
 
   void _openMixDetailSheet(BuildContext context, StudioMixItem mix) {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     if (mix.id == 'youtube_hifi_showcase') {
       Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const YouTubeDiscoveryScreen()),
@@ -343,6 +344,17 @@ class _StudioHeroShowcaseCarouselState
     bool isSolid,
   ) {
     final firstTrack = mix.tracks.isNotEmpty ? mix.tracks.first : null;
+    final mixColor = mix.id == 'youtube_hifi_showcase'
+        ? StudioCategoryColors.youtubeMusic
+        : (mix.id == 'hires_master_mix'
+            ? StudioCategoryColors.hiResGold
+            : (mix.id == 'night_ambient_mix'
+                ? StudioCategoryColors.sleepTimer
+                : (mix.id == 'focus_ambient_mix'
+                    ? StudioCategoryColors.autoEq
+                    : (mix.id == 'bass_heavy_mix'
+                        ? StudioCategoryColors.dspTubeWarmth
+                        : primary))));
 
     return InkWell(
       onTap: () => _openMixDetailSheet(context, mix),
@@ -365,7 +377,7 @@ class _StudioHeroShowcaseCarouselState
                   child: HugeIcon(
                     icon: mix.icon,
                     size: 140,
-                    color: primary,
+                    color: mixColor,
                   ),
                 ),
               ),
@@ -382,12 +394,8 @@ class _StudioHeroShowcaseCarouselState
                         height: 78,
                         margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.12),
+                          color: StudioCategoryColors.youtubeMusic.withValues(alpha: isSolid ? 0.18 : 0.14),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.35),
-                            width: 1.0,
-                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.25),
@@ -396,11 +404,11 @@ class _StudioHeroShowcaseCarouselState
                             ),
                           ],
                         ),
-                        child: Center(
+                        child: const Center(
                           child: HugeIcon(
                             icon: HugeIcons.strokeRoundedPlayList,
                             size: 34,
-                            color: primary,
+                            color: StudioCategoryColors.youtubeMusic,
                           ),
                         ),
                       )
@@ -411,10 +419,6 @@ class _StudioHeroShowcaseCarouselState
                         margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.3),
-                            width: 1.0,
-                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.25),
@@ -447,17 +451,13 @@ class _StudioHeroShowcaseCarouselState
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: primary.withValues(alpha: 0.12),
+                                  color: mixColor.withValues(alpha: isSolid ? 0.18 : 0.14),
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: primary.withValues(alpha: 0.3),
-                                    width: 0.8,
-                                  ),
                                 ),
                                 child: Text(
                                   mix.categoryBadge,
                                   style: TextStyle(
-                                    color: primary,
+                                    color: mixColor,
                                     fontSize: 8.5,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 0.5,
@@ -473,7 +473,7 @@ class _StudioHeroShowcaseCarouselState
                                 child: HugeIcon(
                                   icon: mix.icon,
                                   size: 14,
-                                  color: primary,
+                                  color: mixColor,
                                 ),
                               ),
                             ],
@@ -551,7 +551,7 @@ class _StudioHeroShowcaseCarouselState
                                   if (mix.id == 'youtube_hifi_showcase') ...[
                                     InkWell(
                                       onTap: () {
-                                        HapticFeedback.selectionClick();
+                                        AppHaptics.selectionClick();
                                         Navigator.of(context).push(
                                           MaterialPageRoute(builder: (_) => const YouTubeDiscoveryScreen()),
                                         );
@@ -560,7 +560,7 @@ class _StudioHeroShowcaseCarouselState
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: primary,
+                                          color: mixColor,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: const Row(
@@ -595,10 +595,6 @@ class _StudioHeroShowcaseCarouselState
                                           decoration: BoxDecoration(
                                             color: theme.colorScheme.surfaceContainerHighest,
                                             borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(
-                                              color: theme.dividerColor.withValues(alpha: 0.6),
-                                              width: 0.8,
-                                            ),
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -629,7 +625,7 @@ class _StudioHeroShowcaseCarouselState
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: primary,
+                                          color: mixColor,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: const Row(
@@ -704,10 +700,6 @@ class _StudioMixDetailSheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 1.2,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.35),
@@ -745,10 +737,6 @@ class _StudioMixDetailSheet extends StatelessWidget {
                     margin: const EdgeInsets.only(right: 14),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
-                        width: 1.0,
-                      ),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
@@ -814,7 +802,7 @@ class _StudioMixDetailSheet extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: M3EButton.filled(
                     onPressed: onPlayAll,
                     icon: const HugeIcon(
                       icon: HugeIcons.strokeRoundedPlay,
@@ -829,18 +817,11 @@ class _StudioMixDetailSheet extends StatelessWidget {
                         color: Colors.black,
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: M3EButton.outlined(
                     onPressed: onShuffle,
                     icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedShuffle,
@@ -853,14 +834,6 @@ class _StudioMixDetailSheet extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,
                         color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-                      backgroundColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
@@ -884,10 +857,6 @@ class _StudioMixDetailSheet extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                      width: 0.8,
-                    ),
                   ),
                   child: Material(
                     color: Colors.transparent,
@@ -900,10 +869,6 @@ class _StudioMixDetailSheet extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                            width: 0.8,
-                          ),
                         ),
                         child: Center(
                           child: Text(
@@ -938,10 +903,6 @@ class _StudioMixDetailSheet extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                                 borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.6),
-                                  width: 0.6,
-                                ),
                               ),
                               child: Text(
                                 'Hi-Res',

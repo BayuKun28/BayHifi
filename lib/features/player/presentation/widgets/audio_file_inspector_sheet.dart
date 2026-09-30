@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/utils/audio_file_inspector.dart';
@@ -480,7 +481,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
             ),
             tooltip: 'Copy $title',
             onPressed: () {
-              HapticFeedback.lightImpact();
+              AppHaptics.lightImpact();
               Clipboard.setData(ClipboardData(text: value));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

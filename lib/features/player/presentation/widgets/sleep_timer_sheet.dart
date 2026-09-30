@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -182,7 +182,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                 height: 46,
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    HapticFeedback.mediumImpact();
+                    AppHaptics.mediumImpact();
                     timerController.cancelTimer();
                     Navigator.of(context).pop();
                   },
@@ -230,7 +230,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 3),
                       child: InkWell(
                         onTap: () {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selectionClick();
                           setState(() => _selectedMinutes = mins);
                         },
                         borderRadius: BorderRadius.circular(10),
@@ -344,7 +344,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                 height: 48,
                 child: FilledButton.icon(
                   onPressed: () {
-                    HapticFeedback.mediumImpact();
+                    AppHaptics.mediumImpact();
                     timerController.startTimer(
                       _selectedMinutes,
                       stopAtEndOfTrack: _stopAtEndOfTrack,
@@ -390,7 +390,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
     final theme = Theme.of(context);
     return InkWell(
       onTap: () {
-        HapticFeedback.selectionClick();
+        AppHaptics.selectionClick();
         controller.extendTimer(minutes);
       },
       borderRadius: BorderRadius.circular(10),
@@ -467,7 +467,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
             value: value,
             activeThumbColor: primaryColor,
             onChanged: (val) {
-              HapticFeedback.selectionClick();
+              AppHaptics.selectionClick();
               onChanged(val);
             },
           ),

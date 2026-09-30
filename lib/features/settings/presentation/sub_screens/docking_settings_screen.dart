@@ -160,14 +160,6 @@ class DockingSettingsScreen extends ConsumerWidget {
                 ? color.withValues(alpha: 0.14)
                 : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.45)
-              : (isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
-          width: 0.9,
-        ),
       ),
       child: Text(
         label,
@@ -226,10 +218,6 @@ class DockingSettingsScreen extends ConsumerWidget {
                     solidBlendAlpha: 0.20,
                   ),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.4),
-                    width: 0.8,
-                  ),
                 ),
                 child: const HugeIcon(
                   icon: HugeIcons.strokeRoundedCar01,

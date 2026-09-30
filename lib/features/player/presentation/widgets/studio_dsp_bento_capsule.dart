@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import '../../../dsp_rack/presentation/dsp_rack_screen.dart';
@@ -27,7 +27,6 @@ class StudioDspBentoCapsule extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
     final eqState = ref.watch(eqControllerProvider);
     final dspState = ref.watch(dspRackControllerProvider);
@@ -67,7 +66,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   AutoEqModalDialog.show(context);
                 },
                 child: Container(
@@ -75,29 +74,17 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: isAutoActive
-                        ? StudioSurfaceTheme.tintedContainer(
-                            context,
-                            const Color(0xFF00E676),
-                            isSolid: isSolid,
-                            translucentAlpha: 0.15,
-                            solidBlendAlpha: 0.18,
-                          )
+                        ? StudioCategoryColors.autoEq.withValues(alpha: isSolid ? 0.18 : 0.15)
                         : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.35),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isAutoActive
-                          ? (isSolid ? theme.colorScheme.outline : const Color(0xFF00E676).withValues(alpha: 0.5))
-                          : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                      width: 0.8,
-                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
+                      const HugeIcon(
                         icon: HugeIcons.strokeRoundedHeadphones,
                         size: 13,
-                        color: isAutoActive ? const Color(0xFF00E676) : primary,
+                        color: StudioCategoryColors.autoEq,
                       ),
                       const SizedBox(width: 5),
                       Flexible(
@@ -107,7 +94,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             color: isAutoActive
-                                ? const Color(0xFF00E676)
+                                ? StudioCategoryColors.autoEq
                                 : theme.colorScheme.onSurface.withValues(alpha: 0.8),
                           ),
                           maxLines: 1,
@@ -134,7 +121,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const DspRackScreen(),
@@ -146,21 +133,9 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: isDspActive
-                        ? StudioSurfaceTheme.tintedContainer(
-                            context,
-                            primary,
-                            isSolid: isSolid,
-                            translucentAlpha: 0.15,
-                            solidBlendAlpha: 0.18,
-                          )
+                        ? StudioCategoryColors.dspMastering.withValues(alpha: isSolid ? 0.18 : 0.15)
                         : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.35),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDspActive
-                          ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5))
-                          : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                      width: 0.8,
-                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -168,7 +143,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                       HugeIcon(
                         icon: HugeIcons.strokeRoundedSlidersVertical,
                         size: 13,
-                        color: isDspActive ? primary : theme.colorScheme.onSurfaceVariant,
+                        color: isDspActive ? StudioCategoryColors.dspMastering : theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 5),
                       Flexible(
@@ -177,7 +152,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: isDspActive ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                            color: isDspActive ? StudioCategoryColors.dspMastering : theme.colorScheme.onSurface.withValues(alpha: 0.8),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

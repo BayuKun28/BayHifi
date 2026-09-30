@@ -1,8 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
@@ -336,7 +337,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     fontFeatures: AppTypography.audioFigures,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: primary,
+                    color: track.isHiRes ? StudioCategoryColors.hiResGold : primary,
                     letterSpacing: 0.4,
                   ),
                   maxLines: 1,
@@ -363,7 +364,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             // Proportional Sleep Timer Button with Countdown Badge
             InkWell(
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 SleepTimerSheet.show(context);
               },
               borderRadius: BorderRadius.circular(16),
@@ -371,12 +372,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: sleepTimer.isActive
-                      ? StudioSurfaceTheme.tintedContainer(context, const Color(0xFFFF9F0A), isSolid: isSolid, translucentAlpha: 0.15)
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          StudioCategoryColors.sleepTimer,
+                          isSolid: isSolid,
+                          translucentAlpha: 0.16,
+                          solidBlendAlpha: 0.2,
+                        )
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
-                  border: sleepTimer.isActive
-                      ? Border.all(color: const Color(0xFFFF9F0A).withValues(alpha: isSolid ? 0.6 : 0.45), width: 1.0)
-                      : null,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -385,18 +389,18 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                       icon: HugeIcons.strokeRoundedHourglass,
                       size: 20,
                       color: sleepTimer.isActive
-                          ? const Color(0xFFFF9F0A)
+                          ? StudioCategoryColors.sleepTimer
                           : theme.colorScheme.onSurface.withValues(alpha: 0.65),
                     ),
                     if (sleepTimer.isActive) ...[
                       const SizedBox(width: 4),
                       Text(
                         sleepTimer.formattedRemaining,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFeatures: AppTypography.audioFigures,
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFFFF9F0A),
+                          color: StudioCategoryColors.sleepTimer,
                         ),
                       ),
                     ],
@@ -410,7 +414,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             if (track != null)
               IconButton(
                 onPressed: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   libraryController.toggleFavorite(track.id);
                 },
                 icon: HugeIcon(
@@ -426,6 +430,226 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         ),
       ],
     );
+  }
+
+  // ─── LANDSCAPE TOP BAR (With Streamlined Studio Actions Toolbar) ───────────
+  Widget _buildLandscapeTopBar(
+    BuildContext context,
+    ThemeData theme,
+    Color primary,
+    Track? track,
+    bool isFav,
+    UnifiedLibraryController libraryController,
+    SleepTimerState sleepTimer,
+    PlaybackState playback,
+  ) {
+    final isSolid = ref.isSolidStyle;
+    return Row(
+      children: [
+        // Left: Collapse Chevron Button
+        if (widget.onCollapse != null)
+          IconButton(
+            onPressed: widget.onCollapse,
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowDown01,
+              size: 20,
+              color: theme.colorScheme.onSurface,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Collapse to MiniPlayer',
+          ),
+
+        const SizedBox(width: 4),
+
+        // NOW PLAYING Text
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: Image.asset(
+                'assets/images/baydev_logo.png',
+                width: 13,
+                height: 13,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              'NOW PLAYING',
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.0,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(width: 8),
+
+        // Relocated Studio Actions Toolbar
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+              // 1. Open Local File
+              IconButton(
+                onPressed: _pickAndPlayFile,
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedFolder01,
+                  size: 18,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                tooltip: 'Open Audio File',
+              ),
+
+              // 2. Playback Speed & Pitch Engine
+              IconButton(
+                onPressed: () {
+                  AppHaptics.lightImpact();
+                  PlaybackSpeedPitchSheet.show(context);
+                },
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDashboardSpeed01,
+                  size: 18,
+                  color: (playback.playbackSpeed != 1.0 || playback.pitchSemitones != 0.0)
+                      ? primary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                tooltip: 'Speed & Pitch (${playback.playbackSpeed.toStringAsFixed(1)}x)',
+              ),
+
+              // 3. Studio Desk & Car Docking Mode
+              IconButton(
+                onPressed: () {
+                  AppHaptics.lightImpact();
+                  StudioDeskDockingScreen.show(context);
+                },
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedCar01,
+                  size: 18,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                tooltip: 'Studio Desk & Car Mode',
+              ),
+
+              // 4. Full-Screen Pro-Q Studio Equalizer
+              IconButton(
+                onPressed: () {
+                  AppHaptics.selectionClick();
+                  widget.onOpenProQStudio();
+                },
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedSlidersVertical,
+                  size: 18,
+                  color: primary,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                tooltip: 'Pro-Q Studio Equalizer',
+              ),
+
+              // 5. Technical Audio Specs Inspector
+              if (track != null)
+                IconButton(
+                  onPressed: () {
+                    AppHaptics.lightImpact();
+                    AudioFileInspectorSheet.show(context, track);
+                  },
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedInformationCircle,
+                    size: 18,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  tooltip: 'Audio Specs Inspector',
+                ),
+
+              // 6. Sleep Timer
+              InkWell(
+                onTap: () {
+                  AppHaptics.lightImpact();
+                  SleepTimerSheet.show(context);
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: sleepTimer.isActive
+                        ? StudioSurfaceTheme.tintedContainer(
+                            context,
+                            StudioCategoryColors.sleepTimer,
+                            isSolid: isSolid,
+                            translucentAlpha: 0.16,
+                            solidBlendAlpha: 0.2,
+                          )
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedHourglass,
+                        size: 18,
+                        color: sleepTimer.isActive
+                            ? StudioCategoryColors.sleepTimer
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                      ),
+                      if (sleepTimer.isActive) ...[
+                        const SizedBox(width: 3),
+                        Text(
+                          sleepTimer.formattedRemaining,
+                          style: TextStyle(
+                            fontFeatures: AppTypography.audioFigures,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: StudioCategoryColors.sleepTimer,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
+              // 7. Favorite Button
+              if (track != null)
+                IconButton(
+                  onPressed: () {
+                    AppHaptics.selectionClick();
+                    libraryController.toggleFavorite(track.id);
+                  },
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedFavourite,
+                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                    size: 18,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
+                ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  ],
+);
   }
 
   // ─── PORTRAIT LAYOUT ──────────────────────────────────────────────────────
@@ -662,17 +886,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15)
                 : (isSolid ? theme.colorScheme.surfaceContainer : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: playback.isShuffle
-                  ? primary.withValues(alpha: isSolid ? 0.8 : 0.6)
-                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-              width: 1.0,
-            ),
           ),
           child: IconButton(
             padding: EdgeInsets.zero,
             onPressed: () {
-              HapticFeedback.selectionClick();
+              AppHaptics.selectionClick();
               ref.read(playerControllerProvider.notifier).toggleShuffle();
             },
             icon: HugeIcon(
@@ -693,17 +911,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           decoration: BoxDecoration(
             color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
           ),
           child: GestureDetector(
             onLongPress: () {
-              HapticFeedback.mediumImpact();
+              AppHaptics.mediumImpact();
               ref.read(playerControllerProvider.notifier).seekBackward();
             },
             child: IconButton(
               padding: EdgeInsets.zero,
               onPressed: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 ref.read(playerControllerProvider.notifier).skipPrevious();
               },
               icon: HugeIcon(
@@ -723,7 +940,6 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
             color: primary,
-            border: isSolid ? null : Border.all(color: primary.withValues(alpha: 0.8), width: 1.0),
             boxShadow: [
               BoxShadow(
                 color: isSolid
@@ -738,16 +954,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             padding: EdgeInsets.zero,
             iconSize: 32,
             onPressed: () {
-              HapticFeedback.mediumImpact();
+              AppHaptics.mediumImpact();
               ref.read(playerControllerProvider.notifier).togglePlayPause();
             },
             icon: playback.isLoading
                 ? SizedBox(
                     width: 26,
                     height: 26,
-                    child: CircularProgressIndicator(
+                    child: M3EProgressIndicator.circular(
                       strokeWidth: 2.8,
-                      valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                      color: theme.colorScheme.onPrimary,
                     ),
                   )
                 : HugeIcon(
@@ -770,17 +986,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           decoration: BoxDecoration(
             color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.0),
           ),
           child: GestureDetector(
             onLongPress: () {
-              HapticFeedback.mediumImpact();
+              AppHaptics.mediumImpact();
               ref.read(playerControllerProvider.notifier).seekForward();
             },
             child: IconButton(
               padding: EdgeInsets.zero,
               onPressed: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 ref.read(playerControllerProvider.notifier).skipNext();
               },
               icon: HugeIcon(
@@ -802,17 +1017,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15)
                 : (isSolid ? theme.colorScheme.surfaceContainer : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: playback.repeatMode != PlaybackRepeatMode.off
-                  ? primary.withValues(alpha: isSolid ? 0.8 : 0.6)
-                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-              width: 1.0,
-            ),
           ),
           child: IconButton(
             padding: EdgeInsets.zero,
             onPressed: () {
-              HapticFeedback.selectionClick();
+              AppHaptics.selectionClick();
               ref.read(playerControllerProvider.notifier).toggleRepeatMode();
             },
             icon: HugeIcon(
@@ -853,12 +1062,6 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.4),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isHiRes
-              ? const Color(0xFFFF9F0A).withValues(alpha: isSolid ? 0.6 : 0.45)
-              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
       ),
       child: FittedBox(
         fit: BoxFit.scaleDown,
@@ -870,9 +1073,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               decoration: BoxDecoration(
                 color: StudioSurfaceTheme.tintedContainer(
                   context,
-                  isHiRes ? const Color(0xFFFF9F0A) : primary,
+                  isHiRes ? StudioCategoryColors.hiResGold : StudioCategoryColors.flacLossless,
                   isSolid: isSolid,
-                  translucentAlpha: isHiRes ? 0.2 : 0.15,
+                  translucentAlpha: 0.18,
+                  solidBlendAlpha: 0.22,
                 ),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -881,7 +1085,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 style: TextStyle(
                   fontSize: 8.5,
                   fontWeight: FontWeight.w900,
-                  color: isHiRes ? const Color(0xFFFF9F0A) : primary,
+                  color: isHiRes ? StudioCategoryColors.hiResGold : StudioCategoryColors.flacLossless,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -928,7 +1132,6 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 0.8),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -939,6 +1142,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               icon: HugeIcons.strokeRoundedFolder01,
               label: 'Open',
               isActive: false,
+              iconColor: primary,
               activeColor: primary,
               onTap: _pickAndPlayFile,
             ),
@@ -950,9 +1154,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               icon: HugeIcons.strokeRoundedCar01,
               label: 'Desk Mode',
               isActive: false,
-              activeColor: const Color(0xFFFF9F0A),
+              iconColor: primary,
+              activeColor: primary,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 StudioDeskDockingScreen.show(context);
               },
             ),
@@ -964,9 +1169,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               icon: HugeIcons.strokeRoundedTextFont,
               label: 'Lyric',
               isActive: _showLyrics,
+              iconColor: primary,
               activeColor: primary,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 setState(() => _showLyrics = !_showLyrics);
               },
             ),
@@ -978,9 +1184,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               icon: HugeIcons.strokeRoundedPlaylist01,
               label: playback.queue.isNotEmpty ? 'Queue (${playback.queue.length})' : 'Queue',
               isActive: playback.queue.isNotEmpty,
+              iconColor: primary,
               activeColor: primary,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 NowPlayingQueueSheet.show(context);
               },
             ),
@@ -992,9 +1199,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               icon: HugeIcons.strokeRoundedDashboardSpeed01,
               label: '${playback.playbackSpeed.toStringAsFixed(1)}x',
               isActive: playback.playbackSpeed != 1.0 || playback.pitchSemitones != 0.0,
+              iconColor: primary,
               activeColor: primary,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 PlaybackSpeedPitchSheet.show(context);
               },
             ),
@@ -1006,9 +1214,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               icon: HugeIcons.strokeRoundedInformationCircle,
               label: 'Spec',
               isActive: false,
-              activeColor: const Color(0xFF00E5FF),
+              iconColor: primary,
+              activeColor: primary,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.lightImpact();
                 if (track != null) {
                   AudioFileInspectorSheet.show(context, track);
                 }
@@ -1025,13 +1234,29 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     required String label,
     required bool isActive,
     required Color activeColor,
+    Color? iconColor,
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
+    final displayIconColor = isActive ? activeColor : (iconColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.7));
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
-      child: Padding(
+      child: Container(
+        decoration: isActive
+            ? BoxDecoration(
+                color: StudioSurfaceTheme.tintedContainer(
+                  context,
+                  activeColor,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.16,
+                  solidBlendAlpha: 0.2,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              )
+            : null,
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1039,7 +1264,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             HugeIcon(
               icon: icon,
               size: 20,
-              color: isActive ? activeColor : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: displayIconColor,
             ),
             const SizedBox(height: 3),
             Text(
@@ -1047,8 +1272,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               style: TextStyle(
                 fontFeatures: AppTypography.audioFigures,
                 fontSize: 9.5,
-                fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
-                color: isActive ? activeColor : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                color: isActive ? activeColor : theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1077,13 +1302,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         children: [
-          // LEFT PANE (42%): Playback Deck, Cover Art, Track Info, Sliders
+          // LEFT PANE (42%): Playback Deck, Cover Art, Track Info, Sliders (Clean & Concise)
           Expanded(
             flex: 5,
             child: Column(
               children: [
-                // Top Bar
-                _buildMinimalistTopBar(
+                // 1. Top Bar with Relocated Studio Actions Toolbar
+                _buildLandscapeTopBar(
                   context,
                   theme,
                   primary,
@@ -1091,11 +1316,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   isFav,
                   libraryController,
                   sleepTimer,
+                  playback,
                 ),
 
                 const SizedBox(height: 6),
 
-                // Center Album Art & Info
+                // 2. Center Album Art & Info
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1174,7 +1400,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
 
                 const SizedBox(height: 4),
 
-                // Customizable Time Bar
+                // 3. Customizable Time Bar
                 CustomTimeBar(
                   position: playback.position,
                   duration: playback.duration,
@@ -1186,156 +1412,17 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   onSeek: (newPos) => ref.read(playerControllerProvider.notifier).seek(newPos),
                 ),
 
-                const SizedBox(height: 4),
-
-                // Main Playback Controls
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: playback.isShuffle
-                            ? primary.withValues(alpha: 0.15)
-                            : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: playback.isShuffle
-                              ? primary.withValues(alpha: 0.6)
-                              : theme.dividerColor.withValues(alpha: 0.5),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          HapticFeedback.selectionClick();
-                          ref.read(playerControllerProvider.notifier).toggleShuffle();
-                        },
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedShuffle,
-                          color: playback.isShuffle ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: theme.dividerColor, width: 1.0),
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          ref.read(playerControllerProvider.notifier).skipPrevious();
-                        },
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedPrevious, size: 22, color: theme.colorScheme.onSurface),
-                      ),
-                    ),
-                    Container(
-                      width: 54,
-                      height: 54,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        color: primary,
-                        border: Border.all(color: primary.withValues(alpha: 0.8), width: 1.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primary.withValues(alpha: 0.35),
-                            blurRadius: 14,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          ref.read(playerControllerProvider.notifier).togglePlayPause();
-                        },
-                        icon: playback.isLoading
-                            ? SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.4,
-                                  valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
-                                ),
-                              )
-                            : HugeIcon(
-                                icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
-                                color: theme.colorScheme.onPrimary,
-                                size: 24,
-                              ),
-                        tooltip: playback.isLoading ? 'Buffering...' : (playback.isPlaying ? 'Pause' : 'Play'),
-                      ),
-                    ),
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: theme.dividerColor, width: 1.0),
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          ref.read(playerControllerProvider.notifier).skipNext();
-                        },
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedNext, size: 22, color: theme.colorScheme.onSurface),
-                      ),
-                    ),
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: playback.repeatMode != PlaybackRepeatMode.off
-                            ? primary.withValues(alpha: 0.15)
-                            : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: playback.repeatMode != PlaybackRepeatMode.off
-                              ? primary.withValues(alpha: 0.6)
-                              : theme.dividerColor.withValues(alpha: 0.5),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          HapticFeedback.selectionClick();
-                          ref.read(playerControllerProvider.notifier).toggleRepeatMode();
-                        },
-                        icon: HugeIcon(
-                          icon: playback.repeatMode == PlaybackRepeatMode.one
-                              ? HugeIcons.strokeRoundedRepeatOne01
-                              : HugeIcons.strokeRoundedRepeat,
-                          color: playback.repeatMode != PlaybackRepeatMode.off ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
                 const SizedBox(height: 6),
 
-                // Bottom Action Strip
-                _buildBottomStudioActionStrip(context, playback, sleepTimer, track, theme, primary),
+                // 4. Main Playback Controls Deck
+                _buildPlaybackControlsDeck(context, playback, primary, theme),
               ],
             ),
           ),
 
           const SizedBox(width: 14),
 
-          // RIGHT PANE (58%): Full Multi-Tab Workstation (Pro-Q Studio EQ / DSP Rack / Lyrics / Queue)
+          // RIGHT PANE (58%): Multi-Tab Workstation (Up Next Queue / Lyrics / DSP Rack)
           Expanded(
             flex: 7,
             child: DualPaneWorkstationPane(

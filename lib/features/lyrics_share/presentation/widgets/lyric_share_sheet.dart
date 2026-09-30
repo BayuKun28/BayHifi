@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../player/domain/lyrics_line.dart';
 import '../../../player/domain/track.dart';
 import '../../domain/models/lyric_card_theme.dart';
@@ -95,10 +95,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.15),
-          width: 1,
-        ),
       ),
       child: SafeArea(
         top: false,
@@ -209,9 +205,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.1),
-          ),
         ),
         child: Row(
           children: [
@@ -222,7 +215,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 isSelected: _currentTabIndex == 0,
                 theme: theme,
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   setState(() => _currentTabIndex = 0);
                 },
               ),
@@ -234,7 +227,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 isSelected: _currentTabIndex == 1,
                 theme: theme,
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   setState(() => _currentTabIndex = 1);
                 },
               ),
@@ -318,10 +311,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.12),
-                width: 1.0,
-              ),
             ),
             child: Center(
               child: AnimatedContainer(
@@ -358,7 +347,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                       child: SizedBox(
                         width: 86,
                         child: _buildRatioOption(r, state.config.ratio, theme, () {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selectionClick();
                           controller.setRatio(r);
                         }),
                       ),
@@ -422,7 +411,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   customText: state.config.customAudioSpec,
                   theme: theme,
                   onChanged: (val) {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     controller.toggleAudioSpecs(val);
                   },
                   onEditCustomText: () => _showCustomAudioSpecDialog(context, theme, state, controller),
@@ -434,7 +423,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   value: state.config.showBranding,
                   theme: theme,
                   onChanged: (val) {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     controller.toggleBranding(val);
                   },
                 ),
@@ -446,7 +435,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     value: state.config.showRomanized,
                     theme: theme,
                     onChanged: (val) {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       controller.toggleRomanized(val);
                     },
                   ),
@@ -473,10 +462,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.12),
-          width: 1.0,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,7 +517,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             children: [
               for (final font in LyricCardFontFamily.values) ...[
                 _buildFontFamilyChip(font, config.fontFamily, theme, () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   controller.setFontFamily(font);
                 }),
                 const SizedBox(width: 8),
@@ -550,7 +535,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               for (final w in weights) ...[
                 GestureDetector(
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     controller.setFontWeight(w.$1);
                   },
                   child: Container(
@@ -561,12 +546,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                           ? theme.colorScheme.primary.withValues(alpha: 0.15)
                           : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: config.fontWeight == w.$1
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.outline.withValues(alpha: 0.15),
-                        width: config.fontWeight == w.$1 ? 1.4 : 0.8,
-                      ),
                     ),
                     child: Text(
                       w.$2,
@@ -594,9 +573,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                ),
               ),
               child: Row(
                 children: [
@@ -605,7 +581,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     isSelected: config.textAlign == TextAlign.left,
                     theme: theme,
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       controller.setTextAlign(TextAlign.left);
                     },
                   ),
@@ -614,7 +590,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     isSelected: config.textAlign == TextAlign.center,
                     theme: theme,
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       controller.setTextAlign(TextAlign.center);
                     },
                   ),
@@ -623,7 +599,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     isSelected: config.textAlign == TextAlign.right,
                     theme: theme,
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       controller.setTextAlign(TextAlign.right);
                     },
                   ),
@@ -637,16 +613,13 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                ),
               ),
               child: _buildIconToggle(
                 icon: HugeIcons.strokeRoundedTextItalic,
                 isSelected: config.isItalic,
                 theme: theme,
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   controller.toggleItalic(!config.isItalic);
                 },
               ),
@@ -658,16 +631,13 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   GestureDetector(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       controller.setFontSizeMultiplier(config.fontSizeMultiplier - 0.1);
                     },
                     child: Padding(
@@ -693,7 +663,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       controller.setFontSizeMultiplier(config.fontSizeMultiplier + 0.1);
                     },
                     child: Padding(
@@ -733,7 +703,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               for (final style in LyricCardHighlightStyle.values) ...[
                 GestureDetector(
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     controller.setHighlightStyle(style);
                   },
                   child: Container(
@@ -744,12 +714,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                           ? theme.colorScheme.primary.withValues(alpha: 0.15)
                           : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: config.highlightStyle == style
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.outline.withValues(alpha: 0.15),
-                        width: config.highlightStyle == style ? 1.5 : 1.0,
-                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -805,7 +769,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 ]) ...[
                   GestureDetector(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       controller.setStrokeWidth(stroke.$1);
                     },
                     child: Container(
@@ -816,12 +780,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                             ? theme.colorScheme.primary.withValues(alpha: 0.15)
                             : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: config.strokeWidth == stroke.$1
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.outline.withValues(alpha: 0.15),
-                          width: config.strokeWidth == stroke.$1 ? 1.2 : 0.8,
-                        ),
                       ),
                       child: Text(
                         stroke.$2,
@@ -869,7 +827,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
-                              HapticFeedback.selectionClick();
+                              AppHaptics.selectionClick();
                               controller.setLineSpacingMultiplier(spacing.$1);
                             },
                             child: Container(
@@ -880,12 +838,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                                     ? theme.colorScheme.primary.withValues(alpha: 0.15)
                                     : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: config.lineSpacingMultiplier == spacing.$1
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.outline.withValues(alpha: 0.12),
-                                  width: config.lineSpacingMultiplier == spacing.$1 ? 1.2 : 0.8,
-                                ),
                               ),
                               child: Center(
                                 child: Text(
@@ -934,7 +886,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
-                              HapticFeedback.selectionClick();
+                              AppHaptics.selectionClick();
                               controller.setLetterSpacing(lSpace.$1);
                             },
                             child: Container(
@@ -945,12 +897,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                                     ? theme.colorScheme.primary.withValues(alpha: 0.15)
                                     : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: (config.letterSpacing - lSpace.$1).abs() < 0.05
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.outline.withValues(alpha: 0.12),
-                                  width: (config.letterSpacing - lSpace.$1).abs() < 0.05 ? 1.2 : 0.8,
-                                ),
                               ),
                               child: Center(
                                 child: Text(
@@ -1010,10 +956,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               ? theme.colorScheme.primary.withValues(alpha: 0.15)
               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.15),
-            width: isSelected ? 1.5 : 1.0,
-          ),
         ),
         child: Text(
           font.label,
@@ -1225,9 +1167,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
       ),
       child: Row(
         children: [
@@ -1235,7 +1174,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   controller.setBackgroundMode(mode);
                 },
                 child: AnimatedContainer(
@@ -1304,7 +1243,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   ]) ...[
                     GestureDetector(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         controller.setBackgroundBlurSigma(b.$1);
                       },
                       child: Container(
@@ -1315,12 +1254,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                               ? theme.colorScheme.primary.withValues(alpha: 0.15)
                               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: (config.backgroundBlurSigma - b.$1).abs() < 1.0
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.outline.withValues(alpha: 0.15),
-                            width: (config.backgroundBlurSigma - b.$1).abs() < 1.0 ? 1.2 : 0.8,
-                          ),
                         ),
                         child: Text(
                           b.$2,
@@ -1363,7 +1296,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   ]) ...[
                     GestureDetector(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         controller.setBackgroundDimOpacity(d.$1);
                       },
                       child: Container(
@@ -1374,12 +1307,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                               ? theme.colorScheme.primary.withValues(alpha: 0.15)
                               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: (config.backgroundDimOpacity - d.$1).abs() < 0.05
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.outline.withValues(alpha: 0.15),
-                            width: (config.backgroundDimOpacity - d.$1).abs() < 0.05 ? 1.2 : 0.8,
-                          ),
                         ),
                         child: Text(
                           d.$2,
@@ -1441,7 +1368,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                           (state.dominantAlbumColor == color || swatches.first == color)),
                   theme: theme,
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     controller.selectPaletteColor(color);
                   },
                 ),
@@ -1458,7 +1385,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             children: [
               for (final preset in LyricCardThemePreset.values) ...[
                 _buildThemePresetChip(preset, state, theme, () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   controller.setPreset(preset);
                 }),
                 const SizedBox(width: 8),
@@ -1493,7 +1420,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   isSelected: state.config.customBackgroundColor == color,
                   theme: theme,
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     controller.setCustomColor(color);
                   },
                 ),
@@ -1640,10 +1567,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               ? theme.colorScheme.primary.withValues(alpha: 0.15)
               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.15),
-            width: isSelected ? 1.5 : 1,
-          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1791,7 +1714,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
         return GestureDetector(
           onTap: () {
-            HapticFeedback.selectionClick();
+            AppHaptics.selectionClick();
             controller.toggleLineSelection(line);
           },
           child: AnimatedContainer(
@@ -1802,12 +1725,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   ? theme.colorScheme.primary.withValues(alpha: 0.12)
                   : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outline.withValues(alpha: 0.12),
-                width: isSelected ? 1.5 : 0.8,
-              ),
             ),
             child: Row(
               children: [
@@ -1874,7 +1791,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               onPressed: state.isRendering
                   ? null
                   : () async {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.lightImpact();
                       final path = await controller.saveImageLocally(_repaintBoundaryKey);
                       if (context.mounted && path != null) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -1907,7 +1824,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               onPressed: state.isRendering || state.config.selectedLines.isEmpty
                   ? null
                   : () async {
-                      HapticFeedback.mediumImpact();
+                      AppHaptics.mediumImpact();
                       final result = await controller.shareLyricCard(_repaintBoundaryKey);
                       if (context.mounted) {
                         if (result.isMissingPlugin) {

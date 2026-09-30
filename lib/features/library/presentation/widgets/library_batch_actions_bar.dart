@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 
 /// Floating capsule action bar for multi-track batch operations in the library
@@ -63,7 +63,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
             children: [
               IconButton(
                 onPressed: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   onClose();
                 },
                 icon: HugeIcon(
@@ -170,7 +170,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
   }) {
     return IconButton(
       onPressed: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
         onTap();
       },
       icon: HugeIcon(

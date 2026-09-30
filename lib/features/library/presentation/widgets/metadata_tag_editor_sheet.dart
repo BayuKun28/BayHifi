@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../player/domain/track.dart';
@@ -110,7 +110,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
             _artworkBytes = bytes;
             _artworkMimeType = isPng ? 'image/png' : 'image/jpeg';
           });
-          HapticFeedback.selectionClick();
+          AppHaptics.selectionClick();
         }
       }
     } catch (e) {
@@ -123,7 +123,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
       _artworkBytes = null;
       _artworkMimeType = null;
     });
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
   }
 
   Future<void> _saveMetadata() async {
@@ -142,7 +142,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
     }
 
     setState(() => _isSaving = true);
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
 
     try {
       final tagData = AudioTagData(
@@ -473,7 +473,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                                   setState(() {
                                     _genreController.text = g;
                                   });
-                                  HapticFeedback.selectionClick();
+                                  AppHaptics.selectionClick();
                                 },
                               ),
                             );

@@ -75,6 +75,9 @@ class _RtaCustomPainter extends CustomPainter {
     final int count = magnitudes.length;
 
     switch (style) {
+      case SpectrumStyle.m3Expressive:
+        _paintM3Expressive(canvas, size, count);
+        break;
       case SpectrumStyle.bars:
         _paintBars(canvas, size, count);
         break;
@@ -96,6 +99,57 @@ class _RtaCustomPainter extends CustomPainter {
       case SpectrumStyle.circular:
         _paintCircular(canvas, size, count);
         break;
+    }
+  }
+
+  void _paintM3Expressive(Canvas canvas, Size size, int count) {
+    const double spacing = 2.5;
+    final double totalSpacing = (count - 1) * spacing;
+    final double barWidth = (size.width - totalSpacing) / count;
+    if (barWidth <= 0) return;
+
+    final radius = Radius.circular(math.min(barWidth / 2, 4.0));
+
+    // Baseline soft glow
+    final baselinePaint = Paint()
+      ..color = barColor.withValues(alpha: 0.15)
+      ..strokeWidth = 1.0;
+    canvas.drawLine(Offset(0, size.height - 0.5), Offset(size.width, size.height - 0.5), baselinePaint);
+
+    for (int i = 0; i < count; i++) {
+      final double mag = magnitudes[i].clamp(0.0, 1.0);
+      final double barHeight = math.max(3.0, mag * (size.height - 6));
+      final double x = i * (barWidth + spacing);
+      final double y = size.height - barHeight;
+
+      // Dynamic Material 3 Expressive gradient along column
+      final rectBounds = Rect.fromLTWH(x, y, barWidth, barHeight);
+      final gradient = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [
+          barColor.withValues(alpha: 0.45 + (mag * 0.35)),
+          barColor.withValues(alpha: 0.95),
+        ],
+      ).createShader(rectBounds);
+
+      _paint.shader = gradient;
+      _paint.style = PaintingStyle.fill;
+
+      final rrect = RRect.fromRectAndRadius(rectBounds, radius);
+      canvas.drawRRect(rrect, _paint);
+      _paint.shader = null;
+
+      // Floating M3 squircle peak hold pill
+      if (showPeakHold && mag > 0.04) {
+        final peakY = math.max(0.0, y - 4.0);
+        final peakRect = RRect.fromRectAndRadius(
+          Rect.fromLTWH(x, peakY, barWidth, 2.2),
+          const Radius.circular(1.1),
+        );
+        _peakPaint.color = barColor.withValues(alpha: 0.9);
+        canvas.drawRRect(peakRect, _peakPaint);
+      }
     }
   }
 

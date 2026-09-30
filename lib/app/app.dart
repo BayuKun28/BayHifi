@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../app/theme/theme_mode_controller.dart';
 import '../core/widgets/floating_rounded_dock.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
@@ -45,14 +46,27 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
       }
     });
 
-    return MaterialApp(
-      title: 'Baydev HiFi',
-      debugShowCheckedModeBanner: false,
-      themeMode: themeState.themeMode.mode,
-      theme: AppThemeBuilder.buildTheme(themeState.currentPalette, isDark: false),
-      darkTheme: AppThemeBuilder.buildTheme(themeState.currentPalette, isDark: true),
-      home: LayoutBuilder(
-        builder: (context, constraints) {
+    final isDark = themeState.themeMode == AppThemeMode.dark ||
+        (themeState.themeMode == AppThemeMode.system &&
+            WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
+    final themeData = AppThemeBuilder.buildTheme(themeState.currentPalette, isDark: isDark);
+    final m3eThemeData = AppThemeBuilder.buildM3ETheme(themeState.currentPalette, isDark: isDark);
+
+    return Theme(
+      data: themeData,
+      child: M3EMaterialApp(
+        title: 'Baydev HiFi',
+        debugShowCheckedModeBanner: false,
+        drawUnderSystemBars: true,
+        data: m3eThemeData,
+        localizationsDelegates: const [
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        home: Theme(
+          data: themeData,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
           final isMobile = constraints.maxWidth < 650;
           final theme = Theme.of(context);
 
@@ -132,17 +146,19 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                              width: 1.0,
                             ),
                           ),
-                          child: Center(
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedAudioWaveform,
-                              color: theme.colorScheme.primary,
-                              size: 20,
+                          padding: const EdgeInsets.all(7),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.asset(
+                              'assets/images/baydev_logo.png',
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
@@ -242,7 +258,9 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
           );
         },
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

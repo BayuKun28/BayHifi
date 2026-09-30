@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/player_customization_settings.dart';
 import '../controllers/player_customization_controller.dart';
@@ -189,14 +189,6 @@ class GesturesSettingsScreen extends ConsumerWidget {
                 ? color.withValues(alpha: 0.14)
                 : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.45)
-              : (isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
-          width: 0.9,
-        ),
       ),
       child: Text(
         label,
@@ -392,7 +384,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
           value: value,
           activeThumbColor: primary,
           onChanged: (val) {
-            HapticFeedback.lightImpact();
+            AppHaptics.lightImpact();
             onChanged(val);
           },
         ),
@@ -468,12 +460,6 @@ class GesturesSettingsScreen extends ConsumerWidget {
             ? theme.colorScheme.surfaceContainerHighest
             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: false),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSolid
-              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-              : StudioSurfaceTheme.outline(context, isSolid: false),
-          width: 0.8,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -531,7 +517,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
               }).toList(),
               onChanged: (val) {
                 if (val != null) {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   onChanged(val);
                 }
               },

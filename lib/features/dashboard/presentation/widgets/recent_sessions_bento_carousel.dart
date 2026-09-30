@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -139,7 +139,7 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
 
     return InkWell(
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
         ref.read(playerControllerProvider.notifier).playTrack(track);
       },
       borderRadius: BorderRadius.circular(14),
@@ -151,12 +151,6 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
               ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid)
               : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isCurrent
-                ? primary
-                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-            width: isCurrent ? 1.2 : 0.8,
-          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,10 +179,6 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5),
-                          width: 0.6,
-                        ),
                       ),
                       child: Text(
                         'HI-RES',

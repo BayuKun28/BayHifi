@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
-
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../audio_engine/audio_cache_service.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
@@ -26,7 +25,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
   /// Opens the unified track action bottom sheet
   static Future<void> show(BuildContext context, Track track) {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -271,7 +270,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
                 ),
                 title: const Text('Play Next', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   ref.read(playerControllerProvider.notifier).playNext(track);
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -293,7 +292,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
                 ),
                 title: const Text('Add to Queue', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   ref.read(playerControllerProvider.notifier).addToQueue(track);
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -364,7 +363,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
                   style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
                 ),
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
                   Navigator.of(context).pop();
                 },
@@ -380,7 +379,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
                   ),
                   title: const Text('Download for Offline Playback', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     AudioCacheService.instance.cacheTrack(track);
                     Navigator.of(context).pop();
                     ScaffoldMessenger.of(context).showSnackBar(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/database/local_persistence_service.dart';
@@ -64,6 +64,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
   }
 
   Widget _buildStatusHero(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
+    final hardwareColor = StudioCategoryColors.audioHardware;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: StudioSurfaceTheme.cardDecoration(
@@ -81,17 +82,17 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 decoration: BoxDecoration(
                   color: StudioSurfaceTheme.tintedContainer(
                     context,
-                    primary,
+                    hardwareColor,
                     isSolid: isSolid,
-                    translucentAlpha: 0.12,
-                    solidBlendAlpha: 0.16,
+                    translucentAlpha: 0.16,
+                    solidBlendAlpha: 0.2,
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: HugeIcon(
                   icon: HugeIcons.strokeRoundedCpu,
                   size: 18,
-                  color: primary,
+                  color: hardwareColor,
                 ),
               ),
               const SizedBox(width: 12),
@@ -130,7 +131,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 theme,
                 label: 'Engine: SoLoud Native C++',
                 isActive: true,
-                color: primary,
+                color: StudioCategoryColors.audioEngineSoloud,
                 isSolid: isSolid,
               ),
               _buildStatusPill(
@@ -138,7 +139,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 theme,
                 label: 'Buffer: ${_bufferLatency.toInt()}ms',
                 isActive: true,
-                color: theme.colorScheme.secondary,
+                color: StudioCategoryColors.proQEqualizer,
                 isSolid: isSolid,
               ),
               _buildStatusPill(
@@ -146,7 +147,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 theme,
                 label: _bitPerfect ? 'Bit-Perfect: ON' : 'Bit-Perfect: OFF',
                 isActive: _bitPerfect,
-                color: theme.colorScheme.tertiary,
+                color: StudioCategoryColors.bitPerfect,
                 isSolid: isSolid,
               ),
             ],
@@ -175,14 +176,6 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 ? color.withValues(alpha: 0.14)
                 : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.45)
-              : (isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
-          width: 0.9,
-        ),
       ),
       child: Text(
         label,
@@ -257,12 +250,6 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                     solidBlendAlpha: 0.20,
                   ),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isSolid
-                        ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                        : primary.withValues(alpha: 0.4),
-                    width: 0.8,
-                  ),
                 ),
                 child: Text(
                   'ONLINE',
@@ -297,7 +284,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
             },
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 setState(() => _outputDevice = val);
                 storage.saveSetting('output_device', val);
               }
@@ -316,12 +303,6 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                       ? theme.colorScheme.surfaceContainerHighest
                       : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isSolid
-                        ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                        : primary.withValues(alpha: 0.3),
-                    width: 0.8,
-                  ),
                 ),
                 child: Text(
                   '${_bufferLatency.toInt()} ms',
@@ -370,7 +351,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 value: _bitPerfect,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   setState(() => _bitPerfect = val);
                   storage.saveSetting('bit_perfect', val);
                 },
@@ -404,12 +385,6 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
             ? theme.colorScheme.surfaceContainerHighest
             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: false),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSolid
-              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-              : StudioSurfaceTheme.outline(context, isSolid: false),
-          width: 0.8,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

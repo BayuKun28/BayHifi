@@ -378,11 +378,18 @@ class PlayerController extends StateNotifier<PlaybackState> {
   }
 
   /// Jumps directly to a track at [index] in the queue
-  Future<void> skipToQueueIndex(int index) async {
+  Future<void> skipToQueueIndex(int index, {bool autoPlay = true}) async {
     if (index < 0 || index >= state.queue.length) return;
     final targetTrack = state.queue[index];
     state = state.copyWith(queueIndex: index);
-    await playTrack(targetTrack);
+    if (autoPlay) {
+      await playTrack(targetTrack);
+    } else {
+      state = state.copyWith(
+        currentTrack: targetTrack,
+        position: Duration.zero,
+      );
+    }
   }
 
   /// Plays a track (local audio file or remote stream URL)
@@ -429,7 +436,11 @@ class PlayerController extends StateNotifier<PlaybackState> {
       final fadeDuration = Duration(milliseconds: _playbackSettings.fadeInDurationMs);
 
       if (track.filePath != null && track.filePath!.isNotEmpty) {
-        await _audioEngine.playFile(track.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
+        try {
+          await _audioEngine.playFile(track.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
+        } catch (e) {
+          debugPrint('[PlayerController] playFile error (handled): $e');
+        }
       } else {
         // Remote / cloud track: Check if cached in AudioCacheService
         final cachedPath = AudioCacheService.instance.getCachedFilePath(track.id);
@@ -870,7 +881,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
     _saveSession();
   }
 
-  Future<void> skipNext() async {
+  Future<void> skipNext({bool autoPlay = true}) async {
     if (state.queue.isEmpty) {
       if (state.duration > Duration.zero) {
         final newPos = state.position + const Duration(seconds: 15);
@@ -884,16 +895,16 @@ class PlayerController extends StateNotifier<PlaybackState> {
     }
 
     if (state.queueIndex < state.queue.length - 1) {
-      await skipToQueueIndex(state.queueIndex + 1);
+      await skipToQueueIndex(state.queueIndex + 1, autoPlay: autoPlay);
     } else if (state.repeatMode == PlaybackRepeatMode.all) {
-      await skipToQueueIndex(0);
+      await skipToQueueIndex(0, autoPlay: autoPlay);
     } else {
       // Reached the end of queue
       await stop();
     }
   }
 
-  Future<void> skipPrevious() async {
+  Future<void> skipPrevious({bool autoPlay = true}) async {
     if (state.position.inSeconds > 3) {
       seek(Duration.zero);
       return;
@@ -906,9 +917,9 @@ class PlayerController extends StateNotifier<PlaybackState> {
     }
 
     if (state.queueIndex > 0) {
-      await skipToQueueIndex(state.queueIndex - 1);
+      await skipToQueueIndex(state.queueIndex - 1, autoPlay: autoPlay);
     } else if (state.repeatMode == PlaybackRepeatMode.all) {
-      await skipToQueueIndex(state.queue.length - 1);
+      await skipToQueueIndex(state.queue.length - 1, autoPlay: autoPlay);
     } else {
       seek(Duration.zero);
     }

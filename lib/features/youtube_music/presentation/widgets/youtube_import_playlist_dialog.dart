@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
+import '../../../../app/theme/app_haptics.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../controllers/youtube_music_controller.dart';
 
@@ -28,7 +30,7 @@ class _YouTubeImportPlaylistDialogState
   }
 
   Future<void> _pasteFromClipboard() async {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data?.text != null && data!.text!.isNotEmpty) {
       setState(() {
@@ -41,7 +43,7 @@ class _YouTubeImportPlaylistDialogState
     final input = _urlController.text.trim();
     if (input.isEmpty) return;
 
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     setState(() {
       _isLoading = true;
       _statusText = 'Importing playlist tracks...';
@@ -119,10 +121,6 @@ class _YouTubeImportPlaylistDialogState
                   decoration: BoxDecoration(
                     color: primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: primary.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
                   ),
                   child: Center(
                     child: HugeIcon(
@@ -226,7 +224,7 @@ class _YouTubeImportPlaylistDialogState
                   SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(
+                    child: M3EProgressIndicator.circular(
                       strokeWidth: 2,
                       color: primary,
                     ),

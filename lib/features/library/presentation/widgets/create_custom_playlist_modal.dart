@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/library_collection_models.dart';
 import '../controllers/library_controller.dart';
@@ -20,7 +20,7 @@ class CreateCustomPlaylistModal extends ConsumerStatefulWidget {
     BuildContext context, {
     PlaylistModel? initialPlaylist,
   }) {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -63,7 +63,7 @@ class _CreateCustomPlaylistModalState extends ConsumerState<CreateCustomPlaylist
       return;
     }
 
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     final desc = _descController.text.trim();
 
     if (widget.initialPlaylist != null) {

@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../player/domain/track.dart';
@@ -130,7 +130,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
             _artworkMimeType = isPng ? 'image/png' : 'image/jpeg';
             _applyArtwork = true;
           });
-          HapticFeedback.selectionClick();
+          AppHaptics.selectionClick();
         }
       }
     } catch (e) {
@@ -144,7 +144,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
       _artworkMimeType = null;
       _applyArtwork = false;
     });
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
   }
 
   Future<void> _executeBatchTagging() async {
@@ -153,7 +153,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
       _progress = 0.0;
     });
 
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
 
     try {
       final items = <BatchTaggingItem>[];
@@ -468,7 +468,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                           _genreController.text = g;
                                           _applyGenre = true;
                                         });
-                                        HapticFeedback.selectionClick();
+                                        AppHaptics.selectionClick();
                                       },
                                     ),
                                   );

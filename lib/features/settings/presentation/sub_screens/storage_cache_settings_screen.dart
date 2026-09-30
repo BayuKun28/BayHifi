@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../library/data/storage_cache_manager.dart';
@@ -50,7 +51,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
   }
 
   Future<void> _clearArtworkCache() async {
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     await StorageCacheManager.instance.clearArtworkCache();
     await _loadStorageSummary();
     if (mounted) {
@@ -61,7 +62,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
   }
 
   Future<void> _clearLyricsCache() async {
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     await StorageCacheManager.instance.clearLyricsCache();
     await _loadStorageSummary();
     if (mounted) {
@@ -72,7 +73,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
   }
 
   Future<void> _clearPlaybackHistory() async {
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     await StorageCacheManager.instance.clearPlaybackHistory();
     await _loadStorageSummary();
     if (mounted) {
@@ -83,7 +84,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
   }
 
   Future<void> _clearAllCaches() async {
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     await StorageCacheManager.instance.clearAllNonEssentialCache();
     await _loadStorageSummary();
     if (mounted) {
@@ -114,7 +115,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
         actions: [
           IconButton(
             onPressed: () {
-              HapticFeedback.lightImpact();
+              AppHaptics.lightImpact();
               _loadStorageSummary(showLoading: true);
             },
             icon: HugeIcon(
@@ -127,7 +128,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: M3EProgressIndicator.circular())
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
               children: [
@@ -206,7 +207,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 // ─── 4. 1-CLICK MASTER PURGE BUTTON ───────────────────────────────
                 FilledButton.icon(
                   onPressed: () {
-                    HapticFeedback.heavyImpact();
+                    AppHaptics.heavyImpact();
                     _clearAllCaches();
                   },
                   icon: HugeIcon(
@@ -345,12 +346,6 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
             ? theme.colorScheme.surfaceContainerHighest
             : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSolid
-              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-              : StudioSurfaceTheme.outline(context, isSolid: false),
-          width: 0.8,
-        ),
       ),
       child: Row(
         children: [
@@ -424,7 +419,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () {
-          HapticFeedback.lightImpact();
+          AppHaptics.lightImpact();
           onTap();
         },
         borderRadius: BorderRadius.circular(12),
@@ -432,12 +427,6 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : StudioSurfaceTheme.outline(context, isSolid: false),
-              width: 0.8,
-            ),
           ),
           child: Row(
             children: [

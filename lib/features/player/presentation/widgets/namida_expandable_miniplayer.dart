@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -87,6 +88,19 @@ class _NamidaExpandableMiniPlayerState
       CollectionTab.folders => HugeIcons.strokeRoundedFolder01,
     };
   }
+
+  Color _getTabColor(CollectionTab tab, Color fallbackPrimary) {
+    return switch (tab) {
+      CollectionTab.tracks => fallbackPrimary,
+      CollectionTab.albums => StudioCategoryColors.themingPalettes,
+      CollectionTab.artists => StudioCategoryColors.visualizer,
+      CollectionTab.genres => StudioCategoryColors.gestures,
+      CollectionTab.youtube => StudioCategoryColors.youtubeMusic,
+      CollectionTab.folders => StudioCategoryColors.libraryScanner,
+    };
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -200,11 +214,6 @@ class _NamidaExpandableMiniPlayerState
                       decoration: BoxDecoration(
                         color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(borderRadius),
-                        border: Border.all(
-                          color: StudioSurfaceTheme.outline(context, isSolid: isSolid)
-                              .withValues(alpha: (1.0 - progress * 0.8)),
-                          width: 1.0,
-                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.4),
@@ -322,7 +331,7 @@ class _NamidaExpandableMiniPlayerState
               );
               return;
             }
-            HapticFeedback.lightImpact();
+            AppHaptics.lightImpact();
             final shuffled = List<Track>.from(tracks)..shuffle();
             ref.read(playerControllerProvider.notifier).setQueue(
                   shuffled,
@@ -344,10 +353,6 @@ class _NamidaExpandableMiniPlayerState
             decoration: BoxDecoration(
               color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                width: 1.0,
-              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.35),
@@ -384,7 +389,7 @@ class _NamidaExpandableMiniPlayerState
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
-            HapticFeedback.selectionClick();
+            AppHaptics.selectionClick();
             setState(() => _isCategoryDockExpanded = !_isCategoryDockExpanded);
           },
           borderRadius: BorderRadius.circular(16),
@@ -394,12 +399,6 @@ class _NamidaExpandableMiniPlayerState
             decoration: BoxDecoration(
               color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: _isCategoryDockExpanded
-                    ? primary
-                    : StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                width: 1.0,
-              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.35),
@@ -457,9 +456,10 @@ class _NamidaExpandableMiniPlayerState
           children: [
             ...CollectionTab.values.map((tab) {
               final isSelected = libraryState.currentTab == tab;
+              final tabColor = _getTabColor(tab, primary);
               return InkWell(
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   ref.read(unifiedLibraryProvider.notifier).setTab(tab);
                   setState(() => _isCategoryDockExpanded = false);
                 },
@@ -469,18 +469,20 @@ class _NamidaExpandableMiniPlayerState
                   decoration: BoxDecoration(
                     color: isSelected
                         ? (isSolid
-                            ? theme.colorScheme.surfaceContainerHighest
-                            : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.15))
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                tabColor,
+                                isSolid: true,
+                                solidBlendAlpha: 0.18,
+                              )
+                            : StudioSurfaceTheme.tintedContainer(
+                                context,
+                                tabColor,
+                                isSolid: false,
+                                translucentAlpha: 0.15,
+                              ))
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border: isSelected
-                        ? Border.all(
-                            color: isSolid
-                                ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                                : primary.withValues(alpha: 0.5),
-                            width: 1.0,
-                          )
-                        : null,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -488,7 +490,7 @@ class _NamidaExpandableMiniPlayerState
                       HugeIcon(
                         icon: _getTabIcon(tab),
                         size: 16,
-                        color: isSelected ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: isSelected ? tabColor : tabColor.withValues(alpha: 0.7),
                       ),
                       const SizedBox(width: 10),
                       Text(
@@ -496,7 +498,7 @@ class _NamidaExpandableMiniPlayerState
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                          color: isSelected ? primary : theme.colorScheme.onSurface,
+                          color: isSelected ? tabColor : theme.colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -509,7 +511,7 @@ class _NamidaExpandableMiniPlayerState
             const SizedBox(height: 4),
             InkWell(
               onTap: () {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 setState(() => _isCategoryDockExpanded = false);
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PlaylistsScreen()),
@@ -584,10 +586,6 @@ class _NamidaExpandableMiniPlayerState
                     decoration: BoxDecoration(
                       color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                        width: 1.0,
-                      ),
                       boxShadow: [
                         BoxShadow(
                           color: (isPlaying ? theme.colorScheme.primary : Colors.black)
@@ -643,12 +641,6 @@ class _NamidaExpandableMiniPlayerState
                                   ? theme.colorScheme.surfaceContainerHighest
                                   : StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: false, translucentAlpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: isSolid
-                                    ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                                    : theme.colorScheme.primary.withValues(alpha: 0.5),
-                                width: 0.8,
-                              ),
                             ),
                             child: Text(
                               '${track.format.name.toUpperCase()} 24/96',
@@ -707,9 +699,9 @@ class _NamidaExpandableMiniPlayerState
                             ? SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(
+                                child: M3EProgressIndicator.circular(
                                   strokeWidth: 2.2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                                  color: theme.colorScheme.onPrimary,
                                 ),
                               )
                             : HugeIcon(
@@ -769,10 +761,10 @@ class _NamidaExpandableMiniPlayerState
             bottom: 0,
             child: SizedBox(
               height: 2.5,
-              child: LinearProgressIndicator(
+              child: M3EProgressIndicator.linear(
                 value: progressRatio,
-                backgroundColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                trackColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                color: theme.colorScheme.primary,
               ),
             ),
           ),

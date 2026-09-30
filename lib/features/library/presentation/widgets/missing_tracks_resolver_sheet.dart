@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../player/domain/track.dart';
 import '../../data/library_indexer_service.dart';
@@ -63,7 +63,7 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
 
   Future<void> _relinkMatchedTracks() async {
     if (_candidateMatches.isEmpty) return;
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
 
     final relinkMap = {for (final m in _candidateMatches) m.track.id: m.newFilePath};
     final libraryCtrl = ref.read(unifiedLibraryProvider.notifier);
@@ -97,7 +97,7 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
 
   Future<void> _removeMissingTracks() async {
     if (_missingTracks.isEmpty) return;
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
 
     final missingIds = _missingTracks.map((t) => t.id).toSet();
     final currentTracks = ref.read(unifiedLibraryProvider).tracks;

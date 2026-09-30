@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/database/local_persistence_service.dart';
@@ -75,22 +76,22 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
             children: [
               Row(
                 children: [
-                  HugeIcon(
+                  const HugeIcon(
                     icon: HugeIcons.strokeRoundedAnalytics01,
                     size: 16,
-                    color: primary,
+                    color: StudioCategoryColors.statistics,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'AUDIOPHILE LISTENING STATS',
-                    style: AppTypography.badge(color: primary),
+                    style: AppTypography.badge(color: StudioCategoryColors.statistics),
                   ),
                 ],
               ),
               if (totalTracks > 0)
                 InkWell(
                   onTap: () async {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.lightImpact();
                     await LocalPersistenceService.instance.clearPlaybackHistory();
                     _loadStats();
                   },
@@ -100,10 +101,6 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                     decoration: BoxDecoration(
                       color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                        width: 0.8,
-                      ),
                     ),
                     child: Text(
                       'Clear History',
@@ -130,7 +127,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                   label: 'Listening Time',
                   value: _formatListeningTime(totalSec),
                   icon: HugeIcons.strokeRoundedClock01,
-                  accentColor: primary,
+                  accentColor: StudioCategoryColors.statistics,
                 ),
               ),
               const SizedBox(width: 8),
@@ -141,7 +138,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                   label: 'Total Plays',
                   value: '$totalTracks',
                   icon: HugeIcons.strokeRoundedMusicNote01,
-                  accentColor: secondary,
+                  accentColor: StudioCategoryColors.themingPalettes,
                 ),
               ),
               const SizedBox(width: 8),
@@ -152,7 +149,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                   label: 'Hi-Res Ratio',
                   value: '${hiResPct.toStringAsFixed(0)}%',
                   icon: HugeIcons.strokeRoundedShieldEnergy,
-                  accentColor: tertiary,
+                  accentColor: StudioCategoryColors.hiResGold,
                 ),
               ),
             ],
@@ -163,11 +160,11 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
+              child: M3EProgressIndicator.linear(
                 value: (hiResPct / 100.0).clamp(0.0, 1.0),
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(tertiary),
-                minHeight: 4,
+                trackColor: theme.colorScheme.surfaceContainerHighest,
+                color: StudioCategoryColors.hiResGold,
+                strokeWidth: 4,
               ),
             ),
             const SizedBox(height: 4),
@@ -176,9 +173,9 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
               children: [
                 Text(
                   '$hiResCount Hi-Res Lossless Plays',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 9.5,
-                    color: tertiary,
+                    color: StudioCategoryColors.hiResGold,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -230,10 +227,6 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                   decoration: BoxDecoration(
                     color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                      width: 0.8,
-                    ),
                   ),
                   child: Row(
                     children: [
@@ -244,10 +237,6 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                         decoration: BoxDecoration(
                           color: StudioSurfaceTheme.tintedContainer(context, rankColor, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: isSolid ? theme.colorScheme.outline : rankColor.withValues(alpha: 0.6),
-                            width: 0.8,
-                          ),
                         ),
                         child: Center(
                           child: Text(
@@ -296,10 +285,6 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                           decoration: BoxDecoration(
                             color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.3),
-                              width: 0.6,
-                            ),
                           ),
                           child: Text(
                             'Hi-Res',
@@ -315,7 +300,7 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                       // Instant Play Button
                       InkWell(
                         onTap: () {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selectionClick();
                           ref.read(playerControllerProvider.notifier).playTrack(track);
                         },
                         borderRadius: BorderRadius.circular(14),
@@ -325,9 +310,6 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
                           decoration: BoxDecoration(
                             color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.6),
-                            ),
                           ),
                           child: Center(
                             child: HugeIcon(
@@ -363,10 +345,6 @@ class _ListeningStatisticsCardState extends ConsumerState<ListeningStatisticsCar
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

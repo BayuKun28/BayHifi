@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
-
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../player/domain/track.dart';
@@ -31,7 +31,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
     BuildContext context, {
     required PlaylistModel playlist,
   }) {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -51,7 +51,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
     required SmartPlaylist smartPlaylist,
     required List<Track> tracks,
   }) {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -431,7 +431,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
           ),
         ),
         onTap: () {
-          HapticFeedback.selectionClick();
+          AppHaptics.selectionClick();
           onTap();
         },
       ),

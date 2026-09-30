@@ -98,9 +98,9 @@ Third line of plain song
   group('Player Customization Controller & Models', () {
     test('PlayerCustomizationSettings defaults and copyWith', () {
       const settings = PlayerCustomizationSettings();
-      expect(settings.albumArtStyle, equals(AlbumArtStyle.squircle));
-      expect(settings.spectrumStyle, equals(SpectrumStyle.bars));
-      expect(settings.timeBarStyle, equals(TimeBarStyle.slim));
+      expect(settings.albumArtStyle, equals(AlbumArtStyle.cdJewel));
+      expect(settings.spectrumStyle, equals(SpectrumStyle.m3Expressive));
+      expect(settings.timeBarStyle, equals(TimeBarStyle.wavy));
       expect(settings.ambientGlow, isTrue);
 
       final updated = settings.copyWith(
@@ -117,13 +117,13 @@ Third line of plain song
 
     test('Enum parsing from strings with safe fallback', () {
       expect(AlbumArtStyle.fromString('vinyl'), equals(AlbumArtStyle.vinyl));
-      expect(AlbumArtStyle.fromString('invalid'), equals(AlbumArtStyle.squircle));
+      expect(AlbumArtStyle.fromString('invalid'), equals(AlbumArtStyle.cdJewel));
 
       expect(SpectrumStyle.fromString('dots'), equals(SpectrumStyle.dots));
-      expect(SpectrumStyle.fromString('invalid'), equals(SpectrumStyle.bars));
+      expect(SpectrumStyle.fromString('invalid'), equals(SpectrumStyle.m3Expressive));
 
       expect(TimeBarStyle.fromString('segmented'), equals(TimeBarStyle.segmented));
-      expect(TimeBarStyle.fromString('invalid'), equals(TimeBarStyle.slim));
+      expect(TimeBarStyle.fromString('invalid'), equals(TimeBarStyle.wavy));
     });
   });
 

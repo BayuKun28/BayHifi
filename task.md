@@ -1,14 +1,85 @@
 # Baydev HiFi — Master Task Tracker (task.md)
 
-Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **Baydev HiFi**. Setiap tugas dirancang secara modular, mengacu pada arsitektur DSP studio presisi tinggi serta referensi UI/UX Expressive modern (Icon, Layout, Multi-tab Collection, Expandable MiniPlayer, Customization Settings).
+Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **Baydev HiFi**. Setiap tugas dirancang secara modular, mengacu pada arsitektur DSP studio presisi tinggi serta referensi UI/UX **100% Pure Material 3 Expressive** (`material_3_expressive: ^1.1.3`, `material_ui`, `motor`, `material_new_shapes`, `M3EHaptics`).
 
 ---
 
 ## Status Dashboard
 
-- **Total Fase**: 43 Fase (Fase 43 Selesai • 100% Passing Tests • 352/352 Passed)
-- **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, StudioSurfaceTheme (Solid & Translucent), 19 Studio Color Palettes, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
-- **Status Proyek**: _Phase 43: Instagram & Spotify Style Lyric Card Customization (Font Weight, Text Stroke Outline, Instagram Highlighter Pill, Spotify Glow, Blur/Shield Atmosphere & Spacing Controls) (Completed)_
+- **Total Fase**: 44 Fase (Fase 44 Blueprint & PRD Disiapkan • 100% Passing Tests • 352/352 Passed)
+- **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
+- **Status Proyek**: _Phase 44: Pure Material 3 Expressive UI Migration & Comprehensive Architectural PRD (Ready for Implementation)_
+
+---
+
+## Fase 44: Pure Material 3 Expressive UI Architecture & 100% Migration PRD
+
+### Product Requirements Document (PRD) — 100% `material_3_expressive` Adoption
+
+#### 1. Executive Summary & Vision
+Baydev HiFi bertransformasi secara penuh menuju arsitektur **100% Pure Material 3 Expressive** dengan mengadopsi library resmi [`material_3_expressive`](https://pub.dev/packages/material_3_expressive) (`version: ^1.1.3`) dan sub-sistemnya (`material_ui: ^1.4.0`, `motor: ^0.2.0` / `^1.1.0`, `material_new_shapes: ^1.0.0`).
+Tujuan utama migrasi ini adalah menyatukan seluruh komponen antarmuka ke standar Material 3 Expressive resmi dari Google:
+- Menghilangkan seluruh widget Material 1/2 legacy dan implementasi kustom ad-hoc.
+- Memanfaatkan fisika pegas *spring motion* (`motor`) untuk seluruh transisi bottom sheet, dialog, carousels, expand-collapse miniplayer, dan interaksi sentuhan.
+- Mengadopsi morfologi bentuk squircle geometris (`material_new_shapes`) dan token dimensi resmi (`M3EDimensions`).
+- Menjaga performa audio audiophile 120 FPS pada custom canvas (`ProQCanvas`, `RtaVisualizerCanvas`, `WaveformCanvas`) dengan membungkusnya secara bersih di dalam kontainer `M3ECard` / `M3EShapeContainer`.
+
+---
+
+#### 2. Matriks Pemetaan & Inventarisasi Komponen (Component Migration Matrix)
+
+| Kategori UI | Komponen Sebelumnya (Legacy / Ad-hoc) | Komponen Resmi `material_3_expressive` | Fitur / Keunggulan M3 Expressive |
+| :--- | :--- | :--- | :--- |
+| **Root Application** | `MaterialApp` + `ThemeData` | `M3EMaterialApp` + `M3EThemeData` | `autoTheming`, `dynamicColoring`, `drawUnderSystemBars: true` |
+| **Navigation Dock** | Custom `AnimatedContainer` pill dock | `M3ENavigationBar` / `M3EToolbar` | Capsule floating dock dengan spring pill indicators (`motor`) |
+| **Bento Cards** | Custom `Container` / `InkWell` | `M3ECard.filled` / `M3ECard.outlined` | Tonal elevation, 1px crisp studio border, dynamic splash ripple |
+| **Horizontal Carousels** | `PageView.builder` / `ListView` | `M3ECarousel.multiBrowse` / `.uncontained` | Dynamic peek edges, spring deceleration, and flush grid alignment |
+| **Buttons & Actions** | `ElevatedButton`, `FilledButton`, `TextButton` | `M3EButton.filled`, `.tonal`, `.outlined` | Standar rasio M3E, squircle corners, expressive press feedback |
+| **Icon Buttons** | `IconButton` standard | `M3EIconButton.standard`, `.filled`, `.tonal` | 40x40 touch target minimum, unified HugeIcons stroke |
+| **Floating Actions** | Standard `FloatingActionButton` | `M3EFab`, `M3EExtendedFab`, `M3EFabMenu` | Speed dial floating action menu dengan animasi morphing |
+| **Audio Sliders** | Standard `Slider` | `M3ESlider.continuous` & `M3ESlider.wavy` | Track berekspresi, dynamic thumb morphing, snap haptics |
+| **Switches & Toggles** | Standard `Switch` | `M3ESwitch` | Expressive thumb icon state, spring glide animation |
+| **Checkboxes** | Standard `Checkbox` | `M3ECheckbox` | Squircle rounded checkmark, multi-state visual feedback |
+| **Segmented Selectors** | Custom pill toggle rows | `M3ESegmentedButton` / `M3EButtonGroup` | Single & multi-segment pill switching with spring physics |
+| **Lists & Track Tiles** | `ListTile` standard | `M3EListTile` | Leading `M3EShapeContainer`, trailing `M3EBadge`, ripple states |
+| **Badges & Specs** | Custom badge container | `M3EBadge` | Tabular figures support, tonal background, crisp outline |
+| **Bottom Sheets** | `showModalBottomSheet` standard | `M3EBottomSheet.showModal` | Spring drag physics (`motor`), rounded 28px top corners |
+| **Dialogs & Modals** | `AlertDialog` / `Dialog` | `M3EDialog` | Expressive content layout, actions alignment, tonal background |
+| **Search Bars** | Standard `TextField` | `M3ESearchBar` & `M3ESearchAnchor` | Expandable search view, search suggestions, leading HugeIcon |
+| **Progress & Loaders** | `LinearProgressIndicator`, `CircularProgressIndicator` | `M3EProgressIndicator`, `M3ELoadingIndicator` | Expressive fluid indeterminate animations & micro-progress lines |
+| **Haptic Feedback** | `HapticFeedback.selectionClick()` | `M3EHaptics.selectionClick()` / `.lightImpact()` | Respon taktil terintegrasi pada event interaksi M3E |
+
+---
+
+#### 3. Rencana Eksekusi Bertahap (Execution Roadmap)
+
+- [ ] **44.1 App Shell, Dynamic Theming & `M3EMaterialApp` Integration**
+  - [ ] Refaktor `lib/main.dart` & `lib/app/app.dart` menggunakan `M3EMaterialApp`.
+  - [ ] Konfigurasi `M3EThemeData` dengan `dynamicColoring`, `autoTheming`, dan integrasi `StudioColorHarmonizer`.
+  - [ ] Implementasi `M3EThemeExtension` untuk token kustom audiophile (warna kurva EQ, zona frekuensi, RTA palette).
+- [ ] **44.2 Omnipresent Navigation Dock & Expandable MiniPlayer**
+  - [ ] Migrasi Bottom Navigation Bar ke `M3ENavigationBar` / `M3EToolbar` dengan transisi pegas `motor`.
+  - [ ] Refaktor `NamidaExpandableMiniPlayer` menggunakan `M3EBottomSheet` dan `M3EProgressIndicator`.
+  - [ ] Upgrade kontrol playback (Play/Pause, Next, Previous) ke `M3EIconButton.tonal` / `M3EButton`.
+- [ ] **44.3 Bento Grid Dashboard & Hero Showcases**
+  - [ ] Migrasi seluruh modul Bento (`EngineTelemetryHeroCard`, `AudiophileStatsCard`, `RecentSessionsBentoCarousel`) ke `M3ECard.filled`.
+  - [ ] Migrasi `StudioHeroShowcaseCarousel` ke `M3ECarousel.multiBrowse`.
+  - [ ] Integrasi `M3EBadge` untuk telemetry specs (kHz, bit-depth, format, DAC mode).
+- [ ] **44.4 Unified Library & Media Collection Screens**
+  - [ ] Migrasi `UnifiedLibraryScreen` (Tracks, Albums, Artists, Playlists, Folders) menggunakan `M3EListTile` dan `M3EShapeContainer`.
+  - [ ] Integrasi `M3ESearchBar` dengan animated search anchor.
+  - [ ] Standarisasi FAB Category & Shuffle Shortcut menggunakan `M3EFabMenu` & `M3EFab`.
+  - [ ] Migrasi toggle layout (Grid vs List) ke `M3ESegmentedButton`.
+- [ ] **44.5 Pro-Q Studio, DSP Rack & AutoEQ Modal**
+  - [ ] Migrasi DSP Rack units ke collapsible `M3ECard` dengan `M3ESwitch` bypass toggles.
+  - [ ] Migrasi slider DSP (Gain, Frequency, Q, Compressor Attack/Release) ke `M3ESlider` (continuous & wavy).
+  - [ ] Migrasi modal `AutoEqModal` & `StudioTrackActionSheet` ke `M3EBottomSheet` & `M3EDialog`.
+- [ ] **44.6 Settings, Theming & Lyric Card Studio Customizer**
+  - [ ] Migrasi `SettingsScreen` & `ThemingSettingsScreen` ke `M3ECard` & `M3EButtonGroup`.
+  - [ ] Migrasi `LyricShareSheet` ke `M3EBottomSheet` dengan kontrol `M3ESlider`, `M3EChip`, dan `M3ESegmentedButton`.
+- [ ] **44.7 Automated Test Suite & Regression Verification**
+  - [ ] Perbarui seluruh unit & widget test suites (`test/..._test.dart`) untuk memvalidasi rendering `M3E*` components.
+  - [ ] Verifikasi kelulusan 100% `flutter test` dan 0 issues pada `flutter analyze`.
 
 ---
 
@@ -1151,4 +1222,143 @@ Perbaikan bug hilangnya warna tema dinamis dari cover album lagu yang sedang akt
   - [x] Menambahkan pengujian cold boot dynamic palette restoration di `test/theme_persistence_test.dart`.
   - [x] Menambahkan pengujian dedicated landscape 16:9 layout di `test/lyric_card_widget_and_sheet_test.dart`.
   - [x] 100% tests passing (334/334 tests) dan 0 analyzer issues (`flutter analyze`).
+
+---
+
+## Fase 41: Modern Studio UI/UX Redesign & Visual Polish
+
+Standardisasi visual antarmuka di seluruh aplikasi dengan layout semi-minimalis Material 3 Expressive, squircle surfaces, eliminasi visual clutter, dan konsistensi studio aesthetics.
+
+- [x] **41.1 Clean Bento Architecture di Seluruh Layar**
+  - [x] Standardisasi margin, radius squircle konsisten, dan solid studio surface backgrounds (`theme.colorScheme.surface`, `surfaceContainer`).
+  - [x] Eliminasi gradasi berlebihan dan efek glassmorphism yang mengaburkan teks.
+- [x] **41.2 Typographic Hierarchy & Tabular Figures**
+  - [x] Integrasi `FontFeature.tabularFigures()` pada seluruh metrik numerik, waktu durasi, frekuensi DSP, dan sampling rate.
+- [x] **41.3 Unit & Widget Test Suite Validation**
+  - [x] Seluruh unit test dan widget test passing 100% dengan 0 analyzer issues.
+
+---
+
+## Fase 42: Pro-Q Studio & DSP Rack Precision Mastering Redesign
+
+Penyempurnaan arsitektur DSP Rack dan Pro-Q Studio dengan visualisasi interaktif kurva biquad IIR, RTA spectrum analyzer 120 FPS, dan integrasi AutoEQ/Squiglink database.
+
+- [x] **42.1 Precision Interactive Parametric Equalizer (`ProQCanvas`)**
+  - [x] Zero latency node dragging, filter type selection (Bell, Low Shelf, High Shelf, Notch, Bandpass, Low Pass, High Pass), Q-factor pinch-to-zoom.
+- [x] **42.2 Mastering DSP Rack Modules**
+  - [x] Rack unit cards dengan modular bypass switch, gain reduction VU meters, and dynamic telemetry.
+- [x] **42.3 Unit & Widget Test Suite Validation**
+  - [x] 100% tests passing di `test/dsp_rack_test.dart` dan `test/auto_eq_test.dart`.
+
+---
+
+## Fase 43: Audio Pipeline Resilience & Dynamic Routing
+
+Optimalisasi pemutaran offline, streaming remote (Navidrome & YouTube Music via SoLoud), format conversion pipeline (WebM/Ogg Opus), dan crossfade transitions.
+
+- [x] **43.1 Robust Streaming & Caching Engine**
+  - [x] Penanganan stream disconnection, automatic retry, silent connection restores.
+- [x] **43.2 Unit & Audio Engine Test Suite Validation**
+  - [x] 100% tests passing di `test/webm_to_ogg_remuxer_test.dart` dan `test/youtube_streaming_and_simple_ui_test.dart`.
+
+---
+
+## Fase 44: Pure Material 3 Expressive UI Architecture & 100% Migration
+
+Migrasi komprehensif seluruh komponen aplikasi menuju **100% Pure Material 3 Expressive** (`material_3_expressive: ^1.1.3`, `motor`, `material_new_shapes`, `M3EHaptics`), penghapusan ketergantungan pada legacy widgets, penerapan haptics terpusat, dan validasi penuh tanpa regresi.
+
+- [x] **44.1 Root App Shell & Dynamic Theming (`M3EMaterialApp` + `M3EThemeData`)**
+  - [x] Migrasi `MaterialApp` ke `M3EMaterialApp` di `lib/app/app.dart` dengan `M3EThemeData` (`autoTheming: true`, `dynamicColoring: true`, `drawUnderSystemBars: true`).
+  - [x] Konfigurasi `localizationsDelegates` (`DefaultMaterialLocalizations.delegate`, `DefaultWidgetsLocalizations.delegate`) untuk resolusi dialog & appbar.
+  - [x] Pembungkusan haptic feedback terpusat di `lib/app/theme/app_haptics.dart` menggunakan `M3EHaptics.trigger(M3EHapticFeedback.light/medium/heavy)` dan `M3EHaptics.selection()`.
+- [x] **44.2 Omnipresent Navigation Dock, Expandable MiniPlayer & Now Playing**
+  - [x] Navigasi dock capsule `FloatingRoundedDock` dan `NamidaExpandableMiniPlayer` dengan micro progress indicator dan gesture handling yang responsif.
+  - [x] Migrasi seluruh tombol kontrol dan aksi di `NowPlayingScreen` ke `AppHaptics`.
+- [x] **44.3 Bento Grid Dashboard & Hero Showcases**
+  - [x] Migrasi seluruh bento cards di `DashboardScreen` (`ListeningStatisticsCard`, `RecentSessionsBentoCarousel`, `StudioHeroShowcaseCarousel`, `ProQMiniLauncherBentoCard`, `MasteringDspBentoCard`) ke `M3EProgressIndicator` dan `AppHaptics`.
+- [x] **44.4 Unified Library, Media Collections & Action Modals**
+  - [x] `UnifiedLibraryScreen`, `TrackTile`, `StudioTrackActionSheet`, detail screens, batch selection bar, dan folder resolvers dimigrasikan ke `AppHaptics` dan `M3EProgressIndicator`.
+- [x] **44.5 DSP Rack, Pro-Q Studio & AutoEQ Modals**
+  - [x] `DspRackScreen`, `RackUnitCard`, dan `ProQStudioScreen` terintegrasi penuh dengan `AppHaptics`.
+- [x] **44.6 YouTube Music, Lyrics Share, Settings Hub & Sub-Screens**
+  - [x] Migrasi `YouTubeDiscoveryScreen`, `YouTubeImportPlaylistDialog`, `LyricShareSheet`, dan seluruh 9 sub-screen Settings (`ThemingSettingsScreen`, `PlaybackEngineSettingsScreen`, `VisualizerSettingsScreen`, `AudioHardwareSettingsScreen`, `DockingSettingsScreen`, `GesturesSettingsScreen`, `StorageCacheSettingsScreen`, `LibraryScannerSettingsScreen`, `BackupRestoreSettingsScreen`) ke `M3EProgressIndicator.circular` dan `AppHaptics`.
+  - [x] Migrasi seluruh widget display player (`StudioDeskDockingScreen`, `SynchronizedLyricsView`, `StudioDspBentoCapsule`, `ParallaxArtworkCard`, `PlaybackSpeedPitchSheet`, `SleepTimerSheet`, `NowPlayingQueueSheet`, `DualPaneWorkstationPane`, `CustomTimeBar`, `AudioFileInspectorSheet`) ke `AppHaptics`.
+- [x] **44.7 Automated Unit & Widget Test Suite Validation**
+  - [x] Seluruh 352 test di `test/` lulus 100% (`flutter test`: 352/352 tests passed).
+  - [x] Zero analyzer issues / warnings (`flutter analyze`: No issues found).
+
+---
+
+## Fase 45: Pure Material 3 Expressive Total UI Overhaul (Official Gallery Fidelity)
+
+Perombakan total antarmuka grafis Baydev HiFi menjadi **100% Pure Material 3 Expressive** dengan mengacu secara presisi pada 5 modul visual resmi `material_3_expressive: ^1.1.3` (Actions & Buttons, Selection & Sliders, Containment & Cards, Navigation & Bars, Feedback & Theming), mengeliminasi flat monochrome (hitam pekat & putih polos) dengan 5-level Tonal Surface Hierarchy, dan memanfaatkan `motor` spring physics, `material_new_shapes`, serta `M3EHaptics`.
+
+- [x] **45.1 Tonal Surface & Theme System Overhaul (`AppPalette`, `AppThemeBuilder`, `StudioSurfaceTheme`)**
+  - [x] Implementasi 5-level Tonal Surface Elevation (`surfaceContainerLowest` s/d `surfaceContainerHighest`) pada mode Dark dan Light di seluruh 19 preset studio `AppPalette`.
+  - [x] Perbaikan `StudioSurfaceTheme.tintedContainer` dengan tonal blending dinamis dan outline studio halus.
+  - [x] Kalibrasi `StudioColorHarmonizer` untuk proteksi kontras otomatis WCAG AA pada ekstraksi album dinamis.
+- [x] **45.2 Dashboard Screen M3 Expressive Overhaul**
+  - [x] Migrasi Dynamic Studio Mixes ke `M3ECarousel.multiBrowse` dengan `M3EButton.filled`.
+  - [x] Upgrade modul Bento Telemetry & Hardware ke `M3ECard.filled` dengan `M3EBadge` status chip.
+  - [x] Integrasi `M3EProgressIndicator` pada listening statistics dan lossless ratio.
+- [x] **45.3 Mastering DSP Rack & Pro-Q Screen M3 Expressive Overhaul**
+  - [x] Migrasi modul DSP Rack ke collapsible `M3ECard` dengan `motor` spring physics.
+  - [x] Integrasi `M3ESwitch` dengan animasi spring thumb dan `M3ESlider` continuous & wavy.
+  - [x] Migrasi header Pro-Q banner dan kontrol band ke `M3EButton.tonal` & `M3EChip`.
+- [x] **45.4 Unified Music Library & Playlists Screen M3 Expressive Overhaul**
+  - [x] Migrasi filter sumber ke `M3EChip.filter` dengan spring checkmark.
+  - [x] Integrasi `M3EListTile` dengan squircle album art, format badges, dan `M3EIconButton`.
+  - [x] Migrasi category dock / speed dial ke `M3EFabMenu` dan `M3EFab`.
+  - [x] Integrasi `M3ESearchBar` dan `M3ESegmentedButton` untuk List/Grid mode.
+- [x] **45.5 Now Playing Screen & Expandable Miniplayer M3 Expressive Overhaul**
+  - [x] Implementasi `M3ESlider.wavy()` untuk fluid audio seekbar.
+  - [x] Upgrade control deck ke symmetrical squircle `M3EIconButton` dengan press feedback.
+  - [x] Bottom action strip dengan `M3EButton.tonal` dan modal bottom sheets `M3EBottomSheet`.
+- [x] **45.6 Settings Hub & Sub-Screens M3 Expressive Overhaul**
+  - [x] Redesain grouped settings sections menggunakan `M3ECard` dengan `StudioCategoryColors`.
+  - [x] Integrasi `M3ESwitch`, `M3EDropdown`, dan `M3ESegmentedButton` pada seluruh preferensi.
+- [x] **45.7 Quality Gate & Zero Regression Testing**
+  - [x] Verifikasi `flutter analyze` dengan 0 errors dan 0 warnings.
+  - [x] Verifikasi `flutter test` dengan 100% kelulusan test suite (355+ tests passed).
+
+---
+
+## Fase 46: Now Playing Landscape & Tablet Mode Refinement
+
+Penyempurnaan tampilan dan ergonomi pemutar musik pada orientasi Landscape dan perangkat Tablet:
+1. **Perbaikan Bug Up Next Queue Tab**:
+   - Memperbaiki pemanggilan `queueIndex` di [dual_pane_workstation_pane.dart](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/lib/features/player/presentation/widgets/dual_pane_workstation_pane.dart) untuk mengatasi `NoSuchMethodError: currentIndex`.
+   - Menambahkan interactive tap listener (`skipToQueueIndex(idx)`) untuk lompat ke lagu yang dipilih secara instan.
+2. **Penataan Ulang Tab Workstation Kanan**:
+   - Menghilangkan tab `PRO-Q EQ` dari split pane kanan agar ruang visual tidak sempit/cramped.
+   - Menyederhanakan workstation kanan menjadi 3 tab utama yang leluasa: `UP NEXT` (Antrean lagu interaktif), `LYRICS` (Lirik sinkron), dan `DSP RACK` (Mastering rack modules).
+   - Menjadikan Pro-Q Studio tetap fokus diakses melalui layar penuh (`ProQStudioScreen`).
+3. **Penyederhanaan Sisi Kiri (Landscape Left Pane)**:
+   - Menghilangkan baris 6 tombol aksi bawah (`_buildBottomStudioActionStrip`) pada mode landscape untuk mencegah penumpukan vertikal dan memberikan ruang proporsional bagi album art (CD Jewel Case), wavy seekbar, dan kontrol pemutaran.
+   - Merelokasi aksi studio esensial (`Open Local File`, `Speed & Pitch`, `Desk Mode`, `Pro-Q Studio`, `Audio Spec Inspector`, `Sleep Timer`, `Favorite`) ke Top Header Bar sisi kiri dengan icon buttons minimalis dan tooltip.
+   - Mempertahankan mode potret 100% sesuai desain yang telah disetujui.
+- [x] **46.4 Validasi & Quality Assurance**
+  - [x] Penambahan widget test di `test/dual_pane_workstation_pane_test.dart` dan `test/player_screen_redesign_test.dart`.
+  - [x] Verifikasi 100% lulus pada seluruh rangkaian test suite.
+
+---
+
+## Fase 47: Studio Desk & Car Docking Mode Overhaul
+
+Modernisasi total tampilan **Studio Desk & Car Docking Mode** (`StudioDeskDockingScreen`) agar selaras dengan standar 100% Pure Material 3 Expressive:
+1. **Integrasi Wavy Seekbar (`CustomTimeBar` / `M3ESlider.wavy()`)**:
+   - Menggantikan slider standar dengan gelombang sinus dinamis (`TimeBarStyle.wavy`), terhubung ke `playerCustomizationProvider`.
+   - Dukungan `timeDisplayMode` (waktu tersisa `-04:39` vs durasi total) dengan tipografi angka tabular (`AppTypography.audioFigures`).
+2. **Visualizer Switcher Dinamis (Artwork / VU Meters / Spectrum)**:
+   - Integrasi `ParallaxArtworkCard` dengan dukungan CD Jewel Case, Vinyl 3D, Curved Bento, dan Squircle.
+   - Mode switcher 3 arah yang mulus: **`ARTWORK`**, **`VU METERS`** (Analog Dual-Channel L-R Peak Meters), dan **`SPECTRUM`** (M3 Expressive RTA Spectrum Visualizer).
+3. **Kontrol Pemutaran Raksasa & Telemetry Studio**:
+   - Tombol Play/Pause 68px dengan dynamic ambient glow dan `M3EProgressIndicator.circular` saat buffering.
+   - Tombol Previous/Next, Shuffle, Repeat simetris dengan tactile `AppHaptics`.
+   - Badge spesifikasi audio Hi-Res Master Gold / Lossless Audio (`96.0 kHz / 24-bit • FLAC`).
+4. **Quick DSP Presets & Volume Control**:
+   - Strip preset DSP mastering 1-tap (`Studio Master`, `Audiophile Pure`, `Warm Tube`, `Bass Boost`, dll.) dan slider volume presisi.
+5. **Responsivitas & Validasi Menyeluruh**:
+   - Desain terkalibrasi untuk Landscape (Tablet/Car Docks) dan Portrait (Phone Stands) bebas overflow.
+   - Pengujian otomatis lulus 100% di `test/desk_docking_test.dart` dan `test/playback_loading_spinner_test.dart`.
 

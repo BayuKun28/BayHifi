@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../audio_engine/fft_processor.dart';
 import '../../../settings/domain/player_customization_settings.dart';
 import '../../../settings/presentation/controllers/player_customization_controller.dart';
@@ -112,13 +113,13 @@ class _ParallaxArtworkCardState extends ConsumerState<ParallaxArtworkCard>
     if (now.difference(_lastDoubleTapCheck).inMilliseconds < 280) {
       // Double tap triggered
       _lastDoubleTapCheck = DateTime.fromMillisecondsSinceEpoch(0);
-      HapticFeedback.mediumImpact();
+      AppHaptics.mediumImpact();
       widget.onDoubleTap?.call();
     } else {
       _lastDoubleTapCheck = now;
       Future.delayed(const Duration(milliseconds: 290), () {
         if (_lastDoubleTapCheck == now) {
-          HapticFeedback.lightImpact();
+          AppHaptics.lightImpact();
           widget.onSingleTap?.call();
         }
       });
@@ -186,7 +187,7 @@ class _ParallaxArtworkCardState extends ConsumerState<ParallaxArtworkCard>
         onPanEnd: _onPanEnd,
         onTap: _handleTap,
         onLongPress: () {
-          HapticFeedback.heavyImpact();
+          AppHaptics.heavyImpact();
           widget.onLongPress?.call();
         },
         child: Transform(

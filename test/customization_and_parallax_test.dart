@@ -16,9 +16,9 @@ void main() {
     test('Default settings verify studio audiophile defaults', () {
       const settings = PlayerCustomizationSettings();
 
-      expect(settings.albumArtStyle, AlbumArtStyle.squircle);
-      expect(settings.spectrumStyle, SpectrumStyle.bars);
-      expect(settings.timeBarStyle, TimeBarStyle.slim);
+      expect(settings.albumArtStyle, AlbumArtStyle.cdJewel);
+      expect(settings.spectrumStyle, SpectrumStyle.m3Expressive);
+      expect(settings.timeBarStyle, TimeBarStyle.wavy);
       expect(settings.ambientGlow, isTrue);
       expect(settings.ambientGlowIntensity, 0.35);
       expect(settings.fftBins, 512);
@@ -81,7 +81,7 @@ void main() {
       expect(TrackTileSwipeAction.fromString(null), TrackTileSwipeAction.none);
 
       expect(AlbumArtStyle.fromString('vinyl'), AlbumArtStyle.vinyl);
-      expect(AlbumArtStyle.fromString('nonexistent'), AlbumArtStyle.squircle);
+      expect(AlbumArtStyle.fromString('nonexistent'), AlbumArtStyle.cdJewel);
     });
   });
 

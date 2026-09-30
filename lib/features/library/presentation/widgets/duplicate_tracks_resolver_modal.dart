@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../data/library_indexer_service.dart';
 import '../controllers/library_controller.dart';
@@ -47,7 +47,7 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
 
   Future<void> _purgeAllRedundantDuplicates() async {
     if (_duplicateGroups.isEmpty) return;
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
 
     final allRedundantIds = <String>{};
     for (final g in _duplicateGroups) {

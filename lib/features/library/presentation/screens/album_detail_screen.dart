@@ -1,10 +1,10 @@
 import 'dart:ui' show ImageFilter, FontFeature;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
@@ -462,7 +462,7 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                           ),
                           onPressed: () {
                             if (widget.album.tracks.isNotEmpty) {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               ref.read(playerControllerProvider.notifier).setQueue(
                                     widget.album.tracks,
                                     initialIndex: 0,
@@ -506,7 +506,7 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                           ),
                           onPressed: () {
                             if (widget.album.tracks.isNotEmpty) {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               final shuffled = List<Track>.from(widget.album.tracks)..shuffle();
                               ref.read(playerControllerProvider.notifier).setQueue(
                                     shuffled,
@@ -663,7 +663,7 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                             ],
                           ),
                           onTap: () {
-                            HapticFeedback.selectionClick();
+                            AppHaptics.selectionClick();
                             ref.read(playerControllerProvider.notifier).setQueue(
                                   widget.album.tracks,
                                   initialIndex: idx,

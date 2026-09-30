@@ -1,6 +1,6 @@
 # Baydev HiFi — Engineering & Design Rules (rules.md)
 
-Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuka **Material 3 Expressive**, dan struktur folder profesional untuk pengembangan pemutar musik audiophile **Baydev HiFi**.
+Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuka **100% Pure Material 3 Expressive** (`material_3_expressive: ^1.1.3`), dan struktur folder profesional untuk pengembangan pemutar musik audiophile **Baydev HiFi**.
 
 ---
 
@@ -9,18 +9,66 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
 2. **60/120 FPS Fluidity**: Antarmuka visualizer spektrum, kurva Pro-Q, dan animasi tidak boleh menghambat pemutaran audio maupun mengalami frame drop.
 3. **Clean & Modular**: Setiap fitur (*Feature-First*) harus independen, dapat diuji secara terisolasi, dan mudah dipelihara.
 4. **Deterministic Audio Math**: Seluruh perhitungan matematika DSP (Biquad, FFT, SPL, AutoEQ) harus berupa fungsi murni (*pure functions*).
+5. **Pure Material 3 Expressive Architecture**: Seluruh elemen antarmuka grafis (UI), layout bento, dialog, kontrol geser, tombol aksi, dan navigasi WAJIB 100% menggunakan ekosistem library resmi `material_3_expressive` (`material_ui`, `motor`, `material_new_shapes`).
 
 ---
 
-## 2. Pedoman Desain Antarmuka (Material 3 Expressive & Namida Architecture)
+## 2. Pedoman Desain Antarmuka (100% Pure Material 3 Expressive & Namida Architecture)
 
-### 2.1 Sistem Warna & Theming (Namida Custom Palette Engine)
+### 2.0 Mandat 100% Library `material_3_expressive` (Strictly Enforced)
+Aplikasi Baydev HiFi secara arsitektural dibangun di atas fondasi **`material_3_expressive`** (`version: ^1.1.3`).
+- **DILARANG KERAS** menggunakan widget Material 1/2 legacy atau widget standar `flutter/material.dart` jika padanan komponen resminya tersedia di dalam `material_3_expressive`.
+- **Daftar Komponen Resmi & Pemetaan Wajib (`M3E*`)**:
+  - **Aplikasi & Tema**: `M3EMaterialApp`, `M3ETheme`, `M3EThemeData`, `M3EColorStyles`, `M3EDimensions`.
+  - **Tombol & Aksi (Buttons & Actions)**:
+    - `M3EButton` (Filled, Tonal, Outlined, Elevated, Text).
+    - `M3EIconButton` (Standard, Filled, Tonal, Outlined).
+    - `M3EFab` & `M3EExtendedFab` (Floating Action Buttons).
+    - `M3EFabMenu` (Speed dial / floating action menu).
+    - `M3EButtonGroup` (Connected / grouped action buttons).
+    - `M3ESegmentedButton` (Single & multi-selection segmented pills).
+    - `M3ESplitButton` (Primary action + dropdown menu split).
+  - **Kontrol Input & Seleksi (Selection & Inputs)**:
+    - `M3ESwitch` (Expressive toggle switches dengan icon and state animation).
+    - `M3ECheckbox` (Expressive rounded squircle checkboxes).
+    - `M3ERadio` (Expressive radio selection pills).
+    - `M3EChip` (Filter, Assist, Input, and Suggestion chips).
+    - `M3ESlider` (Continuous, discrete, and expressive Wavy slider untuk seekbar audio & DSP parameter).
+    - `M3ETextField` (Expressive text input fields).
+    - `M3EDropdown` (Expressive dropdown selector).
+  - **Kontainer, Permukaan & Layout (Containment & Surfaces)**:
+    - `M3ECard` (Elevated, Filled, Outlined Bento Grid cards).
+    - `M3ECarousel` (Multi-browse, hero, and uncontained carousels).
+    - `M3EListTile` (Expressive list items dengan leading avatar, badges, and trailing action).
+    - `M3EDivider` (Tonal studio dividers).
+    - `M3EShapeContainer` (Container dengan expressive morphing shapes via `material_new_shapes`).
+    - `M3EDialog` (Expressive modal, alert, confirmation, and full-screen dialogs).
+    - `M3EBottomSheet` (Expressive modal & persistent bottom sheets dengan spring drag physics).
+  - **Navigasi & App Bar (Navigation & Bars)**:
+    - `M3EAppBar` (Pinned, scrolling, and large expressive app bars).
+    - `M3ESearchBar` & `M3ESearchAnchor` (Expressive search view with expandable anchor).
+    - `M3ENavigationBar` (Bottom navigation capsule bar with animated spring pill indicators).
+    - `M3ENavigationRail` (Side navigation for landscape & desktop docking).
+    - `M3EToolbar` (Floating / docked action toolbars).
+    - `M3ETabBar` & `M3ETab` (Expressive tabs with fluid spring indicator).
+    - `M3EMenu` & `M3EMenuItem` (Contextual popups and action sheets).
+  - **Umpan Balik & Indikator (Feedback & Indicators)**:
+    - `M3EBadge` (Hi-Res specs, bit-depth, format, count badges).
+    - `M3EProgressIndicator` (Linear & circular expressive progress bars).
+    - `M3ELoadingIndicator` (Indeterminate expressive loaders).
+    - `M3ESnackbar` (Expressive snackbars with haptic feedback).
+    - `M3ETooltip` (Expressive hover/long-press tooltips).
+  - **Fisika Gerak & Haptik (Motion, Physics & Haptics)**:
+    - Seluruh transisi, animasi lembar modal, gesture dragging, dan spring physics WAJIB menggunakan engine pegas **`motor`** (`SpringDescription`, expressive motion curves) bawaan `material_3_expressive`.
+    - Respon sentuhan taktil WAJIB memanfaatkan **`M3EHaptics`** (`selectionClick()`, `lightImpact()`, `mediumImpact()`).
+
+### 2.1 Sistem Warna & Theming (M3EThemeData & Studio Palette Engine)
 - **Theme Modes (Dark / Light / System)**:
   - `ThemeMode.dark`: Studio Dark Obsidian (`#0D0F14`) atau *True OLED Black* (`#000000`).
   - `ThemeMode.light`: Clean Studio Light / Champagne (`#F5F7FA`) dengan kontras teks tinggi.
   - `ThemeMode.system`: Mengikuti preferensi tema perangkat (OS) secara otomatis.
-- **Namida Dynamic Palette & Custom Colors**:
-  - UI secara dinamis mengekstrak palet warna dari Album Art lagu aktif menggunakan `palette_generator` yang diselaraskan secara halus dan proporsional.
+- **M3E Dynamic Palette & Custom Colors**:
+  - UI secara dinamis mengekstrak palet warna dari Album Art lagu aktif menggunakan `palette_generator` yang diselaraskan secara halus dan proporsional ke dalam `M3EThemeData`.
   - Pilihan preset palet audio studio terkurasi (Non-Neon & Restrained Studio Tones):
     - *Obsidian Cyan* (Refined Sky Studio `#38BDF8` / `#0284C7`)
     - *Amber Tube Glow* (Warm Analog Tube `#F59E0B` / `#D97706`)
@@ -29,10 +77,10 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
     - *Crimson Passion* (Mastering Rose Crimson `#F43F5E` / `#E11D48`)
     - *True OLED Black* (0% battery consumption AMOLED with `#38BDF8` precision accent)
   - Pengguna bebas memilih Accent Color custom (HEX / Swatch) untuk slider, indikator node, dan kurva glow.
-- **Surface Elevation**: Gunakan tonal elevation Material 3 (`#161920`, `#1C202A`, `#242A38`), jangan gunakan drop shadow kasar.
+- **Surface Elevation**: Gunakan tonal elevation Material 3 Expressive (`#161920`, `#1C202A`, `#242A38`), jangan gunakan drop shadow kasar.
 - **Zero-Neon & Restrained Palette Policy (Strictly Enforced)**:
   - DILARANG KERAS menggunakan warna neon menyala atau saturasi berlebihan yang menyilaukan mata (seperti neon green `#00FF00`, neon cyan `#00F0FF`, atau garish blinding neons).
-  - Seluruh warna kurva EQ, grafis RTA, kartu bento, status badge, dan tombol aksi wajib menggunakan warna studio terkalibrasi, berkelas, dan nyaman di mata dalam sesi mendengarkan yang panjang.
+  - Seluruh warna kurva EQ, grafis RTA, kartu bento `M3ECard`, status badge `M3EBadge`, dan tombol aksi `M3EButton` wajib menggunakan warna studio terkalibrasi, berkelas, dan nyaman di mata dalam sesi mendengarkan yang panjang.
   - `EQ Curve`: Amber Warmth (`#F59E0B`) dengan soft subtle glow.
   - `Driver FR`: Muted Sky Blue (`#38BDF8`).
   - `Target FR`: Soft Mint Emerald (`#10B981`).
@@ -40,19 +88,20 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
   - `Danger / Peak Clipping`: Soft Studio Red (`#F43F5E`).
 - **Solid Surfaces & Minimal Restrained Gradients Policy (Strictly Enforced)**:
   - DILARANG KERAS menggunakan warna gradasi dekoratif/berlebihan pada komponen UI seperti cards, container bento, hero banners, list tiles, dialog, panel, atau settings overview.
-  - Semua komponen UI wajib menggunakan warna **solid** murni yang bersumber langsung dari `Theme.of(context).colorScheme` dan `AppPalette` aktif (`theme.colorScheme.surface`, `surfaceContainer`, `surfaceContainerHighest`, `surfaceContainerLow`).
+  - Semua komponen UI wajib menggunakan warna **solid** murni yang bersumber langsung dari `M3EThemeData` dan `AppPalette` aktif (`theme.colorScheme.surface`, `surfaceContainer`, `surfaceContainerHighest`, `surfaceContainerLow`).
   - Penggunaan gradien HANYA diperbolehkan jika ultra-minimal dan murni fungsional, yaitu:
     1. Area fill di bawah kurva DSP / RTA spectrum analyzer (fade dari warna aksen ke transparan untuk visualisasi pembacaan data frekuensi).
     2. ShaderMask edge fade pada synchronized lyrics / list edge (agar teks memudar halus di batas atas/bawah layar).
     3. Sheen refleksi minimal pada vinyl disc animation.
     Di luar ketiga kebutuhan fungsional tersebut, seluruh kartu bento, overview, dan banner WAJIB menggunakan latar belakang warna solid dengan 1px crisp outline border.
 
-### 2.2 Bentuk (Shapes) & Tipografi
-- **Expressive Shapes**: Gunakan squircle dan rounded shape Material 3:
-  - Mini Buttons & Pills: `BorderRadius.circular(8)` s/d `(12)`.
-  - Cards & Audio Nodes: `BorderRadius.circular(16)`.
-  - Album Art Container: Pilihan corner radius dinamis (`0px`, `16px`, `28px`).
-  - Bottom Sheets & Modals: `BorderRadius.vertical(top: Radius.circular(28))`.
+### 2.2 Bentuk (Shapes), Morphing & Tipografi
+- **Expressive Shapes & Morphing (`material_new_shapes`)**:
+  - Gunakan shape tokens resmi Material 3 Expressive dan `M3EShapeContainer`:
+    - Mini Buttons & Pills: `M3EDimensions` / `BorderRadius.circular(8)` s/d `(12)`.
+    - Cards & Audio Nodes (`M3ECard`): `BorderRadius.circular(16)`.
+    - Album Art Container: Pilihan corner radius dinamis (`0px`, `16px`, `28px`).
+    - Bottom Sheets & Modals (`M3EBottomSheet`): `BorderRadius.vertical(top: Radius.circular(28))`.
 - **Tipografi**: Gunakan font modern (misal: Inter / Roboto / JetBrains Mono untuk angka audio):
   - Semua angka frekuensi (`Hz`), gain (`dB`), Q-factor, dan audio badge (`24-bit / 192 kHz`) **wajib** menggunakan *tabular figures* (`FontFeature.tabularFigures()`) agar angka tidak bergetar saat nilainya berubah.
 
@@ -65,19 +114,19 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
 
 ---
 
-### 2.4 Arsitektur MiniPlayer & Navigasi (Namida-Inspired Expandable Player)
+### 2.4 Arsitektur MiniPlayer & Navigasi (M3E Expandable Player & Dock)
 - **Tanpa Tab Khusus Player**:
   - Layar pemutar musik utama (*Now Playing*) **tidak** menggunakan tab mandiri di Bottom Navigation Bar.
-  - Tab utama aplikasi Baydev HiFi terdiri dari 4 tab:
+  - Tab utama aplikasi Baydev HiFi terdiri dari 4 tab yang dikelola via `M3ENavigationBar`:
     1. **Dashboard** (Index 0): Status engine SoLoud, DAC indicator, launcher Pro-Q, statistik library.
     2. **DSP Rack** (Index 1): 10+ modul mastering (Tube Exciter, Compressor, Crossfeed, Limiter).
     3. **Library** (Index 2): Pustaka terpadu offline lokal dan cloud Navidrome.
     4. **Settings** (Index 3): Kustomisasi tema, custom palette, dark/light/system, visualizer, dan DAC.
 - **Omnipresent Expandable MiniPlayer**:
-  - MiniPlayer selalu melayang (*docked*) tepat di atas Bottom Navigation Bar (atau di bagian bawah layar saat navigasi tersembunyi).
-  - Menampilkan thumbnail album art (squircle rounded), judul lagu bergeser halus (*marquee* jika panjang), nama artist, tombol Play/Pause, tombol Next, dan progress bar tipis 2.5px di bagian bawah.
-  - **Fluid Gestures & Spring Physics**:
-    - Ketukan (*tap*) atau gesekan ke atas (*swipe up*) membuka layar **NowPlayingScreen** secara penuh dengan transisi bottom-sheet / sliding panel.
+  - MiniPlayer selalu melayang (*docked*) tepat di atas `M3ENavigationBar` (atau di bagian bawah layar saat navigasi tersembunyi).
+  - Menampilkan thumbnail album art (`M3EShapeContainer`), judul lagu bergeser halus (*marquee* jika panjang), nama artist, tombol `M3EIconButton` Play/Pause & Next, dan progress bar tipis `M3EProgressIndicator` (2.5px) di bagian bawah.
+  - **Fluid Gestures & Motor Spring Physics**:
+    - Ketukan (*tap*) atau gesekan ke atas (*swipe up*) membuka layar **NowPlayingScreen** secara penuh dengan transisi `M3EBottomSheet` berbasis fisika pegas `motor`.
     - Gesekan ke bawah (*swipe down*) atau tombol chevron collapse mengembalikan player ke bentuk MiniPlayer tanpa menghentikan pemutaran audio.
 
 ---
@@ -89,8 +138,8 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
 - **Mandatory Icon Package (`hugeicons`)**:
   - Seluruh ikon di dalam aplikasi **wajib** menggunakan `HugeIcons` (stroke rounded style `HugeIcons.strokeRounded...` atau solid `HugeIcons.solidRounded...`).
   - **Dilarang keras** mencampur ikon generic Material 1/2 (`Icons.xxx`).
-- **Floating Rounded Dock**:
-  - Bottom navigation bar diimplementasikan sebagai **Floating Capsule Dock** (`borderRadius: BorderRadius.circular(26)`), melayang di atas safe area dengan elevasi halus, batas border 1px, dan indikator pill aktif beranimasi.
+- **Floating Rounded Dock (`M3ENavigationBar` / `M3EToolbar`)**:
+  - Bottom navigation bar diimplementasikan sebagai **Floating Capsule Dock** (`borderRadius: BorderRadius.circular(26)`), melayang di atas safe area dengan elevasi halus, batas border 1px, dan indikator pill aktif beranimasi `motor`.
 - **Anti-AI-Slop UI Philosophy**:
   - Pertahankan *high information density* ala studio hardware (FabFilter, Universal Audio, Namida).
   - Gunakan *tabular figures* (`FontFeature.tabularFigures()`) pada semua display angka audio (frekuensi, gain, durasi, bitrate, preamp).
@@ -100,25 +149,25 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
 ### 2.6 Konsistensi Desain Antarmuka & Referensi UI Fidelity
 - **Kepatuhan Desain Referensi**:
   - Setiap penambahan screen, modal, bottom sheet, atau komponen baru **wajib konsisten** dengan desain yang telah ada (`collection_dark`, `collection_light`, `customization_settings`, `yt_miniplayer`, `pro_q_studio`).
-  - Gunakan komponen dasar yang seragam: squircle rounded borders (`8px`, `12px`, `16px`, `24px`), dark studio surface containers, 1px crisp outline border (`Border.all(color: theme.dividerColor, width: 1.0)`).
+  - Gunakan komponen dasar yang seragam: squircle rounded borders (`8px`, `12px`, `16px`, `24px`), dark studio surface containers `M3ECard`, 1px crisp outline border (`Border.all(color: theme.dividerColor, width: 1.0)`).
   - **100% English Language Policy**: Seluruh teks antarmuka pengguna (title, label, button, tooltip, snackbar, modal dialog) wajib menggunakan Bahasa Inggris formal.
-  - **Tactile Micro-interactions**: Berikan haptic feedback halus (`HapticFeedback.selectionClick()`) dan transisi animasi halus (150-250ms) pada interaksi tombol, reordering, dan switching.
+  - **Tactile Micro-interactions**: Berikan haptic feedback halus (`M3EHaptics.selectionClick()`) dan transisi animasi halus (150-250ms) pada interaksi tombol, reordering, dan switching.
 
-### 2.7 Standar Arsitektur Material 3 Expressive & Pure Theme Palettes System
+### 2.7 Standar Arsitektur Pure Material 3 Expressive & Pure Theme Palettes System
 - **Pure Material 3 Expressive Semi-Minimalist Aesthetics**:
   - Terapkan tata letak antarmuka yang bersih, elegan, dan **semi-minimalist** (tidak terlalu ramai/padat/cluttered).
-  - Berikan *breathing room* yang proporsional, struktur kartu yang fokus dan lapang, serta hindari penumpukan badge dekoratif yang tidak esensial.
+  - Berikan *breathing room* yang proporsional, struktur kartu `M3ECard` yang fokus dan lapang, serta hindari penumpukan badge dekoratif yang tidak esensial.
   - Standar squircle tokens:
-    - `XS: 8px` (Chips, mini tags, status dots)
-    - `S: 12px` (Action buttons, quick metric items)
-    - `M: 16px` (Standard Bento cards, dialogs, sliders)
+    - `XS: 8px` (`M3EChip`, mini tags, status dots)
+    - `S: 12px` (`M3EButton`, quick metric items)
+    - `M: 16px` (Standard Bento `M3ECard`, dialogs `M3EDialog`, `M3ESlider`)
     - `L: 20px` (Feature cards, DSP tiles)
-    - `XL: 28px` (Hero containers, album art, bottom sheets)
-    - `Pill: 999px` (Status badges, active pills, capsule docks)
+    - `XL: 28px` (Hero containers, album art, `M3EBottomSheet`)
+    - `Pill: 999px` (Status badges `M3EBadge`, active pills, capsule docks)
   - 1px crisp studio borders (`Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1.0)`) tanpa shadow buram berlebihan.
 - **Strict Color Theming Palette Adherence (Zero Hardcoded Random Colors)**:
   - **DILARANG KERAS** menggunakan warna hardcoded arbitrer di luar palet tema aktif (seperti hardcoded `0xFFFF9F0A`, `0xFF00F0FF`, `0xFFBF5AF2`, dll pada komponen kartu dan teks).
-  - Seluruh komponen antarmuka, kartu, kurva visual, teks, border, dan icon **WAJIB** mengambil nilai warna dari `Theme.of(context).colorScheme` dan `AppPalette` aktif:
+  - Seluruh komponen antarmuka, kartu `M3ECard`, kurva visual, teks, border, dan icon **WAJIB** mengambil nilai warna dari `M3EThemeData` / `Theme.of(context).colorScheme` dan `AppPalette` aktif:
     - `colorScheme.primary`: Aksen utama kartu aktif, kurva EQ, highlight, dan indikator status.
     - `colorScheme.secondary`: Aksen sekunder dan badge pelengkap.
     - `colorScheme.tertiary`: Aksen tersier / target curve.
@@ -127,10 +176,10 @@ Aturan resmi arsitektur perangkat lunak, standar koding fungsi, pedoman antarmuk
     - `colorScheme.outline`: Warna garis border 1px yang bersih.
     - `colorScheme.onSurface` & `colorScheme.onSurfaceVariant`: Tipografi judul dan teks sekunder.
   - Komponen harus beradaptasi secara otomatis 100% harmonis saat pengguna berganti palet warna di Pengaturan (*Obsidian Cyan*, *Amber Tube Glow*, *Emerald HiFi*, *Electric Purple*, *Crimson Passion*, *True OLED Black*, *Champagne Light*).
-- **Expressive Motion & Spring Physics**:
-  - Gunakan kurva gerak pegas ekspresif (`Curves.easeOutBack`, `Curves.fastEaseInToSlowEase`, `Curves.easeOutCubic`).
+- **Expressive Motion & Motor Spring Physics**:
+  - Gunakan kurva gerak pegas ekspresif dari package `motor` (`SpringDescription`, `Curves.easeOutBack`, `Curves.fastEaseInToSlowEase`, `Curves.easeOutCubic`).
   - Manfaatkan `flutter_animate` untuk *staggered entrance animations* (fade & slide-in dengan delay bertahap 40-60ms per tile).
-  - Berikan haptic micro-feedback (`HapticFeedback.lightImpact()` atau `HapticFeedback.selectionClick()`) pada setiap interaksi pengguna.
+  - Berikan haptic micro-feedback (`M3EHaptics.lightImpact()` atau `M3EHaptics.selectionClick()`) pada setiap interaksi pengguna.
 - **High Information Density & Tabular Figures**:
   - Tampilkan data audio secara bersih dan presisi (sample rate, buffer latency, bit depth, total listening hours, format).
   - Wajib menerapkan `FontFeature.tabularFigures()` pada semua angka numerik dinamis agar tampilan tidak jittering saat data ter-refresh.

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
@@ -365,7 +365,7 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                           ),
                           onPressed: () {
                             if (widget.folder.tracks.isNotEmpty) {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               ref.read(playerControllerProvider.notifier).setQueue(
                                     widget.folder.tracks,
                                     initialIndex: 0,
@@ -409,7 +409,7 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                           ),
                           onPressed: () {
                             if (widget.folder.tracks.isNotEmpty) {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               final shuffled = List<Track>.from(widget.folder.tracks)..shuffle();
                               ref.read(playerControllerProvider.notifier).setQueue(
                                     shuffled,
@@ -546,7 +546,7 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                             ],
                           ),
                           onTap: () {
-                            HapticFeedback.selectionClick();
+                            AppHaptics.selectionClick();
                             ref.read(playerControllerProvider.notifier).setQueue(
                                   widget.folder.tracks,
                                   initialIndex: idx,

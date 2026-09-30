@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
@@ -180,7 +180,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                     max: 3.0,
                     divisions: 55,
                     onChanged: (val) {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       playerNotifier.setPlaybackSpeed(val);
                       settingsNotifier.setPlaybackSpeed(val);
                     },
@@ -193,7 +193,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                     final isSel = (speed - s).abs() < 0.01;
                     return InkWell(
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.lightImpact();
                         playerNotifier.setPlaybackSpeed(s);
                         settingsNotifier.setPlaybackSpeed(s);
                       },
@@ -290,7 +290,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                     max: 12.0,
                     divisions: 48, // 0.5 st steps
                     onChanged: (val) {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       playerNotifier.setPitch(val, cents: cents);
                       settingsNotifier.setPitchSemitones(val);
                     },
@@ -310,7 +310,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                     ),
                     InkWell(
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.lightImpact();
                         playerNotifier.setPitch(0.0, cents: 0.0);
                         settingsNotifier.setPitchSemitones(0.0);
                         settingsNotifier.setPitchFineCents(0.0);
@@ -387,7 +387,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                   value: isLinked,
                   activeThumbColor: primary,
                   onChanged: (val) {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.lightImpact();
                     playerNotifier.toggleLinkSpeedAndPitch();
                     settingsNotifier.toggleLinkSpeedAndPitch(val);
                   },

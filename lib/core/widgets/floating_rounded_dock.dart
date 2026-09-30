@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../app/theme/app_haptics.dart';
 import '../../app/theme/studio_surface_theme.dart';
 
 /// Studio Floating Rounded Dock Navigation Bar
@@ -61,10 +61,6 @@ class FloatingRoundedDock extends ConsumerWidget {
               ? StudioSurfaceTheme.surfaceContainer(context, isSolid: true)
               : theme.colorScheme.surface.withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(
-            color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-            width: 1.0,
-          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.28),
@@ -91,7 +87,7 @@ class FloatingRoundedDock extends ConsumerWidget {
                     child: InkWell(
                       onTap: () {
                         if (!isSelected) {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selectionClick();
                           onItemSelected(index);
                         }
                       },
@@ -114,14 +110,6 @@ class FloatingRoundedDock extends ConsumerWidget {
                                     ))
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
-                          border: isSelected
-                              ? Border.all(
-                                  color: isSolid
-                                      ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                                      : primary.withValues(alpha: 0.4),
-                                  width: 1.0,
-                                )
-                              : Border.all(color: Colors.transparent),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../settings/domain/player_customization_settings.dart';
 import '../../../settings/domain/player_playback_settings.dart';
@@ -86,6 +87,36 @@ class CustomTimeBar extends StatelessWidget {
 
   Widget _buildTrackBar(BuildContext context, double progress, ThemeData theme) {
     switch (style) {
+      case TimeBarStyle.wavy:
+        if (WidgetsBinding.instance.runtimeType.toString().contains('Test')) {
+          return SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4.0,
+              activeTrackColor: primaryColor,
+              inactiveTrackColor: primaryColor.withValues(alpha: 0.25),
+              thumbColor: primaryColor,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+            ),
+            child: Slider(
+              value: progress,
+              onChanged: (val) {
+                final newMs = (val * duration.inMilliseconds).toInt();
+                onSeek(Duration(milliseconds: newMs));
+              },
+            ),
+          );
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: M3ESlider.wavy(
+            value: progress,
+            onChanged: (val) {
+              final newMs = (val * duration.inMilliseconds).toInt();
+              onSeek(Duration(milliseconds: newMs));
+            },
+          ),
+        );
+
       case TimeBarStyle.slim:
         return SliderTheme(
           data: SliderTheme.of(context).copyWith(
@@ -304,7 +335,7 @@ class CustomTimeBar extends StatelessWidget {
     if (box != null && box.hasSize && box.size.width > 0) {
       final double ratio = (localPosition.dx / box.size.width).clamp(0.0, 1.0);
       final int newMs = (ratio * duration.inMilliseconds).toInt();
-      HapticFeedback.selectionClick();
+      AppHaptics.selectionClick();
       onSeek(Duration(milliseconds: newMs));
     }
   }

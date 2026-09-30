@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
+import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
@@ -59,7 +60,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
   }
 
   void _onFilterSelected(String filter) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     setState(() {
       _selectedFilter = filter;
     });
@@ -74,7 +75,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
   }
 
   void _openImportPlaylistDialog() {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     showDialog(
       context: context,
       builder: (_) => const YouTubeImportPlaylistDialog(),
@@ -82,7 +83,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
   }
 
   void _openDspRack() {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const DspRackScreen()),
     );
@@ -117,12 +118,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   decoration: BoxDecoration(
                     color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: _searchFocusNode.hasFocus
-                          ? primary.withValues(alpha: 0.6)
-                          : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                      width: 1,
-                    ),
                   ),
                   child: Row(
                     children: [
@@ -163,7 +158,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                             color: Colors.grey,
                           ),
                           onPressed: () {
-                            HapticFeedback.selectionClick();
+                            AppHaptics.selectionClick();
                             _searchController.clear();
                             ytController.onQueryChanged('');
                           },
@@ -182,18 +177,20 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     height: 48,
                     width: 48,
                     decoration: BoxDecoration(
-                      color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: primary.withValues(alpha: 0.35),
-                        width: 1,
+                      color: StudioSurfaceTheme.tintedContainer(
+                        context,
+                        StudioCategoryColors.youtubeMusic,
+                        isSolid: isSolid,
+                        translucentAlpha: 0.16,
+                        solidBlendAlpha: 0.2,
                       ),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Center(
                       child: HugeIcon(
                         icon: HugeIcons.strokeRoundedPlayList,
                         size: 20,
-                        color: primary,
+                        color: StudioCategoryColors.youtubeMusic,
                       ),
                     ),
                   ),
@@ -214,26 +211,33 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             itemBuilder: (ctx, idx) {
               final filter = _quickFilters[idx];
               final isSelected = _selectedFilter == filter.label;
+              final ytColor = StudioCategoryColors.youtubeMusic;
               return ChoiceChip(
                 avatar: HugeIcon(
                   icon: filter.icon,
                   size: 14,
-                  color: isSelected ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: isSelected ? ytColor : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 label: Text(
                   filter.label,
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                    color: isSelected ? ytColor : theme.colorScheme.onSurface.withValues(alpha: 0.75),
                   ),
                 ),
                 selected: isSelected,
-                selectedColor: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20),
+                selectedColor: StudioSurfaceTheme.tintedContainer(
+                  context,
+                  ytColor,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.16,
+                  solidBlendAlpha: 0.20,
+                ),
                 backgroundColor: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                 side: BorderSide(
                   color: isSelected
-                      ? primary.withValues(alpha: 0.6)
+                      ? ytColor.withValues(alpha: 0.6)
                       : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                   width: 1,
                 ),
@@ -285,7 +289,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             color: theme.colorScheme.onSurface,
           ),
           onPressed: () {
-            HapticFeedback.selectionClick();
+            AppHaptics.selectionClick();
             Navigator.of(context).pop();
           },
         ),
@@ -334,7 +338,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedSlidersHorizontal,
               size: 20,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              color: StudioCategoryColors.dspMastering,
             ),
             tooltip: 'Open DSP Mastering Rack',
             onPressed: _openDspRack,
@@ -343,7 +347,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedPlayList,
               size: 20,
-              color: primary,
+              color: StudioCategoryColors.youtubeMusic,
             ),
             tooltip: 'Import Playlist URL',
             onPressed: _openImportPlaylistDialog,
@@ -378,7 +382,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             SizedBox(
               width: 24,
               height: 24,
-              child: CircularProgressIndicator(
+              child: M3EProgressIndicator.circular(
                 strokeWidth: 2.5,
                 color: primary,
               ),
@@ -452,7 +456,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   children: [
                     InkWell(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         ref.read(playerControllerProvider.notifier).setQueue(
                               searchResults,
                               initialIndex: 0,
@@ -464,10 +468,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         decoration: BoxDecoration(
                           color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.3),
-                            width: 0.8,
-                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -493,7 +493,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     const SizedBox(width: 8),
                     InkWell(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         final shuffled = List<Track>.from(searchResults)..shuffle();
                         ref.read(playerControllerProvider.notifier).setQueue(
                               shuffled,
@@ -506,10 +506,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         decoration: BoxDecoration(
                           color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                            width: 0.8,
-                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -550,7 +546,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   track: track,
                   isPlaying: isPlaying,
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     _searchFocusNode.unfocus();
                     ref.read(playerControllerProvider.notifier).setQueue(
                           searchResults,
@@ -595,10 +591,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       decoration: BoxDecoration(
                         color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: primary.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
                       ),
                       child: Center(
                         child: HugeIcon(
@@ -797,7 +789,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 if (trendingTracks.isNotEmpty)
                   InkWell(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       ref.read(playerControllerProvider.notifier).setQueue(
                             trendingTracks,
                             initialIndex: 0,
@@ -809,10 +801,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       decoration: BoxDecoration(
                         color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: primary.withValues(alpha: 0.3),
-                          width: 0.8,
-                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -844,7 +832,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   ),
                   tooltip: 'Refresh Charts',
                   onPressed: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     ytController.fetchTrending(force: true);
                   },
                 ),
@@ -863,7 +851,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               child: SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(
+                child: M3EProgressIndicator.circular(
                   strokeWidth: 2,
                   color: primary,
                 ),
@@ -888,7 +876,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selectionClick();
                       ytController.fetchTrending(force: true);
                     },
                     icon: HugeIcon(
@@ -913,7 +901,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               track: track,
               isPlaying: isPlaying,
               onTap: () {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 ref.read(playerControllerProvider.notifier).setQueue(
                       trendingTracks,
                       initialIndex: trendingTracks.indexOf(track),
@@ -1021,10 +1009,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1072,12 +1056,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: BorderSide(
-            color: isTileActive
-                ? primary.withValues(alpha: 0.5)
-                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-            width: 1,
-          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: ListTile(
@@ -1090,10 +1068,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 height: 46,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                    width: 0.8,
-                  ),
                 ),
                 child: StudioArtworkWidget(
                   track: track,
@@ -1114,9 +1088,9 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         ? SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(
+                            child: M3EProgressIndicator.circular(
                               strokeWidth: 2.0,
-                              valueColor: AlwaysStoppedAnimation<Color>(primary),
+                              color: primary,
                             ),
                           )
                         : HugeIcon(
@@ -1191,7 +1165,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 ),
                 tooltip: 'Start Smart Track Radio',
                 onPressed: () {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selectionClick();
                   onStartRadio();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

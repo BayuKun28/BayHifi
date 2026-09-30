@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 enum AlbumArtStyle {
+  cdJewel('CD Jewel Case', 'Acrylic jewel case with spine tray and hologram optical sheen'),
   squircle('Default Squircle', 'Modern 28px squircle with dynamic ambient glow'),
   square('Square Studio', 'Sharp 8px studio monitor card with crisp 1px borders'),
   disc('Minimalist Disc', 'Circular CD audio disc with orbital rim'),
   vinyl('Vinyl Record', 'Classic spinning vinyl with groove ridges and center label'),
   turntable('Turntable & Tonearm', 'Spinning vinyl record with animated metallic tonearm needle'),
-  cassette('Retro Cassette Tape', 'Analog cassette tape with dual rotating spools and tape window'),
-  cdJewel('CD Jewel Case', 'Acrylic jewel case with spine tray and hologram optical sheen');
+  cassette('Retro Cassette Tape', 'Analog cassette tape with dual rotating spools and tape window');
 
   final String label;
   final String description;
@@ -17,11 +17,12 @@ enum AlbumArtStyle {
     for (final s in AlbumArtStyle.values) {
       if (s.name == val) return s;
     }
-    return AlbumArtStyle.squircle;
+    return AlbumArtStyle.cdJewel;
   }
 }
 
 enum SpectrumStyle {
+  m3Expressive('M3 Expressive Pillars', 'Material 3 Expressive squircle morphing columns with dynamic studio gradient and floating peak pills'),
   bars('Multi-Band Bars', 'High-density multi-frequency FFT studio bars'),
   wave('Liquid Wave', 'Smooth anti-aliased gradient Bezier sound wave'),
   dots('Peak Dots', 'Pulsing audiophile matrix peak dots'),
@@ -38,11 +39,12 @@ enum SpectrumStyle {
     for (final s in SpectrumStyle.values) {
       if (s.name == val) return s;
     }
-    return SpectrumStyle.bars;
+    return SpectrumStyle.m3Expressive;
   }
 }
 
 enum TimeBarStyle {
+  wavy('Expressive Wavy', 'Material 3 Expressive dynamic traveling sine-wave seekbar'),
   slim('Slim Studio', 'Precision 3.5px studio track with tabular figures'),
   capsule('Hi-Fi Capsule', 'Thick 8px solid capsule seekbar'),
   segmented('Segmented LED', 'Multi-segment audiophile VU meter time bar'),
@@ -58,7 +60,7 @@ enum TimeBarStyle {
     for (final s in TimeBarStyle.values) {
       if (s.name == val) return s;
     }
-    return TimeBarStyle.slim;
+    return TimeBarStyle.wavy;
   }
 }
 
@@ -153,9 +155,9 @@ class PlayerCustomizationSettings {
   final TrackTileSwipeAction trackSwipeRight;
 
   const PlayerCustomizationSettings({
-    this.albumArtStyle = AlbumArtStyle.squircle,
-    this.spectrumStyle = SpectrumStyle.bars,
-    this.timeBarStyle = TimeBarStyle.slim,
+    this.albumArtStyle = AlbumArtStyle.cdJewel,
+    this.spectrumStyle = SpectrumStyle.m3Expressive,
+    this.timeBarStyle = TimeBarStyle.wavy,
     this.ambientGlow = true,
     this.ambientGlowIntensity = 0.35,
     this.fftBins = 512,

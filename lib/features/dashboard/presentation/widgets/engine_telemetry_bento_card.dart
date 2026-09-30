@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../settings/presentation/sub_screens/audio_hardware_settings_screen.dart';
@@ -14,7 +14,6 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
     final eqState = ref.watch(eqControllerProvider);
     final playback = ref.watch(playerControllerProvider);
@@ -29,7 +28,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
 
     return InkWell(
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const AudioHardwareSettingsScreen()),
         );
@@ -54,13 +53,13 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
+                          color: StudioCategoryColors.audioEngine.withValues(alpha: isSolid ? 0.18 : 0.14),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: HugeIcon(
+                        child: const HugeIcon(
                           icon: HugeIcons.strokeRoundedCpu,
                           size: 16,
-                          color: primary,
+                          color: StudioCategoryColors.audioEngine,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -99,12 +98,8 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
+                    color: StudioCategoryColors.bitPerfect.withValues(alpha: isSolid ? 0.18 : 0.14),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.35),
-                      width: 0.8,
-                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -112,16 +107,16 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: BoxDecoration(
-                          color: primary,
+                        decoration: const BoxDecoration(
+                          color: StudioCategoryColors.bitPerfect,
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 5),
-                      Text(
+                      const Text(
                         'BIT-PERFECT DIRECT',
                         style: TextStyle(
-                          color: primary,
+                          color: StudioCategoryColors.bitPerfect,
                           fontSize: 9,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.4,
@@ -144,7 +139,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                     isSolid: isSolid,
                     label: 'SOURCE SPEC',
                     value: '$formatStr $bitDepthStr',
-                    color: primary,
+                    color: StudioCategoryColors.hiResGold,
                     sub: sampleRateStr,
                   ),
                 ),
@@ -155,7 +150,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                     isSolid: isSolid,
                     label: 'ENGINE BUFFER',
                     value: 'Low-Latency',
-                    color: theme.colorScheme.secondary,
+                    color: StudioCategoryColors.bitPerfect,
                     sub: 'Direct Stream',
                   ),
                 ),
@@ -166,7 +161,7 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                     isSolid: isSolid,
                     label: 'HEADROOM',
                     value: preampStr,
-                    color: theme.colorScheme.tertiary,
+                    color: StudioCategoryColors.proQEqualizer,
                     sub: 'Safe Pre-Amp',
                   ),
                 ),
@@ -192,10 +187,6 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

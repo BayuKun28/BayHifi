@@ -120,10 +120,6 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                       ? StudioSurfaceTheme.tintedContainer(context, const Color(0xFF00E676), isSolid: isSolid, translucentAlpha: 0.15, solidBlendAlpha: 0.20)
                       : StudioSurfaceTheme.tintedContainer(context, Colors.orange, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isConnected ? const Color(0xFF00E676) : Colors.orangeAccent,
-                    width: 1,
-                  ),
                 ),
                 child: Row(
                   children: [

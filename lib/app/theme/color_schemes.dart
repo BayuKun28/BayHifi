@@ -47,7 +47,6 @@ class AppTheme {
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.surfaceBorder),
         ),
         textStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 11),
       ),

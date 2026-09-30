@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/database/local_persistence_service.dart';
@@ -203,14 +204,6 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 ? color.withValues(alpha: 0.14)
                 : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.45)
-              : (isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
-          width: 0.9,
-        ),
       ),
       child: Text(
         label,
@@ -293,12 +286,6 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                         )
                       : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.3),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: timerState.isActive
-                        ? const Color(0xFF00E676).withValues(alpha: 0.6)
-                        : StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                    width: 0.8,
-                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -343,10 +330,6 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   solidBlendAlpha: 0.14,
                 ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: primary.withValues(alpha: 0.25),
-                  width: 0.8,
-                ),
               ),
               child: Row(
                 children: [
@@ -407,7 +390,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     onPressed: () {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.lightImpact();
                       timerNotifier.extendTimer(15);
                     },
                     icon: HugeIcon(icon: HugeIcons.strokeRoundedClock01, size: 14, color: primary),
@@ -426,7 +409,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     onPressed: () {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.lightImpact();
                       timerNotifier.cancelTimer();
                     },
                     icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 14, color: Color(0xFFFF3B30)),
@@ -463,7 +446,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         timerNotifier.startTimer(mins);
                       },
                       child: Text(
@@ -530,7 +513,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: M3EProgressIndicator.circular(strokeWidth: 2),
                 ),
             ],
           ),
@@ -546,9 +529,6 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
               decoration: BoxDecoration(
                 color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                ),
               ),
               child: Center(
                 child: Text(
@@ -566,9 +546,6 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 decoration: BoxDecoration(
                   color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                  ),
                 ),
                 child: Row(
                   children: [
@@ -586,7 +563,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 16, color: Color(0xFFFF453A)),
                       tooltip: 'Remove Folder',
                       onPressed: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.lightImpact();
                         controller.removeMusicFolder(path);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Removed folder: $path')),
@@ -610,14 +587,13 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   solidBlendAlpha: 0.16,
                 ),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
                   SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: primary),
+                    child: M3EProgressIndicator.circular(strokeWidth: 2, color: primary),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -646,7 +622,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   onPressed: libraryState.isScanning
                       ? null
                       : () {
-                          HapticFeedback.mediumImpact();
+                          AppHaptics.mediumImpact();
                           controller.pickAndScanDirectory();
                         },
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 16, color: theme.colorScheme.onPrimary),
@@ -662,7 +638,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 onPressed: libraryState.isScanning
                     ? null
                     : () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.lightImpact();
                         controller.rescanSavedFolders();
                       },
                 icon: HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 16, color: primary),
@@ -705,7 +681,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             itemIcon: (sec) => sec == 0 ? HugeIcons.strokeRoundedVolumeHigh : HugeIcons.strokeRoundedFilter,
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 setState(() => _minTrackDurationSeconds = val);
                 storage.saveSetting('minimum_track_duration_seconds', val);
                 storage.saveSetting('ignore_short_tracks', val > 0);
@@ -744,7 +720,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 value: _autoScanOnStartup,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   setState(() => _autoScanOnStartup = val);
                   storage.saveSetting('auto_scan_on_startup', val);
                 },
@@ -778,12 +754,6 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             ? theme.colorScheme.surfaceContainerHighest
             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: false),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSolid
-              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-              : StudioSurfaceTheme.outline(context, isSolid: false),
-          width: 0.8,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/playback_state.dart';
@@ -175,7 +175,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                     // Shuffle Toggle
                     IconButton(
                       onPressed: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         controller.toggleShuffle();
                       },
                       icon: HugeIcon(
@@ -190,7 +190,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                     // Repeat Mode Toggle
                     IconButton(
                       onPressed: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         controller.toggleRepeatMode();
                       },
                       icon: HugeIcon(
@@ -208,7 +208,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                     if (playback.queue.isNotEmpty)
                       IconButton(
                         onPressed: () {
-                          HapticFeedback.mediumImpact();
+                          AppHaptics.mediumImpact();
                           controller.clearQueue();
                         },
                         icon: const HugeIcon(
@@ -283,7 +283,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                         itemCount: playback.queue.length,
                         // ignore: deprecated_member_use
                         onReorder: (oldIdx, newIdx) {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selectionClick();
                           controller.reorderQueue(oldIdx, newIdx);
                         },
                         itemBuilder: (context, index) {
@@ -300,11 +300,11 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                             primaryColor: primary,
                             isSolid: isSolid,
                             onTap: () {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               controller.skipToQueueIndex(index);
                             },
                             onRemove: () {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               controller.removeFromQueue(index);
                             },
                           );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../domain/player_playback_settings.dart';
@@ -94,7 +94,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           // ─── 7. RESET TO DEFAULTS ───────────────────────────────────────
           OutlinedButton.icon(
             onPressed: () {
-              HapticFeedback.mediumImpact();
+              AppHaptics.mediumImpact();
               _showResetConfirmation(context, notifier, isSolid);
             },
             icon: HugeIcon(
@@ -258,12 +258,6 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
               )
             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.4),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.4)
-              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-          width: 0.8,
-        ),
       ),
       child: Text(
         label,
@@ -362,7 +356,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 value: settings.enableSmoothFade,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   notifier.toggleSmoothFade(val);
                 },
               ),
@@ -492,7 +486,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 value: settings.pauseOnHeadphoneUnplug,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   notifier.togglePauseOnHeadphoneUnplug(val);
                 },
               ),
@@ -530,7 +524,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 value: settings.resumeOnHeadphonePlug,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   notifier.toggleResumeOnHeadphonePlug(val);
                 },
               ),
@@ -605,7 +599,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 value: settings.pauseOnZeroVolume,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   notifier.togglePauseOnZeroVolume(val);
                 },
               ),
@@ -731,7 +725,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 value: settings.linkSpeedAndPitch,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   notifier.toggleLinkSpeedAndPitch(val);
                 },
               ),
@@ -780,7 +774,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             },
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 notifier.setReplayGainMode(val);
               }
             },
@@ -807,12 +801,6 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                       ? theme.colorScheme.surfaceContainerHighest
                       : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isSolid
-                        ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                        : primary.withValues(alpha: 0.3),
-                    width: 0.8,
-                  ),
                 ),
                 child: Text(
                   '${settings.replayGainPreampDb >= 0 ? '+' : ''}${settings.replayGainPreampDb.toStringAsFixed(1)} dB',
@@ -865,7 +853,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 value: settings.replayGainPreventClipping,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   notifier.toggleReplayGainPreventClipping(val);
                 },
               ),
@@ -904,7 +892,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 value: settings.enableSkipSilence,
                 activeThumbColor: primary,
                 onChanged: (val) {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   notifier.toggleEnableSkipSilence(val);
                 },
               ),
@@ -931,12 +919,6 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                         ? theme.colorScheme.surfaceContainerHighest
                         : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isSolid
-                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                          : primary.withValues(alpha: 0.3),
-                      width: 0.8,
-                    ),
                   ),
                   child: Text(
                     '${settings.silenceThresholdDb.toStringAsFixed(0)} dBFS',
@@ -1000,7 +982,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             },
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 notifier.setSeekStepMode(val);
               }
             },
@@ -1027,12 +1009,6 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                         ? theme.colorScheme.surfaceContainerHighest
                         : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isSolid
-                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                          : primary.withValues(alpha: 0.3),
-                      width: 0.8,
-                    ),
                   ),
                   child: Text(
                     '${settings.seekStepSeconds} s',
@@ -1073,12 +1049,6 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                         ? theme.colorScheme.surfaceContainerHighest
                         : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isSolid
-                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                          : primary.withValues(alpha: 0.3),
-                      width: 0.8,
-                    ),
                   ),
                   child: Text(
                     '${(settings.seekStepPercent * 100).toStringAsFixed(0)} %',
@@ -1122,7 +1092,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             },
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 notifier.setTimeDisplayMode(val);
               }
             },
@@ -1156,12 +1126,6 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             ? theme.colorScheme.surfaceContainerHighest
             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: false),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSolid
-              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-              : StudioSurfaceTheme.outline(context, isSolid: false),
-          width: 0.8,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

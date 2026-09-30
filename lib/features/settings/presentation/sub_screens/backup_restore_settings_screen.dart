@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
@@ -20,7 +21,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
   bool _includeLibrary = true;
 
   Future<void> _exportBackupFile() async {
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     final jsonStr = BackupRestoreService.instance.createBackupJson(
       includeHistory: _includeHistory,
       includeLibrary: _includeLibrary,
@@ -39,7 +40,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
   }
 
   Future<void> _copyBackupJson() async {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     final jsonStr = BackupRestoreService.instance.createBackupJson(
       includeHistory: _includeHistory,
       includeLibrary: _includeLibrary,
@@ -155,10 +156,6 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                             ? primary.withValues(alpha: 0.1)
                             : theme.colorScheme.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: validation.isValid ? primary : theme.colorScheme.error,
-                          width: 0.8,
-                        ),
                       ),
                       child: validation.isValid
                           ? Column(
@@ -238,7 +235,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
   }
 
   Future<void> _performRestore(String jsonStr) async {
-    HapticFeedback.heavyImpact();
+    AppHaptics.heavyImpact();
     final result = await BackupRestoreService.instance.restoreFromBackupJson(jsonStr);
 
     if (result.success) {
@@ -402,7 +399,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
       ),
       child: InkWell(
         onTap: () {
-          HapticFeedback.lightImpact();
+          AppHaptics.lightImpact();
           _showRestoreDialog();
         },
         borderRadius: BorderRadius.circular(16),
@@ -491,7 +488,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
           value: value,
           activeThumbColor: primary,
           onChanged: (val) {
-            HapticFeedback.lightImpact();
+            AppHaptics.lightImpact();
             onChanged(val);
           },
         ),
@@ -603,14 +600,6 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                 ? color.withValues(alpha: 0.14)
                 : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.45)
-              : (isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
-          width: 0.9,
-        ),
       ),
       child: Text(
         label,

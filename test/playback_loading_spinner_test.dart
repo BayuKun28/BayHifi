@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/features/player/domain/playback_state.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
@@ -39,7 +40,7 @@ void main() {
     expect(playingState.isPlaying, isTrue);
   });
 
-  testWidgets('NowPlayingScreen displays CircularProgressIndicator when loading/buffering', (tester) async {
+  testWidgets('NowPlayingScreen displays M3EProgressIndicator when loading/buffering', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 850));
 
     await tester.pumpWidget(
@@ -66,12 +67,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // CircularProgressIndicator should be rendered inside the Play/Pause button
-    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    // Progress indicator should be rendered inside the Play/Pause button
+    expect(find.byWidgetPredicate((w) => w is M3EProgressIndicator || w is CircularProgressIndicator || w.runtimeType.toString().contains('ProgressIndicator')), findsWidgets);
     expect(find.byTooltip('Buffering...'), findsOneWidget);
   });
 
-  testWidgets('NamidaExpandableMiniPlayer displays CircularProgressIndicator when loading/buffering', (tester) async {
+  testWidgets('NamidaExpandableMiniPlayer displays M3EProgressIndicator when loading/buffering', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 850));
 
     await tester.pumpWidget(
@@ -103,11 +104,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // CircularProgressIndicator should be rendered inside the miniplayer circle button
-    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    // Progress indicator should be rendered inside the miniplayer circle button
+    expect(find.byWidgetPredicate((w) => w is M3EProgressIndicator || w is CircularProgressIndicator || w.runtimeType.toString().contains('ProgressIndicator')), findsWidgets);
   });
 
-  testWidgets('StudioDeskDockingScreen displays CircularProgressIndicator when loading/buffering', (tester) async {
+  testWidgets('StudioDeskDockingScreen displays progress indicator when loading/buffering', (tester) async {
     await tester.binding.setSurfaceSize(const Size(800, 600));
 
     await tester.pumpWidget(
@@ -134,8 +135,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // CircularProgressIndicator should be rendered inside the desk docking centerpiece
-    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    // Progress indicator should be rendered inside the desk docking centerpiece
+    expect(find.byWidgetPredicate((w) => w is M3EProgressIndicator || w is CircularProgressIndicator || w.runtimeType.toString().contains('ProgressIndicator')), findsWidgets);
     expect(find.byTooltip('Buffering...'), findsOneWidget);
   });
 }

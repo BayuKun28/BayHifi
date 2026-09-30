@@ -40,7 +40,7 @@ void main() {
               final colorSolid = StudioSurfaceTheme.surfaceContainer(context, isSolid: true);
               final scheme = Theme.of(context).colorScheme;
 
-              expect(colorTranslucent.a, closeTo(0.6, 0.01));
+              expect(colorTranslucent.a, closeTo(0.85, 0.01));
               expect(colorSolid.a, 1.0);
               expect(colorSolid, scheme.surfaceContainer);
 
@@ -61,7 +61,7 @@ void main() {
               final colorSolid = StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: true);
               final scheme = Theme.of(context).colorScheme;
 
-              expect(colorTranslucent.a, closeTo(0.7, 0.01));
+              expect(colorTranslucent.a, closeTo(0.90, 0.01));
               expect(colorSolid.a, 1.0);
               expect(colorSolid, scheme.surfaceContainerHighest);
 
@@ -82,7 +82,7 @@ void main() {
               final colorSolid = StudioSurfaceTheme.surfaceContainerLow(context, isSolid: true);
               final scheme = Theme.of(context).colorScheme;
 
-              expect(colorTranslucent.a, closeTo(0.5, 0.01));
+              expect(colorTranslucent.a, closeTo(0.70, 0.01));
               expect(colorSolid.a, 1.0);
               expect(colorSolid, scheme.surfaceContainerLow);
 
@@ -103,7 +103,7 @@ void main() {
               final colorSolid = StudioSurfaceTheme.surface(context, isSolid: true);
               final scheme = Theme.of(context).colorScheme;
 
-              expect(colorTranslucent.a, closeTo(0.75, 0.01));
+              expect(colorTranslucent.a, closeTo(0.90, 0.01));
               expect(colorSolid.a, 1.0);
               expect(colorSolid, scheme.surface);
 
@@ -124,7 +124,7 @@ void main() {
               final colorTranslucent = StudioSurfaceTheme.tintedContainer(context, tint, isSolid: false);
               final colorSolid = StudioSurfaceTheme.tintedContainer(context, tint, isSolid: true);
 
-              expect(colorTranslucent.a, closeTo(0.12, 0.01));
+              expect(colorTranslucent.a, closeTo(0.14, 0.01));
               expect(colorSolid.a, 1.0); // Solid must be 100% opaque
 
               return const SizedBox.shrink();
@@ -144,12 +144,11 @@ void main() {
               final outSolid = StudioSurfaceTheme.outline(context, isSolid: true);
               final subOutTranslucent = StudioSurfaceTheme.subtleOutline(context, isSolid: false);
               final subOutSolid = StudioSurfaceTheme.subtleOutline(context, isSolid: true);
-              final scheme = Theme.of(context).colorScheme;
 
-              expect(outSolid, scheme.outline);
-              expect(outTranslucent.a, closeTo(0.45, 0.01));
-              expect(subOutTranslucent.a, closeTo(0.25, 0.01));
-              expect(subOutSolid, scheme.outlineVariant);
+              expect(outSolid, Colors.transparent);
+              expect(outTranslucent, Colors.transparent);
+              expect(subOutTranslucent, Colors.transparent);
+              expect(subOutSolid, Colors.transparent);
 
               return const SizedBox.shrink();
             },

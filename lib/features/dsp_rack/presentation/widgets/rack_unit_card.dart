@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 
 /// Reusable Studio Rackmount Unit Frame with collapsible minimization
@@ -51,7 +51,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
   }
 
   void _toggleExpanded() {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     setState(() {
       _isExpanded = !_isExpanded;
     });
@@ -65,16 +65,12 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
     final color = widget.accentColor ?? theme.colorScheme.primary;
 
     final chassisBg = StudioSurfaceTheme.surface(context, isSolid: isSolid);
-    final borderColor = widget.isActive
-        ? (isSolid ? color : color.withValues(alpha: 0.5))
-        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: chassisBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: widget.isActive ? 1.2 : 1.0),
         boxShadow: isSolid
             ? [
                 BoxShadow(
@@ -109,14 +105,6 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                   top: const Radius.circular(15),
                   bottom: _isExpanded ? Radius.zero : const Radius.circular(15),
                 ),
-                border: _isExpanded
-                    ? Border(
-                        bottom: BorderSide(
-                          color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                          width: 0.8,
-                        ),
-                      )
-                    : null,
               ),
               child: Row(
                 children: [
@@ -138,12 +126,6 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                             )
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: widget.isActive
-                            ? color
-                            : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                        width: 1,
-                      ),
                     ),
                     child: Text(
                       widget.unitNumber,
@@ -212,12 +194,6 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                               )
                             : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: widget.isActive
-                              ? (isSolid ? theme.colorScheme.outline : color)
-                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                          width: 1,
-                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -301,10 +277,6 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isDark ? const Color(0xFF2C3240) : const Color(0xFFCFD5E1),
-        border: Border.all(
-          color: isDark ? Colors.white12 : Colors.black12,
-          width: 0.8,
-        ),
       ),
       child: Center(
         child: Container(

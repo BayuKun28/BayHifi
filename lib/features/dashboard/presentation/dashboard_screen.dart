@@ -128,10 +128,6 @@ class DashboardScreen extends ConsumerWidget {
           decoration: BoxDecoration(
             color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: ref.isSolidStyle),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: ref.isSolidStyle ? theme.colorScheme.outline : primary.withValues(alpha: 0.4),
-              width: 0.8,
-            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

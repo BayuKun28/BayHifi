@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../../core/lyrics/east_asian_romanizer.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -76,7 +76,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
   }
 
   void _setDisplayMode(LyricsDisplayMode mode) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     setState(() {
       _displayMode = mode;
       _lineKeys.clear();
@@ -89,7 +89,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
   }
 
   void _updateTimingOffset(Duration newOffset) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     setState(() {
       _timingOffset = newOffset;
     });
@@ -233,7 +233,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
             if (widget.onRefresh != null)
               OutlinedButton.icon(
                 onPressed: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.lightImpact();
                   widget.onRefresh!();
                 },
                 icon: HugeIcon(
@@ -314,7 +314,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                 child: InkWell(
                   onTap: isSynced
                       ? () {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selectionClick();
                           final seekPos = line.timestamp - _timingOffset;
                           ref.read(playerControllerProvider.notifier).seek(
                             seekPos < Duration.zero ? Duration.zero : seekPos,
@@ -591,7 +591,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     final track = ref.read(playerControllerProvider).currentTrack;
     if (track == null || widget.lyricsResult.lines.isEmpty) return;
 
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     LyricShareSheet.show(
       context,
       track: track,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../domain/player_customization_settings.dart';
@@ -50,7 +50,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             itemIcon: _getAlbumStyleIcon,
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 controller.setAlbumArtStyle(val);
               }
             },
@@ -74,7 +74,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             itemIcon: _getTimeBarStyleIcon,
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 controller.setTimeBarStyle(val);
               }
             },
@@ -94,7 +94,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             itemIcon: _getPerfModeIcon,
             onChanged: (val) {
               if (val != null) {
-                HapticFeedback.selectionClick();
+                AppHaptics.selectionClick();
                 controller.setPerformanceMode(val);
               }
             },
@@ -251,14 +251,6 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                 ? color.withValues(alpha: 0.14)
                 : theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.45)
-              : (isSolid
-                  ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2)),
-          width: 0.9,
-        ),
       ),
       child: Text(
         label,
@@ -341,10 +333,6 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                   ? theme.colorScheme.surfaceContainerHighest
                   : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                width: 1.0,
-              ),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<T>(
@@ -453,10 +441,6 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                   ? theme.colorScheme.surfaceContainerHighest
                   : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                width: 1.0,
-              ),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<SpectrumStyle>(
@@ -501,7 +485,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     controller.setSpectrumStyle(val);
                   }
                 },
@@ -549,10 +533,6 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                       ? theme.colorScheme.surfaceContainerHighest
                       : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: false),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                    width: 0.8,
-                  ),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
@@ -577,7 +557,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                     }).toList(),
                     onChanged: (val) {
                       if (val != null) {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selectionClick();
                         controller.setFftBins(val);
                       }
                     },
@@ -761,7 +741,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           value: value,
           activeThumbColor: primary,
           onChanged: (val) {
-            HapticFeedback.lightImpact();
+            AppHaptics.lightImpact();
             onChanged(val);
           },
         ),
@@ -777,12 +757,6 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             ? theme.colorScheme.surfaceContainerHighest
             : StudioSurfaceTheme.tintedContainer(context, primary, isSolid: false, translucentAlpha: 0.12),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isSolid
-              ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-              : primary.withValues(alpha: 0.3),
-          width: 0.8,
-        ),
       ),
       child: Text(
         text,
@@ -830,6 +804,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
 
   dynamic _getSpectrumStyleIcon(SpectrumStyle style) {
     switch (style) {
+      case SpectrumStyle.m3Expressive:
+        return HugeIcons.strokeRoundedSparkles;
       case SpectrumStyle.bars:
         return HugeIcons.strokeRoundedAudioWaveform;
       case SpectrumStyle.wave:
@@ -851,6 +827,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     switch (style) {
       case TimeBarStyle.slim:
         return HugeIcons.strokeRoundedSlidersVertical;
+      case TimeBarStyle.wavy:
+        return HugeIcons.strokeRoundedAudioWaveform;
       case TimeBarStyle.capsule:
         return HugeIcons.strokeRoundedClock01;
       case TimeBarStyle.segmented:

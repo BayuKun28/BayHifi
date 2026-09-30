@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../pro_q_studio/domain/biquad_math.dart';
@@ -16,7 +16,6 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
     final eqState = ref.watch(eqControllerProvider);
 
@@ -38,7 +37,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
 
     return InkWell(
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => const ProQStudioScreen(),
@@ -61,13 +60,13 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
+                    color: StudioCategoryColors.proQEqualizer.withValues(alpha: isSolid ? 0.18 : 0.14),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: HugeIcon(
+                  child: const HugeIcon(
                     icon: HugeIcons.strokeRoundedSlidersVertical,
                     size: 15,
-                    color: primary,
+                    color: StudioCategoryColors.proQEqualizer,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -87,13 +86,13 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
+                    color: StudioCategoryColors.proQEqualizer.withValues(alpha: isSolid ? 0.18 : 0.14),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: HugeIcon(
+                  child: const HugeIcon(
                     icon: HugeIcons.strokeRoundedMaximize01,
                     size: 13,
-                    color: primary,
+                    color: StudioCategoryColors.proQEqualizer,
                   ),
                 ),
               ],
@@ -108,10 +107,6 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                  width: 0.8,
-                ),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(9),
@@ -120,7 +115,7 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                     painter: _MiniEqCurvePainter(
                       bands: eqState.bands,
                       isEnabled: eqState.isEnabled,
-                      primaryColor: primary,
+                      primaryColor: StudioCategoryColors.proQEqualizer,
                       gridColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
                     ),
                   ),
@@ -158,16 +153,16 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
+                      color: StudioCategoryColors.autoEq.withValues(alpha: isSolid ? 0.18 : 0.14),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       targetName.length > 13 ? '${targetName.substring(0, 11)}…' : targetName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFeatures: AppTypography.audioFigures,
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
-                        color: primary,
+                        color: StudioCategoryColors.autoEq,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

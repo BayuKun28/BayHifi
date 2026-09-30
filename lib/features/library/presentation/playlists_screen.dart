@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/app_typography.dart';
@@ -140,7 +141,6 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
               decoration: BoxDecoration(
                 color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: primary.withValues(alpha: isSolid ? 0.6 : 0.4)),
               ),
               child: HugeIcon(icon: HugeIcons.strokeRoundedPlayList, color: primary, size: 18),
             ),
@@ -295,7 +295,6 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                 decoration: BoxDecoration(
                   color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid, translucentAlpha: 0.3),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -320,7 +319,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    FilledButton.tonalIcon(
+                    M3EButton.tonal(
                       onPressed: () => CreateCustomPlaylistModal.show(context),
                       icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 16, color: primary),
                       label: const Text('CREATE PLAYLIST'),
@@ -336,10 +335,6 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                        width: 1.0,
-                      ),
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -433,10 +428,6 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
       color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: accentColor.withValues(alpha: isSolid ? 0.6 : 0.4),
-          width: 1.0,
-        ),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),

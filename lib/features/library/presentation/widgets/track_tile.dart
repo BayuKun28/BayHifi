@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../audio_engine/audio_cache_service.dart';
@@ -47,7 +47,7 @@ class TrackTile extends ConsumerWidget {
   void _executeAction(BuildContext context, WidgetRef ref, TrackTileSwipeAction action) {
     switch (action) {
       case TrackTileSwipeAction.addToQueue:
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
         onAddToQueue?.call();
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +59,7 @@ class TrackTile extends ConsumerWidget {
         );
         break;
       case TrackTileSwipeAction.playNext:
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
         onPlayNext?.call();
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,11 +71,11 @@ class TrackTile extends ConsumerWidget {
         );
         break;
       case TrackTileSwipeAction.toggleFavorite:
-        HapticFeedback.selectionClick();
+        AppHaptics.selectionClick();
         ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
         break;
       case TrackTileSwipeAction.addToPlaylist:
-        HapticFeedback.selectionClick();
+        AppHaptics.selectionClick();
         onAddToPlaylist?.call();
         break;
       case TrackTileSwipeAction.none:
@@ -213,30 +213,34 @@ class TrackTile extends ConsumerWidget {
                 child: Row(
                   children: [
                     if (settings.trackShowFormatBadge) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                        decoration: BoxDecoration(
-                          color: track.isHiRes
-                              ? const Color(0xFFFF9F0A).withValues(alpha: 0.15)
-                              : theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: track.isHiRes
-                                ? const Color(0xFFFF9F0A).withValues(alpha: 0.5)
-                                : theme.dividerColor,
-                            width: 0.6,
-                          ),
-                        ),
-                        child: Text(
-                          track.format.name.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: track.isHiRes
-                                ? const Color(0xFFFF9F0A)
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                        ),
+                      Builder(
+                        builder: (context) {
+                          final Color badgeColor = track.isHiRes
+                              ? StudioCategoryColors.hiResGold
+                              : (track.format.name.toLowerCase() == 'flac'
+                                  ? StudioCategoryColors.flacLossless
+                                  : (track.format.name.toLowerCase() == 'wav'
+                                      ? StudioCategoryColors.wavPcm
+                                      : (track.format.name.toLowerCase() == 'opus'
+                                          ? StudioCategoryColors.opusStream
+                                          : theme.colorScheme.onSurfaceVariant)));
+
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: badgeColor.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              track.format.name.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: badgeColor,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(width: 6),
                     ],
@@ -245,12 +249,8 @@ class TrackTile extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00E676).withValues(alpha: 0.15),
+                          color: StudioCategoryColors.bitPerfect.withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: const Color(0xFF00E676).withValues(alpha: 0.5),
-                            width: 0.6,
-                          ),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
@@ -258,7 +258,7 @@ class TrackTile extends ConsumerWidget {
                             HugeIcon(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               size: 9,
-                              color: Color(0xFF00E676),
+                              color: StudioCategoryColors.bitPerfect,
                             ),
                             SizedBox(width: 2),
                             Text(
@@ -266,7 +266,7 @@ class TrackTile extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF00E676),
+                                color: StudioCategoryColors.bitPerfect,
                               ),
                             ),
                           ],
@@ -313,7 +313,7 @@ class TrackTile extends ConsumerWidget {
                   ),
                   tooltip: isFav ? 'Remove Favorite' : 'Favorite Track',
                   onPressed: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selectionClick();
                     ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
                   },
                 ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../app/theme/app_haptics.dart';
 
 /// Studio Alphabetical Fast-Scroller & Context-Aware Scrollbar
 ///
@@ -149,7 +149,7 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
     final letter = alphabet[letterIndex];
 
     if (_activeLetter != letter) {
-      HapticFeedback.selectionClick();
+      AppHaptics.selectionClick();
       setState(() {
         _activeLetter = letter;
       });
@@ -256,12 +256,8 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F131C).withValues(alpha: 0.75),
+                    color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(11),
-                    border: Border.all(
-                      color: const Color(0xFF222938).withValues(alpha: 0.8),
-                      width: 0.8,
-                    ),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Column(
@@ -305,12 +301,8 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF131824),
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: primary.withValues(alpha: 0.8),
-                      width: 1.5,
-                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.6),

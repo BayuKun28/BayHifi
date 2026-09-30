@@ -42,4 +42,37 @@ void main() {
     expect(find.text('Queue'), findsOneWidget);
     expect(find.text('Spec'), findsOneWidget);
   });
+
+  testWidgets('NowPlayingScreen in Landscape mode has streamlined left pane without bottom strip and studio top bar', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(900, 500);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: NowPlayingScreen(
+            onOpenProQStudio: () {},
+            onCollapse: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 1. Verify NOW PLAYING is rendered in landscape
+    expect(find.text('NOW PLAYING'), findsOneWidget);
+
+    // 2. Verify Right Pane Workstation Tabs are present
+    expect(find.text('UP NEXT'), findsOneWidget);
+    expect(find.text('LYRICS'), findsOneWidget);
+    expect(find.text('DSP RACK'), findsOneWidget);
+    expect(find.text('PRO-Q EQ'), findsNothing); // Pro-Q removed from cramped tabs
+
+    // 3. Verify Bottom Studio Action Strip text is NOT present in landscape mode
+    expect(find.text('Open'), findsNothing);
+    expect(find.text('Desk Mode'), findsNothing);
+    expect(find.text('Lyric'), findsNothing);
+  });
 }
+

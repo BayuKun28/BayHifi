@@ -1,10 +1,10 @@
 import 'dart:ui' show ImageFilter, FontFeature;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
@@ -439,7 +439,7 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                           ),
                           onPressed: () {
                             if (widget.artist.tracks.isNotEmpty) {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               ref.read(playerControllerProvider.notifier).setQueue(
                                     widget.artist.tracks,
                                     initialIndex: 0,
@@ -483,7 +483,7 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                           ),
                           onPressed: () {
                             if (widget.artist.tracks.isNotEmpty) {
-                              HapticFeedback.lightImpact();
+                              AppHaptics.lightImpact();
                               final shuffled = List<Track>.from(widget.artist.tracks)..shuffle();
                               ref.read(playerControllerProvider.notifier).setQueue(
                                     shuffled,
@@ -549,7 +549,7 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(14),
                           onTap: () {
-                            HapticFeedback.selectionClick();
+                            AppHaptics.selectionClick();
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => AlbumDetailScreen(album: album),
@@ -749,7 +749,7 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                             ],
                           ),
                           onTap: () {
-                            HapticFeedback.selectionClick();
+                            AppHaptics.selectionClick();
                             ref.read(playerControllerProvider.notifier).setQueue(
                                   widget.artist.tracks,
                                   initialIndex: idx,
