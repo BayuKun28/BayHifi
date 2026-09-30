@@ -145,9 +145,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('THEMING & COLOR PALETTES'), findsOneWidget);
-      expect(find.text('ACTIVE THEME PREVIEW'), findsOneWidget);
-      expect(find.text('THEME MODE'), findsOneWidget);
-      expect(find.text('SURFACE & COMPONENT FILL STYLE'), findsOneWidget);
+      expect(find.text('ACTIVE STUDIO THEME PREVIEW'), findsOneWidget);
+      expect(find.text('THEME MODE'), findsWidgets);
+      expect(find.text('SURFACE & COMPONENT FILL STYLE'), findsWidgets);
       expect(find.text('STUDIO COLOR PALETTES'), findsOneWidget);
 
       // Verify the new palettes render in list

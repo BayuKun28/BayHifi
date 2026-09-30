@@ -43,10 +43,6 @@ class LyricCardWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: isBlurredBg ? const Color(0xFF0F1218) : colors.backgroundColor,
               borderRadius: BorderRadius.circular(24 * scale),
-              border: Border.all(
-                color: isBlurredBg ? Colors.white.withValues(alpha: 0.22) : colors.borderColor,
-                width: 1.2,
-              ),
             ),
             child: Stack(
               children: [

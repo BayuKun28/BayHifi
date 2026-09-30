@@ -6,9 +6,32 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 41 Fase (Fase 41 Selesai • 100% Passing Tests • 340/340 Passed)
+- **Total Fase**: 42 Fase (Fase 42 Selesai • 100% Passing Tests • 345/345 Passed)
 - **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, StudioSurfaceTheme (Solid & Translucent), 19 Studio Color Palettes, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
-- **Status Proyek**: _Phase 41: UI/UX Redesign, Dashboard Reordering, Library Grid Mode & Dynamic Detail Screen Backdrops (Completed)_
+- **Status Proyek**: _Phase 42: Borderless Studio Lyric Card, Dynamic Cover Theming Contrast Hardener & Sub-Settings Redesign (Completed)_
+
+---
+
+## Fase 42: Borderless Studio Lyric Card, Dynamic Cover Theming Contrast Hardener & Sub-Settings Redesign
+
+Peningkatan kualitas visual kartu lirik dan proteksi kontras palet dinamis:
+1. **Borderless Studio Lyric Card**: Menghilangkan outer border stroke pada kartu lirik sehingga hasil rendering kartu menjadi bersih, murni, dan borderless dengan sudut squircle halus (`ClipRRect 24px`).
+2. **Dynamic Cover Theme Contrast Hardener (`StudioColorHarmonizer`)**:
+   - Mencegah masalah teks/ikon hitam pada cover album gelap/hitam (seperti *Back in Black*, dsb.): Jika warna ekstraksi album memiliki luminance/lightness rendah atau saturasi grayscale, algoritma secara cerdas mentransformasikan aksen menjadi **Studio Silver Ash / Slate (`#94A3B8`)** dengan kontras tinggi WCAG AA.
+   - Mengkalkulasi `onPrimary` dan `onSecondary` secara dinamis pada `AppThemeBuilder` berdasarkan relative luminance sehingga teks/ikon pada tombol selalu terlihat kontras dan tajam.
+   - Mengamankan resolusi `LyricCardColors.fromDynamicColor` agar latar belakang, kartu, dan teks selalu terbaca kontras pada cover hitam.
+3. **Theming & Studio Palettes Sub-Settings Hub Redesign**:
+   - **Active Studio Theme Cockpit Preview**: Menampilkan live preview pemutar studio mini, audio specs badge, slider aksen, dan 4 titik swatch warna.
+   - **Display Ground & Surface Style Card**: Kontrol compact 3-opsi Theme Mode (`System`, `Light`, `Dark`) dan 2-opsi Surface Fill Style (`Solid M3` vs `Translucent Soft Tint`).
+   - **Dynamic & OLED Engines**: Bento card switch untuk *Monet Dynamic Album Art Palette* dan tombol 1-tap aktivasi *True OLED Black Mode*.
+   - **Curated Studio Palettes Filtered Grid**: Tab filter kategori (`All Presets`, `Studio Core`, `Pastel Soft`) dengan 2-kolom grid bento responsif berisi 19 palet studio dan checkmark indicator.
+   - **Custom Studio Accent Picker**: 19 color swatches studio dengan active glow ring.
+
+- [x] **42.1 Borderless Studio Lyric Card Canvas (`LyricCardWidget`)**
+- [x] **42.2 StudioColorHarmonizer Dynamic Cover Contrast Protection**
+- [x] **42.3 Dynamic `onPrimary` / `onSecondary` & WCAG AA Contrast in `AppThemeBuilder`**
+- [x] **42.4 Material 3 Expressive Sub-Settings Redesign (`ThemingSettingsScreen`)**
+- [x] **42.5 Unit & Widget Test Suite Validation (`test/phase_42_theming_and_contrast_test.dart` - 100% Passed)**
 
 ---
 

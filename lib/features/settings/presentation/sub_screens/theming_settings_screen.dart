@@ -7,8 +7,28 @@ import '../../../../app/theme/theme_mode_controller.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 
-class ThemingSettingsScreen extends ConsumerWidget {
+enum PaletteCategoryFilter {
+  all('All Presets', 19),
+  studio('Studio Core', 13),
+  pastel('Pastel Soft', 6);
+
+  final String label;
+  final int count;
+  const PaletteCategoryFilter(this.label, this.count);
+}
+
+/// Redesigned Material 3 Expressive Theming & Studio Palettes Screen.
+/// Provides an intuitive cockpit interface for customizing app display mode,
+/// surface fill style, dynamic album art extraction, OLED black mode, and studio palettes.
+class ThemingSettingsScreen extends ConsumerStatefulWidget {
   const ThemingSettingsScreen({super.key});
+
+  @override
+  ConsumerState<ThemingSettingsScreen> createState() => _ThemingSettingsScreenState();
+}
+
+class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
+  PaletteCategoryFilter _selectedCategory = PaletteCategoryFilter.all;
 
   static const List<Color> _accentOptions = [
     Color(0xFF38BDF8), // Sky Studio
@@ -32,8 +52,17 @@ class ThemingSettingsScreen extends ConsumerWidget {
     Color(0xFF14B8A6), // Sage Teal
   ];
 
+  static const Set<String> _pastelIds = {
+    'pastel_lavender',
+    'pastel_sage',
+    'pastel_sky',
+    'pastel_peach',
+    'pastel_blush',
+    'pastel_butter',
+  };
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final themeState = ref.watch(themeControllerProvider);
     final themeNotifier = ref.read(themeControllerProvider.notifier);
     final theme = Theme.of(context);
@@ -55,40 +84,36 @@ class ThemingSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: [
-          // 1. LIVE PREVIEW CARD
-          _buildSectionHeader(context, 'ACTIVE THEME PREVIEW', HugeIcons.strokeRoundedView),
+          // ─── 1. ACTIVE THEME COCKPIT PREVIEW ───────────────────────────
+          _buildSectionHeader(context, 'ACTIVE STUDIO THEME PREVIEW', HugeIcons.strokeRoundedView),
           const SizedBox(height: 8),
           _buildLiveThemePreview(context, themeState, isSolid),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-          // 2. THEME MODE
-          _buildSectionHeader(context, 'THEME MODE', HugeIcons.strokeRoundedSun01),
+          // ─── 2. DISPLAY GROUND & SURFACE STYLE ─────────────────────────
+          _buildSectionHeader(context, 'DISPLAY GROUND & SURFACE STYLE', HugeIcons.strokeRoundedSun01),
           const SizedBox(height: 8),
-          _buildThemeModeSelector(context, themeState, themeNotifier, isSolid),
-          const SizedBox(height: 20),
+          _buildDisplayGroundCard(context, themeState, themeNotifier, isSolid),
+          const SizedBox(height: 24),
 
-          // 2b. SURFACE & COMPONENT FILL STYLE
-          _buildSectionHeader(context, 'SURFACE & COMPONENT FILL STYLE', HugeIcons.strokeRoundedPaintBoard),
+          // ─── 3. DYNAMIC & OLED ENGINES ─────────────────────────────────
+          _buildSectionHeader(context, 'DYNAMIC & DISPLAY ENGINES', HugeIcons.strokeRoundedSparkles),
           const SizedBox(height: 8),
-          _buildSurfaceFillStyleSelector(context, themeState, themeNotifier, isSolid),
-          const SizedBox(height: 20),
+          _buildEnginesRow(context, themeState, themeNotifier, isSolid),
+          const SizedBox(height: 24),
 
-          // 3. STUDIO COLOR PALETTES
+          // ─── 4. CURATED STUDIO PALETTES ────────────────────────────────
           _buildSectionHeader(context, 'STUDIO COLOR PALETTES', HugeIcons.strokeRoundedLayers01),
           const SizedBox(height: 8),
+          _buildPaletteCategoryFilterBar(context, isSolid),
+          const SizedBox(height: 12),
           _buildPalettesGrid(context, themeState, themeNotifier, isSolid),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-          // 4. CUSTOM ACCENT COLOR
-          _buildSectionHeader(context, 'CUSTOM ACCENT COLOR', HugeIcons.strokeRoundedColorPicker),
+          // ─── 5. CUSTOM STUDIO ACCENT COLOR ─────────────────────────────
+          _buildSectionHeader(context, 'CUSTOM STUDIO ACCENT COLOR', HugeIcons.strokeRoundedColorPicker),
           const SizedBox(height: 8),
           _buildAccentPicker(context, themeState, themeNotifier, isSolid),
-          const SizedBox(height: 20),
-
-          // 5. DYNAMIC MONET THEME
-          _buildSectionHeader(context, 'DYNAMIC ALBUM ART PALETTE', HugeIcons.strokeRoundedSparkles),
-          const SizedBox(height: 8),
-          _buildDynamicAlbumArtTile(context, themeState, themeNotifier, ref, isSolid),
         ],
       ),
     );
@@ -116,119 +141,210 @@ class ThemingSettingsScreen extends ConsumerWidget {
   Widget _buildLiveThemePreview(BuildContext context, ThemeSettingsState state, bool isSolid) {
     final theme = Theme.of(context);
     final palette = state.currentPalette;
+    final primary = theme.colorScheme.primary;
+
+    String themeTag = palette.isDynamic
+        ? 'DYNAMIC ALBUM ART'
+        : (palette.isOledBlack ? 'TRUE OLED BLACK' : palette.name.toUpperCase());
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: StudioSurfaceTheme.cardDecoration(
         context: context,
         isSolid: isSolid,
-        radius: 16,
+        radius: 18,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: palette.primary,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: palette.primary.withValues(alpha: 0.4),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, color: Colors.black, size: 20),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Hotel California (Hi-Res Master)',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Eagles • FLAC 24-bit / 96 kHz Studio Lossless',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.tintedContainer(
-                    context,
-                    palette.primary,
-                    isSolid: isSolid,
-                    translucentAlpha: 0.15,
-                    solidBlendAlpha: 0.20,
-                  ),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: palette.primary, width: 0.8),
-                ),
-                child: Text(
-                  'ACTIVE',
-                  style: TextStyle(
-                    color: palette.primary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 9.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SliderTheme(
-            data: theme.sliderTheme,
-            child: Slider(
-              value: 0.65,
-              onChanged: (_) {},
-            ),
-          ),
+          // Header Bar: Theme tag badge & Swatch preview
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '03:45',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontSize: 10,
-                  fontFeatures: AppTypography.audioFigures,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                decoration: BoxDecoration(
+                  color: StudioSurfaceTheme.tintedContainer(
+                    context,
+                    primary,
+                    isSolid: isSolid,
+                    translucentAlpha: 0.16,
+                    solidBlendAlpha: 0.20,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: primary.withValues(alpha: 0.6), width: 1.0),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: primary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      themeTag,
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                '06:30',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontSize: 10,
-                  fontFeatures: AppTypography.audioFigures,
-                ),
+              // Color swatch dots
+              Row(
+                children: [
+                  _buildColorDot(palette.primary, tooltip: 'Primary Accent'),
+                  const SizedBox(width: 6),
+                  _buildColorDot(palette.secondary, tooltip: 'Secondary Tone'),
+                  const SizedBox(width: 6),
+                  _buildColorDot(
+                    state.themeMode == AppThemeMode.light
+                        ? palette.surfaceContainerLight
+                        : palette.surfaceContainerDark,
+                    tooltip: 'Container Surface',
+                  ),
+                  const SizedBox(width: 6),
+                  _buildColorDot(
+                    state.themeMode == AppThemeMode.light
+                        ? palette.backgroundLight
+                        : palette.backgroundDark,
+                    tooltip: 'Background Ground',
+                  ),
+                ],
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+
+          // Mini Player Simulation Card
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                width: 1.0,
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: primary,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primary.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedMusicNote01,
+                          color: theme.colorScheme.onPrimary,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Studio Reference Playback',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12.5,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'FLAC 24-bit / 96 kHz • Audiophile Studio Engine',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 10.5,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: primary.withValues(alpha: 0.4), width: 0.8),
+                      ),
+                      child: Text(
+                        'HI-RES',
+                        style: TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 9,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SliderTheme(
+                  data: theme.sliderTheme,
+                  child: Slider(
+                    value: 0.65,
+                    onChanged: (_) {},
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '03:45',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 10,
+                        fontFeatures: AppTypography.audioFigures,
+                      ),
+                    ),
+                    Text(
+                      '06:30',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 10,
+                        fontFeatures: AppTypography.audioFigures,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildThemeModeSelector(
+  Widget _buildDisplayGroundCard(
     BuildContext context,
     ThemeSettingsState state,
     ThemeController notifier,
@@ -236,147 +352,415 @@ class ThemingSettingsScreen extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
 
-    return Row(
-      children: AppThemeMode.values.map((modeOption) {
-        final isSelected = state.themeMode == modeOption;
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: InkWell(
-              onTap: () => notifier.setThemeMode(modeOption),
-              borderRadius: BorderRadius.circular(12),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? StudioSurfaceTheme.tintedContainer(
-                          context,
-                          theme.colorScheme.primary,
-                          isSolid: isSolid,
-                          translucentAlpha: 0.15,
-                          solidBlendAlpha: 0.18,
-                        )
-                      : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                    width: isSelected ? 1.8 : 1.0,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    HugeIcon(
-                      icon: modeOption.icon,
-                      size: 20,
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      modeOption.label,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 18,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Theme Mode (3 Segment Options)
+          Text(
+            'THEME MODE',
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
             ),
           ),
-        );
-      }).toList(),
+          const SizedBox(height: 8),
+          Row(
+            children: AppThemeMode.values.map((modeOption) {
+              final isSelected = state.themeMode == modeOption;
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      notifier.setThemeMode(modeOption);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                theme.colorScheme.primary,
+                                isSolid: isSolid,
+                                translucentAlpha: 0.16,
+                                solidBlendAlpha: 0.20,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                          width: isSelected ? 1.6 : 1.0,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          HugeIcon(
+                            icon: modeOption.icon,
+                            size: 18,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            modeOption.label,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+
+          // Surface Fill Style (2 Options)
+          Text(
+            'SURFACE & COMPONENT FILL STYLE',
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: SurfaceFillStyle.values.map((fillOption) {
+              final activeStyle = state.surfaceFillStyle ?? SurfaceFillStyle.solid;
+              final isSelected = activeStyle == fillOption;
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      notifier.setSurfaceFillStyle(fillOption);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                theme.colorScheme.primary,
+                                isSolid: isSolid,
+                                translucentAlpha: 0.16,
+                                solidBlendAlpha: 0.20,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                          width: isSelected ? 1.6 : 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          HugeIcon(
+                            icon: fillOption.icon,
+                            size: 17,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              fillOption.label,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildSurfaceFillStyleSelector(
+  Widget _buildEnginesRow(
     BuildContext context,
     ThemeSettingsState state,
     ThemeController notifier,
     bool isSolid,
   ) {
     final theme = Theme.of(context);
-    final activeStyle = state.surfaceFillStyle ?? SurfaceFillStyle.translucent;
+    final primary = theme.colorScheme.primary;
 
-    return Row(
-      children: SurfaceFillStyle.values.map((fillOption) {
-        final isSelected = activeStyle == fillOption;
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+    return Column(
+      children: [
+        // Monet Dynamic Album Art Card
+        Material(
+          color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+              width: 1.0,
+            ),
+          ),
+          child: SwitchListTile(
+            value: state.dynamicAlbumArtEnabled,
+            onChanged: (val) {
+              HapticFeedback.lightImpact();
+              final currentTrack = ref.read(playerControllerProvider).currentTrack;
+              notifier.toggleDynamicAlbumArt(val, currentTrack);
+            },
+            secondary: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: state.dynamicAlbumArtEnabled
+                    ? primary.withValues(alpha: 0.18)
+                    : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedSparkles,
+                  size: 20,
+                  color: state.dynamicAlbumArtEnabled ? primary : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Flexible(
+                  child: Text(
+                    'Dynamic Album Art Palette',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (state.dynamicAlbumArtEnabled)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'ACTIVE',
+                      style: TextStyle(color: primary, fontSize: 8.5, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+              ],
+            ),
+            subtitle: const Text(
+              'Dynamically extract safe, high-contrast studio palettes from currently playing cover artwork',
+              style: TextStyle(fontSize: 10.5),
+            ),
+            activeThumbColor: primary,
+            activeTrackColor: primary.withValues(alpha: 0.45),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // True OLED Black Mode Card
+        InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            notifier.setPalette(AppPalette.trueOledBlack);
+            notifier.setThemeMode(AppThemeMode.dark);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: StudioSurfaceTheme.cardDecoration(
+              context: context,
+              isSolid: isSolid,
+              radius: 16,
+              borderColor: state.currentPalette.id == 'true_oled'
+                  ? primary
+                  : StudioSurfaceTheme.outline(context, isSolid: isSolid),
+              borderWidth: state.currentPalette.id == 'true_oled' ? 1.6 : 1.0,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white24, width: 1.0),
+                  ),
+                  child: const Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedMoon02,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'True OLED Black Mode',
+                            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          if (state.currentPalette.id == 'true_oled')
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: primary.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'ACTIVE',
+                                style: TextStyle(color: primary, fontSize: 8.5, fontWeight: FontWeight.w900),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '100% pure black ground for AMOLED screens with high-contrast studio white text',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (state.currentPalette.id == 'true_oled')
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                    size: 20,
+                    color: primary,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaletteCategoryFilterBar(BuildContext context, bool isSolid) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: PaletteCategoryFilter.values.map((filter) {
+          final isSelected = _selectedCategory == filter;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
             child: InkWell(
               onTap: () {
                 HapticFeedback.selectionClick();
-                notifier.setSurfaceFillStyle(fillOption);
+                setState(() => _selectedCategory = filter);
               },
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(20),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? StudioSurfaceTheme.tintedContainer(
                           context,
-                          theme.colorScheme.primary,
+                          primary,
                           isSolid: isSolid,
-                          translucentAlpha: 0.15,
-                          solidBlendAlpha: 0.18,
+                          translucentAlpha: 0.18,
+                          solidBlendAlpha: 0.22,
                         )
                       : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
-                        ? theme.colorScheme.primary
-                        : StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                    width: isSelected ? 1.8 : 1.0,
+                        ? primary
+                        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                    width: isSelected ? 1.5 : 1.0,
                   ),
                 ),
-                child: Column(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: fillOption.icon,
-                      size: 20,
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(height: 6),
                     Text(
-                      fillOption.label,
-                      textAlign: TextAlign.center,
+                      filter.label,
                       style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
+                        fontSize: 11.5,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: isSelected ? primary : theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      fillOption.description,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? primary.withValues(alpha: 0.25)
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${filter.count}',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                          color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -387,97 +771,132 @@ class ThemingSettingsScreen extends ConsumerWidget {
     bool isSolid,
   ) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
 
-    return Column(
-      children: AppPalette.allPresets.map((palette) {
+    final filteredList = AppPalette.allPresets.where((p) {
+      if (_selectedCategory == PaletteCategoryFilter.pastel) {
+        return _pastelIds.contains(p.id);
+      } else if (_selectedCategory == PaletteCategoryFilter.studio) {
+        return !_pastelIds.contains(p.id);
+      }
+      return true;
+    }).toList();
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        mainAxisExtent: 88,
+      ),
+      itemCount: filteredList.length,
+      itemBuilder: (context, index) {
+        final palette = filteredList[index];
         final isSelected = state.currentPalette.id == palette.id;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: InkWell(
-            onTap: () => notifier.setPalette(palette),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
+
+        return InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            notifier.setPalette(palette);
+          },
+          borderRadius: BorderRadius.circular(14),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? StudioSurfaceTheme.tintedContainer(
+                      context,
+                      primary,
+                      isSolid: isSolid,
+                      translucentAlpha: 0.12,
+                      solidBlendAlpha: 0.16,
+                    )
+                  : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
                 color: isSelected
-                    ? StudioSurfaceTheme.tintedContainer(
-                        context,
-                        theme.colorScheme.primary,
-                        isSolid: isSolid,
-                        translucentAlpha: 0.10,
-                        solidBlendAlpha: 0.14,
-                      )
-                    : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected ? theme.colorScheme.primary : StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                  width: isSelected ? 1.8 : 1.0,
-                ),
+                    ? primary
+                    : StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                width: isSelected ? 1.6 : 1.0,
               ),
-              child: Row(
-                children: [
-                  Row(
-                    children: [
-                      _buildColorDot(palette.primary),
-                      const SizedBox(width: 4),
-                      _buildColorDot(palette.backgroundDark),
-                      const SizedBox(width: 4),
-                      _buildColorDot(palette.surfaceContainerDark),
-                    ],
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Swatch Dots & Selection Icon
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
-                        Text(
-                          palette.name,
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          palette.description,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        _buildColorDot(palette.primary),
+                        const SizedBox(width: 4),
+                        _buildColorDot(palette.backgroundDark),
+                        const SizedBox(width: 4),
+                        _buildColorDot(palette.surfaceContainerDark),
                       ],
                     ),
-                  ),
-                  if (isSelected)
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                      size: 18,
-                      color: theme.colorScheme.primary,
+                    if (isSelected)
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                        size: 16,
+                        color: primary,
+                      ),
+                  ],
+                ),
+                // Title and description
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      palette.name,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? primary : theme.colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                ],
-              ),
+                    const SizedBox(height: 1),
+                    Text(
+                      palette.description,
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
-      }).toList(),
+      },
     );
   }
 
-  Widget _buildColorDot(Color color) {
-    return Container(
+  Widget _buildColorDot(Color color, {String? tooltip}) {
+    final dot = Container(
       width: 14,
       height: 14,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.black26, width: 0.8),
+        border: Border.all(color: Colors.white24, width: 0.8),
       ),
     );
+
+    if (tooltip != null) {
+      return Tooltip(message: tooltip, child: dot);
+    }
+    return dot;
   }
 
   Widget _buildAccentPicker(
@@ -487,23 +906,27 @@ class ThemingSettingsScreen extends ConsumerWidget {
     bool isSolid,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: StudioSurfaceTheme.cardDecoration(
         context: context,
         isSolid: isSolid,
-        radius: 16,
+        radius: 18,
       ),
       child: Wrap(
         spacing: 12,
-        runSpacing: 10,
+        runSpacing: 12,
+        alignment: WrapAlignment.start,
         children: _accentOptions.map((accentColor) {
           final isSelected = state.customAccentColor.toARGB32() == accentColor.toARGB32();
           return InkWell(
-            onTap: () => notifier.setCustomAccent(accentColor),
+            onTap: () {
+              HapticFeedback.selectionClick();
+              notifier.setCustomAccent(accentColor);
+            },
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              width: 32,
-              height: 32,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
                 color: accentColor,
                 shape: BoxShape.circle,
@@ -516,56 +939,22 @@ class ThemingSettingsScreen extends ConsumerWidget {
                     ),
                 ],
                 border: Border.all(
-                  color: isSelected ? Colors.white : Colors.transparent,
-                  width: 2.2,
+                  color: isSelected ? Colors.white : Colors.black26,
+                  width: isSelected ? 2.2 : 0.8,
                 ),
               ),
               child: isSelected
-                  ? const Center(
-                      child: HugeIcon(icon: HugeIcons.strokeRoundedTick02, size: 16, color: Colors.black),
+                  ? Center(
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedTick02,
+                        size: 16,
+                        color: accentColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                      ),
                     )
                   : null,
             ),
           );
         }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildDynamicAlbumArtTile(
-    BuildContext context,
-    ThemeSettingsState state,
-    ThemeController notifier,
-    WidgetRef ref,
-    bool isSolid,
-  ) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 1.0,
-        ),
-      ),
-      child: SwitchListTile(
-        value: state.dynamicAlbumArtEnabled,
-        onChanged: (val) {
-          final currentTrack = ref.read(playerControllerProvider).currentTrack;
-          notifier.toggleDynamicAlbumArt(val, currentTrack);
-        },
-        title: const Text(
-          'Monet Dynamic Palette',
-          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-        ),
-        subtitle: const Text(
-          'Automatically extract primary and accent color palettes from active album artwork',
-          style: TextStyle(fontSize: 10.5),
-        ),
-        activeThumbColor: theme.colorScheme.primary,
-        activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
       ),
     );
   }

@@ -159,22 +159,39 @@ class LyricCardColors {
     }
   }
 
-  /// Create a color scheme from a dynamic cover palette color
+  /// Create a color scheme from a dynamic cover palette color with safe contrast protection
   factory LyricCardColors.fromDynamicColor(Color baseColor, {Color? accentColor}) {
     final hsl = HSLColor.fromColor(baseColor);
-    final bg = hsl.withLightness(0.12).withSaturation((hsl.saturation * 0.7).clamp(0.2, 0.6)).toColor();
-    final surface = hsl.withLightness(0.18).withSaturation((hsl.saturation * 0.6).clamp(0.15, 0.5)).toColor();
-    final accent = accentColor ?? hsl.withLightness(0.65).withSaturation(0.85).toColor();
+    final lum = baseColor.computeLuminance();
+    final isVeryDark = lum < 0.12 || hsl.lightness < 0.20;
+    final isLowSat = hsl.saturation < 0.18;
+
+    final bg = isVeryDark
+        ? const Color(0xFF0C0E14)
+        : hsl.withLightness(0.10).withSaturation((hsl.saturation * 0.7).clamp(0.15, 0.5)).toColor();
+    final surface = isVeryDark
+        ? const Color(0xFF161A22)
+        : hsl.withLightness(0.16).withSaturation((hsl.saturation * 0.6).clamp(0.12, 0.45)).toColor();
+
+    Color resolvedAccent;
+    if (accentColor != null && accentColor.computeLuminance() > 0.18) {
+      resolvedAccent = accentColor;
+    } else if (isLowSat || isVeryDark) {
+      // Fallback to high-contrast refined studio slate / silver gray
+      resolvedAccent = const Color(0xFF94A3B8);
+    } else {
+      resolvedAccent = hsl.withLightness(0.65).withSaturation(0.85).toColor();
+    }
 
     return LyricCardColors(
       backgroundColor: bg,
       surfaceColor: surface,
       primaryTextColor: const Color(0xFFFFFFFF),
-      secondaryTextColor: const Color(0xFFB0B7C3),
-      accentColor: accent,
-      borderColor: accent.withValues(alpha: 0.25),
-      badgeBackgroundColor: accent.withValues(alpha: 0.18),
-      badgeTextColor: accent,
+      secondaryTextColor: const Color(0xFFCBD5E1),
+      accentColor: resolvedAccent,
+      borderColor: resolvedAccent.withValues(alpha: 0.25),
+      badgeBackgroundColor: resolvedAccent.withValues(alpha: 0.18),
+      badgeTextColor: resolvedAccent,
     );
   }
 
