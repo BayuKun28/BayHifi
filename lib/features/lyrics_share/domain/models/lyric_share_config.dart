@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_initializing_formals
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../player/domain/lyrics_line.dart';
@@ -17,12 +18,24 @@ class LyricShareConfig {
   final FontWeight fontWeight;
   final bool isItalic;
   final TextAlign textAlign;
-  final LyricCardHighlightStyle highlightStyle;
-  final double strokeWidth;
-  final double backgroundBlurSigma;
-  final double backgroundDimOpacity;
-  final double lineSpacingMultiplier;
-  final double letterSpacing;
+  final LyricCardHighlightStyle? _highlightStyle;
+  LyricCardHighlightStyle get highlightStyle => _highlightStyle ?? LyricCardHighlightStyle.none;
+
+  final double? _strokeWidth;
+  double get strokeWidth => _strokeWidth ?? 2.5;
+
+  final double? _backgroundBlurSigma;
+  double get backgroundBlurSigma => _backgroundBlurSigma ?? 30.0;
+
+  final double? _backgroundDimOpacity;
+  double get backgroundDimOpacity => _backgroundDimOpacity ?? 0.65;
+
+  final double? _lineSpacingMultiplier;
+  double get lineSpacingMultiplier => _lineSpacingMultiplier ?? 1.0;
+
+  final double? _letterSpacing;
+  double get letterSpacing => _letterSpacing ?? -0.2;
+
   final Color? selectedPaletteColor;
   final Color? customBackgroundColor;
   final bool showAudioSpecsBadge;
@@ -41,19 +54,24 @@ class LyricShareConfig {
     this.fontWeight = FontWeight.w700,
     this.isItalic = false,
     this.textAlign = TextAlign.left,
-    this.highlightStyle = LyricCardHighlightStyle.none,
-    this.strokeWidth = 2.5,
-    this.backgroundBlurSigma = 30.0,
-    this.backgroundDimOpacity = 0.65,
-    this.lineSpacingMultiplier = 1.0,
-    this.letterSpacing = -0.2,
+    LyricCardHighlightStyle? highlightStyle,
+    double? strokeWidth,
+    double? backgroundBlurSigma,
+    double? backgroundDimOpacity,
+    double? lineSpacingMultiplier,
+    double? letterSpacing,
     this.selectedPaletteColor,
     this.customBackgroundColor,
     this.showAudioSpecsBadge = true,
     this.showBranding = true,
     this.showRomanized = false,
     this.customAudioSpec,
-  });
+  })  : _highlightStyle = highlightStyle,
+        _strokeWidth = strokeWidth,
+        _backgroundBlurSigma = backgroundBlurSigma,
+        _backgroundDimOpacity = backgroundDimOpacity,
+        _lineSpacingMultiplier = lineSpacingMultiplier,
+        _letterSpacing = letterSpacing;
 
   /// Maximum number of selectable lines to maintain clean layout & legibility
   static const int maxSelectedLines = 5;

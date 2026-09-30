@@ -981,8 +981,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
     );
   }
 
-  dynamic _getHighlightIcon(LyricCardHighlightStyle style) {
-    switch (style) {
+  dynamic _getHighlightIcon(LyricCardHighlightStyle? style) {
+    switch (style ?? LyricCardHighlightStyle.none) {
       case LyricCardHighlightStyle.none:
         return HugeIcons.strokeRoundedTextFont;
       case LyricCardHighlightStyle.stroke:
