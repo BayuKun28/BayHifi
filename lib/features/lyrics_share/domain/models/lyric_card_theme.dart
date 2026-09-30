@@ -33,6 +33,19 @@ enum LyricCardFontFamily {
   const LyricCardFontFamily(this.label, this.fontFamily);
 }
 
+/// Supported text styling and highlight effects inspired by Instagram Stories & Spotify
+enum LyricCardHighlightStyle {
+  none('Clean', 'Standard studio typography'),
+  stroke('Text Stroke', 'High-contrast font border outline'),
+  highlighterPill('Instagram Pill', 'Rounded highlight box behind each lyric line'),
+  dropShadow('Spotify Glow', 'Soft diffused ambient shadow for maximum legibility');
+
+  final String label;
+  final String description;
+
+  const LyricCardHighlightStyle(this.label, this.description);
+}
+
 /// Background visual styling mode for the lyric card
 enum LyricCardBackgroundMode {
   blurredArtwork('Blurred Cover'),

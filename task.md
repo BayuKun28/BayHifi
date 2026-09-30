@@ -6,9 +6,38 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 42 Fase (Fase 42 Selesai • 100% Passing Tests • 345/345 Passed)
+- **Total Fase**: 43 Fase (Fase 43 Selesai • 100% Passing Tests • 352/352 Passed)
 - **Arsitektur UI**: _Material 3 Expressive Studio UI, Bento Grid Modular System, Floating Rounded Dock, StudioSurfaceTheme (Solid & Translucent), 19 Studio Color Palettes, Unified HugeIcons & Anti-AI-Slop Restrained Aesthetics (100% English)_
-- **Status Proyek**: _Phase 42: Borderless Studio Lyric Card, Dynamic Cover Theming Contrast Hardener & Sub-Settings Redesign (Completed)_
+- **Status Proyek**: _Phase 43: Instagram & Spotify Style Lyric Card Customization (Font Weight, Text Stroke Outline, Instagram Highlighter Pill, Spotify Glow, Blur/Shield Atmosphere & Spacing Controls) (Completed)_
+
+---
+
+## Fase 43: Instagram & Spotify Style Lyric Card Customization Engine
+
+Ekspansi kemampuan kustomisasi kartu lirik studio berstandar Instagram Stories & Spotify Sharing:
+1. **Multi-Weight Typography Engine**:
+   - Selector ketebalan font (`FontWeight.w400 Regular`, `w600 SemiBold`, `w700 Bold`, `w900 Black`) dengan chip interaktif 1-tap.
+   - Pilihan perataan teks (Left, Center, Right), toggle italic, dan font size scaling stepper (`65%` - `160%`).
+2. **Text Styles & Highlights (Instagram & Spotify Style `LyricCardHighlightStyle`)**:
+   - **`Clean` (`none`)**: Tipografi studio minimalis tanpa efek tambahan.
+   - **`Text Stroke` (`stroke`)**: Border outline di sekeliling teks karakter huruf menggunakan dual-pass layer rendering (`Stack` + `Paint()..style=PaintingStyle.stroke`) dengan warna kontras otomatis dan opsi ketebalan stroke (`1.5px Subtle`, `2.5px Standard`, `4.0px Thick`).
+   - **`Instagram Pill` (`highlighterPill`)**: Kotak latar rounded squircle bergaya Instagram Stories di belakang setiap baris lirik dengan padding nyaman dan kontras tinggi.
+   - **`Spotify Glow` (`dropShadow`)**: Ambient diffused drop shadow dan soft accent glow di belakang glyph teks sehingga lirik melayang jelas di atas artwork yang kompleks.
+3. **Typography Spacing & Formatting**:
+   - Kontrol line spacing dinamis: `Compact (0.8x)`, `Normal (1.0x)`, `Relaxed (1.3x)`.
+   - Kontrol letter spacing: `Tight (-0.5)`, `Normal (-0.2)`, `Wide (+0.8)`.
+4. **Atmosphere & Readability Shield Adjustments**:
+   - Pengaturan instan intensitas blur cover: `Soft (15)`, `Normal (30)`, `Deep (50)`.
+   - Pengaturan intensitas dark vignette / readability shield: `Light (40%)`, `Standard (65%)`, `Heavy (85%)`.
+5. **No Overflow Guarantee**:
+   - Seluruh baris kontrol di dalam modal bottom sheet dibungkus horizontal scroll view responsif untuk tampilan sempurna di semua rasio layar mobile.
+
+- [x] **43.1 Domain Models & Config Expansion (`LyricCardHighlightStyle`, `LyricShareConfig`)**
+- [x] **43.2 Dual-Pass Stroke, Instagram Pill & Spotify Glow Canvas (`LyricCardWidget`)**
+- [x] **43.3 Blur Sigma & Readability Shield Atmospheric Controls in `LyricCardWidget`**
+- [x] **43.4 Responsive Material 3 Expressive Bento UI Controls in `LyricShareSheet`**
+- [x] **43.5 Controller State Updaters in `LyricShareController`**
+- [x] **43.6 Unit & Widget Test Suite Validation (`test/phase_43_lyric_card_customization_test.dart` - 100% Passed)**
 
 ---
 

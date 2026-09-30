@@ -17,6 +17,12 @@ class LyricShareConfig {
   final FontWeight fontWeight;
   final bool isItalic;
   final TextAlign textAlign;
+  final LyricCardHighlightStyle highlightStyle;
+  final double strokeWidth;
+  final double backgroundBlurSigma;
+  final double backgroundDimOpacity;
+  final double lineSpacingMultiplier;
+  final double letterSpacing;
   final Color? selectedPaletteColor;
   final Color? customBackgroundColor;
   final bool showAudioSpecsBadge;
@@ -35,6 +41,12 @@ class LyricShareConfig {
     this.fontWeight = FontWeight.w700,
     this.isItalic = false,
     this.textAlign = TextAlign.left,
+    this.highlightStyle = LyricCardHighlightStyle.none,
+    this.strokeWidth = 2.5,
+    this.backgroundBlurSigma = 30.0,
+    this.backgroundDimOpacity = 0.65,
+    this.lineSpacingMultiplier = 1.0,
+    this.letterSpacing = -0.2,
     this.selectedPaletteColor,
     this.customBackgroundColor,
     this.showAudioSpecsBadge = true,
@@ -65,6 +77,12 @@ class LyricShareConfig {
     FontWeight? fontWeight,
     bool? isItalic,
     TextAlign? textAlign,
+    LyricCardHighlightStyle? highlightStyle,
+    double? strokeWidth,
+    double? backgroundBlurSigma,
+    double? backgroundDimOpacity,
+    double? lineSpacingMultiplier,
+    double? letterSpacing,
     Color? selectedPaletteColor,
     Color? customBackgroundColor,
     bool? showAudioSpecsBadge,
@@ -84,6 +102,12 @@ class LyricShareConfig {
       fontWeight: fontWeight ?? this.fontWeight,
       isItalic: isItalic ?? this.isItalic,
       textAlign: textAlign ?? this.textAlign,
+      highlightStyle: highlightStyle ?? this.highlightStyle,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+      backgroundBlurSigma: backgroundBlurSigma ?? this.backgroundBlurSigma,
+      backgroundDimOpacity: backgroundDimOpacity ?? this.backgroundDimOpacity,
+      lineSpacingMultiplier: lineSpacingMultiplier ?? this.lineSpacingMultiplier,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
       selectedPaletteColor: selectedPaletteColor ?? this.selectedPaletteColor,
       customBackgroundColor: customBackgroundColor ?? this.customBackgroundColor,
       showAudioSpecsBadge: showAudioSpecsBadge ?? this.showAudioSpecsBadge,
@@ -108,6 +132,12 @@ class LyricShareConfig {
           fontWeight == other.fontWeight &&
           isItalic == other.isItalic &&
           textAlign == other.textAlign &&
+          highlightStyle == other.highlightStyle &&
+          strokeWidth == other.strokeWidth &&
+          backgroundBlurSigma == other.backgroundBlurSigma &&
+          backgroundDimOpacity == other.backgroundDimOpacity &&
+          lineSpacingMultiplier == other.lineSpacingMultiplier &&
+          letterSpacing == other.letterSpacing &&
           selectedPaletteColor == other.selectedPaletteColor &&
           customBackgroundColor == other.customBackgroundColor &&
           showAudioSpecsBadge == other.showAudioSpecsBadge &&
@@ -127,6 +157,12 @@ class LyricShareConfig {
       fontWeight.hashCode ^
       isItalic.hashCode ^
       textAlign.hashCode ^
+      highlightStyle.hashCode ^
+      strokeWidth.hashCode ^
+      backgroundBlurSigma.hashCode ^
+      backgroundDimOpacity.hashCode ^
+      lineSpacingMultiplier.hashCode ^
+      letterSpacing.hashCode ^
       (selectedPaletteColor?.hashCode ?? 0) ^
       (customBackgroundColor?.hashCode ?? 0) ^
       showAudioSpecsBadge.hashCode ^

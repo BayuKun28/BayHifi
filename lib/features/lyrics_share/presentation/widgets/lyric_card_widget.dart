@@ -50,7 +50,10 @@ class LyricCardWidget extends StatelessWidget {
                 if (isBlurredBg) ...[
                   Positioned.fill(
                     child: ImageFiltered(
-                      imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                      imageFilter: ui.ImageFilter.blur(
+                        sigmaX: config.backgroundBlurSigma,
+                        sigmaY: config.backgroundBlurSigma,
+                      ),
                       child: Transform.scale(
                         scale: 1.15, // Scale up slightly to prevent blur edge bleeding
                         child: StudioArtworkWidget(
@@ -69,9 +72,9 @@ class LyricCardWidget extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withValues(alpha: 0.50),
-                            Colors.black.withValues(alpha: 0.65),
-                            Colors.black.withValues(alpha: 0.85),
+                            Colors.black.withValues(alpha: (config.backgroundDimOpacity * 0.75).clamp(0.0, 1.0)),
+                            Colors.black.withValues(alpha: config.backgroundDimOpacity.clamp(0.0, 1.0)),
+                            Colors.black.withValues(alpha: (config.backgroundDimOpacity * 1.25).clamp(0.0, 1.0)),
                           ],
                           stops: const [0.0, 0.45, 1.0],
                         ),
@@ -325,7 +328,7 @@ class LyricCardWidget extends StatelessWidget {
     final lineCount = config.selectedLines.length;
     final double baseFontSize = _calculateFontSize(lineCount, config.ratio) * scale;
     final double fontSize = baseFontSize * config.fontSizeMultiplier;
-    final double lineSpacing = (lineCount > 3 ? 8.0 : 14.0) * scale;
+    final double lineSpacing = ((lineCount > 3 ? 8.0 : 14.0) * scale * config.lineSpacingMultiplier).clamp(4.0, 36.0);
 
     final crossAxis = config.textAlign == TextAlign.center
         ? CrossAxisAlignment.center
@@ -363,11 +366,93 @@ class LyricCardWidget extends StatelessWidget {
     final bool showRoman =
         config.showRomanized && romanized != null && romanized.isNotEmpty && romanized != mainText;
 
-    return Column(
-      crossAxisAlignment: crossAxis,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
+    Widget mainTextWidget;
+
+    switch (config.highlightStyle) {
+      case LyricCardHighlightStyle.stroke:
+        // Dual-pass text stack: outer stroke behind solid fill
+        final strokeColor = colors.primaryTextColor.computeLuminance() > 0.45
+            ? Colors.black.withValues(alpha: 0.95)
+            : Colors.white.withValues(alpha: 0.95);
+        final alignment = config.textAlign == TextAlign.center
+            ? Alignment.center
+            : (config.textAlign == TextAlign.right ? Alignment.centerRight : Alignment.centerLeft);
+
+        mainTextWidget = Stack(
+          alignment: alignment,
+          children: [
+            // Stroke Layer
+            Text(
+              mainText,
+              textAlign: config.textAlign,
+              style: TextStyle(
+                fontFamily: config.fontFamily.fontFamily,
+                fontSize: fontSize,
+                fontWeight: config.fontWeight,
+                fontStyle: config.isItalic ? FontStyle.italic : FontStyle.normal,
+                height: 1.25,
+                letterSpacing: config.letterSpacing,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = (config.strokeWidth * scale).clamp(1.0, 10.0)
+                  ..strokeCap = StrokeCap.round
+                  ..strokeJoin = StrokeJoin.round
+                  ..color = strokeColor,
+              ),
+            ),
+            // Fill Layer
+            Text(
+              mainText,
+              textAlign: config.textAlign,
+              style: TextStyle(
+                fontFamily: config.fontFamily.fontFamily,
+                color: colors.primaryTextColor,
+                fontSize: fontSize,
+                fontWeight: config.fontWeight,
+                fontStyle: config.isItalic ? FontStyle.italic : FontStyle.normal,
+                height: 1.25,
+                letterSpacing: config.letterSpacing,
+              ),
+            ),
+          ],
+        );
+        break;
+
+      case LyricCardHighlightStyle.highlighterPill:
+        // Instagram Story style: rounded pill highlight box behind each lyric line
+        final pillBgColor = colors.badgeBackgroundColor.withValues(alpha: 0.90);
+        mainTextWidget = Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: (10.0 * scale).clamp(6.0, 18.0),
+            vertical: (4.0 * scale).clamp(2.0, 8.0),
+          ),
+          decoration: BoxDecoration(
+            color: pillBgColor,
+            borderRadius: BorderRadius.circular(8.0 * scale),
+            border: Border.all(
+              color: colors.borderColor.withValues(alpha: 0.7),
+              width: 0.8 * scale,
+            ),
+          ),
+          child: Text(
+            mainText,
+            textAlign: config.textAlign,
+            style: TextStyle(
+              fontFamily: config.fontFamily.fontFamily,
+              color: colors.primaryTextColor,
+              fontSize: fontSize,
+              fontWeight: config.fontWeight,
+              fontStyle: config.isItalic ? FontStyle.italic : FontStyle.normal,
+              height: 1.25,
+              letterSpacing: config.letterSpacing,
+            ),
+          ),
+        );
+        break;
+
+      case LyricCardHighlightStyle.dropShadow:
+        // Spotify style: soft diffused ambient shadow and gentle accent glow
+        mainTextWidget = Text(
           mainText,
           textAlign: config.textAlign,
           style: TextStyle(
@@ -377,9 +462,45 @@ class LyricCardWidget extends StatelessWidget {
             fontWeight: config.fontWeight,
             fontStyle: config.isItalic ? FontStyle.italic : FontStyle.normal,
             height: 1.25,
-            letterSpacing: -0.2,
+            letterSpacing: config.letterSpacing,
+            shadows: [
+              Shadow(
+                color: Colors.black.withValues(alpha: 0.90),
+                offset: Offset(0, 2 * scale),
+                blurRadius: 8 * scale,
+              ),
+              Shadow(
+                color: colors.accentColor.withValues(alpha: 0.45),
+                offset: Offset.zero,
+                blurRadius: 14 * scale,
+              ),
+            ],
           ),
-        ),
+        );
+        break;
+
+      case LyricCardHighlightStyle.none:
+        mainTextWidget = Text(
+          mainText,
+          textAlign: config.textAlign,
+          style: TextStyle(
+            fontFamily: config.fontFamily.fontFamily,
+            color: colors.primaryTextColor,
+            fontSize: fontSize,
+            fontWeight: config.fontWeight,
+            fontStyle: config.isItalic ? FontStyle.italic : FontStyle.normal,
+            height: 1.25,
+            letterSpacing: config.letterSpacing,
+          ),
+        );
+        break;
+    }
+
+    return Column(
+      crossAxisAlignment: crossAxis,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        mainTextWidget,
         if (showRoman) ...[
           SizedBox(height: 3 * scale),
           Text(
@@ -392,6 +513,7 @@ class LyricCardWidget extends StatelessWidget {
               fontWeight: FontWeight.w500,
               fontStyle: FontStyle.italic,
               height: 1.2,
+              letterSpacing: config.letterSpacing,
             ),
           ),
         ],

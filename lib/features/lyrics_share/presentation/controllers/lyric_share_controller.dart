@@ -377,6 +377,42 @@ class LyricShareController extends StateNotifier<LyricShareState> {
     state = state.copyWith(config: newConfig, clearStatus: true);
   }
 
+  /// Set text styling and highlight effect (None, Stroke/Border, Instagram Pill, Spotify Glow)
+  void setHighlightStyle(LyricCardHighlightStyle style) {
+    final newConfig = state.config.copyWith(highlightStyle: style);
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set text border / outline stroke width (1.0px to 6.0px)
+  void setStrokeWidth(double width) {
+    final newConfig = state.config.copyWith(strokeWidth: width.clamp(1.0, 6.0));
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set background blur sigma for blurred artwork mode (0.0 to 60.0)
+  void setBackgroundBlurSigma(double sigma) {
+    final newConfig = state.config.copyWith(backgroundBlurSigma: sigma.clamp(0.0, 60.0));
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set background dim opacity (0.10 to 0.95)
+  void setBackgroundDimOpacity(double opacity) {
+    final newConfig = state.config.copyWith(backgroundDimOpacity: opacity.clamp(0.10, 0.95));
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set line spacing multiplier (0.6x to 2.0x)
+  void setLineSpacingMultiplier(double multiplier) {
+    final newConfig = state.config.copyWith(lineSpacingMultiplier: multiplier.clamp(0.6, 2.0));
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set letter spacing (-1.0 to 3.0)
+  void setLetterSpacing(double spacing) {
+    final newConfig = state.config.copyWith(letterSpacing: spacing.clamp(-1.0, 3.0));
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
   /// Set font weight
   void setFontWeight(FontWeight weight) {
     final newConfig = state.config.copyWith(fontWeight: weight);
@@ -385,7 +421,9 @@ class LyricShareController extends StateNotifier<LyricShareState> {
 
   /// Toggle bold font weight
   void toggleBold() {
-    final isCurrentlyBold = state.config.fontWeight == FontWeight.w700 || state.config.fontWeight == FontWeight.w800;
+    final isCurrentlyBold = state.config.fontWeight == FontWeight.w700 ||
+        state.config.fontWeight == FontWeight.w800 ||
+        state.config.fontWeight == FontWeight.w900;
     final newWeight = isCurrentlyBold ? FontWeight.w400 : FontWeight.w700;
     final newConfig = state.config.copyWith(fontWeight: newWeight);
     state = state.copyWith(config: newConfig, clearStatus: true);

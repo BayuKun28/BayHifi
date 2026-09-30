@@ -371,17 +371,27 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
           const SizedBox(height: 12),
 
-          // ─── 3. TYPOGRAPHY BENTO ─────────────────────────────────────────
+          // ─── 3. TYPOGRAPHY & FONT WEIGHT BENTO ───────────────────────────
           _buildBentoSection(
             theme: theme,
-            title: 'TYPOGRAPHY & FORMATTING',
+            title: 'TYPOGRAPHY & FONT WEIGHT',
             icon: HugeIcons.strokeRoundedTextFont,
             child: _buildTypographySection(theme, state, controller),
           ),
 
           const SizedBox(height: 12),
 
-          // ─── 4. BACKGROUND & PALETTE BENTO ───────────────────────────────
+          // ─── 4. TEXT STYLES & HIGHLIGHTS BENTO (IG & SPOTIFY STYLE) ─────
+          _buildBentoSection(
+            theme: theme,
+            title: 'TEXT STYLES & HIGHLIGHTS',
+            icon: HugeIcons.strokeRoundedPaintBoard,
+            child: _buildHighlightAndStyleSection(theme, state, controller),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ─── 5. BACKGROUND & PALETTE BENTO ───────────────────────────────
           _buildBentoSection(
             theme: theme,
             title: 'BACKGROUND & PALETTE',
@@ -398,7 +408,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
           const SizedBox(height: 12),
 
-          // ─── 5. ELEMENTS & BADGES BENTO ──────────────────────────────────
+          // ─── 6. ELEMENTS & BADGES BENTO ──────────────────────────────────
           _buildBentoSection(
             theme: theme,
             title: 'ELEMENTS & BADGES',
@@ -504,12 +514,20 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   ) {
     final config = state.config;
 
+    final weights = const [
+      (FontWeight.w400, 'Regular'),
+      (FontWeight.w600, 'SemiBold'),
+      (FontWeight.w700, 'Bold'),
+      (FontWeight.w900, 'Black'),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Font Family Selector Chips
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
           child: Row(
             children: [
               for (final font in LyricCardFontFamily.values) ...[
@@ -523,7 +541,51 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           ),
         ),
         const SizedBox(height: 10),
-        // Alignment, Bold, Italic, and Font Size Stepper Bar
+        // Font Weight Selector Chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              for (final w in weights) ...[
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    controller.setFontWeight(w.$1);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    margin: const EdgeInsets.only(right: 6),
+                    decoration: BoxDecoration(
+                      color: config.fontWeight == w.$1
+                          ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: config.fontWeight == w.$1
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outline.withValues(alpha: 0.15),
+                        width: config.fontWeight == w.$1 ? 1.4 : 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      w.$2,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: w.$1,
+                        color: config.fontWeight == w.$1
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Alignment, Italic, and Font Size Stepper Bar
         Row(
           children: [
             // Text Alignment Segment
@@ -569,7 +631,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               ),
             ),
             const SizedBox(width: 8),
-            // Bold & Italic Toggles
+            // Italic Toggle
             Container(
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
@@ -579,27 +641,14 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   color: theme.colorScheme.outline.withValues(alpha: 0.1),
                 ),
               ),
-              child: Row(
-                children: [
-                  _buildIconToggle(
-                    icon: HugeIcons.strokeRoundedTextBold,
-                    isSelected: config.fontWeight == FontWeight.w700 || config.fontWeight == FontWeight.w800,
-                    theme: theme,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      controller.toggleBold();
-                    },
-                  ),
-                  _buildIconToggle(
-                    icon: HugeIcons.strokeRoundedTextItalic,
-                    isSelected: config.isItalic,
-                    theme: theme,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      controller.toggleItalic(!config.isItalic);
-                    },
-                  ),
-                ],
+              child: _buildIconToggle(
+                icon: HugeIcons.strokeRoundedTextItalic,
+                isSelected: config.isItalic,
+                theme: theme,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  controller.toggleItalic(!config.isItalic);
+                },
               ),
             ),
             const Spacer(),
@@ -663,6 +712,286 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
         ),
       ],
     );
+  }
+
+  Widget _buildHighlightAndStyleSection(
+    ThemeData theme,
+    LyricShareState state,
+    LyricShareController controller,
+  ) {
+    final config = state.config;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Style selector chips (Clean, Stroke, Instagram Pill, Spotify Glow)
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              for (final style in LyricCardHighlightStyle.values) ...[
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    controller.setHighlightStyle(style);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: config.highlightStyle == style
+                          ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: config.highlightStyle == style
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outline.withValues(alpha: 0.15),
+                        width: config.highlightStyle == style ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        HugeIcon(
+                          icon: _getHighlightIcon(style),
+                          size: 14,
+                          color: config.highlightStyle == style
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          style.label,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: config.highlightStyle == style ? FontWeight.w700 : FontWeight.w500,
+                            color: config.highlightStyle == style
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        // If Text Stroke is active: Stroke Thickness selector
+        if (config.highlightStyle == LyricCardHighlightStyle.stroke) ...[
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                Text(
+                  'Border Width:',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                for (final stroke in [
+                  (1.5, 'Subtle (1.5px)'),
+                  (2.5, 'Standard (2.5px)'),
+                  (4.0, 'Thick (4.0px)'),
+                ]) ...[
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      controller.setStrokeWidth(stroke.$1);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: config.strokeWidth == stroke.$1
+                            ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: config.strokeWidth == stroke.$1
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.outline.withValues(alpha: 0.15),
+                          width: config.strokeWidth == stroke.$1 ? 1.2 : 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        stroke.$2,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: config.strokeWidth == stroke.$1 ? FontWeight.w700 : FontWeight.w500,
+                          color: config.strokeWidth == stroke.$1
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+
+        const SizedBox(height: 10),
+
+        // Line Spacing & Letter Spacing Sub-Row
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Line Spacing',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      for (final spacing in [
+                        (0.8, 'Compact'),
+                        (1.0, 'Normal'),
+                        (1.3, 'Relaxed'),
+                      ]) ...[
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              controller.setLineSpacingMultiplier(spacing.$1);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              margin: const EdgeInsets.only(right: 4),
+                              decoration: BoxDecoration(
+                                color: config.lineSpacingMultiplier == spacing.$1
+                                    ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: config.lineSpacingMultiplier == spacing.$1
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.outline.withValues(alpha: 0.12),
+                                  width: config.lineSpacingMultiplier == spacing.$1 ? 1.2 : 0.8,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  spacing.$2,
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: config.lineSpacingMultiplier == spacing.$1
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: config.lineSpacingMultiplier == spacing.$1
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Letter Spacing',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      for (final lSpace in [
+                        (-0.5, 'Tight'),
+                        (-0.2, 'Normal'),
+                        (0.8, 'Wide'),
+                      ]) ...[
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              controller.setLetterSpacing(lSpace.$1);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              margin: const EdgeInsets.only(right: 4),
+                              decoration: BoxDecoration(
+                                color: (config.letterSpacing - lSpace.$1).abs() < 0.05
+                                    ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: (config.letterSpacing - lSpace.$1).abs() < 0.05
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.outline.withValues(alpha: 0.12),
+                                  width: (config.letterSpacing - lSpace.$1).abs() < 0.05 ? 1.2 : 0.8,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  lSpace.$2,
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: (config.letterSpacing - lSpace.$1).abs() < 0.05
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: (config.letterSpacing - lSpace.$1).abs() < 0.05
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  dynamic _getHighlightIcon(LyricCardHighlightStyle style) {
+    switch (style) {
+      case LyricCardHighlightStyle.none:
+        return HugeIcons.strokeRoundedTextFont;
+      case LyricCardHighlightStyle.stroke:
+        return HugeIcons.strokeRoundedPaintBoard;
+      case LyricCardHighlightStyle.highlighterPill:
+        return HugeIcons.strokeRoundedBookmark02;
+      case LyricCardHighlightStyle.dropShadow:
+        return HugeIcons.strokeRoundedSparkles;
+    }
   }
 
   Widget _buildFontFamilyChip(
@@ -946,36 +1275,131 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
     LyricShareState state,
     LyricShareController controller,
   ) {
-    switch (state.config.backgroundMode) {
+    final config = state.config;
+
+    switch (config.backgroundMode) {
       case LyricCardBackgroundMode.blurredArtwork:
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.1),
-            ),
-          ),
-          child: Row(
-            children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedImage01,
-                size: 16,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Album artwork is softly blurred with a dark studio readability shield.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 11,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Blur Intensity row
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  Text(
+                    'Blur:',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  for (final b in [
+                    (15.0, 'Soft (15)'),
+                    (30.0, 'Normal (30)'),
+                    (50.0, 'Deep (50)'),
+                  ]) ...[
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        controller.setBackgroundBlurSigma(b.$1);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: BoxDecoration(
+                          color: (config.backgroundBlurSigma - b.$1).abs() < 1.0
+                              ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: (config.backgroundBlurSigma - b.$1).abs() < 1.0
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outline.withValues(alpha: 0.15),
+                            width: (config.backgroundBlurSigma - b.$1).abs() < 1.0 ? 1.2 : 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          b.$2,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: (config.backgroundBlurSigma - b.$1).abs() < 1.0
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: (config.backgroundBlurSigma - b.$1).abs() < 1.0
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            // Dark Shield / Dimming Opacity row
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  Text(
+                    'Shield:',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  for (final d in [
+                    (0.40, 'Light (40%)'),
+                    (0.65, 'Standard (65%)'),
+                    (0.85, 'Heavy (85%)'),
+                  ]) ...[
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        controller.setBackgroundDimOpacity(d.$1);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: BoxDecoration(
+                          color: (config.backgroundDimOpacity - d.$1).abs() < 0.05
+                              ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: (config.backgroundDimOpacity - d.$1).abs() < 0.05
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outline.withValues(alpha: 0.15),
+                            width: (config.backgroundDimOpacity - d.$1).abs() < 0.05 ? 1.2 : 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          d.$2,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: (config.backgroundDimOpacity - d.$1).abs() < 0.05
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: (config.backgroundDimOpacity - d.$1).abs() < 0.05
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         );
 
       case LyricCardBackgroundMode.albumPalette:

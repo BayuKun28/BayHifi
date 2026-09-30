@@ -115,7 +115,8 @@ void main() {
     expect(find.text('Is this just fantasy?'), findsOneWidget);
 
     // Verify Typography Controls
-    expect(find.text('TYPOGRAPHY & FORMATTING'), findsOneWidget);
+    expect(find.text('TYPOGRAPHY & FONT WEIGHT'), findsOneWidget);
+    expect(find.text('TEXT STYLES & HIGHLIGHTS'), findsOneWidget);
     expect(find.text('Studio Sans'), findsOneWidget);
     expect(find.text('Editorial Serif'), findsOneWidget);
     expect(find.text('Studio Mono'), findsOneWidget);

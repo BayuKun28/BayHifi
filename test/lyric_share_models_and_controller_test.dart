@@ -197,8 +197,8 @@ void main() {
       controller.setFontSizeMultiplier(1.3);
       expect(controller.state.config.fontSizeMultiplier, 1.3);
 
-      controller.setFontWeight(FontWeight.w900);
-      expect(controller.state.config.fontWeight, FontWeight.w900);
+      controller.setFontWeight(FontWeight.w400);
+      expect(controller.state.config.fontWeight, FontWeight.w400);
 
       controller.toggleBold();
       expect(controller.state.config.fontWeight, FontWeight.w700);
