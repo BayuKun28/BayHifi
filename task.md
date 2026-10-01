@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 48 Fase (Seluruh Fase 1–48 Selesai & Terverifikasi • 100% Passing Tests • 360/360 Passed)
+- **Total Fase**: 49 Fase (Fase 1–48 Selesai • Fase 49 Linux Desktop Studio Architecture Siap Dieksekusi • 360/360 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 48: Linux Desktop Compilation & Packaging Implementation (Completed & 100% Passing Tests)_
+- **Status Proyek**: _Phase 49: Linux Desktop Adaptive Studio Engine & Platform-Guarded Architecture (Ready for Execution)_
 
 ---
 
@@ -1242,3 +1242,34 @@ Perombakan total antarmuka grafis Baydev HiFi menjadi **100% Pure Material 3 Exp
 - [x] **48.3 Konfigurasi .gitignore & Dokumentasi Blueprint**:
   - [x] Pembaruan `.gitignore` untuk mengabaikan artefak build Linux ephemeral (`linux/flutter/ephemeral/`), standalone packaging (`*.AppImage`, `*.deb`, `*.tar.gz`), dan folder bundle staging.
   - [x] Pembuatan dokumen panduan kompilasi dan distribusi desktop di [linux_desktop_compilation_plan.md](file:///home/x/.gemini/antigravity-ide/brain/60c8bfc5-8a26-4277-8746-1c10727adb4b/linux_desktop_compilation_plan.md).
+
+---
+
+## Fase 49: Linux Desktop Adaptive Studio Engine & Platform-Guarded Architecture
+
+Implementasi pengalaman desktop native Linux kelas studio dengan isolasi platform ketat (*zero regression for Android*), integrasi D-Bus MPRIS v2, pintasan keyboard studio, layout 3-kolom dengan Persistent Master Transport Bar, dan Drag-and-Drop file manager.
+
+- [ ] **49.1 Desktop Windowing & Geometry Persistence (Platform-Guarded)**:
+  - [ ] Integrasi `window_manager` terlindungi `Platform.isLinux` (min size `960x640`, default `1280x800`).
+  - [ ] Persistensi ukuran dan posisi window di `LocalPersistenceService`.
+- [ ] **49.2 Adaptive Layout Switcher & Desktop Studio Master Layout**:
+  - [ ] Pembuatan `AdaptiveAppShell` (Mobile `< 960px` vs Desktop `isDesktop && >= 960px`).
+  - [ ] Implementasi `DesktopStudioSidebar` (Permanent Left Navigation Rail) di desktop.
+  - [ ] Implementasi `DesktopBottomMasterTransportDeck` dengan wavy seekbar, volume slider, dan mini RTA.
+  - [ ] Verifikasi mobile/tablet layout Android tetap 100% identik dan tidak terganggu.
+- [ ] **49.3 Global & Local Keyboard Shortcuts Engine**:
+  - [ ] Dispatcher hotkeys (`Space`, `Arrows`, `Ctrl+Arrows`, `L`, `Q`, `E`, `Ctrl+F`, `F11`, `Esc`).
+  - [ ] Overlay cheatsheet pintasan keyboard (`?` atau `Ctrl+/`).
+- [ ] **49.4 Linux MPRIS v2 D-Bus & Desktop Media Notification Engine**:
+  - [ ] Registrasi service `org.mpris.MediaPlayer2.baydev_hifi` pada D-Bus session (Linux-only).
+  - [ ] Sinkronisasi dua arah status pemutaran, metadata lagu, dan playhead position.
+- [ ] **49.5 Desktop Drag-and-Drop File & Folder Handler**:
+  - [ ] Handler drag-and-drop file audio & folder musik langsung dari File Manager Linux.
+  - [ ] Visual drop overlay dengan responsivitas tinggi.
+- [ ] **49.6 System Tray & XDG Desktop Integration**:
+  - [ ] Pembuatan `baydev_hifi.desktop` dan ikon SVG/PNG hi-res.
+  - [ ] Integrasi system tray icon & context menu (`Play/Pause`, `Next`, `Quit`).
+- [ ] **49.7 Quality Gate & Multi-Platform Zero Regression Testing**:
+  - [ ] Unit & widget tests untuk layout desktop, keyboard dispatcher, dan MPRIS state mapping.
+  - [ ] Unit test validasi bahwa mode mobile tetap merender `FloatingRoundedDock` dan `NamidaExpandableMiniPlayer`.
+  - [ ] Verifikasi `flutter analyze` 0 issues dan `flutter test` lulus 100%.

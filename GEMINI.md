@@ -31,9 +31,15 @@ UI/UX & Theming Standards — Pure `material_3_expressive` Mandate (Strictly Non
 - Anti-AI-Slop Policy: Follow `anti-ai-slop-ui` skill standards (high information clarity, tabular figures for audio data via `FontFeature.tabularFigures()`, restrained studio palettes, zero unreadable frosted glass or meaningless decorative bloat).
 - Language: 100% English across all UI labels, tooltips, dialogs, snackbars, and messages.
 
+Cross-Platform Architecture & Strict Platform Guards Mandate:
+- Zero Regression Policy for Mobile/Android: Desktop features (Linux MPRIS D-Bus, Window Manager, System Tray, Desktop Drag-and-Drop) MUST strictly be protected with platform guards (`if (Platform.isLinux)`, `if (Platform.isAndroid)`, etc.) and responsive layout breakpoints (`>= 960px`).
+- Desktop logic and plugins must NEVER break, overwrite, or cause regressions/crashes on the existing Android mobile/tablet experience (`NamidaExpandableMiniPlayer`, `FloatingRoundedDock`, mobile touch gestures, Scoped Storage).
+- Mobile layout (< 960px or Android) and tablet dual-pane layout must remain 100% intact.
+
 Testing Mandate (Strictly Non-Negotiable):
 - EVERY feature, bugfix, refactoring, controller, and UI layout update MUST include unit / widget test files (`test/..._test.dart`) to guarantee zero regression and deterministic state execution.
 - Always run `flutter test` and `flutter analyze` after completing tasks to maintain 100% passing tests with 0 errors and 0 warnings.
+
 
 
 

@@ -365,7 +365,28 @@ $$\text{Preamp Gain} \rightarrow \text{Parametric EQ} \rightarrow \text{Bass Boo
 
 ---
 
-## 9. Ringkasan Eksekusi
-Aturan di atas berlaku untuk seluruh penulisan kode pada project **Baydev HiFi**. Setiap penambahan atau pembaruan modul wajib mematuhi pemisahan layer, penamaan konsisten, presisi matematika DSP RYNLABS_HIFI, dan standar antarmuka Material 3 Expressive.
+## 9. Mandat Cross-Platform Architecture & Strict Platform Guards (Android & Linux Desktop)
+
+### 9.1 Isolasi Fitur Platform (Zero Regression Guarantee)
+- **Strict Platform Guards**: Seluruh pemanggilan native platform plugins atau OS-specific daemons (seperti `window_manager`, Linux D-Bus `mpris`, System Tray `tray_manager`, Android Scoped Storage, atau Android MediaNotification) WAJIB dilindungi dengan guard bersyarat `if (Platform.isLinux)`, `if (Platform.isAndroid)`, `if (Platform.isWindows)`, `if (Platform.isMacOS)`, atau abstract platform-interface service pattern.
+- Dilarang keras mengeksekusi kode platform desktop di Android atau sebaliknya yang berpotensi memicu `MissingPluginException`, unhandled platform channel crashes, atau unexpected behavior.
+
+### 9.2 Adaptive Layout Breakpoints & Platform-Aware Shell
+- **Mobile/Phone Mode (`< 960px` atau Android Phone)**:
+  - Antarmuka WAJIB mempertahankan 100% arsitektur mobile yang sudah terbukti: `NamidaExpandableMiniPlayer`, `FloatingRoundedDock`, gestur swipe expand/collapse, dan bottom sheet controls.
+- **Tablet / Landscape Mode (`isLandscape && !isDesktopLayout`)**:
+  - Antarmuka WAJIB mempertahankan arsitektur *Dual-Pane Workstation* (Fase 46).
+- **Desktop Mode (`(Platform.isLinux || Platform.isWindows || Platform.isMacOS) && width >= 960px`)**:
+  - Antarmuka mengaktifkan arsitektur *Desktop Studio Canvas*: Permanent Sidebar (`NavigationRail`), Main Content Stage, dan *Persistent Bottom Master Transport Deck*.
+- Layout desktop DILARANG MERUSAK, menggantikan, atau mengubah tata letak mobile pada platform Android.
+
+### 9.3 Input Device Ergonomics (Keyboard & Mouse vs Touch)
+- Keyboard shortcuts (`Shortcuts` & `Actions`) hanya merespons penekanan tombol fisik dan tidak boleh menghalangi *touch interactions*, *virtual soft keyboard*, atau *gesture recognizers* pada perangkat layar sentuh Android.
+- Drag-and-drop desktop (`desktop_drop`) hanya aktif pada event mouse drag dari OS file manager dan tidak boleh menginterupsi *touch scroll list view* di Android.
+
+---
+
+## 10. Ringkasan Eksekusi
+Aturan di atas berlaku untuk seluruh penulisan kode pada project **Baydev HiFi**. Setiap penambahan atau pembaruan modul wajib mematuhi pemisahan layer, penamaan konsisten, presisi matematika DSP RYNLABS_HIFI, standar antarmuka Material 3 Expressive, dan isolasi ketat antar-platform.
 
 
