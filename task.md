@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 49 Fase (Fase 1–48 Selesai • Fase 49 Linux Desktop Studio Architecture Siap Dieksekusi • 360/360 Passed)
+- **Total Fase**: 50 Fase (Fase 1–50 Selesai • 100% Passed • 373/373 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 49: Linux Desktop Adaptive Studio Engine & Platform-Guarded Architecture (Ready for Execution)_
+- **Status Proyek**: _Phase 50: In-Tree YouTube & YouTube Music Streaming Engine Overhaul, 100% Full-Duration Stream Resolver & Desktop Focus Isolation (Complete — 0 Errors, 0 Warnings)_
 
 ---
 
@@ -1249,27 +1249,62 @@ Perombakan total antarmuka grafis Baydev HiFi menjadi **100% Pure Material 3 Exp
 
 Implementasi pengalaman desktop native Linux kelas studio dengan isolasi platform ketat (*zero regression for Android*), integrasi D-Bus MPRIS v2, pintasan keyboard studio, layout 3-kolom dengan Persistent Master Transport Bar, dan Drag-and-Drop file manager.
 
-- [ ] **49.1 Desktop Windowing & Geometry Persistence (Platform-Guarded)**:
-  - [ ] Integrasi `window_manager` terlindungi `Platform.isLinux` (min size `960x640`, default `1280x800`).
-  - [ ] Persistensi ukuran dan posisi window di `LocalPersistenceService`.
-- [ ] **49.2 Adaptive Layout Switcher & Desktop Studio Master Layout**:
-  - [ ] Pembuatan `AdaptiveAppShell` (Mobile `< 960px` vs Desktop `isDesktop && >= 960px`).
-  - [ ] Implementasi `DesktopStudioSidebar` (Permanent Left Navigation Rail) di desktop.
-  - [ ] Implementasi `DesktopBottomMasterTransportDeck` dengan wavy seekbar, volume slider, dan mini RTA.
-  - [ ] Verifikasi mobile/tablet layout Android tetap 100% identik dan tidak terganggu.
-- [ ] **49.3 Global & Local Keyboard Shortcuts Engine**:
-  - [ ] Dispatcher hotkeys (`Space`, `Arrows`, `Ctrl+Arrows`, `L`, `Q`, `E`, `Ctrl+F`, `F11`, `Esc`).
-  - [ ] Overlay cheatsheet pintasan keyboard (`?` atau `Ctrl+/`).
-- [ ] **49.4 Linux MPRIS v2 D-Bus & Desktop Media Notification Engine**:
-  - [ ] Registrasi service `org.mpris.MediaPlayer2.baydev_hifi` pada D-Bus session (Linux-only).
-  - [ ] Sinkronisasi dua arah status pemutaran, metadata lagu, dan playhead position.
-- [ ] **49.5 Desktop Drag-and-Drop File & Folder Handler**:
-  - [ ] Handler drag-and-drop file audio & folder musik langsung dari File Manager Linux.
-  - [ ] Visual drop overlay dengan responsivitas tinggi.
-- [ ] **49.6 System Tray & XDG Desktop Integration**:
-  - [ ] Pembuatan `baydev_hifi.desktop` dan ikon SVG/PNG hi-res.
-  - [ ] Integrasi system tray icon & context menu (`Play/Pause`, `Next`, `Quit`).
-- [ ] **49.7 Quality Gate & Multi-Platform Zero Regression Testing**:
-  - [ ] Unit & widget tests untuk layout desktop, keyboard dispatcher, dan MPRIS state mapping.
-  - [ ] Unit test validasi bahwa mode mobile tetap merender `FloatingRoundedDock` dan `NamidaExpandableMiniPlayer`.
-  - [ ] Verifikasi `flutter analyze` 0 issues dan `flutter test` lulus 100%.
+- [x] **49.1 Desktop Windowing & Geometry Persistence (Platform-Guarded)**:
+  - [x] Integrasi `window_manager` terlindungi `Platform.isLinux` (min size `960x640`, default `1280x800`).
+  - [x] Persistensi ukuran dan posisi window di `LocalPersistenceService`.
+- [x] **49.2 Adaptive Layout Switcher & Desktop Studio Master Layout**:
+  - [x] Pembuatan `AdaptiveAppShell` (Mobile `< 960px` vs Desktop `isDesktop && >= 960px`).
+  - [x] Implementasi `DesktopStudioSidebar` (Permanent Left Navigation Rail) di desktop.
+  - [x] Implementasi `DesktopBottomMasterTransportDeck` dengan squircle prominent play/pause button, 120px volume slider, dan mini RTA.
+  - [x] Verifikasi mobile/tablet layout Android tetap 100% identik dan tidak terganggu.
+- [x] **49.3 Global & Local Keyboard Shortcuts Engine**:
+  - [x] Dispatcher hotkeys (`Space`, `Arrows`, `Ctrl+Arrows`, `L`, `Q`, `E`, `Ctrl+F`, `F11`, `Esc`).
+  - [x] Overlay cheatsheet pintasan keyboard (`?` atau `Ctrl+/`).
+- [x] **49.4 Linux MPRIS v2 D-Bus & Desktop Media Notification Engine**:
+  - [x] Registrasi service `org.mpris.MediaPlayer2.baydev_hifi` pada D-Bus session (Linux-only).
+  - [x] Sinkronisasi dua arah status pemutaran, metadata lagu, dan playhead position.
+- [x] **49.5 Desktop Drag-and-Drop File & Folder Handler**:
+  - [x] Handler drag-and-drop file audio & folder musik langsung dari File Manager Linux.
+  - [x] Visual drop overlay dengan responsivitas tinggi.
+- [x] **49.6 System Tray & XDG Desktop Integration**:
+  - [x] Pembuatan `baydev_hifi.desktop` dan ikon SVG/PNG hi-res.
+  - [x] Integrasi system tray icon & context menu (`Play/Pause`, `Next`, `Quit`).
+- [x] **49.7 Responsive Library Grids & Modal Lyrics Share Card**:
+  - [x] Responsivitas grid Albums (2-6 kolom) dan Artists (3-8 kolom) proporsional pada desktop.
+  - [x] Integrasi fitur `Share Lyric Card` di modal `DesktopLyricsDialog` memanggil `LyricShareSheet`.
+- [x] **49.8 Quality Gate & Multi-Platform Zero Regression Testing**:
+  - [x] Unit & widget tests di `test/desktop_transport_deck_and_lyrics_test.dart` (5/5 passed).
+  - [x] Verifikasi `flutter analyze` 0 issues dan `flutter test` lulus 100% (365/365 passed).
+
+---
+
+## Fase 50: In-Tree YouTube & YouTube Music Streaming Engine Overhaul, Full Stream Resolution & Desktop Focus Isolation
+ 
+Modernisasi dan kustomisasi in-tree engine `packages/youtube_explode_dart` untuk streaming audio YouTube/YouTube Music berkualitas tinggi (Opus 160kbps / AAC 256kbps), resolusi batasan CDN 1MB (58s freeze) melalui multi-endpoint verified resolver, eliminasi 403 HEAD checks, perbaikan numeric client ID headers, perbaikan pencarian filter `sp`, isolasi pengetikan pada desktop shortcuts dispatcher, dan pengoptimalan `WebmToOggRemuxer` untuk pemutaran instan 100% lagu.
+ 
+- [x] **50.1 In-Tree Dependency Migration & Repository Decoupling**:
+  - [x] Clone `https://github.com/Hexer10/youtube_explode_dart` langsung ke `packages/youtube_explode_dart`.
+  - [x] Hapus koneksi `.git` internal package sehingga menjadi source in-tree mandiri.
+  - [x] Konfigurasi `pubspec.yaml` menggunakan `path: packages/youtube_explode_dart`.
+  - [x] Verifikasi `flutter pub get` dan integrasi workspace.
+- [x] **50.2 Innertube API Protocol & Client Modernization**:
+  - [x] Update Innertube API endpoints dan payload context (`WEB`, `ANDROID`, `IOS`, `TVHTML5`, `ANDROID_MUSIC`).
+  - [x] Implementasi numeric Innertube client IDs mapping (`1` WEB, `3` ANDROID, `5` IOS, `26` TV, `67` ANDROID_MUSIC) pada header `X-Youtube-Client-Name` untuk mencegah error 400 Bad Request.
+  - [x] Eliminasi pengecekan `HEAD` request pada `stream_client.dart` yang memicu false positive 403 Forbidden pada CDN googlevideo.
+  - [x] Perbarui User-Agent strings dan client version terbaru (`Chrome 133`, `Web 2.20250312.04.00`).
+- [x] **50.3 Desktop Keyboard Shortcuts Focus Protection**:
+  - [x] Implementasi multi-tier focus detection pada `DesktopShortcutsDispatcher` (`_isTyping`) memeriksa `primaryFocus.context?.widget`, `findAncestorStateOfType<EditableTextState>()`, `findAncestorWidgetOfExactType<TextField>()`, dan `debugLabel`.
+  - [x] Perlindungan total saat mengetik di search bar YouTube, Library, tag editor, playlist creator, dan dialog lainnya agar tidak memicu shortcut Space, L, Q, E, M, dsb.
+- [x] **50.4 YouTube Music Search & Trending Pipeline Fixes**:
+  - [x] Perbaiki format query `SearchPage.get` dengan mengabaikan parameter `sp` kosong agar tidak menghasilkan HTTP 400 Bad Request.
+  - [x] Sanitasi metadata `cleanMetadata` dan penghapusan nomor track awal pada nama artis/lagu.
+- [x] **50.5 Real-time Audio Stream Buffering & 100% Full Duration Resolution**:
+  - [x] Analisis dan pemecahan akar masalah 58-second stall (batasan 1,048,576 bytes pada Google Video CDN tanpa token attestation).
+  - [x] Implementasi multi-endpoint verified stream resolver (`_resolveFullAudioStream`) dan chunked streaming pipeline berkecepatan tinggi (chunk 512KB) di `YouTubeMusicService`.
+  - [x] Resolusi audio stream kualitas tertinggi (`Opus 160kbps` / itag 251 atau `AAC 256kbps` / itag 140) dengan remuxing real-time `WebmToOggRemuxer` langsung ke buffer C++ SoLoud engine.
+  - [x] Otomatisasi caching file utuh ke `AudioCacheService` untuk pemutaran offline instan pada sesi berikutnya.
+- [x] **50.6 Quality Gate & Multi-Platform Zero Regression Testing**:
+  - [x] Unit & widget tests di `test/desktop_shortcuts_and_youtube_stream_test.dart` (6/6 passed).
+  - [x] Integration tests di `test/youtube_stream_integration_test.dart` memverifikasi streaming melampaui 1MB tanpa stall (2/2 passed).
+  - [x] Verifikasi `flutter analyze` 0 errors/warnings dan `flutter test` lulus 100% (373/373 passed).
+

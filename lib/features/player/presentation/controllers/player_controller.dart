@@ -135,10 +135,16 @@ class PlayerController extends StateNotifier<PlaybackState> {
   void _initListener() {
     _posSub = _audioEngine.positionStream.listen((pos) {
       if (state.isPlaying) {
+        final trackDur = state.currentTrack?.duration ?? Duration.zero;
         final engineDur = _audioEngine.duration;
-        final currentDur = engineDur > Duration.zero
-            ? engineDur
-            : (state.duration > Duration.zero ? state.duration : (state.currentTrack?.duration ?? Duration.zero));
+        // The track's duration from metadata / API takes absolute precedence.
+        // For buffer streams, _audioEngine.duration only reports momentary decoded buffer size,
+        // so it must NEVER overwrite an already known track duration.
+        final currentDur = trackDur > Duration.zero
+            ? trackDur
+            : (state.duration > Duration.zero
+                ? state.duration
+                : (engineDur > Duration.zero ? engineDur : Duration.zero));
 
         state = state.copyWith(
           position: pos,
@@ -418,26 +424,50 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
   /// Plays a track (local audio file or remote stream URL)
   Future<void> playTrack(Track track) async {
+    Track targetTrack = track;
+    if (track.id.startsWith('yt_')) {
+      final videoId = track.id.replaceFirst('yt_', '');
+      final cleanThumb = 'https://i.ytimg.com/vi/$videoId/hqdefault.jpg';
+      if (targetTrack.albumArtUrl == null || targetTrack.albumArtUrl!.isEmpty || targetTrack.albumArtUrl!.contains('sqp=')) {
+        targetTrack = targetTrack.copyWith(albumArtUrl: cleanThumb);
+      }
+      if (targetTrack.duration == Duration.zero) {
+        try {
+          final video = await YouTubeMusicService.instance.getVideoDetails(videoId);
+          if (video != null) {
+            final parsed = YouTubeMusicService.cleanMetadata(video.title, video.author);
+            targetTrack = targetTrack.copyWith(
+              title: parsed.title,
+              artist: parsed.artist,
+              duration: video.duration ?? targetTrack.duration,
+              albumArtUrl: cleanThumb,
+            );
+          }
+        } catch (_) {}
+      }
+    }
+
     state = state.copyWith(
       status: PlaybackStatus.loading,
-      currentTrack: track,
+      currentTrack: targetTrack,
       errorMessage: null,
     );
 
     // If queue doesn't contain this track, ensure queue has it
-    if (!state.queue.contains(track)) {
-      final newQueue = List<Track>.from(state.queue)..add(track);
+    if (!state.queue.contains(targetTrack)) {
+      final newQueue = List<Track>.from(state.queue)..add(targetTrack);
       state = state.copyWith(
         queue: newQueue,
         queueIndex: newQueue.length - 1,
       );
     } else {
-      final idx = state.queue.indexOf(track);
+      final idx = state.queue.indexOf(targetTrack);
       if (idx != -1) {
         state = state.copyWith(queueIndex: idx);
       }
     }
 
+    debugPrint('[PlayerController] playTrack invoked: "${targetTrack.title}" by "${targetTrack.artist}" (id: ${targetTrack.id})');
     try {
       if (state.volume <= 0.0 && !state.isMuted) {
         setVolume(1.0);
@@ -447,7 +477,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
       // Calculate ReplayGain if enabled
       final rgDb = ReplayGainService.instance.calculateEffectiveGainDb(
-        track: track,
+        track: targetTrack,
         mode: _playbackSettings.replayGainMode,
         preampDb: _playbackSettings.replayGainPreampDb,
         preventClipping: _playbackSettings.replayGainPreventClipping,
@@ -459,41 +489,43 @@ class PlayerController extends StateNotifier<PlaybackState> {
       final enableFade = _playbackSettings.enableSmoothFade;
       final fadeDuration = Duration(milliseconds: _playbackSettings.fadeInDurationMs);
 
-      if (track.filePath != null && track.filePath!.isNotEmpty) {
+      if (targetTrack.filePath != null && targetTrack.filePath!.isNotEmpty) {
+        debugPrint('[PlayerController] Playing local file: ${targetTrack.filePath}');
         try {
-          await _audioEngine.playFile(track.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
+          await _audioEngine.playFile(targetTrack.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
         } catch (e) {
           debugPrint('[PlayerController] playFile error (handled): $e');
         }
       } else {
         // Remote / cloud track: Check if cached in AudioCacheService
-        final cachedPath = AudioCacheService.instance.getCachedFilePath(track.id);
+        final cachedPath = AudioCacheService.instance.getCachedFilePath(targetTrack.id);
         if (cachedPath != null) {
-          debugPrint('[PlayerController] Playing cached track from $cachedPath');
+          debugPrint('[PlayerController] Playing from disk cache: $cachedPath');
           await _audioEngine.playFile(cachedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
-        } else if (track.id.startsWith('yt_')) {
+        } else if (targetTrack.id.startsWith('yt_')) {
           // YouTube track: progressive push-streaming via setBufferStream with WebmToOggRemuxer
+          debugPrint('[PlayerController] YouTube stream init: fetching Ogg Opus stream for ${targetTrack.id}...');
           bool streamedSuccessfully = false;
           try {
             final oggStream = await YouTubeMusicService.instance
-                .getOggOpusAudioByteStream(track.id)
-                .timeout(const Duration(seconds: 25));
+                .getOggOpusAudioByteStream(targetTrack.id)
+                .timeout(const Duration(seconds: 15));
 
             if (oggStream != null) {
               final bufferSource = SoLoud.instance.setBufferStream(
                 bufferingType: BufferingType.preserved,
-                bufferingTimeNeeds: 0.5,
+                bufferingTimeNeeds: 0.1, // Ultra-low initial buffering requirement for instant start
                 format: BufferType.auto,
               );
 
-              final tempFile = AudioCacheService.instance.getTempFile(track.id);
-              final targetFile = AudioCacheService.instance.getCacheFile(track.id);
+              final tempFile = AudioCacheService.instance.getTempFile(targetTrack.id);
+              final targetFile = AudioCacheService.instance.getCacheFile(targetTrack.id);
               if (!await tempFile.parent.exists()) {
                 await tempFile.parent.create(recursive: true);
               }
               final sink = tempFile.openWrite();
 
-              // Pre-buffer initial header chunks (OpusHead, OpusTags) + initial audio frames (~16KB or 3 chunks)
+              // Pre-buffer initial header chunks (OpusHead, OpusTags) + initial audio frames (~48KB or 15 chunks)
               final streamIterator = StreamIterator(oggStream);
               int prebufferedBytes = 0;
               int prebufferedChunks = 0;
@@ -505,11 +537,13 @@ class PlayerController extends StateNotifier<PlaybackState> {
                 SoLoud.instance.addAudioDataStream(bufferSource, chunk);
                 sink.add(chunk);
 
-                // Ensure OpusHead (page0), OpusTags (page1) and first audio page are fed
-                if (prebufferedBytes >= 16384 || prebufferedChunks >= 3) {
+                // Ensure OpusHead (page0), OpusTags (page1) and sufficient audio pages are fed
+                if (prebufferedBytes >= 49152 || (prebufferedChunks >= 12 && prebufferedBytes >= 20480)) {
                   break;
                 }
               }
+
+              debugPrint('[PlayerController] YouTube prebuffered $prebufferedBytes bytes ($prebufferedChunks chunks). Sending to SoLoud audio engine...');
 
               if (prebufferedChunks > 0) {
                 // Start playback once headers and initial audio frames are in SoLoud's buffer
@@ -519,16 +553,31 @@ class PlayerController extends StateNotifier<PlaybackState> {
                   fadeDuration: fadeDuration,
                 );
 
-                if (handle != null && handle != -1) {
+                if (handle != null) {
                   streamedSuccessfully = true;
+                  debugPrint('[PlayerController] SoLoud stream playback started successfully (handle: $handle)');
 
                   // Asynchronously pipe remaining chunks into SoLoud and disk cache
                   () async {
                     try {
+                      int totalStreamedBytes = prebufferedBytes;
+                      int chunkCount = prebufferedChunks;
+                      int lastLoggedBytes = prebufferedBytes;
+
                       while (await streamIterator.moveNext()) {
                         final chunk = streamIterator.current;
+                        chunkCount++;
+                        totalStreamedBytes += chunk.length;
                         SoLoud.instance.addAudioDataStream(bufferSource, chunk);
                         sink.add(chunk);
+
+                        // Log streaming progress every 512KB
+                        if (totalStreamedBytes - lastLoggedBytes >= 524288) {
+                          debugPrint(
+                            '[PlayerController] Streaming progress: ${(totalStreamedBytes / 1024).toStringAsFixed(1)} KB piped ($chunkCount chunks)',
+                          );
+                          lastLoggedBytes = totalStreamedBytes;
+                        }
                       }
                       SoLoud.instance.setDataIsEnded(bufferSource);
                       await sink.flush();
@@ -538,6 +587,9 @@ class PlayerController extends StateNotifier<PlaybackState> {
                         if (await targetFile.exists()) await targetFile.delete();
                         await tempFile.rename(targetFile.path);
                         await AudioCacheService.instance.scanCache();
+                        debugPrint(
+                          '[PlayerController] YouTube stream fully downloaded and cached: ${targetFile.path} ($totalStreamedBytes bytes across $chunkCount chunks)',
+                        );
                       }
                     } catch (e) {
                       debugPrint('[PlayerController] Progressive stream piping notice: $e');
@@ -557,51 +609,59 @@ class PlayerController extends StateNotifier<PlaybackState> {
           }
 
           if (!streamedSuccessfully) {
-            // Fallback: Download via cacheTrack with 45s timeout
+            // Fallback: Download via cacheTrack with 15s timeout
+            debugPrint('[PlayerController] Falling back to direct cacheTrack download for ${targetTrack.id}...');
             final downloadedPath = await AudioCacheService.instance
-                .cacheTrack(track)
-                .timeout(const Duration(seconds: 45), onTimeout: () => null);
+                .cacheTrack(targetTrack)
+                .timeout(const Duration(seconds: 15), onTimeout: () => null);
             if (downloadedPath != null) {
+              debugPrint('[PlayerController] Fallback cacheTrack successful, playing: $downloadedPath');
               await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
             } else {
-              throw ArgumentError('Unable to play or cache YouTube track: ${track.title} (${track.id})');
+              throw ArgumentError('Unable to play or cache YouTube track: ${targetTrack.title} (${targetTrack.id})');
             }
           }
         } else {
           // Subsonic / generic remote: download-to-cache then play
-          final downloadedPath = await AudioCacheService.instance.cacheTrack(track);
+          debugPrint('[PlayerController] Caching remote track: ${targetTrack.id}...');
+          final downloadedPath = await AudioCacheService.instance.cacheTrack(targetTrack);
           if (downloadedPath != null) {
             await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
           } else {
-            final streamUrl = track.streamUrl ?? track.remoteUrl;
+            final streamUrl = targetTrack.streamUrl ?? targetTrack.remoteUrl;
             if (streamUrl != null && streamUrl.isNotEmpty) {
               await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
             } else {
-              throw ArgumentError('Unable to stream or cache track: ${track.id}');
+              throw ArgumentError('Unable to stream or cache track: ${targetTrack.id}');
             }
           }
         }
       }
 
       final engineDur = _audioEngine.duration;
-      final effectiveDuration = engineDur > Duration.zero ? engineDur : track.duration;
+      final effectiveDuration = targetTrack.duration > Duration.zero
+          ? targetTrack.duration
+          : (engineDur > Duration.zero ? engineDur : targetTrack.duration);
 
       state = state.copyWith(
         status: PlaybackStatus.playing,
+        currentTrack: targetTrack,
         duration: effectiveDuration,
         position: Duration.zero,
         effectiveReplayGainDb: rgDb,
       );
+      debugPrint('[PlayerController] Playback active: "${targetTrack.title}" by "${targetTrack.artist}" (duration: $effectiveDuration)');
 
       // Smart Prefetch: Cache next track in queue ahead of time
       _prefetchNextTrackInQueue();
 
       // Log to playback history database
-      LocalPersistenceService.instance.logTrackPlayback(track.toMap());
+      LocalPersistenceService.instance.logTrackPlayback(targetTrack.toMap());
 
       _saveSession();
       _syncAudioHandler();
     } catch (e) {
+      debugPrint('[PlayerController] Playback error: $e');
       state = state.copyWith(
         status: PlaybackStatus.error,
         errorMessage: 'Failed to play track: $e',

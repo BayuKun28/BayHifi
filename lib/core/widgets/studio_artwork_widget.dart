@@ -35,6 +35,19 @@ class StudioArtworkWidget extends StatelessWidget {
     this.backgroundColor,
   });
 
+  /// Normalizes image URLs (e.g. converts YouTube AVIF image URLs with complex query parameters to clean, high-compatibility JPEGs)
+  static String normalizeArtworkUrl(String? rawUrl) {
+    if (rawUrl == null || rawUrl.trim().isEmpty) return '';
+    final clean = rawUrl.trim();
+    if (clean.contains('i.ytimg.com') && (clean.contains('sqp=') || clean.contains('hq720.jpg'))) {
+      final match = RegExp(r'/vi/([^/]+)/').firstMatch(clean);
+      if (match != null && match.group(1) != null) {
+        return 'https://i.ytimg.com/vi/${match.group(1)}/hqdefault.jpg';
+      }
+    }
+    return clean;
+  }
+
   /// Helper to obtain an ImageProvider from a Track (for ThemeController, PaletteGenerator, etc.)
   static ImageProvider? getImageProvider(Track? track) {
     if (track == null) return null;
@@ -45,7 +58,7 @@ class StudioArtworkWidget extends StatelessWidget {
 
     final rawUrl = track.albumArtUrl;
     if (rawUrl != null && rawUrl.trim().isNotEmpty) {
-      final cleanUrl = rawUrl.trim();
+      final cleanUrl = normalizeArtworkUrl(rawUrl);
       if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
         return NetworkImage(cleanUrl);
       } else {
@@ -81,7 +94,7 @@ class StudioArtworkWidget extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
       );
     } else if (targetUrl != null && targetUrl.trim().isNotEmpty) {
-      final cleanUrl = targetUrl.trim();
+      final cleanUrl = normalizeArtworkUrl(targetUrl);
       if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
         imageContent = Image.network(
           cleanUrl,

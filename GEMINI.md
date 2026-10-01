@@ -6,9 +6,10 @@ Todo tasks, PRD, and implementation progress are tracked in [task.md](file:///mn
 
 Always adhere strictly to the design principles, performance rules, Dart 3 code standards, and folder structure specified in `rules.md`.
 
-Audio engine dependency mandate:
+Audio engine & streaming dependency mandates:
 - `flutter_soloud` MUST be sourced from the local sibling directory `/mnt/01DC9A2666E1A190/Other/PROJECTS/flutter_soloud` (`path: ../flutter_soloud`), NEVER from pub.dev.
-- The agent has full access to read and customize C++ filters in `flutter_soloud`.
+- `youtube_explode_dart` MUST be sourced from the local in-tree directory `packages/youtube_explode_dart` (`path: packages/youtube_explode_dart`), NEVER from pub.dev.
+- The agent has full access to read and customize C++ filters in `flutter_soloud` and streaming extraction/cipher algorithms in `packages/youtube_explode_dart`.
 
 UI/UX & Theming Standards — Pure `material_3_expressive` Mandate (Strictly Non-Negotiable):
 - 100% Pure `material_3_expressive` Library Mandate: ALL UI components, widgets, containers, navigation bars, toolbars, dialogs, bottom sheets, sliders, switches, buttons, and chips MUST strictly and 100% use the official [`material_3_expressive`](https://pub.dev/packages/material_3_expressive) package (`^1.1.3`) and its underlying framework (`material_ui`, `motor`, `material_new_shapes`). NEVER use generic/legacy Flutter Material widgets when an `M3E*` component exists.

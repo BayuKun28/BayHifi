@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../../player/domain/track.dart';
@@ -101,13 +103,20 @@ class YouTubeMusicService {
       );
       return manifest;
     } catch (e) {
-      debugPrint('[YouTubeMusicService] Manifest fetch notice for $videoId: $e, recycling client...');
+      debugPrint('[YouTubeMusicService] Manifest fetch notice for $videoId: $e, recycling client with fallback...');
       try {
         _yt?.close();
       } catch (_) {}
       _yt = YoutubeExplode();
       try {
-        final manifest = await _client.videos.streamsClient.getManifest(videoId);
+        final manifest = await _client.videos.streamsClient.getManifest(
+          videoId,
+          ytClients: [
+            YoutubeApiClient.ios,
+            YoutubeApiClient.androidMusic,
+            YoutubeApiClient.tv,
+          ],
+        );
         _manifestCache[videoId] = (
           manifest: manifest,
           expiresAt: DateTime.now().add(const Duration(minutes: 30)),
@@ -138,16 +147,120 @@ class YouTubeMusicService {
     return audioStreams.withHighestBitrate();
   }
 
+  /// List of verified high-availability streaming instances for resilient full-duration audio playback
+  static const List<String> _streamingInstances = [
+    'https://invidious.f5.si',
+    'https://inv.nadeko.net',
+    'https://invidious.nerdvpn.de',
+    'https://yt.chocolatemoo53.com',
+    'https://invidious.tiekoetter.com',
+  ];
+
+  /// Resolves direct audio stream format using fast verified streaming endpoints
+  Future<({String url, int totalBytes, bool isOpusOrWebm})?> _resolveFullAudioStream(String videoId) async {
+    for (final host in _streamingInstances) {
+      try {
+        final uri = Uri.parse('$host/api/v1/videos/$videoId');
+        final res = await http.get(uri).timeout(const Duration(milliseconds: 2800));
+        if (res.statusCode == 200) {
+          final data = json.decode(res.body) as Map<String, dynamic>;
+          final adaptive = (data['adaptiveFormats'] as List<dynamic>?) ?? [];
+          if (adaptive.isEmpty) continue;
+
+          // Prefer itag 251 (Opus 160kbps), then 250, then 249, then 140 (AAC)
+          var best = adaptive.firstWhere(
+            (f) => f['itag'] == 251 || f['itag'] == '251',
+            orElse: () => null,
+          );
+          best ??= adaptive.firstWhere(
+            (f) => ((f['type'] as String?) ?? '').contains('opus'),
+            orElse: () => null,
+          );
+          best ??= adaptive.firstWhere(
+            (f) => ((f['type'] as String?) ?? '').startsWith('audio/'),
+            orElse: () => null,
+          );
+
+          if (best != null && best['url'] != null) {
+            final url = best['url'] as String;
+            final cl = best['clen'] ?? best['contentLength'];
+            final size = int.tryParse(cl?.toString() ?? '') ?? 0;
+            final type = (best['type'] as String?)?.toLowerCase() ?? '';
+            final isOpus = type.contains('opus') || type.contains('webm');
+
+            debugPrint('[YouTubeMusicService] Successfully resolved audio stream from $host: size=$size, isOpus=$isOpus');
+            return (url: url, totalBytes: size, isOpusOrWebm: isOpus);
+          }
+        }
+      } catch (_) {
+        // Try next instance
+      }
+    }
+    return null;
+  }
+
+  /// Streams audio chunks with automatic chunking and retry resilience
+  static Stream<List<int>> _fetchStreamChunks(String streamUrl, int totalBytes) async* {
+    const chunkSize = 512 * 1024; // 512 KB chunks for max CDN throughput
+    int start = 0;
+    int retries = 0;
+    final client = http.Client();
+
+    while (totalBytes <= 0 || start < totalBytes) {
+      final end = (totalBytes > 0) ? (start + chunkSize - 1).clamp(0, totalBytes - 1) : start + chunkSize - 1;
+      try {
+        final req = http.Request('GET', Uri.parse(streamUrl));
+        req.headers['Range'] = 'bytes=$start-$end';
+        final res = await client.send(req);
+
+        if (res.statusCode != 200 && res.statusCode != 206) {
+          throw Exception('HTTP status ${res.statusCode}');
+        }
+
+        int receivedInChunk = 0;
+        await for (final data in res.stream) {
+          start += data.length;
+          receivedInChunk += data.length;
+          yield data;
+        }
+
+        if (receivedInChunk == 0) {
+          break; // EOF reached
+        }
+        retries = 0;
+      } catch (e) {
+        retries++;
+        if (retries > 4) {
+          rethrow;
+        }
+        await Future.delayed(const Duration(milliseconds: 400));
+      }
+    }
+  }
+
   /// Resolves the highest quality direct audio stream URL (Opus 160kbps or AAC 256kbps).
   Future<String?> getAudioStreamUrl(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
 
-    // Check memory cache (stream URLs are valid for ~6 hours)
+    // Check memory cache (stream URLs are valid for ~4 hours)
     final cached = _urlCache[videoId];
     if (cached != null && DateTime.now().isBefore(cached.expiresAt)) {
       return cached.url;
     }
 
+    // 1. Try verified full audio stream resolution
+    try {
+      final resolved = await _resolveFullAudioStream(videoId);
+      if (resolved != null) {
+        _urlCache[videoId] = (
+          url: resolved.url,
+          expiresAt: DateTime.now().add(const Duration(hours: 4)),
+        );
+        return resolved.url;
+      }
+    } catch (_) {}
+
+    // 2. Direct manifest fallback
     try {
       final manifest = await _getStreamManifest(videoId);
       if (manifest == null) return null;
@@ -171,9 +284,21 @@ class YouTubeMusicService {
     }
   }
 
-  /// Returns a live `Stream<List<int>>` of audio chunks using YoutubeExplode streamsClient
+  /// Returns a live `Stream<List<int>>` of audio chunks for full playback without 1MB ceiling.
   Future<Stream<List<int>>?> getAudioByteStream(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
+
+    // 1. Try verified full audio stream resolution
+    try {
+      final resolved = await _resolveFullAudioStream(videoId);
+      if (resolved != null) {
+        return _fetchStreamChunks(resolved.url, resolved.totalBytes);
+      }
+    } catch (resolvedErr) {
+      debugPrint('[YouTubeMusicService] Fallback stream resolution notice: $resolvedErr');
+    }
+
+    // 2. Fallback to direct YoutubeExplode streamsClient
     try {
       final manifest = await _getStreamManifest(videoId);
       if (manifest == null) return null;
@@ -189,9 +314,27 @@ class YouTubeMusicService {
   }
 
   /// Returns a live `Stream<Uint8List>` of Ogg Opus audio chunks, remuxed in real-time from WebM Opus.
-  /// This allows direct, low-latency streaming into flutter_soloud's C++ audio decoding engine.
+  /// This allows direct, low-latency streaming into flutter_soloud's C++ audio decoding engine
+  /// for the entire song duration without freezing.
   Future<Stream<Uint8List>?> getOggOpusAudioByteStream(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
+
+    // 1. Try verified full audio stream resolution
+    try {
+      final resolved = await _resolveFullAudioStream(videoId);
+      if (resolved != null) {
+        final rawStream = _fetchStreamChunks(resolved.url, resolved.totalBytes);
+        if (resolved.isOpusOrWebm) {
+          return WebmToOggRemuxer.remuxStream(rawStream);
+        } else {
+          return rawStream.map((chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk));
+        }
+      }
+    } catch (resolvedErr) {
+      debugPrint('[YouTubeMusicService] Fallback stream resolution notice: $resolvedErr');
+    }
+
+    // 2. Fallback to direct YoutubeExplode streamsClient
     try {
       final manifest = await _getStreamManifest(videoId);
       if (manifest == null) return null;
@@ -214,8 +357,8 @@ class YouTubeMusicService {
     }
   }
 
-  /// Downloads audio directly using YoutubeExplode streamsClient into targetFile,
-  /// remuxing WebM Opus to standard Ogg Opus on the fly for native SoLoud compatibility.
+  /// Downloads audio directly into targetFile, remuxing WebM Opus to standard Ogg Opus
+  /// on the fly for native SoLoud compatibility across 100% of track duration.
   Future<String?> downloadAudio(
     String videoIdOrTrackId,
     File targetFile, {
@@ -223,21 +366,11 @@ class YouTubeMusicService {
   }) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
     try {
-      final manifest = await _getStreamManifest(videoId);
-      if (manifest == null) {
-        debugPrint('[YouTubeMusicService] No stream manifest found for $videoId');
+      final oggStream = await getOggOpusAudioByteStream(videoId);
+      if (oggStream == null) {
+        debugPrint('[YouTubeMusicService] No audio stream available for $videoId');
         return null;
       }
-
-      final bestStream = _selectBestAudioStream(manifest);
-      if (bestStream == null) {
-        debugPrint('[YouTubeMusicService] No audio streams found for $videoId');
-        return null;
-      }
-
-      final rawStream = _client.videos.streamsClient.get(bestStream);
-      final totalBytes = bestStream.size.totalBytes;
-      int received = 0;
 
       if (!await targetFile.parent.exists()) {
         await targetFile.parent.create(recursive: true);
@@ -246,20 +379,12 @@ class YouTubeMusicService {
         await targetFile.delete();
       }
 
-      final isOpusOrWebm = bestStream.audioCodec.toLowerCase().contains('opus') ||
-          bestStream.container.name.toLowerCase().contains('webm');
-
-      final streamToSave = isOpusOrWebm
-          ? WebmToOggRemuxer.remuxStream(rawStream)
-          : rawStream.map((chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk));
-
       final sink = targetFile.openWrite();
-      await for (final chunk in streamToSave) {
+      int received = 0;
+      await for (final chunk in oggStream) {
         sink.add(chunk);
         received += chunk.length;
-        if (totalBytes > 0) {
-          onProgress?.call((received / totalBytes).clamp(0.0, 1.0));
-        }
+        onProgress?.call((received / (3 * 1024 * 1024)).clamp(0.0, 1.0));
       }
       await sink.flush();
       await sink.close();
@@ -365,12 +490,22 @@ class YouTubeMusicService {
     }
   }
 
+  /// Fetches rich details for a single YouTube video.
+  Future<Video?> getVideoDetails(String videoIdOrTrackId) async {
+    final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
+    try {
+      return await _client.videos.get(videoId).timeout(const Duration(seconds: 4));
+    } catch (e) {
+      debugPrint('[YouTubeMusicService] Error getting video details for $videoId: $e');
+      return null;
+    }
+  }
+
   /// Maps a YouTube Explode SearchVideo object to Baydev HiFi's Track domain entity.
   Track _mapSearchVideoToTrack(SearchVideo video) {
     final parsed = cleanMetadata(video.title, video.author);
-    final thumb = video.thumbnails.isNotEmpty
-        ? video.thumbnails.last.url.toString()
-        : 'https://i.ytimg.com/vi/${video.id.value}/hqdefault.jpg';
+    // Standard high-res JPEG thumbnail (avoids AVIF compression issues on Desktop/Linux)
+    final thumb = 'https://i.ytimg.com/vi/${video.id.value}/hqdefault.jpg';
 
     return Track(
       id: 'yt_${video.id.value}',
@@ -390,6 +525,7 @@ class YouTubeMusicService {
   /// Maps a YouTube Explode Video object to Baydev HiFi's Track domain entity.
   Track _mapVideoToTrack(Video video) {
     final parsed = cleanMetadata(video.title, video.author);
+    final thumb = 'https://i.ytimg.com/vi/${video.id.value}/hqdefault.jpg';
 
     return Track(
       id: 'yt_${video.id.value}',
@@ -397,7 +533,7 @@ class YouTubeMusicService {
       artist: parsed.artist,
       album: 'YouTube Music',
       duration: video.duration ?? Duration.zero,
-      albumArtUrl: video.thumbnails.highResUrl,
+      albumArtUrl: thumb,
       format: AudioFormat.opus,
       sampleRate: 48000,
       bitDepth: 16,
@@ -410,55 +546,142 @@ class YouTubeMusicService {
   static ({String artist, String title}) cleanMetadata(String rawTitle, String channelName) {
     String clean = rawTitle;
 
-    // Remove noise in brackets and parentheses
-    clean = clean.replaceAll(
-      RegExp(r'\[[^\]]*?(Official|Music|Video|Audio|Lyric|Lyrics|HD|HQ|4K|Remaster|Visualizer|MV|Performance)[^\]]*?\]',
-          caseSensitive: false),
-      '',
-    );
-    clean = clean.replaceAll(
-      RegExp(r'\([^\)]*?(Official|Music|Video|Audio|Lyric|Lyrics|HD|HQ|4K|Remaster|Visualizer|MV|Performance)[^\)]*?\)',
-          caseSensitive: false),
-      '',
-    );
-    clean = clean.replaceAll(RegExp(r'\[\s*\]|\(\s*\)'), '');
+    // Replace unicode dashes with standard hyphen
+    clean = clean.replaceAll(RegExp(r'[–—―]'), '-');
 
-    // Check if title has "Artist - Title" format
+    // Strip brackets noise: [Official Video], [Vietsub], [MV], [4K], etc.
+    clean = clean.replaceAll(
+      RegExp(
+        r'\[\s*[^\]]*?(Official|Music|Video|Audio|Lyric|Lyrics|HD|HQ|4K|Remaster|Visualizer|MV|Performance|Vietsub|Kara|Engsub|Sub|CC|Cover|Live|Stream|Audio Visualizer)[^\]]*?\]',
+        caseSensitive: false,
+      ),
+      '',
+    );
+    clean = clean.replaceAll(
+      RegExp(
+        r'\(\s*[^\)]*?(Official|Music|Video|Audio|Lyric|Lyrics|HD|HQ|4K|Remaster|Visualizer|MV|Performance|Vietsub|Kara|Engsub|Sub|CC|Cover|Live|Stream|Audio Visualizer)[^\)]*?\)',
+        caseSensitive: false,
+      ),
+      '',
+    );
+    // Japanese/Chinese bracket noise 【...】 「...」 『...』
+    clean = clean.replaceAll(
+      RegExp(
+        r'[【「『]\s*[^】」』]*?(Official|Music|Video|Audio|Lyric|Lyrics|HD|HQ|4K|Remaster|Visualizer|MV|Vietsub)[^】」』]*?[】」』]',
+        caseSensitive: false,
+      ),
+      '',
+    );
+
+    // Clean empty parentheses/brackets
+    clean = clean.replaceAll(RegExp(r'\[\s*\]|\(\s*\)|【\s*】|「\s*」|『\s*』'), '');
+
+    // Handle pipe `|` tags (e.g. "Vietsub | ...", "... | Lyrics Video", "... | Official Audio")
+    final pipeParts = clean.split('|').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    if (pipeParts.length > 1) {
+      // Filter out pipe parts that are pure junk / tag words
+      final filtered = <String>[];
+      for (final p in pipeParts) {
+        final pLower = p.toLowerCase();
+        final isJunk = RegExp(
+          r'^(vietsub|kara|lyrics? video|official (video|audio|music video|mv)|audio|hd|4k|remastered?|visualizer|live|full album|hq|mv)$',
+          caseSensitive: false,
+        ).hasMatch(pLower);
+        if (!isJunk) {
+          filtered.add(p);
+        }
+      }
+      if (filtered.isNotEmpty) {
+        clean = filtered.join(' - ');
+      }
+    }
+
+    // Strip trailing noise like " | Lyrics Video", " - Official Audio", etc.
+    clean = clean.replaceAll(
+      RegExp(r'(\||-)\s*(lyrics? video|official audio|official video|official mv|audio|visualizer)\s*$', caseSensitive: false),
+      '',
+    );
+
+    final channelClean = _stripChannelSuffixes(channelName);
+
+    // Check if title has " - " delimiter
     if (clean.contains(' - ')) {
       final parts = clean.split(' - ');
-      final artistPart = parts[0].trim();
-      final titlePart = parts.sublist(1).join(' - ').trim();
+      final p0 = parts[0].trim();
+      final p1 = parts.sublist(1).join(' - ').trim();
 
-      if (artistPart.isNotEmpty && titlePart.isNotEmpty) {
+      if (p0.isNotEmpty && p1.isNotEmpty) {
+        final p0Lower = p0.toLowerCase();
+        final p1Lower = p1.toLowerCase();
+        final chLower = channelClean.toLowerCase();
+
+        // Case A: p1 matches channel name (e.g. "Waiting For The End - Linkin Park") -> p1 is artist, p0 is title
+        if (chLower.isNotEmpty && (p1Lower.contains(chLower) || chLower.contains(p1Lower))) {
+          return (
+            artist: _stripChannelSuffixes(p1),
+            title: _cleanTrackTitle(p0),
+          );
+        }
+
+        // Case B: p0 matches channel name (e.g. "Linkin Park - Waiting For The End") -> p0 is artist, p1 is title
+        if (chLower.isNotEmpty && (p0Lower.contains(chLower) || chLower.contains(p0Lower))) {
+          return (
+            artist: _stripChannelSuffixes(p0),
+            title: _cleanTrackTitle(p1),
+          );
+        }
+
+        // Case C: Check for "feat." or "ft." in parts (usually indicates artist side)
+        final featRegex = RegExp(r'\b(feat|ft)\.?\b', caseSensitive: false);
+        if (featRegex.hasMatch(p1) && !featRegex.hasMatch(p0)) {
+          // e.g. "Where'd You Go - Fort Minor feat. Holly Brook" -> p1 is artist, p0 is title
+          return (
+            artist: _stripChannelSuffixes(p1),
+            title: _cleanTrackTitle(p0),
+          );
+        }
+
+        // Default "Artist - Title"
         return (
-          artist: _stripChannelSuffixes(artistPart),
-          title: _cleanTrackTitle(titlePart),
+          artist: _stripChannelSuffixes(p0),
+          title: _cleanTrackTitle(p1),
         );
       }
     }
 
-    // Check if title has "Artist : Title" format
+    // Check if title has " : " delimiter
     if (clean.contains(' : ')) {
       final parts = clean.split(' : ');
-      final artistPart = parts[0].trim();
-      final titlePart = parts.sublist(1).join(' : ').trim();
+      final p0 = parts[0].trim();
+      final p1 = parts.sublist(1).join(' : ').trim();
 
-      if (artistPart.isNotEmpty && titlePart.isNotEmpty) {
+      if (p0.isNotEmpty && p1.isNotEmpty) {
+        final p1Lower = p1.toLowerCase();
+        final chLower = channelClean.toLowerCase();
+
+        if (chLower.isNotEmpty && (p1Lower.contains(chLower) || chLower.contains(p1Lower))) {
+          return (
+            artist: _stripChannelSuffixes(p1),
+            title: _cleanTrackTitle(p0),
+          );
+        }
+
         return (
-          artist: _stripChannelSuffixes(artistPart),
-          title: _cleanTrackTitle(titlePart),
+          artist: _stripChannelSuffixes(p0),
+          title: _cleanTrackTitle(p1),
         );
       }
     }
 
     return (
-      artist: _stripChannelSuffixes(channelName),
+      artist: channelClean.isNotEmpty ? channelClean : 'YouTube Artist',
       title: _cleanTrackTitle(clean),
     );
   }
 
   static String _stripChannelSuffixes(String name) {
     return name
+        .replaceAll(RegExp(r'^\d+[\.\-\s]+'), '') // strip leading numbers like "01. "
         .replaceAll(RegExp(r' - Topic$', caseSensitive: false), '')
         .replaceAll(RegExp(r'VEVO$', caseSensitive: false), '')
         .replaceAll(RegExp(r'Official Channel$', caseSensitive: false), '')

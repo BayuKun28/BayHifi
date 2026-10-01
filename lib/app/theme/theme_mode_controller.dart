@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -623,7 +624,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       final generator = await PaletteGenerator.fromImageProvider(
         provider,
         maximumColorCount: 16,
-      );
+      ).timeout(const Duration(seconds: 3));
 
       final vibrant = generator.vibrantColor?.color ??
           generator.dominantColor?.color ??
@@ -637,8 +638,10 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
           const Color(0xFF14171E);
 
       setDynamicAlbumArt(dominant, vibrant);
+    } on TimeoutException {
+      debugPrint('[ThemeController] Dynamic palette extraction timed out for track: ${track.title} (using current theme palette)');
     } catch (e) {
-      debugPrint('[ThemeController] Dynamic palette extraction error: $e');
+      debugPrint('[ThemeController] Dynamic palette extraction notice: $e');
     }
   }
 

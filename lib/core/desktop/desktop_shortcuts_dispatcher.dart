@@ -39,8 +39,34 @@ class _DesktopShortcutsDispatcherState extends ConsumerState<DesktopShortcutsDis
   bool _isTyping(BuildContext context) {
     final focused = FocusManager.instance.primaryFocus;
     if (focused == null) return false;
-    final contextWidget = focused.context?.widget;
-    return contextWidget is EditableText;
+    final focusedContext = focused.context;
+    if (focusedContext == null) return false;
+
+    // 1. Direct widget type inspection
+    final widget = focusedContext.widget;
+    if (widget is EditableText || widget is TextField || widget is TextFormField) {
+      return true;
+    }
+
+    // 2. Ancestor state & widget inspection
+    if (focusedContext.findAncestorStateOfType<EditableTextState>() != null) {
+      return true;
+    }
+    if (focusedContext.findAncestorWidgetOfExactType<EditableText>() != null ||
+        focusedContext.findAncestorWidgetOfExactType<TextField>() != null ||
+        focusedContext.findAncestorWidgetOfExactType<TextFormField>() != null) {
+      return true;
+    }
+
+    // 3. FocusNode debug label inspection
+    final debugLabel = focused.debugLabel?.toLowerCase() ?? '';
+    if (debugLabel.contains('editabletext') ||
+        debugLabel.contains('textfield') ||
+        debugLabel.contains('textformfield')) {
+      return true;
+    }
+
+    return false;
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
@@ -227,9 +253,10 @@ void showDesktopShortcutsCheatsheet(BuildContext context) {
       ),
       content: SizedBox(
         width: 480,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: shortcuts.map((s) {
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: shortcuts.map((s) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 5.0),
               child: Row(
@@ -268,6 +295,7 @@ void showDesktopShortcutsCheatsheet(BuildContext context) {
               ),
             );
           }).toList(),
+          ),
         ),
       ),
       actions: [

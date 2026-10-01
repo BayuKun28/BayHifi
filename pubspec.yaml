@@ -65,8 +65,10 @@ dependencies:
   audio_service: ^0.18.18
   audiotags: ^1.4.5
 
-  # YouTube & YouTube Music Streaming Engine
-  youtube_explode_dart: ^3.1.0
+  # YouTube & YouTube Music Streaming Engine (Local Custom Engine)
+  youtube_explode_dart:
+    path: packages/youtube_explode_dart
+  http: ^1.2.2
   window_manager: ^0.5.2
   desktop_drop: ^0.8.0
   dbus: ^0.8.0
