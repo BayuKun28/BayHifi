@@ -117,6 +117,56 @@ void main() {
       expect(find.text('BAYDEV HIFI STUDIO'), findsOneWidget);
     });
 
+    testWidgets('Desktop Layout (>=960px) in BaydevHiFiApp renders DesktopBottomMasterTransportDeck and expands to NowPlayingScreen',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final container = ProviderContainer();
+      final sampleTrack = const Track(
+        id: 'desktop_track_1',
+        title: 'Desktop Studio Hi-Res',
+        artist: 'Baydev Desktop Master',
+        album: 'Mastering Opus Linux',
+        duration: Duration(minutes: 4, seconds: 20),
+        format: AudioFormat.flac,
+        sampleRate: 96000,
+        bitDepth: 24,
+      );
+      container.read(playerControllerProvider.notifier).state =
+          container.read(playerControllerProvider).copyWith(
+                queue: [sampleTrack],
+                currentTrack: sampleTrack,
+              );
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const BaydevHiFiApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify Desktop bottom transport deck is rendered
+      expect(find.text('Desktop Studio Hi-Res'), findsOneWidget);
+      expect(find.text('Baydev Desktop Master'), findsOneWidget);
+
+      // Expand player on Desktop
+      container.read(playerExpansionProvider.notifier).expand();
+      await tester.pumpAndSettle();
+
+      expect(container.read(playerExpansionProvider), isTrue);
+      expect(find.text('NOW PLAYING'), findsOneWidget);
+
+      // Collapse player
+      container.read(playerExpansionProvider.notifier).collapse();
+      await tester.pumpAndSettle();
+
+      expect(container.read(playerExpansionProvider), isFalse);
+      expect(find.text('Desktop Studio Hi-Res'), findsOneWidget);
+    });
+
     testWidgets('UnifiedLibraryScreen clears multi-select mode on system back press',
         (WidgetTester tester) async {
       final container = ProviderContainer();

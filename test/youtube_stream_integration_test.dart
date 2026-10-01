@@ -22,7 +22,7 @@ void main() {
 
       expect(chunkCount, greaterThan(15));
       expect(totalBytes, greaterThan(1048576));
-    }, timeout: const Timeout(Duration(seconds: 40)));
+    }, timeout: const Timeout(Duration(seconds: 90)));
 
     test('YouTubeMusicService getAudioStreamUrl returns verified stream URL', () async {
       final url = await YouTubeMusicService.instance.getAudioStreamUrl('yt_juJkNKodgdE');

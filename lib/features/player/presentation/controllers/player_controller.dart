@@ -889,7 +889,12 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
   /// Shuffles active queue tracks, preserving originalQueue for unshuffle restoration
   void shuffleQueue({bool keepCurrentTrackFirst = true}) {
-    if (state.queue.isEmpty) return;
+    if (state.queue.isEmpty) {
+      state = state.copyWith(isShuffle: true);
+      _saveSession();
+      _syncAudioHandler();
+      return;
+    }
 
     final orig = state.originalQueue.isNotEmpty
         ? state.originalQueue

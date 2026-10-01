@@ -13,7 +13,9 @@ import '../features/library/presentation/playlists_screen.dart';
 import '../features/library/presentation/unified_library_screen.dart';
 import '../features/player/presentation/controllers/player_controller.dart';
 import '../features/player/presentation/controllers/player_expansion_controller.dart';
+import '../features/player/presentation/now_playing_screen.dart';
 import '../features/player/presentation/widgets/namida_expandable_miniplayer.dart';
+import '../features/pro_q_studio/presentation/pro_q_studio_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/youtube_music/presentation/youtube_discovery_screen.dart';
 
@@ -175,6 +177,8 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                   }
 
                   // ─── 3. DESKTOP STUDIO MASTER LAYOUT (>= 960px) ───────────────
+                  final isPlayerExpanded = ref.watch(playerExpansionProvider);
+
                   return Scaffold(
                     backgroundColor: theme.scaffoldBackgroundColor,
                     body: Stack(
@@ -206,6 +210,20 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                           bottom: 0,
                           child: DesktopBottomMasterTransportDeck(),
                         ),
+
+                        // Layer 3: Full Studio Now Playing Workstation when expanded on Desktop
+                        if (isPlayerExpanded)
+                          Positioned.fill(
+                            child: NowPlayingScreen(
+                              onCollapse: () =>
+                                  ref.read(playerExpansionProvider.notifier).collapse(),
+                              onOpenProQStudio: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const ProQStudioScreen()),
+                                );
+                              },
+                            ),
+                          ),
                       ],
                     ),
                   );

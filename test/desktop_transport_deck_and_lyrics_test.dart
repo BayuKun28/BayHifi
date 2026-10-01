@@ -12,6 +12,10 @@ import 'package:baydev_hifi/features/lyrics_share/presentation/widgets/lyric_sha
 import 'package:baydev_hifi/features/player/domain/playback_state.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
+import 'package:baydev_hifi/features/settings/domain/player_customization_settings.dart';
+import 'package:baydev_hifi/features/settings/domain/player_playback_settings.dart';
+import 'package:baydev_hifi/features/settings/presentation/controllers/playback_settings_controller.dart';
+import 'package:baydev_hifi/features/settings/presentation/controllers/player_customization_controller.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -124,6 +128,64 @@ void main() {
       await tester.pump();
 
       expect(notifier.state.volume, isNotNull);
+    });
+
+    testWidgets('Shuffle and Repeat buttons render visible active states and tooltips when toggled', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+
+      final notifier = PlayerController(SoLoudController.instance);
+      notifier.state = PlaybackState(
+        currentTrack: testTrack,
+        status: PlaybackStatus.playing,
+        isShuffle: false,
+        repeatMode: PlaybackRepeatMode.off,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) => notifier),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              bottomNavigationBar: DesktopBottomMasterTransportDeck(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Verify inactive tooltips
+      expect(find.byTooltip('Shuffle: OFF'), findsOneWidget);
+      expect(find.byTooltip('Repeat: OFF'), findsOneWidget);
+
+      // Tap Shuffle button
+      await tester.tap(find.byTooltip('Shuffle: OFF'));
+      await tester.pump();
+
+      expect(notifier.state.isShuffle, isTrue);
+      expect(find.byTooltip('Shuffle: ON'), findsOneWidget);
+
+      // Tap Repeat button -> Repeat ALL
+      await tester.tap(find.byTooltip('Repeat: OFF'));
+      await tester.pump();
+
+      expect(notifier.state.repeatMode, PlaybackRepeatMode.all);
+      expect(find.byTooltip('Repeat: ALL'), findsOneWidget);
+
+      // Tap Repeat button again -> Repeat ONE
+      await tester.tap(find.byTooltip('Repeat: ALL'));
+      await tester.pump();
+
+      expect(notifier.state.repeatMode, PlaybackRepeatMode.one);
+      expect(find.byTooltip('Repeat: ONE'), findsOneWidget);
+
+      // Verify RepeatOne icon is rendered
+      final repeatOneIcon = find.byWidgetPredicate(
+        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedRepeatOne01,
+      );
+      expect(repeatOneIcon, findsOneWidget);
     });
   });
 
@@ -265,6 +327,247 @@ void main() {
       final desktopDelegate = desktopGrid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       expect(desktopDelegate.crossAxisCount, 7);
       expect(desktopDelegate.childAspectRatio, 0.92);
+    });
+  });
+
+  group('DesktopBottomMasterTransportDeck Dynamic Settings & Visibility Rules Tests', () {
+    testWidgets('Respects trackTitleFirst ordering (title first vs artist first)', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+
+      final playerNotifier = PlayerController(SoLoudController.instance);
+      playerNotifier.state = PlaybackState(
+        currentTrack: testTrack,
+        status: PlaybackStatus.playing,
+        duration: const Duration(minutes: 3, seconds: 45),
+      );
+
+      final customNotifier = PlayerCustomizationNotifier();
+      customNotifier.state = customNotifier.state.copyWith(trackTitleFirst: true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) => playerNotifier),
+            playerCustomizationProvider.overrideWith((ref) => customNotifier),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              bottomNavigationBar: DesktopBottomMasterTransportDeck(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('Linux Master HiFi Track'), findsOneWidget);
+      expect(find.text('Studio Audiophile'), findsOneWidget);
+
+      // Change setting: artist first
+      customNotifier.state = customNotifier.state.copyWith(trackTitleFirst: false);
+      await tester.pump();
+
+      expect(find.text('Studio Audiophile'), findsOneWidget);
+      expect(find.text('Linux Master HiFi Track'), findsOneWidget);
+    });
+
+    testWidgets('Respects trackShowFormatBadge and trackShowBitrate visibility rules', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+
+      final playerNotifier = PlayerController(SoLoudController.instance);
+      playerNotifier.state = PlaybackState(
+        currentTrack: testTrack,
+        status: PlaybackStatus.playing,
+        duration: const Duration(minutes: 3, seconds: 45),
+      );
+
+      final customNotifier = PlayerCustomizationNotifier();
+      customNotifier.state = customNotifier.state.copyWith(
+        trackShowFormatBadge: true,
+        trackShowBitrate: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) => playerNotifier),
+            playerCustomizationProvider.overrideWith((ref) => customNotifier),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              bottomNavigationBar: DesktopBottomMasterTransportDeck(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // With trackShowBitrate: true -> '96kHz / 24bit'
+      expect(find.text('96kHz / 24bit'), findsOneWidget);
+
+      // Set trackShowBitrate: false -> shows format name 'FLAC'
+      customNotifier.state = customNotifier.state.copyWith(
+        trackShowFormatBadge: true,
+        trackShowBitrate: false,
+      );
+      await tester.pump();
+      expect(find.text('FLAC'), findsOneWidget);
+
+      // Hide format badge entirely
+      customNotifier.state = customNotifier.state.copyWith(
+        trackShowFormatBadge: false,
+      );
+      await tester.pump();
+      expect(find.text('FLAC'), findsNothing);
+      expect(find.text('96kHz / 24bit'), findsNothing);
+    });
+
+    testWidgets('Respects trackShowDirectFav (shows/hides favorite button and toggles state)', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+
+      final playerNotifier = PlayerController(SoLoudController.instance);
+      playerNotifier.state = PlaybackState(
+        currentTrack: testTrack,
+        status: PlaybackStatus.playing,
+      );
+
+      final customNotifier = PlayerCustomizationNotifier();
+      customNotifier.state = customNotifier.state.copyWith(trackShowDirectFav: true);
+
+      final libraryController = UnifiedLibraryController();
+      libraryController.state = libraryController.state.copyWith(
+        tracks: [testTrack],
+        favoriteTrackIds: {},
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) => playerNotifier),
+            playerCustomizationProvider.overrideWith((ref) => customNotifier),
+            unifiedLibraryProvider.overrideWith((ref) => libraryController),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              bottomNavigationBar: DesktopBottomMasterTransportDeck(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Verify un-favorited state with tooltip
+      expect(find.byTooltip('Add to Favorites'), findsOneWidget);
+
+      // Tap favorite button to toggle favorite state
+      await tester.tap(find.byTooltip('Add to Favorites'));
+      await tester.pump();
+
+      expect(libraryController.state.favoriteTrackIds.contains(testTrack.id), isTrue);
+      expect(find.byTooltip('Remove from Favorites'), findsOneWidget);
+
+      // Hide direct favorite button
+      customNotifier.state = customNotifier.state.copyWith(trackShowDirectFav: false);
+      await tester.pump();
+
+      expect(find.byTooltip('Remove from Favorites'), findsNothing);
+      expect(find.byTooltip('Add to Favorites'), findsNothing);
+    });
+
+    testWidgets('Respects trackShowDuration and toggles timeDisplayMode on click', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+
+      final playerNotifier = PlayerController(SoLoudController.instance);
+      playerNotifier.state = PlaybackState(
+        currentTrack: testTrack,
+        status: PlaybackStatus.playing,
+        position: const Duration(minutes: 1, seconds: 15),
+        duration: const Duration(minutes: 3, seconds: 45),
+      );
+
+      final customNotifier = PlayerCustomizationNotifier();
+      customNotifier.state = customNotifier.state.copyWith(trackShowDuration: true);
+
+      final playbackSettingsNotifier = PlaybackSettingsController();
+      playbackSettingsNotifier.state = playbackSettingsNotifier.state.copyWith(
+        timeDisplayMode: TimeDisplayMode.remaining,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) => playerNotifier),
+            playerCustomizationProvider.overrideWith((ref) => customNotifier),
+            playbackSettingsProvider.overrideWith((ref) => playbackSettingsNotifier),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              bottomNavigationBar: DesktopBottomMasterTransportDeck(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Position: 01:15
+      expect(find.text('01:15'), findsOneWidget);
+
+      // Remaining: 03:45 - 01:15 = -02:30
+      expect(find.text('-02:30'), findsOneWidget);
+
+      // Tap duration text to toggle to Total mode
+      await tester.tap(find.text('-02:30'));
+      await tester.pump();
+
+      expect(playbackSettingsNotifier.state.timeDisplayMode, TimeDisplayMode.total);
+      expect(find.text('03:45'), findsOneWidget);
+    });
+
+    testWidgets('Respects dynamic spectrumStyle and albumArtStyle configurations', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+
+      final playerNotifier = PlayerController(SoLoudController.instance);
+      playerNotifier.state = PlaybackState(
+        currentTrack: testTrack,
+        status: PlaybackStatus.playing,
+      );
+
+      final customNotifier = PlayerCustomizationNotifier();
+      customNotifier.state = customNotifier.state.copyWith(
+        spectrumStyle: SpectrumStyle.vuMeter,
+        albumArtStyle: AlbumArtStyle.vinyl,
+        ambientGlow: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) => playerNotifier),
+            playerCustomizationProvider.overrideWith((ref) => customNotifier),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              bottomNavigationBar: DesktopBottomMasterTransportDeck(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Verify Spectrum tooltip matches active spectrum style
+      expect(find.byTooltip('Spectrum: Dual Analog VU Dials'), findsOneWidget);
+
+      // Change spectrum style to wave
+      customNotifier.state = customNotifier.state.copyWith(
+        spectrumStyle: SpectrumStyle.wave,
+      );
+      await tester.pump();
+
+      expect(find.byTooltip('Spectrum: Liquid Wave'), findsOneWidget);
     });
   });
 }
