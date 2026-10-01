@@ -6,295 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 44 Fase (Fase 44 Blueprint & PRD Disiapkan • 100% Passing Tests • 352/352 Passed)
+- **Total Fase**: 48 Fase (Seluruh Fase 1–48 Selesai & Terverifikasi • 100% Passing Tests • 360/360 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 44: Pure Material 3 Expressive UI Migration & Comprehensive Architectural PRD (Ready for Implementation)_
-
----
-
-## Fase 44: Pure Material 3 Expressive UI Architecture & 100% Migration PRD
-
-### Product Requirements Document (PRD) — 100% `material_3_expressive` Adoption
-
-#### 1. Executive Summary & Vision
-Baydev HiFi bertransformasi secara penuh menuju arsitektur **100% Pure Material 3 Expressive** dengan mengadopsi library resmi [`material_3_expressive`](https://pub.dev/packages/material_3_expressive) (`version: ^1.1.3`) dan sub-sistemnya (`material_ui: ^1.4.0`, `motor: ^0.2.0` / `^1.1.0`, `material_new_shapes: ^1.0.0`).
-Tujuan utama migrasi ini adalah menyatukan seluruh komponen antarmuka ke standar Material 3 Expressive resmi dari Google:
-- Menghilangkan seluruh widget Material 1/2 legacy dan implementasi kustom ad-hoc.
-- Memanfaatkan fisika pegas *spring motion* (`motor`) untuk seluruh transisi bottom sheet, dialog, carousels, expand-collapse miniplayer, dan interaksi sentuhan.
-- Mengadopsi morfologi bentuk squircle geometris (`material_new_shapes`) dan token dimensi resmi (`M3EDimensions`).
-- Menjaga performa audio audiophile 120 FPS pada custom canvas (`ProQCanvas`, `RtaVisualizerCanvas`, `WaveformCanvas`) dengan membungkusnya secara bersih di dalam kontainer `M3ECard` / `M3EShapeContainer`.
-
----
-
-#### 2. Matriks Pemetaan & Inventarisasi Komponen (Component Migration Matrix)
-
-| Kategori UI | Komponen Sebelumnya (Legacy / Ad-hoc) | Komponen Resmi `material_3_expressive` | Fitur / Keunggulan M3 Expressive |
-| :--- | :--- | :--- | :--- |
-| **Root Application** | `MaterialApp` + `ThemeData` | `M3EMaterialApp` + `M3EThemeData` | `autoTheming`, `dynamicColoring`, `drawUnderSystemBars: true` |
-| **Navigation Dock** | Custom `AnimatedContainer` pill dock | `M3ENavigationBar` / `M3EToolbar` | Capsule floating dock dengan spring pill indicators (`motor`) |
-| **Bento Cards** | Custom `Container` / `InkWell` | `M3ECard.filled` / `M3ECard.outlined` | Tonal elevation, 1px crisp studio border, dynamic splash ripple |
-| **Horizontal Carousels** | `PageView.builder` / `ListView` | `M3ECarousel.multiBrowse` / `.uncontained` | Dynamic peek edges, spring deceleration, and flush grid alignment |
-| **Buttons & Actions** | `ElevatedButton`, `FilledButton`, `TextButton` | `M3EButton.filled`, `.tonal`, `.outlined` | Standar rasio M3E, squircle corners, expressive press feedback |
-| **Icon Buttons** | `IconButton` standard | `M3EIconButton.standard`, `.filled`, `.tonal` | 40x40 touch target minimum, unified HugeIcons stroke |
-| **Floating Actions** | Standard `FloatingActionButton` | `M3EFab`, `M3EExtendedFab`, `M3EFabMenu` | Speed dial floating action menu dengan animasi morphing |
-| **Audio Sliders** | Standard `Slider` | `M3ESlider.continuous` & `M3ESlider.wavy` | Track berekspresi, dynamic thumb morphing, snap haptics |
-| **Switches & Toggles** | Standard `Switch` | `M3ESwitch` | Expressive thumb icon state, spring glide animation |
-| **Checkboxes** | Standard `Checkbox` | `M3ECheckbox` | Squircle rounded checkmark, multi-state visual feedback |
-| **Segmented Selectors** | Custom pill toggle rows | `M3ESegmentedButton` / `M3EButtonGroup` | Single & multi-segment pill switching with spring physics |
-| **Lists & Track Tiles** | `ListTile` standard | `M3EListTile` | Leading `M3EShapeContainer`, trailing `M3EBadge`, ripple states |
-| **Badges & Specs** | Custom badge container | `M3EBadge` | Tabular figures support, tonal background, crisp outline |
-| **Bottom Sheets** | `showModalBottomSheet` standard | `M3EBottomSheet.showModal` | Spring drag physics (`motor`), rounded 28px top corners |
-| **Dialogs & Modals** | `AlertDialog` / `Dialog` | `M3EDialog` | Expressive content layout, actions alignment, tonal background |
-| **Search Bars** | Standard `TextField` | `M3ESearchBar` & `M3ESearchAnchor` | Expandable search view, search suggestions, leading HugeIcon |
-| **Progress & Loaders** | `LinearProgressIndicator`, `CircularProgressIndicator` | `M3EProgressIndicator`, `M3ELoadingIndicator` | Expressive fluid indeterminate animations & micro-progress lines |
-| **Haptic Feedback** | `HapticFeedback.selectionClick()` | `M3EHaptics.selectionClick()` / `.lightImpact()` | Respon taktil terintegrasi pada event interaksi M3E |
-
----
-
-#### 3. Rencana Eksekusi Bertahap (Execution Roadmap)
-
-- [ ] **44.1 App Shell, Dynamic Theming & `M3EMaterialApp` Integration**
-  - [ ] Refaktor `lib/main.dart` & `lib/app/app.dart` menggunakan `M3EMaterialApp`.
-  - [ ] Konfigurasi `M3EThemeData` dengan `dynamicColoring`, `autoTheming`, dan integrasi `StudioColorHarmonizer`.
-  - [ ] Implementasi `M3EThemeExtension` untuk token kustom audiophile (warna kurva EQ, zona frekuensi, RTA palette).
-- [ ] **44.2 Omnipresent Navigation Dock & Expandable MiniPlayer**
-  - [ ] Migrasi Bottom Navigation Bar ke `M3ENavigationBar` / `M3EToolbar` dengan transisi pegas `motor`.
-  - [ ] Refaktor `NamidaExpandableMiniPlayer` menggunakan `M3EBottomSheet` dan `M3EProgressIndicator`.
-  - [ ] Upgrade kontrol playback (Play/Pause, Next, Previous) ke `M3EIconButton.tonal` / `M3EButton`.
-- [ ] **44.3 Bento Grid Dashboard & Hero Showcases**
-  - [ ] Migrasi seluruh modul Bento (`EngineTelemetryHeroCard`, `AudiophileStatsCard`, `RecentSessionsBentoCarousel`) ke `M3ECard.filled`.
-  - [ ] Migrasi `StudioHeroShowcaseCarousel` ke `M3ECarousel.multiBrowse`.
-  - [ ] Integrasi `M3EBadge` untuk telemetry specs (kHz, bit-depth, format, DAC mode).
-- [ ] **44.4 Unified Library & Media Collection Screens**
-  - [ ] Migrasi `UnifiedLibraryScreen` (Tracks, Albums, Artists, Playlists, Folders) menggunakan `M3EListTile` dan `M3EShapeContainer`.
-  - [ ] Integrasi `M3ESearchBar` dengan animated search anchor.
-  - [ ] Standarisasi FAB Category & Shuffle Shortcut menggunakan `M3EFabMenu` & `M3EFab`.
-  - [ ] Migrasi toggle layout (Grid vs List) ke `M3ESegmentedButton`.
-- [ ] **44.5 Pro-Q Studio, DSP Rack & AutoEQ Modal**
-  - [ ] Migrasi DSP Rack units ke collapsible `M3ECard` dengan `M3ESwitch` bypass toggles.
-  - [ ] Migrasi slider DSP (Gain, Frequency, Q, Compressor Attack/Release) ke `M3ESlider` (continuous & wavy).
-  - [ ] Migrasi modal `AutoEqModal` & `StudioTrackActionSheet` ke `M3EBottomSheet` & `M3EDialog`.
-- [ ] **44.6 Settings, Theming & Lyric Card Studio Customizer**
-  - [ ] Migrasi `SettingsScreen` & `ThemingSettingsScreen` ke `M3ECard` & `M3EButtonGroup`.
-  - [ ] Migrasi `LyricShareSheet` ke `M3EBottomSheet` dengan kontrol `M3ESlider`, `M3EChip`, dan `M3ESegmentedButton`.
-- [ ] **44.7 Automated Test Suite & Regression Verification**
-  - [ ] Perbarui seluruh unit & widget test suites (`test/..._test.dart`) untuk memvalidasi rendering `M3E*` components.
-  - [ ] Verifikasi kelulusan 100% `flutter test` dan 0 issues pada `flutter analyze`.
-
----
-
-## Fase 43: Instagram & Spotify Style Lyric Card Customization Engine
-
-Ekspansi kemampuan kustomisasi kartu lirik studio berstandar Instagram Stories & Spotify Sharing:
-1. **Multi-Weight Typography Engine**:
-   - Selector ketebalan font (`FontWeight.w400 Regular`, `w600 SemiBold`, `w700 Bold`, `w900 Black`) dengan chip interaktif 1-tap.
-   - Pilihan perataan teks (Left, Center, Right), toggle italic, dan font size scaling stepper (`65%` - `160%`).
-2. **Text Styles & Highlights (Instagram & Spotify Style `LyricCardHighlightStyle`)**:
-   - **`Clean` (`none`)**: Tipografi studio minimalis tanpa efek tambahan.
-   - **`Text Stroke` (`stroke`)**: Border outline di sekeliling teks karakter huruf menggunakan dual-pass layer rendering (`Stack` + `Paint()..style=PaintingStyle.stroke`) dengan warna kontras otomatis dan opsi ketebalan stroke (`1.5px Subtle`, `2.5px Standard`, `4.0px Thick`).
-   - **`Instagram Pill` (`highlighterPill`)**: Kotak latar rounded squircle bergaya Instagram Stories di belakang setiap baris lirik dengan padding nyaman dan kontras tinggi.
-   - **`Spotify Glow` (`dropShadow`)**: Ambient diffused drop shadow dan soft accent glow di belakang glyph teks sehingga lirik melayang jelas di atas artwork yang kompleks.
-3. **Typography Spacing & Formatting**:
-   - Kontrol line spacing dinamis: `Compact (0.8x)`, `Normal (1.0x)`, `Relaxed (1.3x)`.
-   - Kontrol letter spacing: `Tight (-0.5)`, `Normal (-0.2)`, `Wide (+0.8)`.
-4. **Atmosphere & Readability Shield Adjustments**:
-   - Pengaturan instan intensitas blur cover: `Soft (15)`, `Normal (30)`, `Deep (50)`.
-   - Pengaturan intensitas dark vignette / readability shield: `Light (40%)`, `Standard (65%)`, `Heavy (85%)`.
-5. **No Overflow Guarantee**:
-   - Seluruh baris kontrol di dalam modal bottom sheet dibungkus horizontal scroll view responsif untuk tampilan sempurna di semua rasio layar mobile.
-
-- [x] **43.1 Domain Models & Config Expansion (`LyricCardHighlightStyle`, `LyricShareConfig`)**
-- [x] **43.2 Dual-Pass Stroke, Instagram Pill & Spotify Glow Canvas (`LyricCardWidget`)**
-- [x] **43.3 Blur Sigma & Readability Shield Atmospheric Controls in `LyricCardWidget`**
-- [x] **43.4 Responsive Material 3 Expressive Bento UI Controls in `LyricShareSheet`**
-- [x] **43.5 Controller State Updaters in `LyricShareController`**
-- [x] **43.6 Unit & Widget Test Suite Validation (`test/phase_43_lyric_card_customization_test.dart` - 100% Passed)**
-
----
-
-## Fase 42: Borderless Studio Lyric Card, Dynamic Cover Theming Contrast Hardener & Sub-Settings Redesign
-
-Peningkatan kualitas visual kartu lirik dan proteksi kontras palet dinamis:
-1. **Borderless Studio Lyric Card**: Menghilangkan outer border stroke pada kartu lirik sehingga hasil rendering kartu menjadi bersih, murni, dan borderless dengan sudut squircle halus (`ClipRRect 24px`).
-2. **Dynamic Cover Theme Contrast Hardener (`StudioColorHarmonizer`)**:
-   - Mencegah masalah teks/ikon hitam pada cover album gelap/hitam (seperti *Back in Black*, dsb.): Jika warna ekstraksi album memiliki luminance/lightness rendah atau saturasi grayscale, algoritma secara cerdas mentransformasikan aksen menjadi **Studio Silver Ash / Slate (`#94A3B8`)** dengan kontras tinggi WCAG AA.
-   - Mengkalkulasi `onPrimary` dan `onSecondary` secara dinamis pada `AppThemeBuilder` berdasarkan relative luminance sehingga teks/ikon pada tombol selalu terlihat kontras dan tajam.
-   - Mengamankan resolusi `LyricCardColors.fromDynamicColor` agar latar belakang, kartu, dan teks selalu terbaca kontras pada cover hitam.
-3. **Theming & Studio Palettes Sub-Settings Hub Redesign**:
-   - **Active Studio Theme Cockpit Preview**: Menampilkan live preview pemutar studio mini, audio specs badge, slider aksen, dan 4 titik swatch warna.
-   - **Display Ground & Surface Style Card**: Kontrol compact 3-opsi Theme Mode (`System`, `Light`, `Dark`) dan 2-opsi Surface Fill Style (`Solid M3` vs `Translucent Soft Tint`).
-   - **Dynamic & OLED Engines**: Bento card switch untuk *Monet Dynamic Album Art Palette* dan tombol 1-tap aktivasi *True OLED Black Mode*.
-   - **Curated Studio Palettes Filtered Grid**: Tab filter kategori (`All Presets`, `Studio Core`, `Pastel Soft`) dengan 2-kolom grid bento responsif berisi 19 palet studio dan checkmark indicator.
-   - **Custom Studio Accent Picker**: 19 color swatches studio dengan active glow ring.
-
-- [x] **42.1 Borderless Studio Lyric Card Canvas (`LyricCardWidget`)**
-- [x] **42.2 StudioColorHarmonizer Dynamic Cover Contrast Protection**
-- [x] **42.3 Dynamic `onPrimary` / `onSecondary` & WCAG AA Contrast in `AppThemeBuilder`**
-- [x] **42.4 Material 3 Expressive Sub-Settings Redesign (`ThemingSettingsScreen`)**
-- [x] **42.5 Unit & Widget Test Suite Validation (`test/phase_42_theming_and_contrast_test.dart` - 100% Passed)**
-
----
-
-## Fase 41: UI/UX Redesign, Dashboard Reordering, Library Grid Mode & Dynamic Detail Screen Backdrops
-
-Penyempurnaan estetika studio dan konsistensi interaksi visual:
-1. **Lyric Card Ratio Horizontal Scroll**: Selector rasio kartu lirik menggunakan `SingleChildScrollView` horizontal dengan tombol berukuran terstandarisasi (`86px`) sehingga seluruh opsi (Story 9:16, Portrait 4:5, Square 1:1, Landscape 16:9) pas dan tidak terpotong atau wrap ke bawah.
-2. **Dashboard Hierarchy Redesign**: Rekonfigurasi urutan section Dashboard di mana `Recent Lossless Sessions` (`RecentSessionsBentoCarousel`) kini berada tepat di bawah `Dynamic Studio Mixes` (`StudioHeroShowcaseCarousel`) untuk visual flow yang harmonis.
-3. **Default Grid Mode for Albums & Artists (3-Column Circular Studio Presentation)**: Menjadikan mode Grid sebagai default (`layoutMode = ViewLayoutMode.grid`) dan merombak tampilan tab Artists menjadi **3 kolom per baris** dengan avatar berbentuk lingkaran murni, bayangan studio, dan nama artis di tengah.
-4. **Album Detail Screen Ambient Artist Photo Background (Soft Studio Blur)**: Menampilkan foto artis di belakang cover album dengan efek Gaussian blur yang halus dan tidak berlebihan (`sigma 7.0`), berpadu dengan gradient scrim yang seimbang sehingga foto artis terlihat jelas namun teks dan cover tetap terbaca tajam.
-5. **Artist Detail Screen Dynamic Collage & Gradient Backdrop**:
-   - Jika artis memiliki $\ge 4$ album: Menghasilkan **2x2 Album Cover Art Collage** yang diblur halus (`sigma 12.0`) dan dipadukan dengan studio vignette overlay.
-   - Jika artis memiliki $< 4$ album: Menghasilkan ambient backdrop foto artis (`sigma 7.0`) / artwork album primer dengan gradasi permukaan tema yang menyatu mulus ke tracklist.
-6. **Library Tracks Shuffle Shortcut FAB**: Menambahkan secondary FAB di atas Category FAB pada tab Tracks (`CollectionTab.tracks`) yang mengacak seluruh koleksi track, memasukkan track ke playback queue (`ref.read(playerControllerProvider.notifier).setQueue(shuffled, initialIndex: 0)`), memicu haptic feedback, dan menampilkan konfirmasi snackbar.
-
-- [x] **41.1 Lyric Card Ratio Picker Horizontal Scroll**
-- [x] **41.2 Dashboard Section Reordering & Proportions**
-- [x] **41.3 Library Albums & Artists Default 3-Column Circular Grid Mode & Toggle Bugfix**
-- [x] **41.4 Album Detail Screen Artist Photo Ambient Background (Soft Recognizable Blur)**
-- [x] **41.5 Artist Detail Screen Dynamic 2x2 Collage Backdrop**
-- [x] **41.6 Library Tracks Shuffle All Shortcut FAB with Queue Integration**
-- [x] **41.7 Unit & Widget Test Suite Validation (`test/phase_41_ui_ux_redesign_test.dart` - 100% Passed)**
-
----
-
-## Fase 38: Spotify-Style Studio Lyric Card & Social Media Sharing System
-
-Pembuatan kartu kutipan lirik studio beresolusi tinggi (Lyric Card) bergaya Spotify / Apple Music dengan rasio kustom (9:16 Story & 1:1 Post), seleksi multi-baris interaktif, tema warna dinamis / OLED / studio, badge format Hi-Res audio, rasterisasi gambar via RepaintBoundary, serta integrasi berbagi ke media sosial (Instagram Stories, WhatsApp, X, dsb.) dan galeri lokal.
-
-- [x] **38.1 Setup Dependensi `share_plus` & Domain Model**
-  - [x] Menambahkan package `share_plus` (`^13.3.0`) ke `pubspec.yaml`.
-  - [x] Membuat domain model `LyricShareConfig`, enum `LyricCardRatio` (9:16 Story, 1:1 Square, 4:5 Portrait), dan `LyricCardThemePreset`.
-  - [x] Membuat model `LyricCardColors` dengan resolusi tema preset (Dynamic, Studio OLED Black, Precision Mint, Sky Studio, Warm Tube, Studio Rose).
-- [x] **38.2 Canvas Render `LyricCardWidget` & Service Rasterisasi `LyricImageGenerator`**
-  - [x] Membangun `LyricCardWidget` responsif (`LayoutBuilder` & dynamic scale factor) dengan tipografi lirik tebal, metadata track, artwork squircle 12px, Hi-Res audio badge, dan studio branding.
-  - [x] Mengimplementasikan `LyricImageGenerator` untuk rasterisasi `RepaintBoundary` -> PNG byte buffer (`pixelRatio: 3.0`) -> cache file -> native sharing via `SharePlus.instance.share`.
-- [x] **38.3 State Management & Interactive Modal `LyricShareSheet`**
-  - [x] Membuat `LyricShareController` untuk mengelola seleksi baris lirik (1-5 baris berurutan) dan konfigurasi tampilan.
-  - [x] Membuat `LyricShareSheet` dengan tab seleksi lirik, live preview canvas interaktif, color/ratio switcher, dan tombol aksi share/save.
-- [x] **38.4 Integrasi ke `SynchronizedLyricsView` & Player**
-  - [x] Menambahkan tombol aksi Share Lyrics di toolbar lirik dan interaksi long-press pada baris lirik.
-  - [x] Menghubungkan metadata lagu aktif, format audio (kHz/bit), dan artwork.
-- [x] **38.5 Unit & Widget Test Suite Validation**
-  - [x] Membuat unit test `test/lyric_share_models_and_controller_test.dart` dan widget test `test/lyric_card_widget_and_sheet_test.dart`.
-  - [x] Memastikan `flutter test` lulus 100% dan `flutter analyze` 0 issues / 0 warnings.
-- [x] **38.6 Dynamic Album Palette, Blurred Cover Background, Gallery Saving & App Logo Branding**
-  - [x] Memperbaiki penyimpanan rasterisasi gambar langsung ke direktori publik Galeri / Pictures (`Pictures/BayHifi` di Android/desktop) agar langsung muncul di Galeri foto perangkat.
-  - [x] Menangani pengecualian `MissingPluginException` pada `share_plus` secara elegan dengan pesan informatif dan fallback otomatis ke penyimpanan galeri.
-  - [x] Memperbaiki rendering artwork album pada footer kartu preview menggunakan `StudioArtworkWidget` terpadu agar selalu tampil dari bytes, file lokal, maupun URL.
-  - [x] Menambahkan 4 mode styling background: *Blurred Cover* (artwork album blur dengan studio readability shield), *Cover Palette* (swatches warna dinamis via `PaletteGenerator`), *Studio Themes* (preset studio), dan *Custom Colors* (12 palet warna audiophile kustom).
-  - [x] Memperbarui branding studio di header kartu menggunakan aset logo resmi aplikasi `assets/images/baydev_logo.png`.
-- [x] **38.7 Custom Typography, Audio Specs Badge Custom Text & Landscape Ratio**
-  - [x] Menambahkan opsi tipe font (`Studio Sans`, `Editorial Serif`, `Studio Mono`, `Script Flow`).
-  - [x] Menambahkan kontrol perataan teks (*Left*, *Center*, *Right*), ketebalan teks (*Bold/Regular*), kemiringan (*Italic*), dan *font size scale stepper* (`65%` hingga `160%`).
-  - [x] Menambahkan dialog editor teks kustom untuk *Audio Specs Badge* dengan opsi *Reset to Auto*.
-  - [x] Menambahkan opsi rasio kartu *Landscape (16:9)* yang responsif untuk wallpaper desktop dan feed sosial horizontal.
-
----
-
-## Fase 37: YouTube Music HiFi UI/UX Streamlining & Streaming Engine Fix
-
-Penyederhanaan antarmuka YouTube Discovery / Library Tab agar lebih intuitif, bersih ("as simple"), serta perbaikan menyeluruh pada engine streaming & playback audio YouTube agar lagu dapat terputar secara lancar dan andal.
-
-- [x] **37.1 YouTube Audio Remuxer & Streaming Engine Fix**
-  - [x] Perbaikan `WebmToOggRemuxer` dengan packet bundling multi-frame (6+ packets/3KB per page) dan flushing tepat waktu untuk stream Ogg Opus yang 100% compliant dengan parser C++ SoLoud (`libopusfile` / `stb_vorbis`).
-  - [x] Peningkatan ketahanan `YouTubeMusicService` dalam ekstraksi stream manifest dan penanganan chunk audio terfragmentasi.
-  - [x] Refaktor `PlayerController.playTrack` dengan progressive pre-buffer playback (128KB / 15 chunks header + initial frames) yang tangguh dan fallback caching otomatis 20s.
-- [x] **37.2 YouTube Discovery Screen UI/UX Simplification ("As Simple")**
-  - [x] Redesain `YouTubeDiscoveryScreen` dengan layout Bento semi-minimalis yang bersih, bebas elemen clutter / slop berlebih.
-  - [x] Integrasi search bar responsif dengan debouncing 400ms, filter kategori ringkas, dan kartu bento 1-tap play.
-  - [x] Standardisasi tombol aksi 3-dots dengan `StudioTrackActionSheet`.
-- [x] **37.3 Unit & Integration Test Suite Validation**
-  - [x] Pembuatan `test/youtube_streaming_and_simple_ui_test.dart` untuk memvalidasi alur streaming YouTube, transisi state player, dan rendering UI.
-  - [x] Memastikan `flutter analyze` 0 issues dan `flutter test` lulus 100% (315/315 tests passing).
-
----
-
-## Fase 36: Playlist Screen Redesign, Merged Studio Collections, Studio Playlist Action Sheet, Dedicated Playlist Detail Screen & Scrollbar
-
-Standardisasi dan perombakan komprehensif antarmuka Playlist, modal pembuatan playlist custom/smart, navigasi bertingkat, bottom action sheet, dan detail screen dengan scrollbar interaktif.
-
-- [x] **36.1 Merged Studio Collections & Dynamic Smart Playlists Row di `PlaylistsScreen`**
-  - [x] Menggabungkan Dynamic Smart Playlists ke dalam baris Studio Collections (bersama Favorite Tracks dan Hi-Res Lossless Masters).
-  - [x] Menavigasi ke `SmartPlaylistsScreen` saat kartu Dynamic Smart Playlists ditekan untuk penjelajahan aturan filter dan preset studio.
-- [x] **36.2 Redesign Modal Pembuatan Playlist Custom & Smart Rule**
-  - [x] Pembuatan `CreateCustomPlaylistModal` bento modern dengan ikon ringkas (18px) dan validasi input.
-  - [x] Redesain `CreateSmartPlaylistDialog` dengan proporsi studio terukur (16-18px), evaluasi langsung jumlah lagu yang cocok, dan styling solid/translucent yang konsisten.
-- [x] **36.3 Standardisasi Menu 3-Dots dengan `StudioPlaylistActionSheet`**
-  - [x] Mengganti popup menu legacy dengan modal bottom sheet modern bersudut 24px yang mendukung aksi Play Now, Shuffle, Add to Queue, Rename, Duplicate, Export M3U8, dan Delete.
-- [x] **36.4 Dedicated `PlaylistDetailScreen` & Interactivity**
-  - [x] Collapsing sliver header dengan indikator jumlah lagu, durasi terformat, status custom/smart/preset, dan sticky action bar (Play All, Shuffle).
-  - [x] Integrasi `TrackTile` dengan `StudioTrackActionSheet` dan `Scrollbar` interaktif.
-- [x] **36.5 Unit & Widget Test Suite Validation**
-  - [x] Penambahan suite pengujian `test/playlist_redesign_and_detail_screen_test.dart` dan pembaruan `test/smart_playlists_engine_test.dart` dengan 100% lulus (312/312 tests) dan 0 issues pada `flutter analyze`.
-
----
-
-## Fase 13: DSP Rack Collapsible Units, Bottom Floating Category Dock, Pastel Palettes & Expressive Controls
-
-Penyempurnaan ergonomi satu tangan dan visual Material 3 Expressive studio di seluruh antarmuka utama Baydev HiFi.
-
-- [x] **13.1 DSP Rack Collapsible Units & Reset Confirmation Modal**
-  - [x] `RackUnitCard` collapsible state: otomatis terminimize saat bypass (OFF) ke faceplate ramping ~46px, auto-expand saat dinyalakan, dan tap header untuk expand manual dengan indikator chevron.
-  - [x] Modal dialog konfirmasi Material 3 untuk aksi _Reset to Flat Reference_ dengan tombol Cancel dan Reset All.
-- [x] **13.2 Library Bottom Floating Category Dock**
-  - [x] Mengganti static top horizontal category bar dengan ergonomic bottom floating action pill di atas miniplayer.
-  - [x] Secondary floating category dock animasi halus yang menampilkan opsi Tracks, Albums, Artists, Genres, Folders, dan Playlists.
-- [x] **13.3 Curated Pastel Studio Color Palettes & Accent Options**
-  - [x] Menambahkan 6 preset palet pastel studio non-neon di `AppPalette` (`Pastel Lavender`, `Pastel Sage Mint`, `Pastel Powder Sky`, `Pastel Soft Peach`, `Pastel Blush Rose`, `Pastel Butter Cream`).
-  - [x] Menambahkan swatches warna aksen pastel pada menu Theming Settings.
-- [x] **13.4 Material 3 Expressive Playback Controls di NowPlayingScreen**
-  - [x] Upgrade Previous, Next, Shuffle, Repeat, dan Play/Pause ke kontainer squircle geometris Material 3 Expressive dengan border crisp 1px selaras dengan mode Desk/Car Docking.
-- [x] **13.5 Dedicated Widget & Unit Tests Validation**
-  - [x] Menambahkan `m3_expressive_enhancements_test.dart` dan memastikan 100% passing tests (73 tests total) dengan 0 warnings dan 0 errors di `flutter analyze`.
-
----
-
-## Fase 12: Material 3 Expressive UI/UX Architecture & Bento Grid System
-
-Implementasi arsitektur antarmuka Material 3 Expressive modern dengan sistem Bento Grid modular, token squircle, elevasi tonal 5-layer, physics spring, dan animasi staggered entrance.
-
-- [x] **12.1 Standardisasi Aturan Material 3 Expressive & Zero-Emoji Policy di `rules.md` & `GEMINI.md`**
-  - [x] Tambahkan section arsitektur M3 Expressive, Bento Grid layout, token squircle (`8px`, `12px`, `16px`, `20px`, `28px`, `999px`), 1px crisp borders, Zero-Emoji Policy, dan tabular figures policy.
-- [x] **12.2 Bento Module 1: C++ SoLoud Engine & Hardware Telemetry Hero Card**
-  - [x] Live C++ audio engine telemetry, source specs (kHz, bit depth, format), safe preamp level, and Bit-Perfect DAC status badge.
-- [x] **12.3 Studio Hero Showcase Carousel (Horizontal Showcase)**
-  - [x] Horizontal M3 Expressive showcase banner directly above Audiophile Stats card with 4 rich cards (_32-Band Pro-Q Studio_, _Mastering DSP Rack_, _AutoEQ & Target Solver_, _Studio Desk Docking_), page indicator dots, and direct navigation.
-- [x] **12.4 Semi-Minimalist Dashboard Streamlining**
-  - [x] Removed redundant Pro-Q and DSP Rack mini cards and top header quick chips to produce an uncrowded, semi-minimalist Material 3 Expressive studio layout.
-- [x] **12.5 Bento Module 2: Audiophile Listening Statistics Card**
-  - [x] High-density telemetry for listening time, lossless FLAC vs Standard distribution, and favorite tracks.
-- [x] **12.6 Bento Module 3: Recent Lossless Sessions Bento Carousel**
-  - [x] Horizontal Bento carousel for recently played/discovered lossless tracks with squircle artwork, format badges (Hi-Res / FLAC), and 1-tap play.
-- [x] **12.7 Pure Theme Palette System Compliance (Zero Hardcoded Random Colors)**
-  - [x] 100% compliance across all dashboard bento widgets with `theme.colorScheme` tokens (`primary`, `secondary`, `tertiary`, `surface`, `surfaceContainer`, `outline`, `onSurface`, `onSurfaceVariant`).
-- [x] **12.8 Unit & Widget Test Suite Validation**
-  - [x] 100% test coverage with passing tests and 0 analyzer warnings across the entire repository.
-- [x] **12.9 Flush Carousel Alignment, Header Minimalist Clean-up & Dynamic Album Art Palette**
-  - [x] Fixed `StudioHeroShowcaseCarousel` left-edge alignment with `viewportFraction: 1.0` and 0 horizontal insets, aligning flush with Bento cards.
-  - [x] Removed `'Studio Command & Telemetry'` subtitle text for a minimalist studio header.
-  - [x] Integrated automatic dynamic album art palette extraction via `palette_generator` with `Track.albumArtBytes` / `Track.albumArtUrl`.
-  - [x] Mandated Zero-Neon & Restrained Studio Palette standard in `rules.md` and `GEMINI.md` and refactored all theme presets and accent swatches to elegant studio tones.
-
----
-
-## Fase 11: Pure Custom Local Library & Storage Directory Management
-
-Pembersihan seluruh data demo/sampling audio bawaan dan integrasi pemilihan direktori & file fisik lokal dengan database persisten.
-
-- [x] **11.1 Penghapusan Seluruh Dummy / Sampling Track Bawaan**
-  - [x] `LocalAudioScanner.defaultLocalTracks` dikembalikan kosong (`const []`)
-  - [x] Inisialisasi library murni membaca data hasil scan direktori pengguna yang tersimpan di `LocalPersistenceService`
-- [x] **11.2 Pemilih Direktori & File Audio Lokal Kustom**
-  - [x] Implementasi `pickAndScanDirectory()` dengan `FilePicker.getDirectoryPath()` dan pemindaian rekursif seluruh format audiophile (`.flac`, `.wav`, `.mp3`, `.opus`, `.ogg`, `.alac`, `.dsf`, `.dff`, `.m4a`, `.aac`)
-  - [x] Implementasi `pickAudioFiles()` untuk pemilihan file spesifik
-  - [x] Ekstraksi cerdas format bitrate/sample rate, penamaan album dari folder induk, dan parsing judul "Artist - Title"
-- [x] **11.3 Database Persisten Koleksi Lagu & Folder Pengguna**
-  - [x] Penyimpanan otomatis track dan daftar direktori ke file JSON storage di dokumen aplikasi
-  - [x] Fitur `rescanSavedFolders()` untuk sinkronisasi ulang seluruh folder musik tersimpan
-  - [x] Fitur `clearLibrary()` dengan dialog konfirmasi untuk membersihkan katalog library
-- [x] **11.4 Studio Empty State & Quick Actions**
-  - [x] Desain empty state studio high-fidelity saat library kosong dengan tombol aksi langsung: `[SELECT MUSIC FOLDER]`, `[PICK AUDIO FILES]`, dan `[CONNECT NAVIDROME CLOUD]`
-  - [x] Popup menu AppBar lengkap di `UnifiedLibraryScreen`: _Pick & Scan Music Folder_, _Pick Audio Files_, _Rescan Music Folders_, _Connect Navidrome Cloud_, _Clear Music Library_
+- **Status Proyek**: _Phase 48: Linux Desktop Compilation & Packaging Implementation (Completed & 100% Passing Tests)_
 
 ---
 
@@ -565,6 +279,75 @@ Integrasi cloud downloader untuk kurva target dan pengukuran IEM/Headphone langs
 - [x] **10.2 Direct AutoEQ Solver Integration**
   - [x] Dialog browser cloud terintegrasi (`AutoEqCloudBrowserDialog`) diakses langsung dari Pro-Q Studio toolbar dan AutoEQ modal
   - [x] Terapkan kurva target dan pengukuran driver online langsung ke AutoEQ Biquad Optimizer Solver dengan tombol `[SOLVE]` 1-klik tanpa perlu transfer file manual
+
+---
+
+## Fase 11: Pure Custom Local Library & Storage Directory Management
+
+Pembersihan seluruh data demo/sampling audio bawaan dan integrasi pemilihan direktori & file fisik lokal dengan database persisten.
+
+- [x] **11.1 Penghapusan Seluruh Dummy / Sampling Track Bawaan**
+  - [x] `LocalAudioScanner.defaultLocalTracks` dikembalikan kosong (`const []`)
+  - [x] Inisialisasi library murni membaca data hasil scan direktori pengguna yang tersimpan di `LocalPersistenceService`
+- [x] **11.2 Pemilih Direktori & File Audio Lokal Kustom**
+  - [x] Implementasi `pickAndScanDirectory()` dengan `FilePicker.getDirectoryPath()` dan pemindaian rekursif seluruh format audiophile (`.flac`, `.wav`, `.mp3`, `.opus`, `.ogg`, `.alac`, `.dsf`, `.dff`, `.m4a`, `.aac`)
+  - [x] Implementasi `pickAudioFiles()` untuk pemilihan file spesifik
+  - [x] Ekstraksi cerdas format bitrate/sample rate, penamaan album dari folder induk, dan parsing judul "Artist - Title"
+- [x] **11.3 Database Persisten Koleksi Lagu & Folder Pengguna**
+  - [x] Penyimpanan otomatis track dan daftar direktori ke file JSON storage di dokumen aplikasi
+  - [x] Fitur `rescanSavedFolders()` untuk sinkronisasi ulang seluruh folder musik tersimpan
+  - [x] Fitur `clearLibrary()` dengan dialog konfirmasi untuk membersihkan katalog library
+- [x] **11.4 Studio Empty State & Quick Actions**
+  - [x] Desain empty state studio high-fidelity saat library kosong dengan tombol aksi langsung: `[SELECT MUSIC FOLDER]`, `[PICK AUDIO FILES]`, dan `[CONNECT NAVIDROME CLOUD]`
+  - [x] Popup menu AppBar lengkap di `UnifiedLibraryScreen`: _Pick & Scan Music Folder_, _Pick Audio Files_, _Rescan Music Folders_, _Connect Navidrome Cloud_, _Clear Music Library_
+
+---
+
+## Fase 12: Material 3 Expressive UI/UX Architecture & Bento Grid System
+
+Implementasi arsitektur antarmuka Material 3 Expressive modern dengan sistem Bento Grid modular, token squircle, elevasi tonal 5-layer, physics spring, dan animasi staggered entrance.
+
+- [x] **12.1 Standardisasi Aturan Material 3 Expressive & Zero-Emoji Policy di `rules.md` & `GEMINI.md`**
+  - [x] Tambahkan section arsitektur M3 Expressive, Bento Grid layout, token squircle (`8px`, `12px`, `16px`, `20px`, `28px`, `999px`), 1px crisp borders, Zero-Emoji Policy, dan tabular figures policy.
+- [x] **12.2 Bento Module 1: C++ SoLoud Engine & Hardware Telemetry Hero Card**
+  - [x] Live C++ audio engine telemetry, source specs (kHz, bit depth, format), safe preamp level, and Bit-Perfect DAC status badge.
+- [x] **12.3 Studio Hero Showcase Carousel (Horizontal Showcase)**
+  - [x] Horizontal M3 Expressive showcase banner directly above Audiophile Stats card with 4 rich cards (_32-Band Pro-Q Studio_, _Mastering DSP Rack_, _AutoEQ & Target Solver_, _Studio Desk Docking_), page indicator dots, and direct navigation.
+- [x] **12.4 Semi-Minimalist Dashboard Streamlining**
+  - [x] Removed redundant Pro-Q and DSP Rack mini cards and top header quick chips to produce an uncrowded, semi-minimalist Material 3 Expressive studio layout.
+- [x] **12.5 Bento Module 2: Audiophile Listening Statistics Card**
+  - [x] High-density telemetry for listening time, lossless FLAC vs Standard distribution, and favorite tracks.
+- [x] **12.6 Bento Module 3: Recent Lossless Sessions Bento Carousel**
+  - [x] Horizontal Bento carousel for recently played/discovered lossless tracks with squircle artwork, format badges (Hi-Res / FLAC), and 1-tap play.
+- [x] **12.7 Pure Theme Palette System Compliance (Zero Hardcoded Random Colors)**
+  - [x] 100% compliance across all dashboard bento widgets with `theme.colorScheme` tokens (`primary`, `secondary`, `tertiary`, `surface`, `surfaceContainer`, `outline`, `onSurface`, `onSurfaceVariant`).
+- [x] **12.8 Unit & Widget Test Suite Validation**
+  - [x] 100% test coverage with passing tests and 0 analyzer warnings across the entire repository.
+- [x] **12.9 Flush Carousel Alignment, Header Minimalist Clean-up & Dynamic Album Art Palette**
+  - [x] Fixed `StudioHeroShowcaseCarousel` left-edge alignment with `viewportFraction: 1.0` and 0 horizontal insets, aligning flush with Bento cards.
+  - [x] Removed `'Studio Command & Telemetry'` subtitle text for a minimalist studio header.
+  - [x] Integrated automatic dynamic album art palette extraction via `palette_generator` with `Track.albumArtBytes` / `Track.albumArtUrl`.
+  - [x] Mandated Zero-Neon & Restrained Studio Palette standard in `rules.md` and `GEMINI.md` and refactored all theme presets and accent swatches to elegant studio tones.
+
+---
+
+## Fase 13: DSP Rack Collapsible Units, Bottom Floating Category Dock, Pastel Palettes & Expressive Controls
+
+Penyempurnaan ergonomi satu tangan dan visual Material 3 Expressive studio di seluruh antarmuka utama Baydev HiFi.
+
+- [x] **13.1 DSP Rack Collapsible Units & Reset Confirmation Modal**
+  - [x] `RackUnitCard` collapsible state: otomatis terminimize saat bypass (OFF) ke faceplate ramping ~46px, auto-expand saat dinyalakan, dan tap header untuk expand manual dengan indikator chevron.
+  - [x] Modal dialog konfirmasi Material 3 untuk aksi _Reset to Flat Reference_ dengan tombol Cancel dan Reset All.
+- [x] **13.2 Library Bottom Floating Category Dock**
+  - [x] Mengganti static top horizontal category bar dengan ergonomic bottom floating action pill di atas miniplayer.
+  - [x] Secondary floating category dock animasi halus yang menampilkan opsi Tracks, Albums, Artists, Genres, Folders, dan Playlists.
+- [x] **13.3 Curated Pastel Studio Color Palettes & Accent Options**
+  - [x] Menambahkan 6 preset palet pastel studio non-neon di `AppPalette` (`Pastel Lavender`, `Pastel Sage Mint`, `Pastel Powder Sky`, `Pastel Soft Peach`, `Pastel Blush Rose`, `Pastel Butter Cream`).
+  - [x] Menambahkan swatches warna aksen pastel pada menu Theming Settings.
+- [x] **13.4 Material 3 Expressive Playback Controls di NowPlayingScreen**
+  - [x] Upgrade Previous, Next, Shuffle, Repeat, dan Play/Pause ke kontainer squircle geometris Material 3 Expressive dengan border crisp 1px selaras dengan mode Desk/Car Docking.
+- [x] **13.5 Dedicated Widget & Unit Tests Validation**
+  - [x] Menambahkan `m3_expressive_enhancements_test.dart` dan memastikan 100% passing tests (73 tests total) dengan 0 warnings dan 0 errors di `flutter analyze`.
 
 ---
 
@@ -917,7 +700,7 @@ Integrasi pencarian dan streaming jutaan lagu YouTube & YouTube Music langsung m
 
 ---
 
-## Fase 29: YouTube Streaming Race Condition & Playback Stability Bug Fix (In Progress)
+## Fase 29: YouTube Streaming Race Condition & Playback Stability Bug Fix (Completed)
 
 Perbaikan bug streaming YouTube di mana loading spinner muncul beberapa saat lalu playback tidak jadi berjalan dan tombol kembali ke posisi paused/play. Root cause adalah race condition antara resolusi URL async dan state engine SoLoud.
 
@@ -925,12 +708,10 @@ Perbaikan bug streaming YouTube di mana loading spinner muncul beberapa saat lal
   - [x] Refaktor `playTrack` untuk `yt_` tracks: resolusi CDN URL via `getAudioStreamUrl()` → langsung `playUrl()` tanpa menunggu full download. `cacheTrack()` berjalan fire-and-forget di background untuk cache hit pada pemutaran berikutnya.
   - [x] Branch terpisah untuk Subsonic/remote tracks: tetap menggunakan `cacheTrack()` → `playFile()` pipeline.
   - [x] `prefetchNextTrack` fix: `AudioCacheService` kini mengizinkan `yt_` tracks melewati pipeline YoutubeExplode meskipun `streamUrl` null (previously always skipped due to `streamUrl == null` guard).
-
 - [x] **29.2 Phase 25.3 Queue Sheet Auto-Scroll Test Fix**
   - [x] `ReorderableListView.builder` adalah virtualized list — item di luar viewport tidak ada di widget tree. Test sebelumnya asserting `findsOneWidget` untuk `ValueKey('queue_track_queue_song_15_15')` selalu gagal karena item 15 belum ter-render saat async `Future.delayed` scroll belum selesai.
   - [x] Fix: primary assertion sekarang verifikasi **state** (`queueIndex == 15`) sebagai source of truth. Secondary assertion memverifikasi list me-render setidaknya beberapa track tile (`find.textContaining('Audiophile Track')`).
   - [x] Total test suite: 246/246 passing, 0 analyzer warnings.
-
 - [x] **29.3 YouTube Streaming Playback Failure Bug Fix**
   - [x] **Root Cause**: Googlevideo CDN streams menolak unauthenticated HTTP GET requests dari generic `http.Client` di `SoLoud.instance.loadUrl()` dengan HTTP 403 Forbidden, menyebabkan exception yang me-revert status playback ke error/paused.
   - [x] **Fix**: Refaktor `playTrack` untuk memprioritaskan download/caching stream via `YoutubeExplode` streamsClient authenticated pipeline (`AudioCacheService.instance.cacheTrack`), diikuti dengan bit-perfect local playback via `_audioEngine.playFile`. Menyediakan instant playback dengan fallback stream URL dan smart next-track prefetching (0ms delay).
@@ -947,33 +728,18 @@ Perbaikan UX untuk koneksi Navidrome dan presisi auto-scroll lyric sinkronisasi.
     - Judul `'NO NAVIDROME SERVER CONNECTED'` + deskripsi `'Stream lossless FLAC and Opus audio directly from your personal Subsonic or Navidrome music server.'`
     - Tombol primary `[ CONNECT TO NAVIDROME ]` (`HugeIcons.strokeRoundedCloudSync`) yang membuka `NavidromeConnectDialog` langsung
     - Quick info badge studio: `SUBSONIC API • LOSSLESS FLAC • OPUS STREAMING`
-
 - [x] **30.2 Navidrome Connect Dialog — Proportional Icon Fix & UX Polish**
   - [x] Memperbaiki proporsi `prefixIcon` pada `TextFormField` (Server URL, Username, Password) dengan padding 12px dan `prefixIconConstraints: BoxConstraints(minWidth: 42, minHeight: 42)` agar icon proporsional dan tidak meregang besar.
   - [x] Mengurangi dialog width dari 440px ke 380px dan padding dari 24px ke 20px untuk layout studio compact yang ergonomis.
   - [x] Menambahkan widget test di `test/phase_29_and_30_features_test.dart` memverifikasi rendering dialog dan proporsi icon.
-
 - [x] **30.3 Navidrome Connection Session Persistence (Auto-Reconnect on App Restart)**
   - [x] Menambahkan method serialisasi `toMap()` dan deserialisasi `SubsonicServerConfig.fromMap()` pada `SubsonicServerConfig`.
   - [x] `UnifiedLibraryController.connectNavidrome()` otomatis menyimpan konfigurasi server ke `LocalPersistenceService.saveSetting('navidrome_config', config.toMap())` setelah koneksi berhasil.
   - [x] `UnifiedLibraryController.disconnectNavidrome()` menghapus konfigurasi server dari persistence.
   - [x] Implementasi `restoreNavidromeSession()` pada startup controller (`Future.microtask`) untuk auto-reconnect ke server Navidrome saat aplikasi dibuka kembali.
   - [x] Mendaftarkan key `'navidrome_config'` pada archive backup & restore `BackupRestoreService`.
-
 - [x] **30.4 Lyrics Active Line Auto-Scroll Centering Fix**
-  - [x] Memperbaiki perhitungan target offset pada `_scrollToActiveLine()` di `SynchronizedLyricsView`:
-    ```dart
-    final itemHeight = _displayMode == LyricsDisplayMode.dualLine ? 74.0 : 56.0;
-    final viewportHeight = _scrollController.position.viewportDimension;
-    final targetOffset = (index * itemHeight) - (viewportHeight / 2) + (itemHeight / 2);
-    final maxExtent = _scrollController.position.maxScrollExtent;
-    _scrollController.animateTo(
-      targetOffset.clamp(0.0, maxExtent > 0 ? maxExtent : double.infinity),
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
-    ```
-  - [x] Memastikan baris lirik aktif selalu terpusat tepat di tengah (_center viewport_) di semua mode display (Original, Romanized, Dual-Line).
+  - [x] Memperbaiki perhitungan target offset pada `_scrollToActiveLine()` di `SynchronizedLyricsView` agar baris lirik aktif selalu terpusat tepat di tengah (_center viewport_) di semua mode display (Original, Romanized, Dual-Line).
   - [x] Validasi widget test pada `test/phase_29_and_30_features_test.dart` (254/254 tests lulus 100%, 0 analyzer warnings).
 
 ---
@@ -986,22 +752,18 @@ Penyempurnaan presisi viewport centering lirik di semua mode pemutaran, implemen
   - [x] Implementasi `Scrollable.ensureVisible` dengan `alignment: 0.5` (`curve: Curves.easeOutCubic`, 300ms) menggunakan per-line `GlobalKey` untuk menempatkan baris lirik aktif selalu tepat di tengah vertikal viewport.
   - [x] Centering presisi berfungsi konsisten untuk trek Lokal/Offline, Navidrome Cloud stream, dan YouTube Music stream.
   - [x] Auto-scroll langsung pada inisialisasi awal, saat scrubbing/seeking, dan saat pergantian offset waktu.
-
 - [x] **31.2 WebM to Ogg Opus Real-Time Streaming Remuxer & Native SoLoud Pipeline**
   - [x] Implementasi `WebmToOggRemuxer` (pure Dart EBML parser & Ogg Opus packager RFC 3533/7845/6716) untuk mengonversi stream WebM Opus YouTube menjadi Ogg Opus ber-header valid secara real-time.
   - [x] Refaktor `YouTubeMusicService.getOggOpusAudioByteStream()` dan `downloadAudio()` agar data stream dan cache lokal tersimpan sebagai Ogg Opus yang dapat didecode langsung oleh engine C++ `flutter_soloud`.
   - [x] Refaktor `PlayerController.playTrack()` untuk melakukan pre-buffering header Ogg (`OpusHead` & `OpusTags`) sebelum `playAudioSource` dipanggil, memulihkan pemutaran YouTube audio instan tanpa tertahan di loading/pause.
-
 - [x] **31.3 Compact Bento 2x2 Library Empty State Quick Actions**
   - [x] Redesain layout kartu empty state library dari list vertikal panjang menjadi Bento Grid 2x2 yang ringkas dan proporsional.
   - [x] Mengelompokkan tombol sumber lokal (`SELECT MUSIC FOLDER`, `PICK AUDIO FILES`) dan sumber online (`CONNECT NAVIDROME CLOUD`, `EXPLORE YOUTUBE MUSIC HIFI`) dengan visual studio yang rapi.
   - [x] Penambahan pill badge format audiophile compact di bagian footer kartu.
-
 - [x] **31.4 Theming Color Surface Fill Style Setting (Solid vs Translucent State & Selector)**
   - [x] Penambahan enum `SurfaceFillStyle` (`translucent`, `solid`) dan integrasi ke `ThemeSettingsState` serta `LocalPersistenceService` (`surface_fill_style`).
   - [x] Penambahan Segmented Control selector pada `ThemingSettingsScreen` di bawah section `SURFACE & COMPONENT FILL STYLE`.
   - [x] State tersimpan persisten dan hot-reload resilient.
-
 - [x] **31.5 Unit & Widget Test Suite Validation**
   - [x] Pembuatan test file `test/phase_31_features_test.dart` dan `test/webm_to_ogg_remuxer_test.dart`.
   - [x] Memastikan 100% test passing (264 tests lulus) dan 0 issues pada `flutter analyze`.
@@ -1022,7 +784,6 @@ Penerapan menyeluruh pengaturan gaya warna `SurfaceFillStyle` (`translucent` / T
     - `outline(context, {bool isSolid = false, double translucentAlpha = 0.4})`: Mengembalikan `colorScheme.outline` solid pada mode `solid`.
     - `subtleOutline(context, {bool isSolid = false, double translucentAlpha = 0.25})`: Mengembalikan `colorScheme.outlineVariant` solid pada mode `solid`.
     - `cardDecoration(...)`: Helper standar dekorasi card Bento dengan border dan shadow solid vs translucent.
-
 - [x] **32.2 Dashboard Bento Grid & Hero Cards SurfaceFillStyle Application**
   - [x] Penerapan ke `DashboardScreen`: Background gradient/solid surface container.
   - [x] Penerapan ke `EngineTelemetryBentoCard`: Card container, spec badge, telemetry gauges.
@@ -1031,36 +792,29 @@ Penerapan menyeluruh pengaturan gaya warna `SurfaceFillStyle` (`translucent` / T
   - [x] Penerapan ke `ProQMiniLauncherBentoCard`: Mini RTA container, frequency zone pills.
   - [x] Penerapan ke `RecentLosslessSessionsCarousel`: Track tile containers, Hi-Res format badges.
   - [x] Penerapan ke `StudioHeroShowcaseCarousel`: Showcase cards, action buttons, page indicator container.
-
 - [x] **32.3 Unified Library & Detail Screens SurfaceFillStyle Application**
   - [x] Penerapan ke `UnifiedLibraryScreen`: Search bar container, empty state Bento 2x2 cards, multi-selection bottom action bar (`LibraryBatchActionsBar`).
   - [x] Penerapan ke `TrackTile` dan `StudioTrackActionSheet` (Action item rows, metadata header card).
   - [x] Penerapan ke detail screens: `AlbumDetailScreen`, `ArtistDetailScreen`, `GenreDetailScreen`, `FolderDetailScreen`, `PlaylistsScreen`.
-
 - [x] **32.4 NowPlaying Screen, Lyrics & Modal Sheets SurfaceFillStyle Application**
   - [x] Penerapan ke `NowPlayingScreen`: Top header pills, format badge container, playback control containers, volume & speed bars, studio action strip.
   - [x] Penerapan ke `NowPlayingQueueSheet`: Queue container, reorder tiles, clear/shuffle pills.
   - [x] Penerapan ke `SynchronizedLyricsView`: Active line container, mode toggle pill container.
   - [x] Penerapan ke `StudioDeskDockingScreen` & `StudioCarDockingScreen`: Dashboard container, big transport buttons.
   - [x] Penerapan ke `PlaybackSpeedPitchSheet`, `SleepTimerSheet`, `AudioFileInspectorSheet`, `StudioDspBentoCapsule`, `DualPaneWorkstationPane`.
-
 - [x] **32.5 DSP Rack, Pro-Q Studio & Parametric Canvas SurfaceFillStyle Application**
   - [x] Penerapan ke `DspRackScreen`: `RackUnitCard` containers (expanded & collapsed), knob background discs, bypass switches, profile dialogs.
   - [x] Penerapan ke `ProQStudioScreen`: Bottom control strip (`BandStripBar`), band pills (`B1`, `B2`, ...), action buttons (`Add Band`, `Delete`, `Undo`), filter type selectors.
   - [x] Penerapan ke `AutoEqCloudBrowserDialog`, `AutoEqModalDialog`, `SquiglinkDialog`.
-
 - [x] **32.6 Settings Screens & Dialogs SurfaceFillStyle Application**
   - [x] Penerapan ke `SettingsScreen`: Settings overview hero card, category cards, navigation containers.
   - [x] Penerapan ke sub-screens: `ThemingSettingsScreen`, `PlaybackEngineSettingsScreen`, `StorageCacheSettingsScreen`, `BackupRestoreSettingsScreen`, `LibraryScannerSettingsScreen`, `VisualizerSettingsScreen`, `GesturesSettingsScreen`, `DockingSettingsScreen`, `AudioHardwareSettingsScreen`.
   - [x] Penerapan ke dialogs & modals: `NavidromeConnectDialog`, `MetadataTagEditorSheet`, `BatchTrackTagEditorModal`.
-
 - [x] **32.7 YouTube Music HiFi Discovery Screen SurfaceFillStyle Application**
   - [x] Penerapan ke `YouTubeDiscoveryScreen`: Search input container, quick category chips, trending cards, related songs ribbons, video item tiles.
-
 - [x] **32.8 Audio Dock & MiniPlayer Navigation SurfaceFillStyle Application**
   - [x] Penerapan ke `FloatingRoundedDock`: Floating capsule dock background (solid vs translucent blur), active tab indicator pill.
   - [x] Penerapan ke `NamidaExpandableMiniPlayer`: Collapsed miniplayer container, progress bar, play/pause capsule button.
-
 - [x] **32.9 Pure Solid M3 Anti-Neon Surface & Studio Neutral Palette Standardization**
   - [x] Standardisasi seluruh preset `AppPalette` (`namidaCyan`, `pastelSage`, `amberTube`, `emeraldHiFi`, `electricPurple`, `crimsonPassion`, `pastelLavender`, `pastelSky`, `pastelPeach`, `pastelBlush`, `pastelButter`) ke neutral studio dark surfaces (`0xFF0C0E12`, `0xFF14161C`, `0xFF1C1F27`, `0xFF242833`) dan neutral light surfaces, menghapus murky green/tinted background wash.
   - [x] Pembaruan `StudioSurfaceTheme.tintedContainer` pada mode solid mengembalikan `surfaceContainerHighest` murni untuk kartu icon, pill badges, dan chip kontrol.
@@ -1138,49 +892,78 @@ Standardisasi menyeluruh terhadap seluruh sub-screen pengaturan (Theming, Playba
 
 ---
 
-## Fase 36: Playlist Screen Redesign, Studio Collection Dynamic Integration & Modern 3-Dots Sheet
+## Fase 36: Playlist Screen Redesign, Merged Studio Collections, Studio Playlist Action Sheet, Dedicated Playlist Detail Screen & Scrollbar
 
-Penyelarasan antarmuka menu Playlist dengan Studio Collection, redesign modal pembuatan playlist & smart rules dengan icon proporsional, serta pembaruan menu opsi 3-dots menjadi standard bottom sheet studio.
+Standardisasi dan perombakan komprehensif antarmuka Playlist, modal pembuatan playlist custom/smart, navigasi bertingkat, bottom action sheet, dan detail screen dengan scrollbar interaktif.
 
-- [x] **36.1 Dynamic Smart Playlist Single-Row Integration**
-  - [x] Integrasi Smart Rules ke single-row card "Dynamic Smart Rules" berdampingan dengan Studio Collection.
-  - [x] Navigasi instan ke daftar Smart Playlists saat di-klik.
-- [x] **36.2 Redesign Modal Create Playlist & Smart Rules**
-  - [x] Mengurangi ukuran icon yang terlalu besar menjadi 20-22px studio squircle.
-  - [x] Tata letak bento compact dengan input field yang rapi.
-- [x] **36.3 Modern 3-Dots Bottom Sheet Standardization**
-  - [x] Standardisasi menu konteks opsi lagu/playlist ke floating bottom sheet modern selaras dengan library.
-  - [x] Dukungan detail playlist screen tersendiri dengan custom studio scrollbar.
-
----
-
-## Fase 37: YouTube Streaming Pipeline & Simple UI/UX Library Screen
-
-Optimalisasi pipeline pemutaran streaming audio YouTube Music dan penyederhanaan UI/UX Library YouTube agar lebih intuitif dan bebas hambatan.
-
-- [x] **37.1 YouTube Audio Streaming Pre-buffering & Native Playback Fix**
-  - [x] Penanganan loading status dan perbaikan decoding WebM/Ogg Opus stream ke engine audio.
-  - [x] State tombol Play/Pause konsisten saat stream mulai berjalan tanpa kembali ke pause.
-- [x] **37.2 Clean & Simple YouTube Music Library UI/UX**
-  - [x] Penyederhanaan layout pencarian dan penjelajahan YouTube Music.
-  - [x] Status visual indikator loading & streaming yang halus dan non-intrusif.
+- [x] **36.1 Merged Studio Collections & Dynamic Smart Playlists Row di `PlaylistsScreen`**
+  - [x] Menggabungkan Dynamic Smart Playlists ke dalam baris Studio Collections (bersama Favorite Tracks dan Hi-Res Lossless Masters).
+  - [x] Menavigasi ke `SmartPlaylistsScreen` saat kartu Dynamic Smart Playlists ditekan untuk penjelajahan aturan filter dan preset studio.
+- [x] **36.2 Redesign Modal Pembuatan Playlist Custom & Smart Rule**
+  - [x] Pembuatan `CreateCustomPlaylistModal` bento modern dengan ikon ringkas (18-22px) dan validasi input.
+  - [x] Redesain `CreateSmartPlaylistDialog` dengan proporsi studio terukur (16-18px), evaluasi langsung jumlah lagu yang cocok, dan styling solid/translucent yang konsisten.
+- [x] **36.3 Standardisasi Menu 3-Dots dengan `StudioPlaylistActionSheet`**
+  - [x] Mengganti popup menu legacy dengan modal bottom sheet modern bersudut 24px yang mendukung aksi Play Now, Shuffle, Add to Queue, Rename, Duplicate, Export M3U8, dan Delete.
+- [x] **36.4 Dedicated `PlaylistDetailScreen` & Interactivity**
+  - [x] Collapsing sliver header dengan indikator jumlah lagu, durasi terformat, status custom/smart/preset, dan sticky action bar (Play All, Shuffle).
+  - [x] Integrasi `TrackTile` dengan `StudioTrackActionSheet` dan `Scrollbar` interaktif.
+- [x] **36.5 Unit & Widget Test Suite Validation**
+  - [x] Penambahan suite pengujian `test/playlist_redesign_and_detail_screen_test.dart` dan pembaruan `test/smart_playlists_engine_test.dart` dengan 100% lulus (312/312 tests) dan 0 issues pada `flutter analyze`.
 
 ---
 
-## Fase 38: Silent Navidrome Startup Restore & Error-Only Notifications
+## Fase 37: YouTube Music HiFi UI/UX Streamlining & Streaming Engine Fix
 
-Menghilangkan notifikasi snackbar yang mengganggu saat auto-reconnect Navidrome di awal pembukaan aplikasi, serta memastikan error tetap ditampilkan secara tepat saat terjadi kegagalan.
+Penyederhanaan antarmuka YouTube Discovery / Library Tab agar lebih intuitif, bersih ("as simple"), serta perbaikan menyeluruh pada engine streaming & playback audio YouTube agar lagu dapat terputar secara lancar dan andal.
 
-- [x] **38.1 Silent Startup Reconnection & Synchronization**
+- [x] **37.1 YouTube Audio Remuxer & Streaming Engine Fix**
+  - [x] Perbaikan `WebmToOggRemuxer` dengan packet bundling multi-frame (6+ packets/3KB per page) dan flushing tepat waktu untuk stream Ogg Opus yang 100% compliant dengan parser C++ SoLoud (`libopusfile` / `stb_vorbis`).
+  - [x] Peningkatan ketahanan `YouTubeMusicService` dalam ekstraksi stream manifest dan penanganan chunk audio terfragmentasi.
+  - [x] Refaktor `PlayerController.playTrack` dengan progressive pre-buffer playback (128KB / 15 chunks header + initial frames) yang tangguh dan fallback caching otomatis 20s.
+- [x] **37.2 YouTube Discovery Screen UI/UX Simplification ("As Simple")**
+  - [x] Redesain `YouTubeDiscoveryScreen` dengan layout Bento semi-minimalis yang bersih, bebas elemen clutter / slop berlebih.
+  - [x] Integrasi search bar responsif dengan debouncing 400ms, filter kategori ringkas, dan kartu bento 1-tap play.
+  - [x] Standardisasi tombol aksi 3-dots dengan `StudioTrackActionSheet`.
+- [x] **37.3 Unit & Integration Test Suite Validation**
+  - [x] Pembuatan `test/youtube_streaming_and_simple_ui_test.dart` untuk memvalidasi alur streaming YouTube, transisi state player, dan rendering UI.
+  - [x] Memastikan `flutter analyze` 0 issues dan `flutter test` lulus 100% (315/315 tests passing).
+
+---
+
+## Fase 38: Spotify-Style Studio Lyric Card & Social Media Sharing System & Silent Navidrome Startup
+
+Pembuatan kartu kutipan lirik studio beresolusi tinggi (Lyric Card) bergaya Spotify / Apple Music dengan rasio kustom (9:16 Story, 1:1 Post, 4:5 Portrait, 16:9 Landscape), seleksi multi-baris interaktif, tema warna dinamis / OLED / studio, badge format Hi-Res audio, rasterisasi gambar via RepaintBoundary, serta integrasi berbagi ke media sosial (Instagram Stories, WhatsApp, X, dsb.) dan galeri lokal, beserta silent auto-reconnect Navidrome startup.
+
+- [x] **38.1 Setup Dependensi `share_plus` & Domain Model**
+  - [x] Menambahkan package `share_plus` (`^13.3.0`) ke `pubspec.yaml`.
+  - [x] Membuat domain model `LyricShareConfig`, enum `LyricCardRatio` (9:16 Story, 1:1 Square, 4:5 Portrait, 16:9 Landscape), dan `LyricCardThemePreset`.
+  - [x] Membuat model `LyricCardColors` dengan resolusi tema preset (Dynamic, Studio OLED Black, Precision Mint, Sky Studio, Warm Tube, Studio Rose).
+- [x] **38.2 Canvas Render `LyricCardWidget` & Service Rasterisasi `LyricImageGenerator`**
+  - [x] Membangun `LyricCardWidget` responsif (`LayoutBuilder` & dynamic scale factor) dengan tipografi lirik tebal, metadata track, artwork squircle 12px, Hi-Res audio badge, dan studio branding.
+  - [x] Mengimplementasikan `LyricImageGenerator` untuk rasterisasi `RepaintBoundary` -> PNG byte buffer (`pixelRatio: 3.0`) -> cache file -> native sharing via `SharePlus.instance.share`.
+- [x] **38.3 State Management & Interactive Modal `LyricShareSheet`**
+  - [x] Membuat `LyricShareController` untuk mengelola seleksi baris lirik (1-5 baris berurutan) dan konfigurasi tampilan.
+  - [x] Membuat `LyricShareSheet` dengan tab seleksi lirik, live preview canvas interaktif, color/ratio switcher, dan tombol aksi share/save.
+- [x] **38.4 Integrasi ke `SynchronizedLyricsView` & Player**
+  - [x] Menambahkan tombol aksi Share Lyrics di toolbar lirik dan interaksi long-press pada baris lirik.
+  - [x] Menghubungkan metadata lagu aktif, format audio (kHz/bit), dan artwork.
+- [x] **38.5 Dynamic Album Palette, Blurred Cover Background, Gallery Saving & App Logo Branding**
+  - [x] Memperbaiki penyimpanan rasterisasi gambar langsung ke direktori publik Galeri / Pictures (`Pictures/BayHifi` di Android/desktop) agar langsung muncul di Galeri foto perangkat.
+  - [x] Menangani pengecualian `MissingPluginException` pada `share_plus` secara elegan dengan pesan informatif dan fallback otomatis ke penyimpanan galeri.
+  - [x] Memperbaiki rendering artwork album pada footer kartu preview menggunakan `StudioArtworkWidget` terpadu agar selalu tampil dari bytes, file lokal, maupun URL.
+  - [x] Menambahkan 4 mode styling background: *Blurred Cover* (artwork album blur dengan studio readability shield), *Cover Palette* (swatches warna dinamis via `PaletteGenerator`), *Studio Themes* (preset studio), dan *Custom Colors* (12 palet warna audiophile kustom).
+  - [x] Memperbarui branding studio di header kartu menggunakan aset logo resmi aplikasi `assets/images/baydev_logo.png`.
+- [x] **38.6 Custom Typography, Audio Specs Badge Custom Text & Landscape Ratio**
+  - [x] Menambahkan opsi tipe font (`Studio Sans`, `Editorial Serif`, `Studio Mono`, `Script Flow`).
+  - [x] Menambahkan kontrol perataan teks (*Left*, *Center*, *Right*), ketebalan teks (*Bold/Regular*), kemiringan (*Italic*), dan *font size scale stepper* (`65%` hingga `160%`).
+  - [x] Menambahkan dialog editor teks kustom untuk *Audio Specs Badge* dengan opsi *Reset to Auto*.
+  - [x] Menambahkan opsi rasio kartu *Landscape (16:9)* yang responsif untuk wallpaper desktop dan feed sosial horizontal.
+- [x] **38.7 Silent Navidrome Startup Restore & Error-Only Notifications**
   - [x] Parameterisasi `isSilent = true` pada `restoreNavidromeSession()`, `connectNavidrome()`, dan `syncNavidromeLibrary()`.
-  - [x] Membersihkan `statusMessage` dari toast/snackbar saat auto-connect dan auto-sync berjalan sukses di startup.
-- [x] **38.2 Error Notification Preservation**
-  - [x] Memastikan saat server offline, URL/kredensial salah, atau sinkronisasi gagal, `statusMessage` tetap terisi dan SnackBar error tetap muncul di UI.
-  - [x] Menjaga feedback interaktif non-silent saat user melakukan koneksi manual via `NavidromeConnectDialog`.
-- [x] **38.3 Unit & Widget Test Suite Validation**
-  - [x] Pengujian unit di `test/phase_29_and_30_features_test.dart` memvalidasi `restoreNavidromeSession(isSilent: true)` tidak menampilkan status message saat sukses dan menampilkan error message saat koneksi gagal.
-  - [x] 100% tests passing dan 0 analyzer issues.
-
+  - [x] Membersihkan `statusMessage` dari toast/snackbar saat auto-connect dan auto-sync berjalan sukses di startup, sambil mempertahankan notifikasi error saat terjadi kegagalan koneksi.
+- [x] **38.8 Unit & Widget Test Suite Validation**
+  - [x] Membuat unit test `test/lyric_share_models_and_controller_test.dart` dan widget test `test/lyric_card_widget_and_sheet_test.dart`.
+  - [x] Memastikan `flutter test` lulus 100% dan `flutter analyze` 0 issues / 0 warnings.
 
 ---
 
@@ -1225,47 +1008,132 @@ Perbaikan bug hilangnya warna tema dinamis dari cover album lagu yang sedang akt
 
 ---
 
-## Fase 41: Modern Studio UI/UX Redesign & Visual Polish
+## Fase 41: UI/UX Redesign, Dashboard Reordering, Library Grid Mode & Dynamic Detail Screen Backdrops
 
-Standardisasi visual antarmuka di seluruh aplikasi dengan layout semi-minimalis Material 3 Expressive, squircle surfaces, eliminasi visual clutter, dan konsistensi studio aesthetics.
+Penyempurnaan estetika studio dan konsistensi interaksi visual:
+1. **Lyric Card Ratio Horizontal Scroll**: Selector rasio kartu lirik menggunakan `SingleChildScrollView` horizontal dengan tombol berukuran terstandarisasi (`86px`) sehingga seluruh opsi (Story 9:16, Portrait 4:5, Square 1:1, Landscape 16:9) pas dan tidak terpotong atau wrap ke bawah.
+2. **Dashboard Hierarchy Redesign**: Rekonfigurasi urutan section Dashboard di mana `Recent Lossless Sessions` (`RecentSessionsBentoCarousel`) kini berada tepat di bawah `Dynamic Studio Mixes` (`StudioHeroShowcaseCarousel`) untuk visual flow yang harmonis.
+3. **Default Grid Mode for Albums & Artists (3-Column Circular Studio Presentation)**: Menjadikan mode Grid sebagai default (`layoutMode = ViewLayoutMode.grid`) dan merombak tampilan tab Artists menjadi **3 kolom per baris** dengan avatar berbentuk lingkaran murni, bayangan studio, dan nama artis di tengah.
+4. **Album Detail Screen Ambient Artist Photo Background (Soft Studio Blur)**: Menampilkan foto artis di belakang cover album dengan efek Gaussian blur yang halus dan tidak berlebihan (`sigma 7.0`), berpadu dengan gradient scrim yang seimbang sehingga foto artis terlihat jelas namun teks dan cover tetap terbaca tajam.
+5. **Artist Detail Screen Dynamic Collage & Gradient Backdrop**:
+   - Jika artis memiliki $\ge 4$ album: Menghasilkan **2x2 Album Cover Art Collage** yang diblur halus (`sigma 12.0`) dan dipadukan dengan studio vignette overlay.
+   - Jika artis memiliki $< 4$ album: Menghasilkan ambient backdrop foto artis (`sigma 7.0`) / artwork album primer dengan gradasi permukaan tema yang menyatu mulus ke tracklist.
+6. **Library Tracks Shuffle Shortcut FAB**: Menambahkan secondary FAB di atas Category FAB pada tab Tracks (`CollectionTab.tracks`) yang mengacak seluruh koleksi track, memasukkan track ke playback queue (`ref.read(playerControllerProvider.notifier).setQueue(shuffled, initialIndex: 0)`), memicu haptic feedback, dan menampilkan konfirmasi snackbar.
+7. **Clean Bento Architecture di Seluruh Layar & Typographic Hierarchy**:
+   - Standardisasi margin, radius squircle konsisten, dan solid studio surface backgrounds (`theme.colorScheme.surface`, `surfaceContainer`).
+   - Eliminasi gradasi berlebihan dan efek glassmorphism yang mengaburkan teks.
+   - Integrasi `FontFeature.tabularFigures()` pada seluruh metrik numerik, waktu durasi, frekuensi DSP, dan sampling rate.
 
-- [x] **41.1 Clean Bento Architecture di Seluruh Layar**
-  - [x] Standardisasi margin, radius squircle konsisten, dan solid studio surface backgrounds (`theme.colorScheme.surface`, `surfaceContainer`).
-  - [x] Eliminasi gradasi berlebihan dan efek glassmorphism yang mengaburkan teks.
-- [x] **41.2 Typographic Hierarchy & Tabular Figures**
-  - [x] Integrasi `FontFeature.tabularFigures()` pada seluruh metrik numerik, waktu durasi, frekuensi DSP, dan sampling rate.
-- [x] **41.3 Unit & Widget Test Suite Validation**
-  - [x] Seluruh unit test dan widget test passing 100% dengan 0 analyzer issues.
-
----
-
-## Fase 42: Pro-Q Studio & DSP Rack Precision Mastering Redesign
-
-Penyempurnaan arsitektur DSP Rack dan Pro-Q Studio dengan visualisasi interaktif kurva biquad IIR, RTA spectrum analyzer 120 FPS, dan integrasi AutoEQ/Squiglink database.
-
-- [x] **42.1 Precision Interactive Parametric Equalizer (`ProQCanvas`)**
-  - [x] Zero latency node dragging, filter type selection (Bell, Low Shelf, High Shelf, Notch, Bandpass, Low Pass, High Pass), Q-factor pinch-to-zoom.
-- [x] **42.2 Mastering DSP Rack Modules**
-  - [x] Rack unit cards dengan modular bypass switch, gain reduction VU meters, and dynamic telemetry.
-- [x] **42.3 Unit & Widget Test Suite Validation**
-  - [x] 100% tests passing di `test/dsp_rack_test.dart` dan `test/auto_eq_test.dart`.
-
----
-
-## Fase 43: Audio Pipeline Resilience & Dynamic Routing
-
-Optimalisasi pemutaran offline, streaming remote (Navidrome & YouTube Music via SoLoud), format conversion pipeline (WebM/Ogg Opus), dan crossfade transitions.
-
-- [x] **43.1 Robust Streaming & Caching Engine**
-  - [x] Penanganan stream disconnection, automatic retry, silent connection restores.
-- [x] **43.2 Unit & Audio Engine Test Suite Validation**
-  - [x] 100% tests passing di `test/webm_to_ogg_remuxer_test.dart` dan `test/youtube_streaming_and_simple_ui_test.dart`.
+- [x] **41.1 Lyric Card Ratio Picker Horizontal Scroll**
+- [x] **41.2 Dashboard Section Reordering & Proportions**
+- [x] **41.3 Library Albums & Artists Default 3-Column Circular Grid Mode & Toggle Bugfix**
+- [x] **41.4 Album Detail Screen Artist Photo Ambient Background (Soft Recognizable Blur)**
+- [x] **41.5 Artist Detail Screen Dynamic 2x2 Collage Backdrop**
+- [x] **41.6 Library Tracks Shuffle All Shortcut FAB with Queue Integration**
+- [x] **41.7 Clean Bento Architecture & Typographic Hierarchy with Tabular Figures**
+- [x] **41.8 Unit & Widget Test Suite Validation (`test/phase_41_ui_ux_redesign_test.dart` - 100% Passed)**
 
 ---
 
-## Fase 44: Pure Material 3 Expressive UI Architecture & 100% Migration
+## Fase 42: Borderless Studio Lyric Card, Dynamic Cover Theming Contrast Hardener, Sub-Settings & Pro-Q Precision Mastering Redesign
 
-Migrasi komprehensif seluruh komponen aplikasi menuju **100% Pure Material 3 Expressive** (`material_3_expressive: ^1.1.3`, `motor`, `material_new_shapes`, `M3EHaptics`), penghapusan ketergantungan pada legacy widgets, penerapan haptics terpusat, dan validasi penuh tanpa regresi.
+Peningkatan kualitas visual kartu lirik, proteksi kontras palet dinamis, serta penyempurnaan arsitektur DSP Rack dan Pro-Q Studio:
+1. **Borderless Studio Lyric Card**: Menghilangkan outer border stroke pada kartu lirik sehingga hasil rendering kartu menjadi bersih, murni, dan borderless dengan sudut squircle halus (`ClipRRect 24px`).
+2. **Dynamic Cover Theme Contrast Hardener (`StudioColorHarmonizer`)**:
+   - Mencegah masalah teks/ikon hitam pada cover album gelap/hitam: Jika warna ekstraksi album memiliki luminance/lightness rendah atau saturasi grayscale, algoritma secara cerdas mentransformasikan aksen menjadi **Studio Silver Ash / Slate (`#94A3B8`)** dengan kontras tinggi WCAG AA.
+   - Mengkalkulasi `onPrimary` dan `onSecondary` secara dinamis pada `AppThemeBuilder` berdasarkan relative luminance sehingga teks/ikon pada tombol selalu terlihat kontras dan tajam.
+   - Mengamankan resolusi `LyricCardColors.fromDynamicColor` agar latar belakang, kartu, dan teks selalu terbaca kontras pada cover hitam.
+3. **Theming & Studio Palettes Sub-Settings Hub Redesign**:
+   - **Active Studio Theme Cockpit Preview**: Menampilkan live preview pemutar studio mini, audio specs badge, slider aksen, dan 4 titik swatch warna.
+   - **Display Ground & Surface Style Card**: Kontrol compact 3-opsi Theme Mode (`System`, `Light`, `Dark`) dan 2-opsi Surface Fill Style (`Solid M3` vs `Translucent Soft Tint`).
+   - **Dynamic & OLED Engines**: Bento card switch untuk *Monet Dynamic Album Art Palette* dan tombol 1-tap aktivasi *True OLED Black Mode*.
+   - **Curated Studio Palettes Filtered Grid**: Tab filter kategori (`All Presets`, `Studio Core`, `Pastel Soft`) dengan 2-kolom grid bento responsif berisi 19 palet studio dan checkmark indicator.
+   - **Custom Studio Accent Picker**: 19 color swatches studio dengan active glow ring.
+4. **Pro-Q Studio & DSP Rack Precision Mastering Redesign**:
+   - Precision Interactive Parametric Equalizer (`ProQCanvas`): Zero latency node dragging, filter type selection, Q-factor pinch-to-zoom.
+   - Mastering DSP Rack Modules: Modular bypass switch, gain reduction VU meters, and dynamic telemetry.
+
+- [x] **42.1 Borderless Studio Lyric Card Canvas (`LyricCardWidget`)**
+- [x] **42.2 StudioColorHarmonizer Dynamic Cover Contrast Protection**
+- [x] **42.3 Dynamic `onPrimary` / `onSecondary` & WCAG AA Contrast in `AppThemeBuilder`**
+- [x] **42.4 Material 3 Expressive Sub-Settings Redesign (`ThemingSettingsScreen`)**
+- [x] **42.5 Precision Interactive Parametric Equalizer & Mastering DSP Rack Modules**
+- [x] **42.6 Unit & Widget Test Suite Validation (`test/phase_42_theming_and_contrast_test.dart` - 100% Passed)**
+
+---
+
+## Fase 43: Instagram & Spotify Style Lyric Card Customization Engine, Audio Pipeline Resilience & Dynamic Routing
+
+Ekspansi kemampuan kustomisasi kartu lirik studio berstandar Instagram Stories & Spotify Sharing, serta optimalisasi pipeline audio streaming:
+1. **Multi-Weight Typography Engine**:
+   - Selector ketebalan font (`FontWeight.w400 Regular`, `w600 SemiBold`, `w700 Bold`, `w900 Black`) dengan chip interaktif 1-tap.
+   - Pilihan perataan teks (Left, Center, Right), toggle italic, dan font size scaling stepper (`65%` - `160%`).
+2. **Text Styles & Highlights (Instagram & Spotify Style `LyricCardHighlightStyle`)**:
+   - **`Clean` (`none`)**: Tipografi studio minimalis tanpa efek tambahan.
+   - **`Text Stroke` (`stroke`)**: Border outline di sekeliling teks karakter huruf menggunakan dual-pass layer rendering (`Stack` + `Paint()..style=PaintingStyle.stroke`) dengan warna kontras otomatis dan opsi ketebalan stroke (`1.5px Subtle`, `2.5px Standard`, `4.0px Thick`).
+   - **`Instagram Pill` (`highlighterPill`)**: Kotak latar rounded squircle bergaya Instagram Stories di belakang setiap baris lirik dengan padding nyaman dan kontras tinggi.
+   - **`Spotify Glow` (`dropShadow`)**: Ambient diffused drop shadow dan soft accent glow di belakang glyph teks sehingga lirik melayang jelas di atas artwork yang kompleks.
+3. **Typography Spacing & Formatting**:
+   - Kontrol line spacing dinamis: `Compact (0.8x)`, `Normal (1.0x)`, `Relaxed (1.3x)`.
+   - Kontrol letter spacing: `Tight (-0.5)`, `Normal (-0.2)`, `Wide (+0.8)`.
+4. **Atmosphere & Readability Shield Adjustments**:
+   - Pengaturan instan intensitas blur cover: `Soft (15)`, `Normal (30)`, `Deep (50)`.
+   - Pengaturan intensitas dark vignette / readability shield: `Light (40%)`, `Standard (65%)`, `Heavy (85%)`.
+5. **No Overflow Guarantee**:
+   - Seluruh baris kontrol di dalam modal bottom sheet dibungkus horizontal scroll view responsif untuk tampilan sempurna di semua rasio layar mobile.
+6. **Audio Pipeline Resilience & Dynamic Routing**:
+   - Penanganan stream disconnection, automatic retry, dan silent connection restores.
+
+- [x] **43.1 Domain Models & Config Expansion (`LyricCardHighlightStyle`, `LyricShareConfig`)**
+- [x] **43.2 Dual-Pass Stroke, Instagram Pill & Spotify Glow Canvas (`LyricCardWidget`)**
+- [x] **43.3 Blur Sigma & Readability Shield Atmospheric Controls in `LyricCardWidget`**
+- [x] **43.4 Responsive Material 3 Expressive Bento UI Controls in `LyricShareSheet`**
+- [x] **43.5 Controller State Updaters in `LyricShareController`**
+- [x] **43.6 Robust Streaming & Caching Engine Integration**
+- [x] **43.7 Unit & Widget Test Suite Validation (`test/phase_43_lyric_card_customization_test.dart` - 100% Passed)**
+
+---
+
+## Fase 44: Pure Material 3 Expressive UI Architecture & 100% Migration PRD
+
+### Product Requirements Document (PRD) — 100% `material_3_expressive` Adoption
+
+#### 1. Executive Summary & Vision
+Baydev HiFi bertransformasi secara penuh menuju arsitektur **100% Pure Material 3 Expressive** dengan mengadopsi library resmi [`material_3_expressive`](https://pub.dev/packages/material_3_expressive) (`version: ^1.1.3`) dan sub-sistemnya (`material_ui: ^1.4.0`, `motor: ^0.2.0` / `^1.1.0`, `material_new_shapes: ^1.0.0`).
+Tujuan utama migrasi ini adalah menyatukan seluruh komponen antarmuka ke standar Material 3 Expressive resmi dari Google:
+- Menghilangkan seluruh widget Material 1/2 legacy dan implementasi kustom ad-hoc.
+- Memanfaatkan fisika pegas *spring motion* (`motor`) untuk seluruh transisi bottom sheet, dialog, carousels, expand-collapse miniplayer, dan interaksi sentuhan.
+- Mengadopsi morfologi bentuk squircle geometris (`material_new_shapes`) dan token dimensi resmi (`M3EDimensions`).
+- Menjaga performa audio audiophile 120 FPS pada custom canvas (`ProQCanvas`, `RtaVisualizerCanvas`, `WaveformCanvas`) dengan membungkusnya secara bersih di dalam kontainer `M3ECard` / `M3EShapeContainer`.
+
+---
+
+#### 2. Matriks Pemetaan & Inventarisasi Komponen (Component Migration Matrix)
+
+| Kategori UI | Komponen Sebelumnya (Legacy / Ad-hoc) | Komponen Resmi `material_3_expressive` | Fitur / Keunggulan M3 Expressive |
+| :--- | :--- | :--- | :--- |
+| **Root Application** | `MaterialApp` + `ThemeData` | `M3EMaterialApp` + `M3EThemeData` | `autoTheming`, `dynamicColoring`, `drawUnderSystemBars: true` |
+| **Navigation Dock** | Custom `AnimatedContainer` pill dock | `M3ENavigationBar` / `M3EToolbar` | Capsule floating dock dengan spring pill indicators (`motor`) |
+| **Bento Cards** | Custom `Container` / `InkWell` | `M3ECard.filled` / `M3ECard.outlined` | Tonal elevation, 1px crisp studio border, dynamic splash ripple |
+| **Horizontal Carousels** | `PageView.builder` / `ListView` | `M3ECarousel.multiBrowse` / `.uncontained` | Dynamic peek edges, spring deceleration, and flush grid alignment |
+| **Buttons & Actions** | `ElevatedButton`, `FilledButton`, `TextButton` | `M3EButton.filled`, `.tonal`, `.outlined` | Standar rasio M3E, squircle corners, expressive press feedback |
+| **Icon Buttons** | `IconButton` standard | `M3EIconButton.standard`, `.filled`, `.tonal` | 40x40 touch target minimum, unified HugeIcons stroke |
+| **Floating Actions** | Standard `FloatingActionButton` | `M3EFab`, `M3EExtendedFab`, `M3EFabMenu` | Speed dial floating action menu dengan animasi morphing |
+| **Audio Sliders** | Standard `Slider` | `M3ESlider.continuous` & `M3ESlider.wavy` | Track berekspresi, dynamic thumb morphing, snap haptics |
+| **Switches & Toggles** | Standard `Switch` | `M3ESwitch` | Expressive thumb icon state, spring glide animation |
+| **Checkboxes** | Standard `Checkbox` | `M3ECheckbox` | Squircle rounded checkmark, multi-state visual feedback |
+| **Segmented Selectors** | Custom pill toggle rows | `M3ESegmentedButton` / `M3EButtonGroup` | Single & multi-segment pill switching with spring physics |
+| **Lists & Track Tiles** | `ListTile` standard | `M3EListTile` | Leading `M3EShapeContainer`, trailing `M3EBadge`, ripple states |
+| **Badges & Specs** | Custom badge container | `M3EBadge` | Tabular figures support, tonal background, crisp outline |
+| **Bottom Sheets** | `showModalBottomSheet` standard | `M3EBottomSheet.showModal` | Spring drag physics (`motor`), rounded 28px top corners |
+| **Dialogs & Modals** | `AlertDialog` / `Dialog` | `M3EDialog` | Expressive content layout, actions alignment, tonal background |
+| **Search Bars** | Standard `TextField` | `M3ESearchBar` & `M3ESearchAnchor` | Expandable search view, search suggestions, leading HugeIcon |
+| **Progress & Loaders** | `LinearProgressIndicator`, `CircularProgressIndicator` | `M3EProgressIndicator`, `M3ELoadingIndicator` | Expressive fluid indeterminate animations & micro-progress lines |
+| **Haptic Feedback** | `HapticFeedback.selectionClick()` | `M3EHaptics.selectionClick()` / `.lightImpact()` | Respon taktil terintegrasi pada event interaksi M3E |
+
+---
+
+#### 3. Checklist Eksekusi Migrasi 100% Pure M3 Expressive
 
 - [x] **44.1 Root App Shell & Dynamic Theming (`M3EMaterialApp` + `M3EThemeData`)**
   - [x] Migrasi `MaterialApp` ke `M3EMaterialApp` di `lib/app/app.dart` dengan `M3EThemeData` (`autoTheming: true`, `dynamicColoring: true`, `drawUnderSystemBars: true`).
@@ -1374,5 +1242,3 @@ Perombakan total antarmuka grafis Baydev HiFi menjadi **100% Pure Material 3 Exp
 - [x] **48.3 Konfigurasi .gitignore & Dokumentasi Blueprint**:
   - [x] Pembaruan `.gitignore` untuk mengabaikan artefak build Linux ephemeral (`linux/flutter/ephemeral/`), standalone packaging (`*.AppImage`, `*.deb`, `*.tar.gz`), dan folder bundle staging.
   - [x] Pembuatan dokumen panduan kompilasi dan distribusi desktop di [linux_desktop_compilation_plan.md](file:///home/x/.gemini/antigravity-ide/brain/60c8bfc5-8a26-4277-8746-1c10727adb4b/linux_desktop_compilation_plan.md).
-
-
