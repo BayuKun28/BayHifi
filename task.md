@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 50 Fase (Fase 1–50 Selesai • 100% Passed • 373/373 Passed)
+- **Total Fase**: 51 Fase (Fase 1–51 Selesai • 100% Passed • 389/389 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 50: In-Tree YouTube & YouTube Music Streaming Engine Overhaul, 100% Full-Duration Stream Resolver & Desktop Focus Isolation (Complete — 0 Errors, 0 Warnings)_
+- **Status Proyek**: _Phase 51: Online Multi-Source Metadata Auto-Fetcher, Interactive Candidate Picker, Batch Auto-Tagger & Library Untagged Filter Chip (Complete — 0 Errors, 0 Warnings • 389/389 Passed)_
 
 ---
 
@@ -1307,4 +1307,35 @@ Modernisasi dan kustomisasi in-tree engine `packages/youtube_explode_dart` untuk
   - [x] Unit & widget tests di `test/desktop_shortcuts_and_youtube_stream_test.dart` (6/6 passed).
   - [x] Integration tests di `test/youtube_stream_integration_test.dart` memverifikasi streaming melampaui 1MB tanpa stall (2/2 passed).
   - [x] Verifikasi `flutter analyze` 0 errors/warnings dan `flutter test` lulus 100% (373/373 passed).
+
+---
+
+## Fase 51: Online Multi-Source Metadata Auto-Fetcher, Interactive Tag Picker, Batch Auto-Tagger & Library Untagged Filter Chip
+
+Implementasi sistem identifikasi dan pencocokan metadata musik otomatis dari berbagai sumber online terpercaya (iTunes Search API, MusicBrainz / Cover Art Archive, Deezer API, dan LRCLIB) untuk memperbaiki file audio yang tidak memiliki tag metadata, artwork cover resolusi tinggi, atau lirik, disertai filter chip dinamis `Untagged` di Unified Library dan modal batch tagger interaktif.
+
+- [x] **51.1 Multi-Provider Online Metadata & Lyrics Engine (`OnlineMetadataService`)**:
+  - [x] Integrasi iTunes Search API (1400×1400 lossless album artwork).
+  - [x] Integrasi Deezer Search API (genre, ISRC, release year, album art).
+  - [x] Integrasi MusicBrainz & Cover Art Archive (verifikasi disc/track number presisi).
+  - [x] Integrasi LRCLIB API untuk pengambilan lirik tersinkronisasi (LRC) & teks polos.
+  - [x] Sanitasi query cerdas (`QuerySanitizer`): pembersihan ekstensi file, nomor track awal (`01 -`, `Track 02`), tag bitrate (`[320kbps]`, `(Official Audio)`), dan pemisahan artis-judul otomatis.
+  - [x] Algoritma penilaian kecocokan berbobot (confidence score $0.0 - 1.0$) berdasarkan Levenshtein distance dan toleransi durasi $\pm 5\text{s}$.
+- [x] **51.2 Interactive Single-Track Candidate Picker (`OnlineCandidatePickerModal`)**:
+  - [x] Modal Material 3 Expressive dengan bilah pencarian interaktif dan real-time live search.
+  - [x] Kartu kandidat dengan thumbnail artwork, badge sumber data (`ITUNES`, `DEEZER`, `MUSICBRAINZ`), persentase kecocokan berwarna adaptif, dan tombol `Apply` 1-ketukan.
+  - [x] Pengunduhan otomatis artwork resolusi tinggi ke memori dan penulisan langsung ke file fisik saat disimpan.
+- [x] **51.3 Multi-Track Batch Auto-Tagger (`OnlineBatchAutoTaggerModal`)**:
+  - [x] Pemindaian batch otomatis beruntun dengan rate-limit protection.
+  - [x] Progress bar penelusuran online dan penulisan metadata real-time.
+  - [x] Daftar review kecocokan dengan checkbox seleksi dan indikator akurasi.
+  - [x] Penulisan batch ke file fisik (`ID3` / `Vorbis` tags) serta sinkronisasi state in-memory, antrean pemutar, dan database persistensi lokal.
+- [x] **51.4 Library Untagged Filter Chip & Quick Action Banner**:
+  - [x] Penambahan getter `Track.isUntagged` mendeteksi nama artis/album tidak dikenal, judul mentah berekstensi, atau cover art yang hilang.
+  - [x] Filter chip dinamis `Untagged (N)` pada header Unified Library dengan warna Warm Tube Amber (`StudioCategoryColors.warmTubeAmber`).
+  - [x] Quick action banner contextual pada tab Untagged dengan tombol langsung `Auto-Tag All from Internet` dan `Batch Edit`.
+- [x] **51.5 Quality Gate & Regression Testing**:
+  - [x] Unit tests sanitasi query dan konversi kandidat di `test/online_metadata_service_test.dart` (4/4 passed).
+  - [x] Unit & widget tests Untagged filter chip, quick banner, dan modal picker/tagger di `test/untagged_filter_chip_and_auto_tag_test.dart` (5/5 passed).
+  - [x] Verifikasi `flutter analyze` 0 errors/warnings dan `flutter test` lulus 100% (389/389 passed).
 

@@ -11,6 +11,7 @@ import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../data/metadata_tagger_service.dart';
 import '../controllers/library_controller.dart';
+import 'online_candidate_picker_modal.dart';
 
 class MetadataTagEditorSheet extends ConsumerStatefulWidget {
   final Track track;
@@ -92,6 +93,55 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
     _discTotalController.dispose();
     _lyricsController.dispose();
     super.dispose();
+  }
+
+  Future<void> _autoFetchFromInternet() async {
+    final result = await OnlineCandidatePickerModal.show(context, widget.track);
+    if (result != null) {
+      final c = result.candidate;
+      setState(() {
+        _titleController.text = c.title;
+        _artistController.text = c.artist;
+        _albumController.text = c.album;
+        _albumArtistController.text = c.albumArtist ?? c.artist;
+        if (c.genre != null && c.genre!.isNotEmpty) {
+          _genreController.text = c.genre!;
+        }
+        if (c.year != null) {
+          _yearController.text = c.year.toString();
+        }
+        if (c.trackNumber != null) {
+          _trackNumController.text = c.trackNumber.toString();
+        }
+        if (c.trackTotal != null) {
+          _trackTotalController.text = c.trackTotal.toString();
+        }
+        if (c.discNumber != null) {
+          _discNumController.text = c.discNumber.toString();
+        }
+        if (c.discTotal != null) {
+          _discTotalController.text = c.discTotal.toString();
+        }
+        if (result.lyrics != null && result.lyrics!.isNotEmpty) {
+          _lyricsController.text = result.lyrics!;
+        }
+        if (result.artwork != null) {
+          _artworkBytes = result.artwork!.bytes;
+          _artworkMimeType = result.artwork!.mimeType;
+        }
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Applied online tags & artwork from ${c.source.name.toUpperCase()} (${(c.confidenceScore * 100).round()}% match)',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _pickNewArtwork() async {
@@ -265,22 +315,62 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                         ),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: outline, width: 0.8),
-                      ),
-                      child: Text(
-                        widget.track.hiResBadgeText,
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurfaceVariant,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                    Row(
+                      children: [
+                        // Auto-Fetch Header Action Button
+                        InkWell(
+                          onTap: _autoFetchFromInternet,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+                            decoration: BoxDecoration(
+                              color: StudioCategoryColors.warmTubeAmber.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: StudioCategoryColors.warmTubeAmber.withValues(alpha: 0.45),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                HugeIcon(
+                                  icon: HugeIcons.strokeRoundedSparkles,
+                                  size: 13,
+                                  color: StudioCategoryColors.warmTubeAmber,
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Auto-Fetch Online',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: StudioCategoryColors.warmTubeAmber,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: outline, width: 0.8),
+                          ),
+                          child: Text(
+                            widget.track.hiResBadgeText,
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: cs.onSurfaceVariant,
+                              fontFeatures: const [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -295,6 +385,67 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // ─── AUTO-FETCH QUICK BANNER ─────────────────────────
+                      InkWell(
+                        onTap: _autoFetchFromInternet,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: StudioSurfaceTheme.tintedContainer(
+                              context,
+                              StudioCategoryColors.warmTubeAmber,
+                              isSolid: isSolid,
+                              solidBlendAlpha: 0.16,
+                              translucentAlpha: 0.12,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: StudioCategoryColors.warmTubeAmber.withValues(alpha: 0.35),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const HugeIcon(
+                                icon: HugeIcons.strokeRoundedCloudDownload,
+                                size: 20,
+                                color: StudioCategoryColors.warmTubeAmber,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Auto-Fill Metadata & Artwork',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: StudioCategoryColors.warmTubeAmber,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Fetch tags, 1400×1400 cover art, and LRCLIB lyrics from iTunes/MusicBrainz.',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 14,
+                                color: StudioCategoryColors.warmTubeAmber,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
                       // ─── ARTWORK PICKER BENTO CARD ───────────────────────
                       _buildArtworkPicker(cs, outline, primary, isSolid),
                       const SizedBox(height: 16),

@@ -11,6 +11,7 @@ import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../data/metadata_tagger_service.dart';
 import '../controllers/library_controller.dart';
+import 'online_batch_auto_tagger_modal.dart';
 
 class BatchTrackTagEditorModal extends ConsumerStatefulWidget {
   final List<Track> tracks;
@@ -355,6 +356,70 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // ─── ONLINE BATCH AUTO-TAGGER QUICK ACCESS ─────
+                            InkWell(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                OnlineBatchAutoTaggerModal.show(context, _trackList);
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: StudioSurfaceTheme.tintedContainer(
+                                    context,
+                                    StudioCategoryColors.warmTubeAmber,
+                                    isSolid: isSolid,
+                                    solidBlendAlpha: 0.16,
+                                    translucentAlpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: StudioCategoryColors.warmTubeAmber.withValues(alpha: 0.35),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedSparkles,
+                                      size: 20,
+                                      color: StudioCategoryColors.warmTubeAmber,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Auto-Match All from Internet',
+                                            style: TextStyle(
+                                              fontSize: 12.5,
+                                              fontWeight: FontWeight.bold,
+                                              color: StudioCategoryColors.warmTubeAmber,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Automatically query iTunes & MusicBrainz for these ${_trackList.length} tracks.',
+                                            style: TextStyle(
+                                              fontSize: 10.5,
+                                              color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 14,
+                                      color: StudioCategoryColors.warmTubeAmber,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+
                             // ─── SHARED COVER ART BENTO ────────────────────
                             _buildSharedArtworkCard(cs, outline, primary, isSolid),
                             const SizedBox(height: 16),

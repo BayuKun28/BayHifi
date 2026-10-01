@@ -138,6 +138,7 @@ class StudioCategoryColors {
   // ─── DSP & Mastering Hardware ──────────────────────────────────────────
   static const Color dspMastering = Color(0xFF10B981); // Hardware Mint
   static const Color dspTubeWarmth = Color(0xFFF59E0B); // Triode Amber
+  static const Color warmTubeAmber = Color(0xFFF59E0B); // Studio Tube Amber
   static const Color proQEqualizer = Color(0xFF06B6D4); // Precision Cyan
   static const Color autoEq = Color(0xFF14B8A6); // Acoustic Teal
   static const Color compressor = Color(0xFFF97316); // Dynamic Orange

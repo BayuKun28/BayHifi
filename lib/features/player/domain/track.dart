@@ -78,6 +78,29 @@ class Track {
       (sampleRate != null && sampleRate! >= 88200) ||
       format == AudioFormat.dsd;
 
+  /// Check if the track lacks proper metadata (unknown artist/album, generic title, or missing artwork)
+  bool get isUntagged {
+    final a = artist.trim().toLowerCase();
+    final alb = album.trim().toLowerCase();
+    final tit = title.trim().toLowerCase();
+    final isUnknownArtist =
+        a.isEmpty || a == 'unknown artist' || a == 'unknown' || a == '<unknown>';
+    final isUnknownAlbum =
+        alb.isEmpty || alb == 'unknown album' || alb == 'unknown' || alb == '<unknown>';
+    final isGenericTitle = tit.isEmpty ||
+        tit.startsWith('track ') ||
+        tit.startsWith('track_') ||
+        tit.startsWith('track-') ||
+        tit.endsWith('.mp3') ||
+        tit.endsWith('.flac') ||
+        tit.endsWith('.wav') ||
+        tit.endsWith('.m4a') ||
+        tit.endsWith('.ogg');
+    final hasNoArt = (albumArtUrl == null || albumArtUrl!.isEmpty) &&
+        (albumArtBytes == null || albumArtBytes!.isEmpty);
+    return isUnknownArtist || isUnknownAlbum || isGenericTitle || hasNoArt;
+  }
+
   String get hiResBadgeText {
     if (format == AudioFormat.dsd) return 'DSD';
     final bits = bitDepth != null ? '$bitDepth-bit' : '';

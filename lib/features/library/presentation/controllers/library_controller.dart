@@ -9,11 +9,12 @@ import '../../../navidrome/domain/subsonic_models.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../data/local_audio_scanner.dart';
 import '../../data/metadata_tagger_service.dart';
+import '../../data/online_metadata_service.dart';
 import '../../domain/library_collection_models.dart';
 import '../../domain/smart_playlist_models.dart';
 import '../../domain/smart_playlist_evaluator.dart';
 
-enum LibrarySourceFilter { all, offline, navidrome, hiRes }
+enum LibrarySourceFilter { all, offline, navidrome, hiRes, untagged }
 
 @immutable
 class UnifiedLibraryState {
@@ -62,6 +63,7 @@ class UnifiedLibraryState {
         LibrarySourceFilter.offline => t.filePath != null && t.filePath!.isNotEmpty,
         LibrarySourceFilter.navidrome => t.remoteUrl != null && t.remoteUrl!.isNotEmpty,
         LibrarySourceFilter.hiRes => t.isHiRes,
+        LibrarySourceFilter.untagged => t.isUntagged,
       };
 
       if (!matchesSource) return false;
@@ -282,6 +284,7 @@ class UnifiedLibraryState {
   int get navidromeTracksCount =>
       tracks.where((t) => t.remoteUrl != null && t.remoteUrl!.isNotEmpty).length;
   int get hiResTracksCount => tracks.where((t) => t.isHiRes).length;
+  int get untaggedTracksCount => tracks.where((t) => t.isUntagged).length;
 
   List<Track> getSmartPlaylistTracks(SmartPlaylist playlist) {
     return const SmartPlaylistEvaluator().evaluate(
@@ -332,6 +335,10 @@ class UnifiedLibraryState {
   }
 }
 
+final onlineMetadataServiceProvider = Provider<OnlineMetadataService>((ref) {
+  return OnlineMetadataService();
+});
+
 final unifiedLibraryProvider =
     StateNotifierProvider<UnifiedLibraryController, UnifiedLibraryState>((ref) {
   return UnifiedLibraryController();
@@ -342,12 +349,14 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     LocalAudioScanner? scanner,
     SubsonicClient? subsonicClient,
     MetadataTaggerService? tagger,
+    OnlineMetadataService? onlineTagger,
     List<Track>? initialTracks,
     List<PlaylistModel>? initialCustomPlaylists,
     List<SmartPlaylist>? initialSmartPlaylists,
   })  : _scanner = scanner ?? const LocalAudioScanner(),
         _subsonicClient = subsonicClient ?? SubsonicClient(),
         _tagger = tagger ?? const MetadataTaggerService(),
+        _onlineTagger = onlineTagger ?? OnlineMetadataService(),
         super(UnifiedLibraryState(
           tracks: initialTracks ?? _loadSavedTracks(),
           customPlaylists: initialCustomPlaylists ?? const [],
@@ -365,10 +374,12 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   final LocalAudioScanner _scanner;
   final SubsonicClient _subsonicClient;
   final MetadataTaggerService _tagger;
+  final OnlineMetadataService _onlineTagger;
 
   LocalAudioScanner get scanner => _scanner;
   SubsonicClient get subsonicClient => _subsonicClient;
   MetadataTaggerService get tagger => _tagger;
+  OnlineMetadataService get onlineTagger => _onlineTagger;
 
   static List<SmartPlaylist> _loadSavedSmartPlaylists() {
     try {
