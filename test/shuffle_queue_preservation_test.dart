@@ -97,7 +97,7 @@ void main() {
       final expectedNextTrack = controller.state.queue[1];
 
       // Skip to next in shuffled queue
-      await controller.skipNext();
+      await controller.skipNext(autoPlay: false);
 
       expect(controller.state.queueIndex, 1);
       expect(controller.state.currentTrack?.id, expectedNextTrack.id);
@@ -113,8 +113,8 @@ void main() {
       expect(controller.state.isShuffle, isTrue);
 
       // Skip to index 2 in shuffled queue
-      await controller.skipNext();
-      await controller.skipNext();
+      await controller.skipNext(autoPlay: false);
+      await controller.skipNext(autoPlay: false);
       expect(controller.state.queueIndex, 2);
 
       final currentlyPlayingInShuffle = controller.state.currentTrack!;
@@ -140,7 +140,7 @@ void main() {
 
       // Subsequent skipNext advances sequentially in original album order
       if (expectedOrigIndex < sampleAlbumTracks.length - 1) {
-        await controller.skipNext();
+        await controller.skipNext(autoPlay: false);
         expect(controller.state.queueIndex, expectedOrigIndex + 1);
         expect(controller.state.currentTrack?.id, sampleAlbumTracks[expectedOrigIndex + 1].id);
       }

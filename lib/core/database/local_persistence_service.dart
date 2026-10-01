@@ -404,6 +404,33 @@ class LocalPersistenceService {
     _cache['custom_eq_presets'] = list.where((p) => p['name'] != name).toList();
     await _save();
   }
+
+  // ─── 9. DESKTOP WINDOW GEOMETRY PERSISTENCE ────────────────────────────────
+  Map<String, dynamic>? getWindowDimensions() {
+    final data = _cache['desktop_window_geometry'];
+    if (data is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(data);
+    }
+    return null;
+  }
+
+  Future<void> saveWindowDimensions({
+    required double width,
+    required double height,
+    double? x,
+    double? y,
+    bool isMaximized = false,
+  }) async {
+    _cache['desktop_window_geometry'] = {
+      'width': width,
+      'height': height,
+      'x': x,
+      'y': y,
+      'isMaximized': isMaximized,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+    await _save();
+  }
 }
 
 

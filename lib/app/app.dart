@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../app/theme/theme_mode_controller.dart';
+import '../core/desktop/desktop_bottom_master_transport_deck.dart';
+import '../core/desktop/desktop_drag_drop_zone.dart';
+import '../core/desktop/desktop_shortcuts_dispatcher.dart';
+import '../core/desktop/desktop_studio_sidebar.dart';
 import '../core/widgets/floating_rounded_dock.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dsp_rack/presentation/dsp_rack_screen.dart';
@@ -12,6 +15,7 @@ import '../features/player/presentation/controllers/player_controller.dart';
 import '../features/player/presentation/controllers/player_expansion_controller.dart';
 import '../features/player/presentation/widgets/namida_expandable_miniplayer.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/youtube_music/presentation/youtube_discovery_screen.dart';
 
 class BaydevHiFiApp extends ConsumerStatefulWidget {
   const BaydevHiFiApp({super.key});
@@ -65,202 +69,152 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
         ],
         home: Theme(
           data: themeData,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-          final isMobile = constraints.maxWidth < 650;
-          final theme = Theme.of(context);
+          child: DesktopShortcutsDispatcher(
+            onSearchRequested: () => setState(() => _selectedNavIndex = 2),
+            child: DesktopDragDropZone(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final theme = Theme.of(context);
+                  final isDesktop = constraints.maxWidth >= 960;
+                  final isMobile = constraints.maxWidth < 650;
 
-          // 5 Main Studio Tabs
-          final pages = [
-            DashboardScreen(
-              onNavigateToPlayer: () =>
-                  ref.read(playerExpansionProvider.notifier).expand(),
-              onNavigateToLibrary: () => setState(() => _selectedNavIndex = 2),
-              onNavigateToDsp: () => setState(() => _selectedNavIndex = 1),
-            ),
-            const DspRackScreen(),
-            const UnifiedLibraryScreen(),
-            const PlaylistsScreen(),
-            const SettingsScreen(),
-          ];
-
-          if (isMobile) {
-            return Scaffold(
-              backgroundColor: theme.scaffoldBackgroundColor,
-              resizeToAvoidBottomInset: false,
-              body: Stack(
-                children: [
-                  // Layer 1: Page Content
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 80.0),
-                    child: IndexedStack(
-                      index: _selectedNavIndex,
-                      children: pages,
+                  // 6 Studio Pages
+                  final pages = [
+                    DashboardScreen(
+                      onNavigateToPlayer: () =>
+                          ref.read(playerExpansionProvider.notifier).expand(),
+                      onNavigateToLibrary: () => setState(() => _selectedNavIndex = 2),
+                      onNavigateToDsp: () => setState(() => _selectedNavIndex = 1),
                     ),
-                  ),
+                    const DspRackScreen(),
+                    const UnifiedLibraryScreen(),
+                    const PlaylistsScreen(),
+                    const YouTubeDiscoveryScreen(),
+                    const SettingsScreen(),
+                  ];
 
-                  // Layer 2: Floating Rounded Dock
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: FloatingRoundedDock(
-                      selectedIndex: _selectedNavIndex,
-                      onItemSelected: (idx) =>
-                          setState(() => _selectedNavIndex = idx),
-                    ),
-                  ),
+                  // Pastikan indeks navigasi dalam batas array pages
+                  final safeIndex = _selectedNavIndex.clamp(0, pages.length - 1);
 
-                  // Layer 3: Namida Omnipresent Expandable MiniPlayer
-                  NamidaExpandableMiniPlayer(
-                    collapsedBottomOffset: 78.0,
-                    isLibraryTab: _selectedNavIndex == 2,
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // Desktop / Tablet / Landscape View with Studio NavigationRail
-          final isShortHeight = constraints.maxHeight < 550;
-
-          return Scaffold(
-            backgroundColor: theme.scaffoldBackgroundColor,
-            body: Stack(
-              children: [
-                Row(
-                  children: [
-                    NavigationRail(
-                      backgroundColor: theme.colorScheme.surface,
-                      selectedIndex: _selectedNavIndex,
-                      onDestinationSelected: (idx) =>
-                          setState(() => _selectedNavIndex = idx),
-                      labelType: isShortHeight
-                          ? NavigationRailLabelType.none
-                          : NavigationRailLabelType.all,
-                      leading: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: isShortHeight ? 6.0 : 16.0,
-                        ),
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                              width: 1.0,
+                  // ─── 1. MOBILE PHONE LAYOUT (< 650px) ─────────────────────────
+                  if (isMobile) {
+                    final mobileNavIndex = safeIndex > 4 ? 4 : (safeIndex == 4 ? 3 : safeIndex);
+                    return Scaffold(
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      resizeToAvoidBottomInset: false,
+                      body: Stack(
+                        children: [
+                          // Layer 1: Page Content
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 80.0),
+                            child: IndexedStack(
+                              index: safeIndex,
+                              children: pages,
                             ),
                           ),
-                          padding: const EdgeInsets.all(7),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.asset(
-                              'assets/images/baydev_logo.png',
-                              fit: BoxFit.contain,
+
+                          // Layer 2: Floating Rounded Dock
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: FloatingRoundedDock(
+                              selectedIndex: mobileNavIndex,
+                              onItemSelected: (idx) {
+                                // Map 5 mobile items: 0->0, 1->1, 2->2, 3->3, 4->5 (Settings)
+                                final mapped = idx == 4 ? 5 : idx;
+                                setState(() => _selectedNavIndex = mapped);
+                              },
                             ),
                           ),
-                        ),
+
+                          // Layer 3: Namida Omnipresent Expandable MiniPlayer
+                          NamidaExpandableMiniPlayer(
+                            collapsedBottomOffset: 78.0,
+                            isLibraryTab: safeIndex == 2,
+                          ),
+                        ],
                       ),
-                      destinations: [
-                        NavigationRailDestination(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedDashboardSquare01,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            size: 22,
+                    );
+                  }
+
+                  // ─── 2. TABLET / COMPACT LANDSCAPE LAYOUT (650px - 959px) ──────
+                  if (!isDesktop) {
+                    return Scaffold(
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      body: Stack(
+                        children: [
+                          Row(
+                            children: [
+                              DesktopStudioSidebar(
+                                isCompact: true,
+                                selectedIndex: safeIndex,
+                                onDestinationSelected: (idx) =>
+                                    setState(() => _selectedNavIndex = idx),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 74.0),
+                                  child: IndexedStack(
+                                    index: safeIndex,
+                                    children: pages,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          selectedIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedDashboardSquare01,
-                            color: theme.colorScheme.primary,
-                            size: 22,
+
+                          // Namida Expandable MiniPlayer on Tablet
+                          NamidaExpandableMiniPlayer(
+                            collapsedBottomOffset: 12.0,
+                            isLibraryTab: safeIndex == 2,
                           ),
-                          label: const Text('Dashboard', style: TextStyle(fontSize: 11)),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // ─── 3. DESKTOP STUDIO MASTER LAYOUT (>= 960px) ───────────────
+                  return Scaffold(
+                    backgroundColor: theme.scaffoldBackgroundColor,
+                    body: Stack(
+                      children: [
+                        Row(
+                          children: [
+                            DesktopStudioSidebar(
+                              isCompact: false,
+                              selectedIndex: safeIndex,
+                              onDestinationSelected: (idx) =>
+                                  setState(() => _selectedNavIndex = idx),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 84.0),
+                                child: IndexedStack(
+                                  index: safeIndex,
+                                  children: pages,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        NavigationRailDestination(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedSlidersVertical,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            size: 22,
-                          ),
-                          selectedIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedSlidersVertical,
-                            color: theme.colorScheme.primary,
-                            size: 22,
-                          ),
-                          label: const Text('DSP Rack', style: TextStyle(fontSize: 11)),
-                        ),
-                        NavigationRailDestination(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedMusicNote01,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            size: 22,
-                          ),
-                          selectedIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedMusicNote01,
-                            color: theme.colorScheme.primary,
-                            size: 22,
-                          ),
-                          label: const Text('Library', style: TextStyle(fontSize: 11)),
-                        ),
-                        NavigationRailDestination(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlayList,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            size: 22,
-                          ),
-                          selectedIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlayList,
-                            color: theme.colorScheme.primary,
-                            size: 22,
-                          ),
-                          label: const Text('Playlists', style: TextStyle(fontSize: 11)),
-                        ),
-                        NavigationRailDestination(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedSettings01,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            size: 22,
-                          ),
-                          selectedIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedSettings01,
-                            color: theme.colorScheme.primary,
-                            size: 22,
-                          ),
-                          label: const Text('Settings', style: TextStyle(fontSize: 11)),
+
+                        // Layer 2: Persistent Studio Master Transport Deck at bottom
+                        const Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: DesktopBottomMasterTransportDeck(),
                         ),
                       ],
                     ),
-                    VerticalDivider(
-                      width: 1,
-                      thickness: 1,
-                      color: theme.dividerColor,
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 74.0),
-                        child: IndexedStack(
-                          index: _selectedNavIndex,
-                          children: pages,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Namida Expandable MiniPlayer on Desktop/Tablet
-                NamidaExpandableMiniPlayer(
-                  collapsedBottomOffset: 12.0,
-                  isLibraryTab: _selectedNavIndex == 2,
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-          );
-        },
+          ),
+        ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
-

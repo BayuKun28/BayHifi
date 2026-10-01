@@ -25,8 +25,11 @@ class EqController extends StateNotifier<EqState> {
         )) {
     _loadSampleCurves();
     _loadCustomPresetNames();
-    _recalculateSafePreamp();
-    _syncWithVirtualDsp();
+    Future.microtask(() {
+      if (_isDisposed || !mounted) return;
+      _recalculateSafePreamp();
+      _syncWithVirtualDsp();
+    });
     VirtualDspService.instance.addListener(_onDspServiceChanged);
   }
 

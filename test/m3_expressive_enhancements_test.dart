@@ -77,14 +77,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Options should be visible in popup
-      expect(find.text('Albums'), findsOneWidget);
-      expect(find.text('Artists'), findsOneWidget);
-      expect(find.text('Genres'), findsOneWidget);
-      expect(find.text('Folders'), findsOneWidget);
-      expect(find.text('Playlists'), findsOneWidget);
+      expect(find.text('Albums'), findsWidgets);
+      expect(find.text('Artists'), findsWidgets);
+      expect(find.text('Genres'), findsWidgets);
+      expect(find.text('Folders'), findsWidgets);
+      expect(find.text('Playlists'), findsWidgets);
 
       // Tap 'Albums' option
-      await tester.tap(find.text('Albums'));
+      await tester.tap(find.text('Albums').last);
       await tester.pumpAndSettle();
 
       // Popup should be dismissed

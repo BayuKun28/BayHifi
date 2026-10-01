@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
@@ -6,6 +8,8 @@ import 'audio_engine/audio_cache_service.dart';
 import 'audio_engine/soloud_controller.dart';
 import 'core/audio_service/baydev_audio_handler.dart';
 import 'core/database/local_persistence_service.dart';
+import 'core/desktop/desktop_window_service.dart';
+import 'core/desktop/linux_mpris_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +19,24 @@ void main() async {
     await LocalPersistenceService.instance.init();
   } catch (e) {
     debugPrint('Peringatan: Inisialisasi database lokal gagal: $e');
+  }
+
+  // Inisialisasi Window Manager pada platform Desktop (Linux/Windows/macOS)
+  if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
+    try {
+      await DesktopWindowService.instance.init();
+    } catch (e) {
+      debugPrint('Peringatan: Inisialisasi DesktopWindowService ditunda/mock: $e');
+    }
+  }
+
+  // Inisialisasi Linux MPRIS v2 D-Bus Daemon (Linux Only)
+  if (!kIsWeb && Platform.isLinux) {
+    try {
+      await LinuxMprisService.instance.init();
+    } catch (e) {
+      debugPrint('Peringatan: Inisialisasi LinuxMprisService ditunda/mock: $e');
+    }
   }
 
   // Inisialisasi AudioCacheService untuk offline caching & prefetching

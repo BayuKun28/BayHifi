@@ -18,6 +18,10 @@ class DspRackController extends StateNotifier<DspRackState> {
         )) {
     _hydrateState();
     _loadCustomPresets();
+    Future.microtask(() {
+      if (_isDisposed || !mounted) return;
+      _syncWithEngine();
+    });
     VirtualDspService.instance.addListener(_onEngineChanged);
   }
 
@@ -42,7 +46,6 @@ class DspRackController extends StateNotifier<DspRackState> {
     } catch (e) {
       debugPrint('[DspRackController] Error hydrating DSP state: $e');
     }
-    _syncWithEngine();
   }
 
   void _loadCustomPresets() {

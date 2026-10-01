@@ -282,17 +282,32 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 20,
-            color: theme.colorScheme.onSurface,
-          ),
-          onPressed: () {
-            AppHaptics.selectionClick();
-            Navigator.of(context).pop();
-          },
-        ),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowLeft01,
+                  size: 20,
+                  color: theme.colorScheme.onSurface,
+                ),
+                onPressed: () {
+                  AppHaptics.selectionClick();
+                  Navigator.of(context).pop();
+                },
+              )
+            : Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: StudioCategoryColors.youtubeMusic.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlayList,
+                    size: 18,
+                    color: StudioCategoryColors.youtubeMusic,
+                  ),
+                ),
+              ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

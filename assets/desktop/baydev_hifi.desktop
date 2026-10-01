@@ -1,0 +1,31 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Baydev HiFi
+GenericName=Audiophile Music Player
+Comment=Studio-Grade Audiophile Lossless Music Player with Pro-Q DSP & Linux MPRIS
+Exec=baydev_hifi %U
+Icon=baydev_logo
+Terminal=false
+Categories=AudioVideo;Audio;Player;Music;
+Keywords=audio;music;player;flac;dsp;equalizer;lossless;hifi;audiophile;mpris;
+MimeType=audio/flac;audio/wav;audio/mpeg;audio/ogg;audio/aac;audio/x-m4a;audio/x-matroska;audio/opus;audio/x-dsd;audio/x-dsf;audio/x-dff;
+StartupNotify=true
+StartupWMClass=baydev_hifi
+Actions=PlayPause;Next;Previous;Stop;
+
+[Desktop Action PlayPause]
+Name=Play/Pause
+Exec=baydev_hifi --action=play-pause
+
+[Desktop Action Next]
+Name=Next Track
+Exec=baydev_hifi --action=next
+
+[Desktop Action Previous]
+Name=Previous Track
+Exec=baydev_hifi --action=previous
+
+[Desktop Action Stop]
+Name=Stop Playback
+Exec=baydev_hifi --action=stop

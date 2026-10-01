@@ -45,14 +45,19 @@ class LyricShareSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => LyricShareSheet(
-        track: track,
-        allLines: allLines,
-        initialSelectedLine: initialSelectedLine,
-        dominantAlbumColor: dominantAlbumColor,
-        vibrantAlbumColor: vibrantAlbumColor,
-        lightVibrantAlbumColor: lightVibrantAlbumColor,
-        audioSpec: audioSpec,
+      builder: (ctx) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: LyricShareSheet(
+            track: track,
+            allLines: allLines,
+            initialSelectedLine: initialSelectedLine,
+            dominantAlbumColor: dominantAlbumColor,
+            vibrantAlbumColor: vibrantAlbumColor,
+            lightVibrantAlbumColor: lightVibrantAlbumColor,
+            audioSpec: audioSpec,
+          ),
+        ),
       ),
     );
   }

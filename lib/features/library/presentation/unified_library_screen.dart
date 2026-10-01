@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
+import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/studio_alphabetical_scroller.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
@@ -321,6 +322,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     final hasGridToggle = libraryState.currentTab == CollectionTab.albums ||
         libraryState.currentTab == CollectionTab.artists;
 
+    final mediaQuery = MediaQuery.of(context);
+    final isExpandedLayout = mediaQuery.size.width >= 600 || mediaQuery.orientation == Orientation.landscape;
+
     return PopScope(
       canPop: !_isMultiSelecting,
       onPopInvokedWithResult: (didPop, result) {
@@ -605,6 +609,11 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       ),
       body: Column(
         children: [
+          // ─── 0. CATEGORY TABS (TRACKS / ALBUMS / ARTISTS / GENRES / FOLDERS / YOUTUBE) ───
+          // Rendered on Tablet & Landscape/Desktop; on Android/Mobile Portrait FAB is used instead.
+          if (isExpandedLayout)
+            _buildCategoryTabsRow(context, libraryState, controller, primaryColor, theme, isSolid),
+
           // ─── 1. SUB-HEADER UTILITY ROW (Item Count & Grid/List Layout Switcher) ───
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -768,7 +777,277 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               ),
             )
           : null,
+      floatingActionButton: _isMultiSelecting || isExpandedLayout
+          ? null
+          : _buildCategoryFab(context, libraryState, controller, primaryColor, theme, isSolid),
       ),
+    );
+  }
+
+  Widget _buildCategoryTabsRow(
+    BuildContext context,
+    UnifiedLibraryState state,
+    UnifiedLibraryController controller,
+    Color primaryColor,
+    ThemeData theme,
+    bool isSolid,
+  ) {
+    final tabs = [
+      (tab: CollectionTab.tracks, label: 'Tracks', count: state.totalTracksCount, icon: HugeIcons.strokeRoundedMusicNote01, color: primaryColor),
+      (tab: CollectionTab.albums, label: 'Albums', count: state.albums.length, icon: HugeIcons.strokeRoundedDisc, color: StudioCategoryColors.storageIndigo),
+      (tab: CollectionTab.artists, label: 'Artists', count: state.artists.length, icon: HugeIcons.strokeRoundedMic01, color: StudioCategoryColors.bitPerfect),
+      (tab: CollectionTab.genres, label: 'Genres', count: state.genres.length, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.hiResGold),
+      (tab: CollectionTab.folders, label: 'Folders', count: state.folders.length, icon: HugeIcons.strokeRoundedFolder01, color: StudioCategoryColors.libraryScanner),
+      (tab: CollectionTab.youtube, label: 'YouTube', count: null, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.youtubeMusic),
+    ];
+
+    return Container(
+      height: 38,
+      margin: const EdgeInsets.only(top: 6, bottom: 2),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        scrollDirection: Axis.horizontal,
+        itemCount: tabs.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, idx) {
+          final item = tabs[idx];
+          final isSelected = state.currentTab == item.tab;
+          final accent = item.color;
+
+          return InkWell(
+            onTap: () {
+              AppHaptics.selectionClick();
+              controller.setTab(item.tab);
+            },
+            borderRadius: BorderRadius.circular(10),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? (isSolid
+                        ? StudioSurfaceTheme.tintedContainer(context, accent, isSolid: true, solidBlendAlpha: 0.22)
+                        : StudioSurfaceTheme.tintedContainer(context, accent, isSolid: false, translucentAlpha: 0.18))
+                    : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isSelected
+                      ? (isSolid ? theme.colorScheme.outline : accent.withValues(alpha: 0.6))
+                      : theme.dividerColor.withValues(alpha: 0.2),
+                  width: isSelected ? 1.4 : 0.8,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HugeIcon(
+                    icon: item.icon,
+                    size: 14,
+                    color: isSelected ? accent : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: isSelected ? accent : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                    ),
+                  ),
+                  if (item.count != null) ...[
+                    const SizedBox(width: 5),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? accent.withValues(alpha: 0.2)
+                            : theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '${item.count}',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected ? accent : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontFeatures: AppTypography.audioFigures,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryFab(
+    BuildContext context,
+    UnifiedLibraryState state,
+    UnifiedLibraryController controller,
+    Color primaryColor,
+    ThemeData theme,
+    bool isSolid,
+  ) {
+    return FloatingActionButton.extended(
+      heroTag: 'library_category_fab',
+      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: theme.colorScheme.onPrimary,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      icon: HugeIcon(
+        icon: switch (state.currentTab) {
+          CollectionTab.tracks => HugeIcons.strokeRoundedMusicNote01,
+          CollectionTab.albums => HugeIcons.strokeRoundedDisc,
+          CollectionTab.artists => HugeIcons.strokeRoundedMic01,
+          CollectionTab.genres => HugeIcons.strokeRoundedPlayList,
+          CollectionTab.folders => HugeIcons.strokeRoundedFolder01,
+          CollectionTab.youtube => HugeIcons.strokeRoundedPlayList,
+        },
+        color: theme.colorScheme.onPrimary,
+        size: 18,
+      ),
+      label: Text(
+        state.currentTab.label,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+      ),
+      onPressed: () => _showCategoryPickerSheet(context, state, controller, primaryColor, isSolid),
+    );
+  }
+
+  void _showCategoryPickerSheet(
+    BuildContext context,
+    UnifiedLibraryState state,
+    UnifiedLibraryController controller,
+    Color primaryColor,
+    bool isSolid,
+  ) {
+    AppHaptics.lightImpact();
+    final theme = Theme.of(context);
+    final tabs = [
+      (tab: CollectionTab.tracks, label: 'Tracks', count: state.totalTracksCount, icon: HugeIcons.strokeRoundedMusicNote01, color: primaryColor),
+      (tab: CollectionTab.albums, label: 'Albums', count: state.albums.length, icon: HugeIcons.strokeRoundedDisc, color: StudioCategoryColors.storageIndigo),
+      (tab: CollectionTab.artists, label: 'Artists', count: state.artists.length, icon: HugeIcons.strokeRoundedMic01, color: StudioCategoryColors.bitPerfect),
+      (tab: CollectionTab.genres, label: 'Genres', count: state.genres.length, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.hiResGold),
+      (tab: CollectionTab.folders, label: 'Folders', count: state.folders.length, icon: HugeIcons.strokeRoundedFolder01, color: StudioCategoryColors.libraryScanner),
+      (tab: CollectionTab.youtube, label: 'YouTube Music HiFi', count: null, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.youtubeMusic),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: theme.dividerColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'COLLECTION CATEGORIES',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: tabs.map((item) {
+                    final isSelected = state.currentTab == item.tab;
+                    final accent = item.color;
+                    return InkWell(
+                      onTap: () {
+                        AppHaptics.selectionClick();
+                        Navigator.of(ctx).pop();
+                        controller.setTab(item.tab);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? (isSolid
+                                  ? StudioSurfaceTheme.tintedContainer(ctx, accent, isSolid: true, solidBlendAlpha: 0.22)
+                                  : StudioSurfaceTheme.tintedContainer(ctx, accent, isSolid: false, translucentAlpha: 0.18))
+                              : StudioSurfaceTheme.surfaceContainerLow(ctx, isSolid: isSolid),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? (isSolid ? theme.colorScheme.outline : accent.withValues(alpha: 0.6))
+                                : theme.dividerColor.withValues(alpha: 0.2),
+                            width: isSelected ? 1.4 : 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            HugeIcon(
+                              icon: item.icon,
+                              size: 16,
+                              color: isSelected ? accent : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              item.label,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                color: isSelected ? accent : theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            if (item.count != null) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? accent.withValues(alpha: 0.2)
+                                      : theme.colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '${item.count}',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected ? accent : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                    fontFeatures: AppTypography.audioFigures,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1145,7 +1424,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       );
     }
 
-    // Grid View (2-Column Squircle) with standard Studio Scrollbar
+    // Responsive Grid View (2-6 Column Squircle) with standard Studio Scrollbar
     return Theme(
       data: theme.copyWith(
         scrollbarTheme: ScrollbarThemeData(
@@ -1158,103 +1437,133 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         controller: _albumsScrollController,
         thumbVisibility: true,
         interactive: true,
-        child: GridView.builder(
-          controller: _albumsScrollController,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(14, 8, 14, bottomPadding),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.8,
-          ),
-          itemCount: albums.length,
-          itemBuilder: (ctx, index) {
-            final album = albums[index];
-            return InkWell(
-              onTap: () => _openAlbumDetail(context, album),
-              borderRadius: BorderRadius.circular(18),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final int crossAxisCount;
+            final double childAspectRatio;
+
+            if (width < 600) {
+              // Mobile phone portrait (< 600px): 2 columns
+              crossAxisCount = 2;
+              childAspectRatio = 0.80;
+            } else if (width < 840) {
+              // Tablet portrait / compact landscape: 3 columns
+              crossAxisCount = 3;
+              childAspectRatio = 0.82;
+            } else if (width < 1100) {
+              // Desktop standard / medium landscape: 4 columns
+              crossAxisCount = 4;
+              childAspectRatio = 0.82;
+            } else if (width < 1400) {
+              // Desktop large: 5 columns
+              crossAxisCount = 5;
+              childAspectRatio = 0.84;
+            } else {
+              // Desktop ultra-wide: 6 columns
+              crossAxisCount = 6;
+              childAspectRatio = 0.84;
+            }
+
+            return GridView.builder(
+              controller: _albumsScrollController,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(14, 8, 14, bottomPadding),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                childAspectRatio: childAspectRatio,
+              ),
+              itemCount: albums.length,
+              itemBuilder: (ctx, index) {
+                final album = albums[index];
+                return InkWell(
+                  onTap: () => _openAlbumDetail(context, album),
                   borderRadius: BorderRadius.circular(18),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
-                        ),
-                        child: StudioArtworkWidget(
-                          track: album.firstTrack,
-                          bytes: album.coverBytes,
-                          url: album.coverUrl,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
-                          fallbackIconSize: 48,
-                        ),
-                      ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            album.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            album.artist,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
+                            ),
+                            child: StudioArtworkWidget(
+                              track: album.firstTrack,
+                              bytes: album.coverBytes,
+                              url: album.coverUrl,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
+                              fallbackIconSize: 48,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${album.trackCount} Tracks',
+                                album.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                album.artist,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 10,
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                                 ),
                               ),
-                              if (album.isHiRes)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                  child: Text(
-                                    'HI-RES',
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '${album.trackCount} Tracks',
                                     style: TextStyle(
-                                      fontSize: 8,
-                                      fontWeight: FontWeight.w900,
+                                      fontSize: 10,
                                       color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                ),
+                                  if (album.isHiRes)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                      decoration: BoxDecoration(
+                                        color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      child: Text(
+                                        'HI-RES',
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w900,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             );
           },
         ),
@@ -1316,7 +1625,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       );
     }
 
-    // Grid View (3-Column Circular Studio Artist Presentation)
+    // Responsive Grid View (3-8 Column Circular Studio Artist Presentation)
     return Theme(
       data: theme.copyWith(
         scrollbarTheme: ScrollbarThemeData(
@@ -1329,77 +1638,119 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         controller: _artistsScrollController,
         thumbVisibility: true,
         interactive: true,
-        child: GridView.builder(
-          controller: _artistsScrollController,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(14, 12, 14, bottomPadding),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.72,
-          ),
-          itemCount: artists.length,
-          itemBuilder: (ctx, index) {
-            final artist = artists[index];
-            return InkWell(
-              onTap: () => _openArtistDetail(context, artist),
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Circular Artist Avatar with Studio Shadow & Subtle Border
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.18),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ArtistAvatarWidget(
-                        artistName: artist.name,
-                        fallbackCoverBytes: artist.coverBytes,
-                        fallbackCoverUrl: artist.coverUrl,
-                        radius: 42,
-                        iconSize: 34,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Artist Name
-                    Text(
-                      artist.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    // Album and Track Count
-                    Text(
-                      '${artist.albumsCount > 0 ? "${artist.albumsCount} Alb • " : ""}${artist.tracksCount} Tracks',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final int crossAxisCount;
+            final double childAspectRatio;
+            final double avatarRadius;
+            final double iconSize;
+
+            if (width < 600) {
+              // Mobile Portrait (< 600px): 3 items per row, snug aspect ratio
+              crossAxisCount = 3;
+              childAspectRatio = 0.78;
+              avatarRadius = 40;
+              iconSize = 32;
+            } else if (width < 850) {
+              // Tablet Portrait / Compact Desktop: 4 items per row
+              crossAxisCount = 4;
+              childAspectRatio = 0.86;
+              avatarRadius = 44;
+              iconSize = 34;
+            } else if (width < 1150) {
+              // Desktop Standard / Landscape: 6 items per row
+              crossAxisCount = 6;
+              childAspectRatio = 0.90;
+              avatarRadius = 44;
+              iconSize = 34;
+            } else if (width < 1450) {
+              // Desktop Wide: 7 items per row
+              crossAxisCount = 7;
+              childAspectRatio = 0.92;
+              avatarRadius = 46;
+              iconSize = 36;
+            } else {
+              // Desktop Ultra-Wide: 8 items per row
+              crossAxisCount = 8;
+              childAspectRatio = 0.94;
+              avatarRadius = 48;
+              iconSize = 38;
+            }
+
+            return GridView.builder(
+              controller: _artistsScrollController,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(14, 12, 14, bottomPadding),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 16,
+                childAspectRatio: childAspectRatio,
               ),
+              itemCount: artists.length,
+              itemBuilder: (ctx, index) {
+                final artist = artists[index];
+                return InkWell(
+                  onTap: () => _openArtistDetail(context, artist),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Circular Artist Avatar with Studio Shadow & Subtle Border
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.18),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ArtistAvatarWidget(
+                            artistName: artist.name,
+                            fallbackCoverBytes: artist.coverBytes,
+                            fallbackCoverUrl: artist.coverUrl,
+                            radius: avatarRadius,
+                            iconSize: iconSize,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Artist Name
+                        Text(
+                          artist.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        // Album and Track Count
+                        Text(
+                          '${artist.albumsCount > 0 ? "${artist.albumsCount} Alb • " : ""}${artist.tracksCount} Tracks',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),

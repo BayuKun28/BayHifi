@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../../../../core/audio_engine/audio_interruption_manager.dart';
 import '../../../../core/audio_engine/replay_gain_service.dart';
 import '../../../../core/audio_service/baydev_audio_handler.dart';
 import '../../../../core/database/local_persistence_service.dart';
+import '../../../../core/desktop/linux_mpris_service.dart';
 import '../../../settings/domain/player_playback_settings.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
 import '../../domain/playback_state.dart';
@@ -88,6 +90,18 @@ class PlayerController extends StateNotifier<PlaybackState> {
       handler.onSkipPreviousCallback = () => skipPrevious();
       handler.onSeekCallback = (pos) async => seek(pos);
       handler.onStopCallback = () => stop();
+
+      if (!kIsWeb && Platform.isLinux) {
+        final mpris = LinuxMprisService.instance;
+        mpris.onPlay = () => resume();
+        mpris.onPause = () => pause();
+        mpris.onPlayPause = () => togglePlayPause();
+        mpris.onNext = () => skipNext();
+        mpris.onPrevious = () => skipPrevious();
+        mpris.onStop = () => stop();
+        mpris.onSeek = (pos) => seek(pos);
+        mpris.onSetVolume = (vol) => setVolume(vol);
+      }
     } catch (e) {
       debugPrint('[PlayerController] AudioHandler callback init error: $e');
     }
@@ -103,6 +117,16 @@ class PlayerController extends StateNotifier<PlaybackState> {
         currentQueue: state.queue,
         currentQueueIndex: state.queueIndex,
       );
+
+      if (!kIsWeb && Platform.isLinux) {
+        LinuxMprisService.instance.updateTrack(state.currentTrack, state.duration);
+        LinuxMprisService.instance.updatePlaybackState(
+          isPlaying: state.isPlaying,
+          position: state.position,
+          duration: state.duration,
+          volume: state.volume,
+        );
+      }
     } catch (e) {
       debugPrint('[PlayerController] Error syncing audio handler: $e');
     }

@@ -357,9 +357,8 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
           top: 6,
           left: 12,
           right: 12,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: MediaQuery.of(context).size.width - 24,
               child: Row(
