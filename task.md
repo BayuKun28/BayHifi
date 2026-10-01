@@ -1325,19 +1325,18 @@ Perombakan total antarmuka grafis Baydev HiFi menjadi **100% Pure Material 3 Exp
 
 ## Fase 46: Now Playing Landscape & Tablet Mode Refinement
 
-Penyempurnaan tampilan dan ergonomi pemutar musik pada orientasi Landscape dan perangkat Tablet:
-1. **Perbaikan Bug Up Next Queue Tab**:
-   - Memperbaiki pemanggilan `queueIndex` di [dual_pane_workstation_pane.dart](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/lib/features/player/presentation/widgets/dual_pane_workstation_pane.dart) untuk mengatasi `NoSuchMethodError: currentIndex`.
-   - Menambahkan interactive tap listener (`skipToQueueIndex(idx)`) untuk lompat ke lagu yang dipilih secara instan.
-2. **Penataan Ulang Tab Workstation Kanan**:
-   - Menghilangkan tab `PRO-Q EQ` dari split pane kanan agar ruang visual tidak sempit/cramped.
-   - Menyederhanakan workstation kanan menjadi 3 tab utama yang leluasa: `UP NEXT` (Antrean lagu interaktif), `LYRICS` (Lirik sinkron), dan `DSP RACK` (Mastering rack modules).
-   - Menjadikan Pro-Q Studio tetap fokus diakses melalui layar penuh (`ProQStudioScreen`).
-3. **Penyederhanaan Sisi Kiri (Landscape Left Pane)**:
-   - Menghilangkan baris 6 tombol aksi bawah (`_buildBottomStudioActionStrip`) pada mode landscape untuk mencegah penumpukan vertikal dan memberikan ruang proporsional bagi album art (CD Jewel Case), wavy seekbar, dan kontrol pemutaran.
-   - Merelokasi aksi studio esensial (`Open Local File`, `Speed & Pitch`, `Desk Mode`, `Pro-Q Studio`, `Audio Spec Inspector`, `Sleep Timer`, `Favorite`) ke Top Header Bar sisi kiri dengan icon buttons minimalis dan tooltip.
-   - Mempertahankan mode potret 100% sesuai desain yang telah disetujui.
-- [x] **46.4 Validasi & Quality Assurance**
+- [x] **46.1 Perbaikan Bug Up Next Queue Tab**:
+  - [x] Memperbaiki pemanggilan `queueIndex` di [dual_pane_workstation_pane.dart](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/lib/features/player/presentation/widgets/dual_pane_workstation_pane.dart) untuk mengatasi `NoSuchMethodError: currentIndex`.
+  - [x] Menambahkan interactive tap listener (`skipToQueueIndex(idx)`) untuk lompat ke lagu yang dipilih secara instan.
+- [x] **46.2 Penataan Ulang Tab Workstation Kanan**:
+  - [x] Menghilangkan tab `PRO-Q EQ` dari split pane kanan agar ruang visual tidak sempit/cramped.
+  - [x] Menyederhanakan workstation kanan menjadi 3 tab utama yang leluasa: `UP NEXT`, `LYRICS`, dan `DSP RACK`.
+  - [x] Menjadikan Pro-Q Studio tetap fokus diakses melalui layar penuh (`ProQStudioScreen`).
+- [x] **46.3 Penyederhanaan Sisi Kiri (Landscape Left Pane)**:
+  - [x] Menghilangkan baris 6 tombol aksi bawah (`_buildBottomStudioActionStrip`) pada mode landscape untuk mencegah penumpukan vertikal.
+  - [x] Merelokasi aksi studio esensial (`Open Local File`, `Speed & Pitch`, `Desk Mode`, `Pro-Q Studio`, `Audio Spec Inspector`, `Sleep Timer`, `Favorite`) ke Top Header Bar sisi kiri dengan icon buttons minimalis dan tooltip.
+  - [x] Menambahkan app logo resmi pada leading `NavigationRail` di tablet & desktop mode.
+- [x] **46.4 Validasi & Quality Assurance**:
   - [x] Penambahan widget test di `test/dual_pane_workstation_pane_test.dart` dan `test/player_screen_redesign_test.dart`.
   - [x] Verifikasi 100% lulus pada seluruh rangkaian test suite.
 
@@ -1345,20 +1344,35 @@ Penyempurnaan tampilan dan ergonomi pemutar musik pada orientasi Landscape dan p
 
 ## Fase 47: Studio Desk & Car Docking Mode Overhaul
 
-Modernisasi total tampilan **Studio Desk & Car Docking Mode** (`StudioDeskDockingScreen`) agar selaras dengan standar 100% Pure Material 3 Expressive:
-1. **Integrasi Wavy Seekbar (`CustomTimeBar` / `M3ESlider.wavy()`)**:
-   - Menggantikan slider standar dengan gelombang sinus dinamis (`TimeBarStyle.wavy`), terhubung ke `playerCustomizationProvider`.
-   - Dukungan `timeDisplayMode` (waktu tersisa `-04:39` vs durasi total) dengan tipografi angka tabular (`AppTypography.audioFigures`).
-2. **Visualizer Switcher Dinamis (Artwork / VU Meters / Spectrum)**:
-   - Integrasi `ParallaxArtworkCard` dengan dukungan CD Jewel Case, Vinyl 3D, Curved Bento, dan Squircle.
-   - Mode switcher 3 arah yang mulus: **`ARTWORK`**, **`VU METERS`** (Analog Dual-Channel L-R Peak Meters), dan **`SPECTRUM`** (M3 Expressive RTA Spectrum Visualizer).
-3. **Kontrol Pemutaran Raksasa & Telemetry Studio**:
-   - Tombol Play/Pause 68px dengan dynamic ambient glow dan `M3EProgressIndicator.circular` saat buffering.
-   - Tombol Previous/Next, Shuffle, Repeat simetris dengan tactile `AppHaptics`.
-   - Badge spesifikasi audio Hi-Res Master Gold / Lossless Audio (`96.0 kHz / 24-bit • FLAC`).
-4. **Quick DSP Presets & Volume Control**:
-   - Strip preset DSP mastering 1-tap (`Studio Master`, `Audiophile Pure`, `Warm Tube`, `Bass Boost`, dll.) dan slider volume presisi.
-5. **Responsivitas & Validasi Menyeluruh**:
-   - Desain terkalibrasi untuk Landscape (Tablet/Car Docks) dan Portrait (Phone Stands) bebas overflow.
-   - Pengujian otomatis lulus 100% di `test/desk_docking_test.dart` dan `test/playback_loading_spinner_test.dart`.
+- [x] **47.1 Integrasi Wavy Seekbar (`CustomTimeBar` / `M3ESlider.wavy()`)**:
+  - [x] Menggantikan slider standar dengan gelombang sinus dinamis (`TimeBarStyle.wavy`), terhubung ke `playerCustomizationProvider`.
+  - [x] Dukungan `timeDisplayMode` (waktu tersisa `-04:39` vs durasi total) dengan tipografi angka tabular (`AppTypography.audioFigures`).
+- [x] **47.2 Visualizer Switcher Dinamis (Artwork / VU Meters / Spectrum)**:
+  - [x] Integrasi `ParallaxArtworkCard` dengan dukungan CD Jewel Case, Vinyl 3D, Curved Bento, dan Squircle.
+  - [x] Mode switcher 3 arah yang mulus: **`ARTWORK`**, **`VU METERS`** (Analog Dual-Channel L-R Peak Meters), dan **`SPECTRUM`** (M3 Expressive RTA Spectrum Visualizer).
+- [x] **47.3 Kontrol Pemutaran Raksasa & Telemetry Studio**:
+  - [x] Tombol Play/Pause 68px dengan dynamic ambient glow dan `M3EProgressIndicator.circular` saat buffering.
+  - [x] Tombol Previous/Next, Shuffle, Repeat simetris dengan tactile `AppHaptics`.
+  - [x] Badge spesifikasi audio Hi-Res Master Gold / Lossless Audio (`96.0 kHz / 24-bit • FLAC`) interaktif dengan `AudioFileInspectorSheet`.
+- [x] **47.4 Quick DSP Presets & Volume Control**:
+  - [x] Strip preset DSP mastering 1-tap (`Studio Master`, `Audiophile Pure`, `Warm Tube`, `Bass Boost`, dll.) dan slider volume presisi.
+- [x] **47.5 Responsivitas & Validasi Menyeluruh**:
+  - [x] Desain terkalibrasi untuk Landscape (Tablet/Car Docks) dan Portrait (Phone Stands) bebas overflow.
+  - [x] Pengujian otomatis lulus 100% di `test/desk_docking_test.dart` dan `test/playback_loading_spinner_test.dart`.
+
+---
+
+## Fase 48: Linux Desktop Compilation & Packaging Implementation
+
+- [x] **48.1 Verifikasi Toolchain & Native Dependencies**:
+  - [x] Verifikasi Flutter SDK 3.47.5, Clang 18.1.3, CMake 3.28.3, Ninja 1.11.1, pkg-config 1.8.1.
+  - [x] Verifikasi native libraries `libgtk-3-dev` (3.24.41) dan `libasound2-dev` (ALSA 1.2.11) untuk engine C++ `flutter_soloud`.
+- [x] **48.2 Kompilasi Linux Debug & Release**:
+  - [x] Kompilasi berhasil untuk `flutter build linux --debug`.
+  - [x] Kompilasi berhasil untuk `flutter build linux --release --no-tree-shake-icons`.
+  - [x] Pembentukan standalone relocatable bundle di `build/linux/x64/release/bundle/` berisi executable `baydev_hifi`, shared libraries (`libflutter_soloud_plugin.so`, `libaudiotags.so`, `libflutter_linux_gtk.so`), dan assets.
+- [x] **48.3 Konfigurasi .gitignore & Dokumentasi Blueprint**:
+  - [x] Pembaruan `.gitignore` untuk mengabaikan artefak build Linux ephemeral (`linux/flutter/ephemeral/`), standalone packaging (`*.AppImage`, `*.deb`, `*.tar.gz`), dan folder bundle staging.
+  - [x] Pembuatan dokumen panduan kompilasi dan distribusi desktop di [linux_desktop_compilation_plan.md](file:///home/x/.gemini/antigravity-ide/brain/60c8bfc5-8a26-4277-8746-1c10727adb4b/linux_desktop_compilation_plan.md).
+
 
