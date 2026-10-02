@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../domain/library_collection_models.dart';
@@ -15,6 +16,8 @@ import '../widgets/create_custom_playlist_modal.dart';
 import '../widgets/create_smart_playlist_dialog.dart';
 import '../widgets/studio_playlist_action_sheet.dart';
 import '../widgets/track_tile.dart';
+import '../../../download_manager/presentation/controllers/download_controller.dart';
+import '../../../../app/theme/app_haptics.dart';
 
 /// Sticky Action Bar Header Delegate
 class _StickyPlaylistActionBarDelegate extends SliverPersistentHeaderDelegate {
@@ -124,6 +127,9 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final totalDuration = tracks.fold(Duration.zero, (sum, t) => sum + t.duration);
     final durationText = _formatTotalDuration(totalDuration);
 
+    final coverUrl = currentPlaylist?.coverUrl ??
+        (tracks.isNotEmpty ? tracks.firstWhere((t) => t.albumArtUrl != null && t.albumArtUrl!.isNotEmpty, orElse: () => tracks.first).albumArtUrl : null);
+
     final statusBarHeight = MediaQuery.paddingOf(context).top;
     final isSmart = currentSmartPlaylist != null;
     final expandedHeight = (isSmart ? 290.0 : 255.0) + statusBarHeight;
@@ -190,11 +196,21 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                         context,
                         smartPlaylist: currentSmartPlaylist!,
                         tracks: tracks,
+                        onDeleted: () {
+                          if (context.mounted && Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          }
+                        },
                       );
                     } else {
                       StudioPlaylistActionSheet.showForPlaylist(
                         context,
                         playlist: currentPlaylist!,
+                        onDeleted: () {
+                          if (context.mounted && Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          }
+                        },
                       );
                     }
                   },
@@ -241,32 +257,36 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                                 Row(
                                   children: [
                                     Container(
-                                      width: 64,
-                                      height: 64,
+                                      width: 72,
+                                      height: 72,
                                       decoration: BoxDecoration(
-                                        color: StudioSurfaceTheme.tintedContainer(
-                                          context,
-                                          accentColor,
-                                          isSolid: isSolid,
-                                          translucentAlpha: 0.18,
-                                        ),
                                         borderRadius: BorderRadius.circular(16),
                                         border: Border.all(
-                                          color: accentColor.withValues(alpha: 0.4),
+                                          color: accentColor.withValues(alpha: 0.35),
                                           width: 1.0,
                                         ),
                                       ),
-                                      child: Center(
-                                        child: HugeIcon(
-                                          icon: isSmart
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: StudioArtworkWidget(
+                                          url: coverUrl,
+                                          width: 72,
+                                          height: 72,
+                                          fallbackIcon: isSmart
                                               ? HugeIcons.strokeRoundedFilterHorizontal
                                               : (currentPlaylist?.id == 'favorites'
                                                   ? HugeIcons.strokeRoundedFavourite
                                                   : (currentPlaylist?.id == 'hires_master'
                                                       ? HugeIcons.strokeRoundedSparkles
                                                       : HugeIcons.strokeRoundedPlaylist01)),
-                                          size: 30,
-                                          color: accentColor,
+                                          fallbackIconSize: 32,
+                                          fallbackColor: accentColor,
+                                          backgroundColor: StudioSurfaceTheme.tintedContainer(
+                                            context,
+                                            accentColor,
+                                            isSolid: isSolid,
+                                            translucentAlpha: 0.18,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -441,16 +461,37 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 64, right: 64),
-                              child: Text(
-                                title,
-                                style: const TextStyle(
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.4,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              padding: const EdgeInsets.only(left: 60, right: 60),
+                              child: Row(
+                                children: [
+                                  if (coverUrl != null && coverUrl.isNotEmpty) ...[
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: SizedBox(
+                                        width: 28,
+                                        height: 28,
+                                        child: StudioArtworkWidget(
+                                          url: coverUrl,
+                                          width: 28,
+                                          height: 28,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                  ],
+                                  Expanded(
+                                    child: Text(
+                                      title,
+                                      style: const TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.4,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -513,6 +554,27 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                         label: const Text('Shuffle', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
                       const SizedBox(width: 8),
+                      IconButton.outlined(
+                        style: IconButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: BorderSide(color: StudioSurfaceTheme.outline(context, isSolid: isSolid)),
+                        ),
+                        icon: HugeIcon(icon: HugeIcons.strokeRoundedDownload01, size: 16, color: accentColor),
+                        tooltip: 'Download All Tracks',
+                        onPressed: () {
+                          if (tracks.isNotEmpty) {
+                            AppHaptics.mediumImpact();
+                            ref.read(downloadControllerProvider.notifier).enqueueTracks(tracks);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Enqueued ${tracks.length} tracks for download.'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 4),
                       if (isSmart)
                         IconButton.outlined(
                           style: IconButton.styleFrom(

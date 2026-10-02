@@ -8,11 +8,15 @@ import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../../player/presentation/widgets/audio_file_inspector_sheet.dart';
+import '../../../dsp_rack/domain/dsp_models.dart';
+import '../../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
+import '../../../dsp_rack/presentation/widgets/studio_track_dsp_preset_sheet.dart';
 import '../../domain/library_collection_models.dart';
 import '../controllers/library_controller.dart';
 import '../screens/album_detail_screen.dart';
 import '../screens/artist_detail_screen.dart';
 import 'metadata_tag_editor_sheet.dart';
+import '../../../download_manager/presentation/controllers/download_controller.dart';
 
 /// Unified Material 3 Expressive Studio Track Action Bottom Sheet (Spotify & Namida Grade)
 class StudioTrackActionSheet extends ConsumerWidget {
@@ -37,61 +41,65 @@ class StudioTrackActionSheet extends ConsumerWidget {
     );
   }
 
-  void _showAddToPlaylistSheet(BuildContext context, WidgetRef ref) {
-    final playlists = ref.read(unifiedLibraryProvider).customPlaylists;
-    final theme = Theme.of(context);
-
+  void _showAddToPlaylistSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'ADD TRACK TO PLAYLIST',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 0.8),
+      builder: (sheetCtx) => Consumer(
+        builder: (ctx, ref, _) {
+          final playlists = ref.watch(unifiedLibraryProvider).customPlaylists;
+          final theme = Theme.of(ctx);
+
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'ADD TRACK TO PLAYLIST',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 0.8),
+                  ),
+                  const SizedBox(height: 8),
+                  if (playlists.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'No custom playlists found. Create a new playlist first.',
+                          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  else
+                    ...playlists.map(
+                      (p) => ListTile(
+                        leading: HugeIcon(
+                          icon: HugeIcons.strokeRoundedPlayList,
+                          size: 20,
+                          color: theme.colorScheme.primary,
+                        ),
+                        title: Text(p.name),
+                        subtitle: Text('${p.trackCount} tracks'),
+                        onTap: () {
+                          ref.read(unifiedLibraryProvider.notifier).addTrackToPlaylist(p.id, track);
+                          Navigator.of(ctx).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Added "${track.title}" to "${p.name}".')),
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 8),
-              if (playlists.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Text(
-                      'No custom playlists found. Create a new playlist first.',
-                      style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-              else
-                ...playlists.map(
-                  (p) => ListTile(
-                    leading: HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlayList,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: Text(p.name),
-                    subtitle: Text('${p.trackCount} tracks'),
-                    onTap: () {
-                      ref.read(unifiedLibraryProvider.notifier).addTrackToPlaylist(p.id, track);
-                      Navigator.of(ctx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Added "${track.title}" to "${p.name}".')),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -142,6 +150,15 @@ class StudioTrackActionSheet extends ConsumerWidget {
         track.id.startsWith('subsonic_') ||
         (track.streamUrl?.isNotEmpty ?? false);
     final isCached = isRemote && AudioCacheService.instance.isCached(track.id);
+
+    final dspController = ref.watch(dspRackControllerProvider.notifier);
+    final dspResolution = dspController.resolvePresetForTrack(track);
+    final isDspPinned = dspController.isTrackPinned(track.id);
+    final dspSubtitle = isDspPinned
+        ? 'Pinned: ${dspResolution.preset.name}'
+        : (dspResolution.source == DspResolutionSource.genreAuto
+            ? 'Auto (${dspResolution.matchedGenre?.toUpperCase() ?? "Genre"}): ${dspResolution.preset.name}'
+            : 'Default: ${dspResolution.preset.name}');
 
     return SafeArea(
       child: Padding(
@@ -305,6 +322,33 @@ class StudioTrackActionSheet extends ConsumerWidget {
                 },
               ),
 
+              // 2.1 Download Track
+              if (track.filePath == null || track.filePath!.isEmpty || track.remoteUrl != null)
+                ListTile(
+                  leading: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedDownload01,
+                    size: 20,
+                    color: Color(0xFF10B981),
+                  ),
+                  title: const Text('Download Track', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                  subtitle: Text(
+                    'Download stream & embed studio tags for offline playback',
+                    style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.55)),
+                  ),
+                  onTap: () {
+                    AppHaptics.mediumImpact();
+                    ref.read(downloadControllerProvider.notifier).enqueueTrack(track);
+                    final messenger = ScaffoldMessenger.maybeOf(context);
+                    Navigator.of(context).pop();
+                    messenger?.showSnackBar(
+                      SnackBar(
+                        content: Text('Downloading "${track.title}" in background...'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+
               // 3. Add to Playlist
               ListTile(
                 leading: HugeIcon(
@@ -315,7 +359,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
                 title: const Text('Add to Playlist', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _showAddToPlaylistSheet(context, ref);
+                  _showAddToPlaylistSheet(context);
                 },
               ),
 
@@ -390,6 +434,45 @@ class StudioTrackActionSheet extends ConsumerWidget {
                     );
                   },
                 ),
+
+              // 7.5 DSP Mastering Preset
+              ListTile(
+                leading: HugeIcon(
+                  icon: isDspPinned
+                      ? HugeIcons.strokeRoundedPin
+                      : (dspResolution.source == DspResolutionSource.genreAuto
+                          ? HugeIcons.strokeRoundedSparkles
+                          : HugeIcons.strokeRoundedSlidersHorizontal),
+                  size: 20,
+                  color: isDspPinned ? primary : theme.colorScheme.onSurface,
+                ),
+                title: const Text('DSP Mastering Preset', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                  dspSubtitle,
+                  style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.55)),
+                ),
+                trailing: isDspPinned
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'PINNED',
+                          style: TextStyle(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
+                            color: primary,
+                          ),
+                        ),
+                      )
+                    : null,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  StudioTrackDspPresetSheet.show(context, track);
+                },
+              ),
 
               const Divider(height: 12),
 

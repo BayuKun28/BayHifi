@@ -15,11 +15,13 @@ import '../../../settings/domain/player_playback_settings.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
 import '../../domain/playback_state.dart';
 import '../../domain/track.dart';
+import '../../../spotify_importer/data/audio_matcher_service.dart';
 import '../../../youtube_music/data/youtube_music_service.dart';
+import '../../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 
 final playerControllerProvider =
     StateNotifierProvider<PlayerController, PlaybackState>((ref) {
-  final controller = PlayerController(SoLoudController.instance);
+  final controller = PlayerController(SoLoudController.instance, ref);
   ref.listen<PlayerPlaybackSettings>(playbackSettingsProvider, (_, next) {
     controller.updatePlaybackSettings(next);
   });
@@ -28,11 +30,12 @@ final playerControllerProvider =
 
 class PlayerController extends StateNotifier<PlaybackState> {
   final SoLoudController _audioEngine;
+  final Ref? _ref;
   StreamSubscription<Duration>? _posSub;
   bool _isAdvancing = false;
   PlayerPlaybackSettings _playbackSettings = const PlayerPlaybackSettings();
 
-  PlayerController(this._audioEngine) : super(const PlaybackState()) {
+  PlayerController(this._audioEngine, [this._ref]) : super(const PlaybackState()) {
     _loadPlaybackSettings();
     _initListener();
     _initAudioServiceCallbacks();
@@ -469,6 +472,9 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
     debugPrint('[PlayerController] playTrack invoked: "${targetTrack.title}" by "${targetTrack.artist}" (id: ${targetTrack.id})');
     try {
+      // Auto-apply DSP preset for track (Track Override > Genre Match > Global)
+      _ref?.read(dspRackControllerProvider.notifier).applyForTrack(targetTrack);
+
       if (state.volume <= 0.0 && !state.isMuted) {
         setVolume(1.0);
       } else {
@@ -489,7 +495,11 @@ class PlayerController extends StateNotifier<PlaybackState> {
       final enableFade = _playbackSettings.enableSmoothFade;
       final fadeDuration = Duration(milliseconds: _playbackSettings.fadeInDurationMs);
 
-      if (targetTrack.filePath != null && targetTrack.filePath!.isNotEmpty) {
+      final localFileExists = targetTrack.filePath != null &&
+          targetTrack.filePath!.isNotEmpty &&
+          File(targetTrack.filePath!).existsSync();
+
+      if (localFileExists) {
         debugPrint('[PlayerController] Playing local file: ${targetTrack.filePath}');
         try {
           await _audioEngine.playFile(targetTrack.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
@@ -497,146 +507,71 @@ class PlayerController extends StateNotifier<PlaybackState> {
           debugPrint('[PlayerController] playFile error (handled): $e');
         }
       } else {
-        // Remote / cloud track: Check if cached in AudioCacheService
-        final cachedPath = AudioCacheService.instance.getCachedFilePath(targetTrack.id);
-        if (cachedPath != null) {
-          debugPrint('[PlayerController] Playing from disk cache: $cachedPath');
-          await _audioEngine.playFile(cachedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
-        } else if (targetTrack.id.startsWith('yt_')) {
-          // YouTube track: progressive push-streaming via setBufferStream with WebmToOggRemuxer
-          debugPrint('[PlayerController] YouTube stream init: fetching Ogg Opus stream for ${targetTrack.id}...');
-          bool streamedSuccessfully = false;
+        // Check if track was persisted or downloaded locally in persistence
+        final persisted = LocalPersistenceService.instance.getTrack(targetTrack.id);
+        if (persisted?.filePath != null &&
+            persisted!.filePath!.isNotEmpty &&
+            File(persisted.filePath!).existsSync()) {
+          debugPrint('[PlayerController] Playing from downloaded local file: ${persisted.filePath}');
           try {
-            final oggStream = await YouTubeMusicService.instance
-                .getOggOpusAudioByteStream(targetTrack.id)
-                .timeout(const Duration(seconds: 15));
-
-            if (oggStream != null) {
-              final bufferSource = SoLoud.instance.setBufferStream(
-                bufferingType: BufferingType.preserved,
-                bufferingTimeNeeds: 0.1, // Ultra-low initial buffering requirement for instant start
-                format: BufferType.auto,
-              );
-
-              final tempFile = AudioCacheService.instance.getTempFile(targetTrack.id);
-              final targetFile = AudioCacheService.instance.getCacheFile(targetTrack.id);
-              if (!await tempFile.parent.exists()) {
-                await tempFile.parent.create(recursive: true);
-              }
-              final sink = tempFile.openWrite();
-
-              // Pre-buffer initial header chunks (OpusHead, OpusTags) + initial audio frames (~48KB or 15 chunks)
-              final streamIterator = StreamIterator(oggStream);
-              int prebufferedBytes = 0;
-              int prebufferedChunks = 0;
-
-              while (await streamIterator.moveNext()) {
-                final chunk = streamIterator.current;
-                prebufferedChunks++;
-                prebufferedBytes += chunk.length;
-                SoLoud.instance.addAudioDataStream(bufferSource, chunk);
-                sink.add(chunk);
-
-                // Ensure OpusHead (page0), OpusTags (page1) and sufficient audio pages are fed
-                if (prebufferedBytes >= 49152 || (prebufferedChunks >= 12 && prebufferedBytes >= 20480)) {
-                  break;
-                }
-              }
-
-              debugPrint('[PlayerController] YouTube prebuffered $prebufferedBytes bytes ($prebufferedChunks chunks). Sending to SoLoud audio engine...');
-
-              if (prebufferedChunks > 0) {
-                // Start playback once headers and initial audio frames are in SoLoud's buffer
-                final handle = await _audioEngine.playAudioSource(
-                  bufferSource,
-                  fadeIn: enableFade,
-                  fadeDuration: fadeDuration,
-                );
-
-                if (handle != null) {
-                  streamedSuccessfully = true;
-                  debugPrint('[PlayerController] SoLoud stream playback started successfully (handle: $handle)');
-
-                  // Asynchronously pipe remaining chunks into SoLoud and disk cache
-                  () async {
-                    try {
-                      int totalStreamedBytes = prebufferedBytes;
-                      int chunkCount = prebufferedChunks;
-                      int lastLoggedBytes = prebufferedBytes;
-
-                      while (await streamIterator.moveNext()) {
-                        final chunk = streamIterator.current;
-                        chunkCount++;
-                        totalStreamedBytes += chunk.length;
-                        SoLoud.instance.addAudioDataStream(bufferSource, chunk);
-                        sink.add(chunk);
-
-                        // Log streaming progress every 512KB
-                        if (totalStreamedBytes - lastLoggedBytes >= 524288) {
-                          debugPrint(
-                            '[PlayerController] Streaming progress: ${(totalStreamedBytes / 1024).toStringAsFixed(1)} KB piped ($chunkCount chunks)',
-                          );
-                          lastLoggedBytes = totalStreamedBytes;
-                        }
-                      }
-                      SoLoud.instance.setDataIsEnded(bufferSource);
-                      await sink.flush();
-                      await sink.close();
-
-                      if (await tempFile.exists() && await tempFile.length() > 0) {
-                        if (await targetFile.exists()) await targetFile.delete();
-                        await tempFile.rename(targetFile.path);
-                        await AudioCacheService.instance.scanCache();
-                        debugPrint(
-                          '[PlayerController] YouTube stream fully downloaded and cached: ${targetFile.path} ($totalStreamedBytes bytes across $chunkCount chunks)',
-                        );
-                      }
-                    } catch (e) {
-                      debugPrint('[PlayerController] Progressive stream piping notice: $e');
-                      try {
-                        SoLoud.instance.setDataIsEnded(bufferSource);
-                      } catch (_) {}
-                      try {
-                        await sink.close();
-                      } catch (_) {}
-                    }
-                  }();
-                }
-              }
-            }
-          } catch (streamErr) {
-            debugPrint('[PlayerController] Progressive streaming failed, attempting fallback cacheTrack: $streamErr');
-          }
-
-          if (!streamedSuccessfully) {
-            // Fallback: Download via cacheTrack with 15s timeout
-            debugPrint('[PlayerController] Falling back to direct cacheTrack download for ${targetTrack.id}...');
-            final downloadedPath = await AudioCacheService.instance
-                .cacheTrack(targetTrack)
-                .timeout(const Duration(seconds: 15), onTimeout: () => null);
-            if (downloadedPath != null) {
-              debugPrint('[PlayerController] Fallback cacheTrack successful, playing: $downloadedPath');
-              await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
-            } else {
-              throw ArgumentError('Unable to play or cache YouTube track: ${targetTrack.title} (${targetTrack.id})');
-            }
+            await _audioEngine.playFile(persisted.filePath!, fadeIn: enableFade, fadeDuration: fadeDuration);
+          } catch (e) {
+            debugPrint('[PlayerController] playFile error (handled): $e');
           }
         } else {
-          // Subsonic / generic remote: download-to-cache then play
-          debugPrint('[PlayerController] Caching remote track: ${targetTrack.id}...');
-          final downloadedPath = await AudioCacheService.instance.cacheTrack(targetTrack);
-          if (downloadedPath != null) {
-            await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
-          } else {
-            final streamUrl = targetTrack.streamUrl ?? targetTrack.remoteUrl;
-            if (streamUrl != null && streamUrl.isNotEmpty) {
-              await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
+          // Remote / cloud track: Check if cached in AudioCacheService
+          final cachedPath = AudioCacheService.instance.getCachedFilePath(targetTrack.id);
+          if (cachedPath != null) {
+            debugPrint('[PlayerController] Playing from disk cache: $cachedPath');
+            await _audioEngine.playFile(cachedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+          } else if (targetTrack.id.startsWith('yt_') ||
+              targetTrack.id.startsWith('spotify_') ||
+              (targetTrack.remoteUrl?.startsWith('spotify:') ?? false)) {
+            final isSpotify = targetTrack.id.startsWith('spotify_') ||
+                (targetTrack.remoteUrl?.startsWith('spotify:') ?? false);
+
+            String resolvedYtId = targetTrack.id;
+            if (isSpotify) {
+              debugPrint('[PlayerController] Matching Spotify track "${targetTrack.title}" by "${targetTrack.artist}" to YouTube stream...');
+              final matched = await AudioMatcherService.instance.matchTrack(targetTrack);
+              if (matched == null) {
+                throw ArgumentError('Unable to match Spotify track to audio stream: "${targetTrack.title}" by "${targetTrack.artist}"');
+              }
+              resolvedYtId = 'yt_${matched.videoId}';
+              debugPrint('[PlayerController] Matched Spotify track to $resolvedYtId ("${matched.videoTitle}") with score ${matched.matchScore}');
+            }
+
+            // Fetch full unthrottled audio into disk cache for 100% complete playback and zero 403 halts
+            debugPrint('[PlayerController] Caching track for 100% full-duration playback: "${targetTrack.title}" ($resolvedYtId)...');
+            final downloadedPath = await AudioCacheService.instance
+                .cacheTrack(targetTrack)
+                .timeout(const Duration(seconds: 30), onTimeout: () => null);
+
+            if (downloadedPath != null) {
+              debugPrint('[PlayerController] Playback ready from disk cache: $downloadedPath');
+              await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
             } else {
-              throw ArgumentError('Unable to stream or cache track: ${targetTrack.id}');
+              throw ArgumentError('Unable to cache or play track: "${targetTrack.title}" (${targetTrack.id})');
+            }
+          } else {
+            // Subsonic / generic remote HTTP: download-to-cache then play
+            debugPrint('[PlayerController] Caching remote track: ${targetTrack.id}...');
+            final downloadedPath = await AudioCacheService.instance.cacheTrack(targetTrack);
+            if (downloadedPath != null) {
+              await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+            } else {
+              final streamUrl = targetTrack.streamUrl ?? targetTrack.remoteUrl;
+              if (streamUrl != null && streamUrl.isNotEmpty && streamUrl.startsWith('http')) {
+                await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
+              } else {
+                throw ArgumentError('Unable to stream or cache track: ${targetTrack.id}');
+              }
             }
           }
         }
       }
+
+
 
       final engineDur = _audioEngine.duration;
       final effectiveDuration = targetTrack.duration > Duration.zero

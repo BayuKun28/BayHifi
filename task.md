@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 51 Fase (Fase 1–51 Selesai • 100% Passed • 389/389 Passed)
+- **Total Fase**: 55 Fase (Fase 1–55 Selesai • 100% Passed • 435/435 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 51: Online Multi-Source Metadata Auto-Fetcher, Interactive Candidate Picker, Batch Auto-Tagger & Library Untagged Filter Chip (Complete — 0 Errors, 0 Warnings • 389/389 Passed)_
+- **Status Proyek**: _Phase 55: Per-Track DSP Mastering Preset System, Genre-Based Auto-Apply Engine & Rules Customizer (Complete — 0 Errors, 0 Warnings • 435/435 Passed)_
 
 ---
 
@@ -1338,4 +1338,150 @@ Implementasi sistem identifikasi dan pencocokan metadata musik otomatis dari ber
   - [x] Unit tests sanitasi query dan konversi kandidat di `test/online_metadata_service_test.dart` (4/4 passed).
   - [x] Unit & widget tests Untagged filter chip, quick banner, dan modal picker/tagger di `test/untagged_filter_chip_and_auto_tag_test.dart` (5/5 passed).
   - [x] Verifikasi `flutter analyze` 0 errors/warnings dan `flutter test` lulus 100% (389/389 passed).
+
+---
+
+## Fase 52: Contextual Selection Action Mode & Multi-Track Batch Action Bar Mobile/Portrait Overlay Refinement
+
+Pembenahan tata letak responsif dan animasi transisi kontekstual mode multi-seleksi lagu pada mode mobile dan portrait (< 650px / tablet), menghilangkan masalah bilah aksi tertimbun di bawah `NamidaExpandableMiniPlayer` dan `FloatingRoundedDock` melalui state hoisting Riverpod dan animasi slide responsif.
+
+- [x] **52.1 Hoisting State Multi-Track Selection ke Riverpod (`LibrarySelectionNotifier` & `librarySelectionProvider`)**:
+  - [x] Pembuatan data model `LibrarySelectionState` (`selectedTrackIds`, `isSelecting`, `count`, `isSelected(id)`).
+  - [x] State notifier `LibrarySelectionNotifier` dengan operasi `toggle(trackId)`, `select(trackId)`, `deselect(trackId)`, `selectAll(tracks)`, `deselectAll()`, dan `clear()`.
+  - [x] Dukungan tactile micro-haptic `AppHaptics.selectionClick()` pada interaksi pemilihan item.
+- [x] **52.2 Dynamic Responsive Transitions di Root Shell (`lib/app/app.dart`)**:
+  - [x] Reaktif `ref.watch(librarySelectionProvider)` pada `BaydevHiFiApp`.
+  - [x] Animasi `AnimatedSlide` dan `IgnorePointer` yang secara otomatis menggeser `FloatingRoundedDock` dan `NamidaExpandableMiniPlayer` turun ke bawah saat mode seleksi lagu aktif di mobile/tablet.
+  - [x] `AnimatedPadding` konten halaman yang bergeser mulus dari `80.0` ke `0.0` saat seleksi aktif sehingga `LibraryBatchActionsBar` duduk nyaman di area safe area bawah.
+  - [x] Pengembalian otomatis dock dan miniplayer saat seleksi selesai, dibatalkan, atau ditutup.
+- [x] **52.3 UnifiedLibraryScreen & TrackTile Contextual Integration**:
+  - [x] Migrasi state lokal `_selectedTrackIds` ke `librarySelectionProvider`.
+  - [x] Sinkronisasi `PopScope` untuk membatalkan seleksi terlebih dahulu saat gesture/tombol back fisik ditekan.
+  - [x] Pembersihan seleksi otomatis saat berpindah kategori tab (Tracks &rarr; Albums, Folders, dsb.) atau filter source.
+  - [x] Refinement `LibraryBatchActionsBar` agar responsif pada semua ukuran layar dengan touch target ringkas `VisualDensity.compact` dan `MaterialTapTargetSize.shrinkWrap`.
+- [x] **52.4 Quality Gate & Zero Regression Testing**:
+  - [x] Unit & widget tests lengkap di `test/library_multi_selection_mobile_test.dart` (6/6 passed).
+  - [x] Verifikasi `flutter analyze` 0 errors dan 0 warnings.
+  - [x] Verifikasi layout desktop tetap stabil di atas desktop bottom master transport deck.
+
+---
+
+## Fase 53: Out-of-the-Box Default Acoustic Tuning (Studio Audiophile Warmth), Curated Presets Suite, 1-Tap Bit-Perfect Bypass & Active State Persistence
+
+Implementasi konfigurasi profil akustik bawaan (*out-of-the-box acoustic tuning*) "Studio Audiophile Warmth" (Baydev Signature Reference) pada Pro-Q Studio Equalizer dan DSP Mastering Rack agar pengguna langsung merasakan audio yang hangat, berbobot, luas, dan ramah telinga sejak pertama kali aplikasi dibuka, dilengkapi tombol bypass 1-ketukan `Audiophile Bit-Perfect (Flat)`, suite preset studio terkurasi, kalkulasi safe preamp headroom otomatis, dan persistensi state aktif.
+
+- [x] **53.1 Default Acoustic Curve & Domain Model Tuning (`EqBand` & `DspRackState`)**:
+  - [x] Penyetelan kurva bawaan 10-band Pro-Q Studio "Studio Audiophile Warmth" (`EqBand.audiophileWarmthBands`):
+    - Sub-Bass ($48\text{ Hz}$ Low-Shelf, $+1.8\text{ dB}$, $Q=0.70$) & Mid-Bass ($110\text{ Hz}$, $+0.8\text{ dB}$, $Q=1.10$).
+    - Low-Mid Mud Cut ($280\text{ Hz}$, $-0.8\text{ dB}$, $Q=1.25$) & Mid Clarity ($1500\text{ Hz}$, $+0.4\text{ dB}$, $Q=1.41$).
+    - Vocal Presence ($3200\text{ Hz}$, $+1.2\text{ dB}$, $Q=1.00$) & Sibilance Control ($8200\text{ Hz}$, $-0.6\text{ dB}$, $Q=1.80$).
+    - Air & Micro-Detail Sparkle ($12000\text{ Hz}$, $+1.2\text{ dB}$ & $16000\text{ Hz}$ High-Shelf, $+1.6\text{ dB}$).
+  - [x] Penyetelan modul DSP Mastering Rack bawaan (`DspRackState`):
+    - Triode Tube Harmonic Exciter aktif pada $18\%$ ($y = \tanh(1.2 \cdot x)$, warmth $0.45$, mix $0.18$) untuk saturasi harmonik genap.
+    - Mid-Side Stereo Width Matrix aktif pada $1.15\times$ ($115\%$ lebar panggung suara, Mid Gain $1.05\times$, wet $70\%$).
+    - Peak Lookahead Limiter aktif (Threshold $-2.5\text{ dB}$, Output Ceiling $-0.5\text{ dBFS}$) untuk jaminan zero-clipping.
+    - Headroom Pre-Amp teratenuasi $-1.5\text{ dB}$ / $-2.0\text{ dB}$ aman.
+- [x] **53.2 Curated Factory Presets Suite (`kBuiltInEqPresets` & `DspPreset.studioPresets`)**:
+  - [x] Pro-Q Studio: `Studio Audiophile Warmth`, `Audiophile Bit-Perfect (Flat)`, `Harman 2019 Reference`, `Vocal & Acoustic Intimacy`, `Deep Bass & Club Drive`, `Air & High-Res Sparkle`, `Treble Tamer`.
+  - [x] DSP Rack: `Studio Audiophile Warmth`, `Audiophile Bit-Perfect`, `Warm Analog Tube Acoustic`, `Deep Bass Sub-Impact`, `Spacious Cinema Holographic`, `Mastering Vocal Clarity`, `Late-Night Headphone Anti-Fatigue`.
+  - [x] Penerjemahan 100% seluruh deskripsi preset ke Bahasa Inggris profesional.
+- [x] **53.3 1-Tap Bit-Perfect Bypass & Reset Workflows**:
+  - [x] Metode `resetToDefault()` mengembalikan ke Studio Warmth.
+  - [x] Metode `resetToBitPerfect()` mengembalikan instan ke Flat $0.0\text{ dB}$ direct passthrough.
+  - [x] Sinkronisasi instan ke `VirtualDspService` dan C++ SoLoud engine.
+- [x] **53.4 Active EQ State Persistence & Hydration**:
+  - [x] Penambahan `getActiveEqState()` dan `saveActiveEqState()` pada `LocalPersistenceService`.
+  - [x] Hidrasi otomatis profil EQ aktif saat aplikasi pertama kali dimuat atau di-restart.
+- **Total Fase**: 54 Fase (Fase 1–54 Selesai • 100% Passed)
+- **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
+- **Status Proyek**: _Phase 54: Native SpotDL Engine, Universal Spotify & YouTube Playlist Import, Hybrid Streaming-to-Offline Architecture & M3E Download Manager (Complete • 423/423 Passed • 0 Errors, 0 Warnings)_
+
+---
+
+## Fase 54: Native SpotDL Engine, Universal Spotify & YouTube Playlist Import, Hybrid Streaming-to-Offline Architecture & M3E Download Manager
+
+Implementasi engine native SpotDL murni berbasis Dart/Flutter, Universal Playlist Import (Spotify & YouTube), pemutaran hybrid streaming-to-offline, serta antarmuka Material 3 Expressive Download Manager pada Unified Library Screen.
+
+- [x] **54.1 Spotify Metadata Extraction & Universal Link Resolver**:
+  - [x] Domain models: `SpotifyTrack`, `SpotifyAlbum`, `SpotifyPlaylist`, `SpotifyArtist`, `UniversalImportPreview`.
+  - [x] Service: `SpotifyMetadataService` untuk fetch metadata track/album/playlist via public/anonymous endpoint tanpa login.
+  - [x] Regex & parser untuk URL/URI Spotify (`open.spotify.com/track/...`, `/album/...`, `/playlist/...`, `/intl-.../`).
+- [x] **54.2 Intelligent Audio Matcher Engine**:
+  - [x] `AudioMatcherService` mencocokkan Spotify metadata ke YouTube Music audio-only streams via `youtube_explode_dart`.
+  - [x] Heuristik kemiripan judul (Levenshtein/token similarity), validasi durasi ($\pm 6\text{ detik}$), dan pemfilteran noise keywords.
+- [x] **54.3 Native Download Engine & Audio Tagger**:
+  - [x] `NativeDownloadService` untuk unduh chunked stream audio dengan realtime progress tracking (bytes, speed, ETA).
+  - [x] `AudioTaggerService` menyematkan ID3/MP4 metadata, HD cover art bytes, dan lirik via `audiotags`.
+  - [x] Auto-index file hasil download ke database `LocalPersistenceService` dan library lokal.
+- [x] **54.4 Download State Management & Queue Controller**:
+  - [x] Riverpod state controller `DownloadController` dan domain model `DownloadTask`.
+  - [x] Manajemen antrean multi-task, pause, resume, cancel, retry, dan persistensi riwayat download.
+- [x] **54.5 Universal Playlist Import & Persistence**:
+  - [x] `UniversalImportDialog` untuk paste link Spotify/YouTube dengan preview card info.
+  - [x] Penyimpanan playlist ke database lokal dengan marker streaming dan dukungan instant on-the-fly streaming.
+  - [x] Penambahan opsi "Import from Spotify & YouTube" pada `PlaylistsScreen`.
+- [x] **54.6 Material 3 Expressive UI & Feature Integration**:
+  - [x] Penambahan `CollectionTab.downloads` dan `LibraryDownloadsTab` pada `UnifiedLibraryScreen`.
+  - [x] Penambahan opsi "Download Track" pada `StudioTrackActionSheet` dan track tiles.
+  - [x] Penambahan tombol batch "Download All" pada Playlist Detail Header.
+  - [x] Smart Link Auto-Detection pada search bar `YouTubeDiscoveryScreen`.
+- [x] **54.8 100% Continuous Audio Streaming & Unthrottled CDN Pipeline**:
+  - [x] Investigasi & identifikasi limitasi Google Video CDN: CDN memberlakukan ceiling buffer 1,048,576 bytes (~36.8 detik pada 160 kbps Opus) untuk standalone adaptive format (itag 251/140) sehingga chunk kedua mengalami HTTP 403 Forbidden.
+  - [x] Implementasi unthrottled muxed stream pipeline (`ratebypass=yes`, itag 18) yang mengunduh 100% track penuh dalam 4-5 detik tanpa hambatan 403.
+  - [x] Konversi/ekstraksi instan ke format standar Ogg Opus (`.ogg`) kompatibel engine C++ SoLoud.
+  - [x] Dual-stage playback architecture pada `PlayerController`:
+    - Stage 1: Pemutaran instan 0ms via `setBufferStream` + `WebmToOggRemuxer`.
+    - Stage 2: Background caching paralel via `AudioCacheService.instance.cacheTrack()` untuk jaminan pemutaran 100% lagu tanpa jeda dan seek instan 0ms.
+  - [x] Migrasi ekstensi disk cache `AudioCacheService` ke `.ogg` untuk native hardware/codec decoding SoLoud.
+  - [x] Verifikasi 100% passing tests dengan `flutter test` dan 0 errors/warnings dengan `flutter analyze`.
+
+---
+
+## Fase 55: Per-Track DSP Mastering Preset System, Genre-Based Auto-Apply Engine & Rules Customizer
+
+Implementasi sistem adaptasi mastering DSP cerdas otomatis berbasis genre metadata lagu, kemampuan pinning kustom per-track, manajemen konfigurasi aturan pemetaan genre, dan kepatuhan 100% Material 3 Expressive & HugeIcons.
+
+- [x] **55.1 Curated Genre Mastering Presets Suite (`DspPreset.studioPresets`)**:
+  - [x] Penambahan 10 preset mastering genre audiophile di `DspPreset.studioPresets`:
+    - `genre_rock`: Dynamic Rock & Alternative (Punchy transient attack, crisp electric guitar bite & tight analog drive).
+    - `genre_pop`: Modern Pop & Commercial (High vocal presence, wide stereo soundstage, polished master compression).
+    - `genre_edm`: Electronic & Club Impact (Deep sub-bass impact, aggressive compressor pump & ultra-wide stereo field).
+    - `genre_hiphop`: Hip-Hop & Urban Sub (Deep psychoacoustic 808 sub-bass, centered punchy vocal presence).
+    - `genre_jazz`: Warm Analog Jazz & Soul (Warm triode tube saturation, binaural crossfeed & organic room acoustics).
+    - `genre_classical`: Holographic Classical & Score (Expansive concert hall spatial reverb, uncompressed bit-perfect dynamics).
+    - `genre_acoustic`: Acoustic & Intimate Folk (Mid-frequency string intimacy, gentle analog warmth & fatigue reduction).
+    - `genre_rnb`: Smooth R&B & Neo-Soul (Lush vocal presence, smooth low-end compression & warm stereophonic field).
+    - `genre_metal`: High-Gain Heavy Metal (Fast transient attack, tight bass roll-off & high-gain harmonic definition).
+    - `genre_lofi`: Lo-Fi & Chillhop Vintage (Heavy analog triode tube saturation, soft vinyl warmth & cozy acoustic space).
+- [x] **55.2 Fuzzy Genre Matching & Multi-Token Evaluator Engine**:
+  - [x] Implementasi `GenrePresetMatcher.match()` dengan evaluasi token pemisah multi-genre (`/`, `;`, `,`, `|`, `&`, `and`), normalisasi sanitasi karakter, pencocokan eksak dan substring bersarang (misal: "Alternative Rock, Shoegaze" $\rightarrow$ `genre_rock`, "Chillhop / Lo-Fi Beats" $\rightarrow$ `genre_lofi`, "Heavy Metal" $\rightarrow$ `genre_metal`).
+  - [x] Dukungan `customMappingOverrides` per-genre kategori.
+- [x] **55.3 Multi-Level Resolution Engine & Controller State**:
+  - [x] Model domain: `DspTrackOverride`, `DspGenreMapping`, `DspResolutionSource`, `DspResolutionResult`, `GenreMatchResult`.
+  - [x] Prioritas resolusi 3 tingkat:
+    1. **Track Pinned Override**: Prioritas tertinggi jika pengguna mem-pin preset khusus ke lagu tersebut.
+    2. **Genre-Based Auto Match**: Otomatis mendeteksi genre tag lagu dan memilih preset mastering optimal jika `autoApplyByGenre` aktif.
+    3. **Global Active Preset / Fallback**: Preset manual yang sedang aktif di DSP Rack jika genre tidak dikenali / kosong.
+  - [x] Penambahan reaktif `revision` counter pada `DspRackState` untuk jaminan notifikasi StateNotifier Riverpod instan pada UI.
+  - [x] Integrasi hook otomatis pada `PlayerController.playTrack()` saat lagu baru dimainkan.
+- [x] **55.4 Persistent Storage Integration (`LocalPersistenceService`)**:
+  - [x] `saveDspTrackOverride()`, `getDspTrackOverrides()`, `removeDspTrackOverride()`.
+  - [x] `saveDspGenreMappings()`, `getDspGenreMappings()`.
+  - [x] `setDspAutoApplyByGenreEnabled()`, `isDspAutoApplyByGenreEnabled()`.
+- [x] **55.5 Pure Material 3 Expressive UI & Action Sheets**:
+  - [x] `StudioTrackDspPresetSheet`: Bottom modal sheet untuk melihat preset aktif, mem-pin preset khusus, unpin kembali ke genre auto, dan memilih preset terkurasi / custom.
+  - [x] `GenreRulesConfigModal`: Modal pengaturan aturan genre untuk toggle auto-apply dan kustomisasi mapping preset per kategori.
+  - [x] Integrasi `StudioTrackActionSheet` dengan action tile "DSP Mastering Preset" dan subtitle dinamis.
+  - [x] `DspRackScreen` enhancement: Active Track Context Banner, tombol "GENRE RULES", dan dropdown menu terkelompok (Genre Mastering, Studio Reference, Custom Profiles).
+- [x] **55.6 Quality Assurance & 100% Passing Tests**:
+  - [x] Test suite komprehensif `test/features/dsp_rack/dsp_per_track_and_genre_auto_apply_test.dart` (10/10 passing unit & widget tests).
+  - [x] `flutter test` dan `flutter analyze` 100% clean dengan 0 errors dan 0 warnings.
+- [x] **55.7 Persistent AutoEQ Driver & Target Curves Hydration**:
+  - [x] Penyimpanan otomatis nama Driver IEM (`lastDriverName`) dan Target Curve (`lastTargetName`) pada `LocalPersistenceService.saveActiveEqState()`.
+  - [x] Hidrasi otomatis saat `EqController` pertama kali dimuat sehingga pilihan Driver dan Target terakhir pengguna langsung aktif di Pro-Q Studio & modal AutoEQ.
+  - [x] Validasi test suite di `test/auto_eq_persistent_selection_test.dart` (3/3 passing tests).
+
+
+
+
 

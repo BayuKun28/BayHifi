@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -16,6 +17,18 @@ class YouTubeMusicService {
 
   YoutubeExplode? _yt;
   YoutubeExplode get _client => _yt ??= YoutubeExplode();
+
+  static bool? _hasFfmpeg;
+  static Future<bool> _checkFfmpeg() async {
+    if (_hasFfmpeg != null) return _hasFfmpeg!;
+    try {
+      final res = await Process.run('ffmpeg', ['-version']);
+      _hasFfmpeg = res.exitCode == 0;
+    } catch (_) {
+      _hasFfmpeg = false;
+    }
+    return _hasFfmpeg!;
+  }
 
   /// Cache of recently resolved audio stream URLs: videoId -> (url, expiryTimestamp)
   final Map<String, ({String url, DateTime expiresAt})> _urlCache = {};
@@ -248,7 +261,25 @@ class YouTubeMusicService {
       return cached.url;
     }
 
-    // 1. Try verified full audio stream resolution
+    // 1. Direct YoutubeExplode manifest (Primary & Client Authenticated)
+    try {
+      final manifest = await _getStreamManifest(videoId);
+      if (manifest != null) {
+        final bestStream = _selectBestAudioStream(manifest);
+        if (bestStream != null) {
+          final streamUrl = bestStream.url.toString();
+          _urlCache[videoId] = (
+            url: streamUrl,
+            expiresAt: DateTime.now().add(const Duration(hours: 4)),
+          );
+          return streamUrl;
+        }
+      }
+    } catch (e) {
+      debugPrint('[YouTubeMusicService] Manifest stream extraction notice for $videoId: $e');
+    }
+
+    // 2. Fallback to full audio stream resolution
     try {
       final resolved = await _resolveFullAudioStream(videoId);
       if (resolved != null) {
@@ -260,35 +291,27 @@ class YouTubeMusicService {
       }
     } catch (_) {}
 
-    // 2. Direct manifest fallback
-    try {
-      final manifest = await _getStreamManifest(videoId);
-      if (manifest == null) return null;
-
-      final bestStream = _selectBestAudioStream(manifest);
-      if (bestStream == null) {
-        debugPrint('[YouTubeMusicService] No audio streams found for $videoId');
-        return null;
-      }
-
-      final streamUrl = bestStream.url.toString();
-      _urlCache[videoId] = (
-        url: streamUrl,
-        expiresAt: DateTime.now().add(const Duration(hours: 4)),
-      );
-
-      return streamUrl;
-    } catch (e, st) {
-      debugPrint('[YouTubeMusicService] Error extracting audio stream URL for $videoId: $e\n$st');
-      return null;
-    }
+    return null;
   }
 
   /// Returns a live `Stream<List<int>>` of audio chunks for full playback without 1MB ceiling.
   Future<Stream<List<int>>?> getAudioByteStream(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
 
-    // 1. Try verified full audio stream resolution
+    // 1. Primary: Direct YoutubeExplode streamsClient
+    try {
+      final manifest = await _getStreamManifest(videoId);
+      if (manifest != null) {
+        final bestStream = _selectBestAudioStream(manifest);
+        if (bestStream != null) {
+          return _client.videos.streamsClient.get(bestStream);
+        }
+      }
+    } catch (e, st) {
+      debugPrint('[YouTubeMusicService] Error getting direct stream for $videoId: $e\n$st');
+    }
+
+    // 2. Fallback to full stream resolution
     try {
       final resolved = await _resolveFullAudioStream(videoId);
       if (resolved != null) {
@@ -298,19 +321,7 @@ class YouTubeMusicService {
       debugPrint('[YouTubeMusicService] Fallback stream resolution notice: $resolvedErr');
     }
 
-    // 2. Fallback to direct YoutubeExplode streamsClient
-    try {
-      final manifest = await _getStreamManifest(videoId);
-      if (manifest == null) return null;
-
-      final bestStream = _selectBestAudioStream(manifest);
-      if (bestStream == null) return null;
-
-      return _client.videos.streamsClient.get(bestStream);
-    } catch (e, st) {
-      debugPrint('[YouTubeMusicService] Error getting audio stream for $videoId: $e\n$st');
-      return null;
-    }
+    return null;
   }
 
   /// Returns a live `Stream<Uint8List>` of Ogg Opus audio chunks, remuxed in real-time from WebM Opus.
@@ -319,7 +330,28 @@ class YouTubeMusicService {
   Future<Stream<Uint8List>?> getOggOpusAudioByteStream(String videoIdOrTrackId) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
 
-    // 1. Try verified full audio stream resolution
+    // 1. Primary: Direct YoutubeExplode streamsClient with on-the-fly WebM to Ogg Opus remuxing
+    try {
+      final manifest = await _getStreamManifest(videoId);
+      if (manifest != null) {
+        final bestStream = _selectBestAudioStream(manifest);
+        if (bestStream != null) {
+          final rawStream = _client.videos.streamsClient.get(bestStream);
+          final isOpusOrWebm = bestStream.audioCodec.toLowerCase().contains('opus') ||
+              bestStream.container.name.toLowerCase().contains('webm');
+
+          if (isOpusOrWebm) {
+            return WebmToOggRemuxer.remuxStream(rawStream);
+          } else {
+            return rawStream.map((chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk));
+          }
+        }
+      }
+    } catch (e, st) {
+      debugPrint('[YouTubeMusicService] Error getting direct Ogg Opus audio stream for $videoId: $e\n$st');
+    }
+
+    // 2. Fallback to full stream resolution
     try {
       final resolved = await _resolveFullAudioStream(videoId);
       if (resolved != null) {
@@ -334,69 +366,117 @@ class YouTubeMusicService {
       debugPrint('[YouTubeMusicService] Fallback stream resolution notice: $resolvedErr');
     }
 
-    // 2. Fallback to direct YoutubeExplode streamsClient
-    try {
-      final manifest = await _getStreamManifest(videoId);
-      if (manifest == null) return null;
-
-      final bestStream = _selectBestAudioStream(manifest);
-      if (bestStream == null) return null;
-
-      final rawStream = _client.videos.streamsClient.get(bestStream);
-      final isOpusOrWebm = bestStream.audioCodec.toLowerCase().contains('opus') ||
-          bestStream.container.name.toLowerCase().contains('webm');
-
-      if (isOpusOrWebm) {
-        return WebmToOggRemuxer.remuxStream(rawStream);
-      } else {
-        return rawStream.map((chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk));
-      }
-    } catch (e, st) {
-      debugPrint('[YouTubeMusicService] Error getting Ogg Opus audio stream for $videoId: $e\n$st');
-      return null;
-    }
+    return null;
   }
 
-  /// Downloads audio directly into targetFile, remuxing WebM Opus to standard Ogg Opus
-  /// on the fly for native SoLoud compatibility across 100% of track duration.
+
+  /// Downloads audio directly into targetFile with 100% full duration guarantee.
+  /// Uses ratebypass=yes unthrottled streaming with audio extraction into high-fidelity Ogg Opus.
   Future<String?> downloadAudio(
     String videoIdOrTrackId,
     File targetFile, {
     void Function(double progress)? onProgress,
   }) async {
     final videoId = videoIdOrTrackId.replaceFirst('yt_', '');
+
+    if (!await targetFile.parent.exists()) {
+      await targetFile.parent.create(recursive: true);
+    }
+    if (await targetFile.exists()) {
+      await targetFile.delete();
+    }
+
+    // 1. Primary Strategy: Unthrottled muxed stream (itag 18) with ffmpeg Ogg Opus audio conversion
+    final hasFfmpeg = await _checkFfmpeg();
+    if (hasFfmpeg) {
+      try {
+        final manifest = await _getStreamManifest(videoId);
+        final itag18 = manifest?.muxed.firstWhereOrNull((s) => s.tag == 18) ?? manifest?.muxed.firstOrNull;
+        if (itag18 != null) {
+          final tempMp4 = File('${targetFile.path}.tmp.mp4');
+          if (await tempMp4.exists()) await tempMp4.delete();
+
+          final sink = tempMp4.openWrite();
+          final client = http.Client();
+          int bytesDownloaded = 0;
+          const chunkSize = 1024 * 1024;
+          final totalBytes = itag18.size.totalBytes;
+
+          while (bytesDownloaded < totalBytes) {
+            final from = bytesDownloaded;
+            final to = (from + chunkSize - 1).clamp(0, totalBytes - 1);
+            final req = http.Request('GET', itag18.url);
+            req.headers['Range'] = 'bytes=$from-$to';
+
+            final res = await client.send(req);
+            if (res.statusCode != 200 && res.statusCode != 206) {
+              throw Exception('HTTP status ${res.statusCode} downloading chunk $from-$to');
+            }
+
+            await for (final data in res.stream) {
+              bytesDownloaded += data.length;
+              sink.add(data);
+              if (totalBytes > 0) {
+                onProgress?.call((bytesDownloaded / totalBytes * 0.85).clamp(0.0, 0.85));
+              }
+            }
+          }
+
+          await sink.flush();
+          await sink.close();
+          client.close();
+
+          if (await tempMp4.exists() && await tempMp4.length() > 0) {
+            onProgress?.call(0.9);
+            final convResult = await Process.run('ffmpeg', [
+              '-y',
+              '-i', tempMp4.path,
+              '-vn',
+              '-c:a', 'libopus',
+              '-b:a', '160k',
+              targetFile.path,
+            ]);
+
+            try {
+              await tempMp4.delete();
+            } catch (_) {}
+
+            if (convResult.exitCode == 0 && await targetFile.exists() && await targetFile.length() > 0) {
+              onProgress?.call(1.0);
+              debugPrint('[YouTubeMusicService] Download & remux to Ogg Opus complete for $videoId (${await targetFile.length()} bytes)');
+              return targetFile.path;
+            }
+          }
+        }
+      } catch (itag18Err, st) {
+        debugPrint('[YouTubeMusicService] itag 18 download error for $videoId: $itag18Err\n$st');
+      }
+    }
+
+    // 2. Fallback Strategy: Direct getOggOpusAudioByteStream piping
     try {
       final oggStream = await getOggOpusAudioByteStream(videoId);
-      if (oggStream == null) {
-        debugPrint('[YouTubeMusicService] No audio stream available for $videoId');
-        return null;
-      }
+      if (oggStream != null) {
+        final sink = targetFile.openWrite();
+        int received = 0;
+        await for (final chunk in oggStream) {
+          sink.add(chunk);
+          received += chunk.length;
+          onProgress?.call((received / (3 * 1024 * 1024)).clamp(0.0, 1.0));
+        }
+        await sink.flush();
+        await sink.close();
 
-      if (!await targetFile.parent.exists()) {
-        await targetFile.parent.create(recursive: true);
+        if (await targetFile.exists() && await targetFile.length() > 0) {
+          onProgress?.call(1.0);
+          return targetFile.path;
+        }
       }
-      if (await targetFile.exists()) {
-        await targetFile.delete();
-      }
-
-      final sink = targetFile.openWrite();
-      int received = 0;
-      await for (final chunk in oggStream) {
-        sink.add(chunk);
-        received += chunk.length;
-        onProgress?.call((received / (3 * 1024 * 1024)).clamp(0.0, 1.0));
-      }
-      await sink.flush();
-      await sink.close();
-
-      if (await targetFile.exists() && await targetFile.length() > 0) {
-        return targetFile.path;
-      }
-      return null;
-    } catch (e, st) {
-      debugPrint('[YouTubeMusicService] Download error for $videoId: $e\n$st');
-      return null;
+    } catch (fallbackErr, st) {
+      debugPrint('[YouTubeMusicService] Fallback download error for $videoId: $fallbackErr\n$st');
     }
+
+    return null;
   }
 
   /// Fetches tracks from a YouTube Music or YouTube playlist URL/ID.

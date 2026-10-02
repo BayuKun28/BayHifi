@@ -9,6 +9,7 @@ import '../core/desktop/desktop_studio_sidebar.dart';
 import '../core/widgets/floating_rounded_dock.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dsp_rack/presentation/dsp_rack_screen.dart';
+import '../features/library/presentation/controllers/library_selection_controller.dart';
 import '../features/library/presentation/playlists_screen.dart';
 import '../features/library/presentation/unified_library_screen.dart';
 import '../features/player/presentation/controllers/player_controller.dart';
@@ -44,6 +45,7 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeControllerProvider);
+    final selectionState = ref.watch(librarySelectionProvider);
 
     // Automatically update dynamic palette when current track changes
     ref.listen(playerControllerProvider.select((s) => s.currentTrack), (previous, current) {
@@ -97,6 +99,7 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
 
                   // Pastikan indeks navigasi dalam batas array pages
                   final safeIndex = _selectedNavIndex.clamp(0, pages.length - 1);
+                  final isSelectingTracks = selectionState.isSelecting && safeIndex == 2;
 
                   // ─── 1. MOBILE PHONE LAYOUT (< 650px) ─────────────────────────
                   if (isMobile) {
@@ -107,8 +110,10 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                       body: Stack(
                         children: [
                           // Layer 1: Page Content
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 80.0),
+                          AnimatedPadding(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOutCubic,
+                            padding: EdgeInsets.only(bottom: isSelectingTracks ? 0.0 : 80.0),
                             child: IndexedStack(
                               index: safeIndex,
                               children: pages,
@@ -120,20 +125,36 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            child: FloatingRoundedDock(
-                              selectedIndex: mobileNavIndex,
-                              onItemSelected: (idx) {
-                                // Map 5 mobile items: 0->0, 1->1, 2->2, 3->3, 4->5 (Settings)
-                                final mapped = idx == 4 ? 5 : idx;
-                                setState(() => _selectedNavIndex = mapped);
-                              },
+                            child: AnimatedSlide(
+                              offset: isSelectingTracks ? const Offset(0, 1.4) : Offset.zero,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOutCubic,
+                              child: IgnorePointer(
+                                ignoring: isSelectingTracks,
+                                child: FloatingRoundedDock(
+                                  selectedIndex: mobileNavIndex,
+                                  onItemSelected: (idx) {
+                                    // Map 5 mobile items: 0->0, 1->1, 2->2, 3->3, 4->5 (Settings)
+                                    final mapped = idx == 4 ? 5 : idx;
+                                    setState(() => _selectedNavIndex = mapped);
+                                  },
+                                ),
+                              ),
                             ),
                           ),
 
                           // Layer 3: Namida Omnipresent Expandable MiniPlayer
-                          NamidaExpandableMiniPlayer(
-                            collapsedBottomOffset: 78.0,
-                            isLibraryTab: safeIndex == 2,
+                          AnimatedSlide(
+                            offset: isSelectingTracks ? const Offset(0, 2.0) : Offset.zero,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOutCubic,
+                            child: IgnorePointer(
+                              ignoring: isSelectingTracks,
+                              child: NamidaExpandableMiniPlayer(
+                                collapsedBottomOffset: 78.0,
+                                isLibraryTab: safeIndex == 2,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -155,8 +176,10 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                                     setState(() => _selectedNavIndex = idx),
                               ),
                               Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 74.0),
+                                child: AnimatedPadding(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOutCubic,
+                                  padding: EdgeInsets.only(bottom: isSelectingTracks ? 0.0 : 74.0),
                                   child: IndexedStack(
                                     index: safeIndex,
                                     children: pages,
@@ -167,9 +190,17 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
                           ),
 
                           // Namida Expandable MiniPlayer on Tablet
-                          NamidaExpandableMiniPlayer(
-                            collapsedBottomOffset: 12.0,
-                            isLibraryTab: safeIndex == 2,
+                          AnimatedSlide(
+                            offset: isSelectingTracks ? const Offset(0, 2.0) : Offset.zero,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOutCubic,
+                            child: IgnorePointer(
+                              ignoring: isSelectingTracks,
+                              child: NamidaExpandableMiniPlayer(
+                                collapsedBottomOffset: 12.0,
+                                isLibraryTab: safeIndex == 2,
+                              ),
+                            ),
                           ),
                         ],
                       ),

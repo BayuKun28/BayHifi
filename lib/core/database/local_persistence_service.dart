@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../features/player/domain/track.dart';
 
 /// Layanan Penyimpanan Lokal Persisten Cepat (JSON File-based DB Engine)
 class LocalPersistenceService {
@@ -74,7 +75,7 @@ class LocalPersistenceService {
   List<Map<String, dynamic>> getCustomPlaylists() {
     final list = _cache['custom_playlists'];
     if (list is List) {
-      return list.whereType<Map<String, dynamic>>().toList();
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
     return [];
   }
@@ -88,7 +89,7 @@ class LocalPersistenceService {
   List<Map<String, dynamic>> getSmartPlaylists() {
     final list = _cache['smart_playlists'];
     if (list is List) {
-      return list.whereType<Map<String, dynamic>>().toList();
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
     return [];
   }
@@ -160,7 +161,7 @@ class LocalPersistenceService {
   List<Map<String, dynamic>> getPlaybackHistory() {
     final list = _cache['playback_history'];
     if (list is List) {
-      return list.whereType<Map<String, dynamic>>().toList();
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
     return [];
   }
@@ -268,7 +269,7 @@ class LocalPersistenceService {
   List<Map<String, dynamic>> getSavedLibraryTracks() {
     final list = _cache['saved_library_tracks'];
     if (list is List) {
-      return list.whereType<Map<String, dynamic>>().toList();
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
     return [];
   }
@@ -276,6 +277,23 @@ class LocalPersistenceService {
   Future<void> saveLibraryTracks(List<Map<String, dynamic>> tracks) async {
     _cache['saved_library_tracks'] = tracks;
     await _save();
+  }
+
+  Future<void> saveTrack(Track track) async {
+    final current = getSavedLibraryTracks();
+    final updated = current.where((m) => m['id'] != track.id).toList();
+    updated.add(track.toMap());
+    await saveLibraryTracks(updated);
+  }
+
+  Track? getTrack(String id) {
+    final list = getSavedLibraryTracks();
+    for (final map in list) {
+      if (map['id'] == id) {
+        return Track.fromMap(map);
+      }
+    }
+    return null;
   }
 
   List<String> getMusicFolders() {
@@ -295,7 +313,7 @@ class LocalPersistenceService {
   List<Map<String, dynamic>> getSavedFrCurves() {
     final list = _cache['saved_fr_curves'];
     if (list is List) {
-      return list.whereType<Map<String, dynamic>>().toList();
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
     return [];
   }
@@ -358,7 +376,7 @@ class LocalPersistenceService {
   List<Map<String, dynamic>> getCustomDspProfiles() {
     final list = _cache['custom_dsp_profiles'];
     if (list is List) {
-      return list.whereType<Map<String, dynamic>>().toList();
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
     return [];
   }
@@ -368,12 +386,76 @@ class LocalPersistenceService {
     await _save();
   }
 
+  // ─── 8.1 PER-TRACK DSP OVERRIDES & GENRE MAPPINGS ────────────────────────
+  Map<String, Map<String, dynamic>> getDspTrackOverrides() {
+    final data = _cache['dsp_track_overrides'];
+    if (data is Map) {
+      final result = <String, Map<String, dynamic>>{};
+      data.forEach((k, v) {
+        if (k is String && v is Map) {
+          result[k] = Map<String, dynamic>.from(v);
+        }
+      });
+      return result;
+    }
+    return {};
+  }
+
+  Future<void> saveDspTrackOverride(Map<String, dynamic> overrideMap) async {
+    final trackId = overrideMap['trackId'] as String?;
+    if (trackId == null || trackId.isEmpty) return;
+    final current = getDspTrackOverrides();
+    current[trackId] = overrideMap;
+    _cache['dsp_track_overrides'] = current;
+    await _save();
+  }
+
+  Future<void> removeDspTrackOverride(String trackId) async {
+    final current = getDspTrackOverrides();
+    if (current.containsKey(trackId)) {
+      current.remove(trackId);
+      _cache['dsp_track_overrides'] = current;
+      await _save();
+    }
+  }
+
+  Map<String, String> getDspGenreMappings() {
+    final data = _cache['dsp_genre_mappings'];
+    if (data is Map) {
+      final result = <String, String>{};
+      data.forEach((k, v) {
+        if (k is String && v is String) {
+          result[k] = v;
+        }
+      });
+      return result;
+    }
+    return {};
+  }
+
+  Future<void> saveDspGenreMappings(Map<String, String> mappings) async {
+    _cache['dsp_genre_mappings'] = Map<String, String>.from(mappings);
+    await _save();
+  }
+
+  bool isDspAutoApplyByGenreEnabled() {
+    final val = _cache['dsp_auto_apply_genre_enabled'];
+    if (val is bool) return val;
+    return true; // Enabled by default
+  }
+
+  Future<void> setDspAutoApplyByGenreEnabled(bool enabled) async {
+    _cache['dsp_auto_apply_genre_enabled'] = enabled;
+    await _save();
+  }
+
+
   // ─── 9. CUSTOM PRO-Q EQ PRESETS ─────────────────────────────────────────────
   /// Returns all user-saved EQ presets. Each entry has: name, preampDb, bands (List<Map>).
   List<Map<String, dynamic>> getCustomEqPresets() {
     final list = _cache['custom_eq_presets'];
     if (list is List) {
-      return list.whereType<Map<String, dynamic>>().toList();
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
     return [];
   }
@@ -403,6 +485,46 @@ class LocalPersistenceService {
     final list = getCustomEqPresets();
     _cache['custom_eq_presets'] = list.where((p) => p['name'] != name).toList();
     await _save();
+  }
+
+  /// Returns the actively applied EQ state (bands, preampDb, activePresetName).
+  Map<String, dynamic>? getActiveEqState() {
+    final data = _cache['active_eq_state'];
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return null;
+  }
+
+  /// Saves the currently applied EQ state, including last selected Driver & Target curve names.
+  Future<void> saveActiveEqState({
+    required List<Map<String, dynamic>> bands,
+    required double preampDb,
+    required String activePresetName,
+    String? lastDriverName,
+    String? lastTargetName,
+  }) async {
+    _cache['active_eq_state'] = {
+      'bands': bands,
+      'preampDb': preampDb,
+      'activePresetName': activePresetName,
+      'lastDriverName': lastDriverName,
+      'lastTargetName': lastTargetName,
+      'savedAt': DateTime.now().toIso8601String(),
+    };
+    await _save();
+  }
+
+  /// Returns the last selected Driver & Target curve names.
+  Map<String, String?> getLastSelectedAutoEqCurves() {
+    final state = getActiveEqState();
+    return {
+      'driverName': state?['lastDriverName'] as String?,
+      'targetName': state?['lastTargetName'] as String?,
+    };
   }
 
   // ─── 9. DESKTOP WINDOW GEOMETRY PERSISTENCE ────────────────────────────────

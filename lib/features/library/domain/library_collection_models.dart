@@ -7,6 +7,7 @@ enum CollectionTab {
   albums('Albums'),
   artists('Artists'),
   genres('Genres'),
+  downloads('Downloads'),
   youtube('YouTube'),
   folders('Folders');
 
@@ -106,7 +107,7 @@ class GenreModel {
   int get trackCount => tracks.length;
 }
 
-/// Model Playlist Kustom
+/// Model Playlist Kustom & Imported Streaming Playlist
 @immutable
 class PlaylistModel {
   final String id;
@@ -115,6 +116,8 @@ class PlaylistModel {
   final List<Track> tracks;
   final bool isCustom;
   final DateTime createdAt;
+  final String sourceType; // 'local', 'spotify', 'youtube', 'navidrome'
+  final String? coverUrl;
 
   const PlaylistModel({
     required this.id,
@@ -123,9 +126,69 @@ class PlaylistModel {
     required this.tracks,
     this.isCustom = true,
     required this.createdAt,
+    this.sourceType = 'local',
+    this.coverUrl,
   });
 
   int get trackCount => tracks.length;
+
+  bool get isStreaming =>
+      sourceType == 'spotify' ||
+      sourceType == 'youtube' ||
+      tracks.any((t) => (t.filePath == null || t.filePath!.isEmpty) && (t.remoteUrl != null && t.remoteUrl!.isNotEmpty));
+
+  int get downloadedCount =>
+      tracks.where((t) => t.filePath != null && t.filePath!.isNotEmpty).length;
+
+  PlaylistModel copyWith({
+    String? id,
+    String? name,
+    String? description,
+    List<Track>? tracks,
+    bool? isCustom,
+    DateTime? createdAt,
+    String? sourceType,
+    String? coverUrl,
+  }) {
+    return PlaylistModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      tracks: tracks ?? this.tracks,
+      isCustom: isCustom ?? this.isCustom,
+      createdAt: createdAt ?? this.createdAt,
+      sourceType: sourceType ?? this.sourceType,
+      coverUrl: coverUrl ?? this.coverUrl,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'description': description,
+    'tracks': tracks.map((t) => t.toMap()).toList(),
+    'isCustom': isCustom,
+    'createdAt': createdAt.toIso8601String(),
+    'sourceType': sourceType,
+    'coverUrl': coverUrl,
+  };
+
+  factory PlaylistModel.fromMap(Map<String, dynamic> map) {
+    return PlaylistModel(
+      id: map['id'] as String? ?? 'custom_${DateTime.now().millisecondsSinceEpoch}',
+      name: map['name'] as String? ?? 'Playlist',
+      description: map['description'] as String? ?? '',
+      tracks: (map['tracks'] as List<dynamic>?)
+              ?.whereType<Map>()
+              .map((t) => Track.fromMap(Map<String, dynamic>.from(t)))
+              .toList() ??
+          const [],
+      isCustom: map['isCustom'] as bool? ?? true,
+      createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
+      sourceType: map['sourceType'] as String? ?? 'local',
+      coverUrl: map['coverUrl'] as String?,
+    );
+  }
 }
 
 /// Model Folder Direktori Audio

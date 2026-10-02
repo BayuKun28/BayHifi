@@ -5,11 +5,12 @@ import '../../domain/fr_curve_data.dart';
 
 /// Built-in factory preset names — these cannot be overwritten directly.
 const kBuiltInEqPresets = <String>[
-  'Default 10-Band',
-  'Flat',
-  'Bass Boost',
-  'V-Shape',
-  'Vocal Clarity',
+  'Studio Audiophile Warmth',
+  'Audiophile Bit-Perfect (Flat)',
+  'Harman 2019 Reference',
+  'Vocal & Acoustic Intimacy',
+  'Deep Bass & Club Drive',
+  'Air & High-Res Sparkle',
   'Treble Tamer',
 ];
 
@@ -44,15 +45,15 @@ class EqState {
 
   const EqState({
     required this.bands,
-    this.selectedBandIndex = 2, // Default selected on B2 (226Hz +4.4dB)
+    this.selectedBandIndex = 1, // Default selected on B1 (48Hz +1.8dB)
     this.isEnabled = true,
     this.isRtaEnabled = true,
     this.showFrCurves = true,
     this.driverFr,
     this.targetFr,
-    this.safePreampDb = -4.3,
+    this.safePreampDb = -2.0,
     this.autoPreampEnabled = true,
-    this.activePresetName = 'Custom AutoEQ',
+    this.activePresetName = 'Studio Audiophile Warmth',
     this.bandResolution = BandResolution.b10,
     this.tuningMode = TuningMode.normal,
     this.abMode = AbComparisonMode.bActive,

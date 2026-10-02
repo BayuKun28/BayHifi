@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../audio_engine/virtual_dsp_service.dart';
 import '../../../../core/database/local_persistence_service.dart';
+import '../../../player/domain/track.dart';
 import '../../domain/dsp_models.dart';
 
 final dspRackControllerProvider =
@@ -18,6 +19,7 @@ class DspRackController extends StateNotifier<DspRackState> {
         )) {
     _hydrateState();
     _loadCustomPresets();
+    _loadTrackOverridesAndGenreMappings();
     Future.microtask(() {
       if (_isDisposed || !mounted) return;
       _syncWithEngine();
@@ -27,8 +29,16 @@ class DspRackController extends StateNotifier<DspRackState> {
 
   bool _isDisposed = false;
   List<DspPreset> _customPresets = [];
+  Map<String, DspTrackOverride> _trackOverrides = {};
+  Map<String, String> _customGenreMappings = {};
+  bool _autoApplyGenreEnabled = true;
+  DspResolutionResult? _lastResolutionResult;
 
   List<DspPreset> get customPresets => List.unmodifiable(_customPresets);
+  Map<String, DspTrackOverride> get trackOverrides => Map.unmodifiable(_trackOverrides);
+  Map<String, String> get customGenreMappings => Map.unmodifiable(_customGenreMappings);
+  bool get isAutoApplyGenreEnabled => _autoApplyGenreEnabled;
+  DspResolutionResult? get lastResolutionResult => _lastResolutionResult;
 
   @override
   void dispose() {
@@ -54,6 +64,17 @@ class DspRackController extends StateNotifier<DspRackState> {
       _customPresets = list.map((m) => DspPreset.fromMap(m)).toList();
     } catch (e) {
       debugPrint('[DspRackController] Error loading custom presets: $e');
+    }
+  }
+
+  void _loadTrackOverridesAndGenreMappings() {
+    try {
+      final overridesMap = LocalPersistenceService.instance.getDspTrackOverrides();
+      _trackOverrides = overridesMap.map((k, v) => MapEntry(k, DspTrackOverride.fromMap(v)));
+      _customGenreMappings = LocalPersistenceService.instance.getDspGenreMappings();
+      _autoApplyGenreEnabled = LocalPersistenceService.instance.isDspAutoApplyByGenreEnabled();
+    } catch (e) {
+      debugPrint('[DspRackController] Error loading overrides/mappings: $e');
     }
   }
 
@@ -457,7 +478,10 @@ class DspRackController extends StateNotifier<DspRackState> {
 
   // Presets and Master Actions
   void applyPreset(DspPreset preset) {
-    state = preset.state.copyWith(activePresetId: preset.id);
+    state = preset.state.copyWith(
+      activePresetId: preset.id,
+      revision: state.revision + 1,
+    );
     _syncWithEngine();
   }
 
@@ -469,7 +493,10 @@ class DspRackController extends StateNotifier<DspRackState> {
       state: state,
     );
     _customPresets.add(newPreset);
-    state = state.copyWith(activePresetId: newPreset.id);
+    state = state.copyWith(
+      activePresetId: newPreset.id,
+      revision: state.revision + 1,
+    );
     await LocalPersistenceService.instance.saveCustomDspProfiles(
       _customPresets.map((p) => p.toMap()).toList(),
     );
@@ -479,7 +506,10 @@ class DspRackController extends StateNotifier<DspRackState> {
   Future<void> deleteCustomProfile(String id) async {
     _customPresets.removeWhere((p) => p.id == id);
     if (state.activePresetId == id) {
-      state = state.copyWith(clearPreset: true);
+      state = state.copyWith(
+        clearPreset: true,
+        revision: state.revision + 1,
+      );
     }
     await LocalPersistenceService.instance.saveCustomDspProfiles(
       _customPresets.map((p) => p.toMap()).toList(),
@@ -491,8 +521,142 @@ class DspRackController extends StateNotifier<DspRackState> {
   }
 
   void resetToDefaults() {
-    state = const DspRackState();
-    VirtualDspService.instance.resetToFlatReference();
+    state = DspRackState(revision: state.revision + 1);
     _syncWithEngine();
   }
+
+  void resetToBitPerfect() {
+    final flatPreset = DspPreset.studioPresets.firstWhere(
+      (p) => p.id == 'pure_direct',
+      orElse: () => DspPreset.studioPresets[1],
+    );
+    applyPreset(flatPreset);
+  }
+
+  // ─── PER-TRACK & GENRE AUTO-APPLY ENGINE ─────────────────────────────────
+
+  /// Finds a preset by ID from custom profiles or curated studio presets
+  DspPreset? findPresetById(String presetId) {
+    for (final p in _customPresets) {
+      if (p.id == presetId) return p;
+    }
+    for (final p in DspPreset.studioPresets) {
+      if (p.id == presetId) return p;
+    }
+    return null;
+  }
+
+  /// Resolves which DSP preset should be applied for a given track based on
+  /// 1. Explicit Track Override (highest priority)
+  /// 2. Genre-Based Auto Match (if enabled)
+  /// 3. Current active/default preset (fallback)
+  DspResolutionResult resolvePresetForTrack(Track track) {
+    // 1. Check Track Override
+    final override = _trackOverrides[track.id];
+    if (override != null) {
+      final preset = findPresetById(override.presetId);
+      if (preset != null) {
+        return DspResolutionResult(
+          preset: preset,
+          source: DspResolutionSource.trackOverride,
+          trackTitle: track.title,
+        );
+      }
+    }
+
+    // 2. Check Genre Auto-Apply
+    if (_autoApplyGenreEnabled && track.genre != null && track.genre!.trim().isNotEmpty) {
+      final match = GenrePresetMatcher.match(
+        track.genre,
+        customMappingOverrides: _customGenreMappings,
+      );
+      if (match != null) {
+        final preset = findPresetById(match.targetPresetId) ??
+            DspPreset.studioPresets.firstWhere((p) => p.id == 'studio_warmth');
+        return DspResolutionResult(
+          preset: preset,
+          source: DspResolutionSource.genreAuto,
+          matchedGenre: match.matchedKeyword,
+          trackTitle: track.title,
+        );
+      }
+    }
+
+    // 3. Fallback to active preset or default studio warmth
+    final active = findPresetById(state.activePresetId ?? 'studio_warmth') ??
+        DspPreset.studioPresets.first;
+    return DspResolutionResult(
+      preset: active,
+      source: DspResolutionSource.manual,
+      trackTitle: track.title,
+    );
+  }
+
+  /// Automatically applies the resolved DSP preset for a track upon playback
+  void applyForTrack(Track track) {
+    final result = resolvePresetForTrack(track);
+    _lastResolutionResult = result;
+
+    // Apply if different from current active preset or if rack state is bypassed/cleared
+    if (state.activePresetId != result.preset.id) {
+      debugPrint('[DspRackController] Auto-applying DSP Preset "${result.preset.name}" (${result.source.name}) for track: ${track.title}');
+      applyPreset(result.preset);
+    }
+  }
+
+  /// Pins a specific DSP preset to a track (creating a permanent override)
+  Future<void> pinPresetForTrack(String trackId, DspPreset preset, {String? trackTitle}) async {
+    final override = DspTrackOverride(
+      trackId: trackId,
+      presetId: preset.id,
+      presetName: preset.name,
+      assignedAt: DateTime.now(),
+    );
+    _trackOverrides[trackId] = override;
+    _lastResolutionResult = DspResolutionResult(
+      preset: preset,
+      source: DspResolutionSource.trackOverride,
+      trackTitle: trackTitle,
+    );
+    applyPreset(preset);
+    await LocalPersistenceService.instance.saveDspTrackOverride(override.toMap());
+  }
+
+  /// Removes track-specific override
+  Future<void> unpinPresetForTrack(String trackId, {Track? activeTrack}) async {
+    if (_trackOverrides.containsKey(trackId)) {
+      _trackOverrides.remove(trackId);
+      if (activeTrack != null && activeTrack.id == trackId) {
+        applyForTrack(activeTrack);
+      } else {
+        state = state.copyWith(revision: state.revision + 1);
+      }
+      await LocalPersistenceService.instance.removeDspTrackOverride(trackId);
+    }
+  }
+
+  /// Checks if a track has a pinned DSP preset override
+  bool isTrackPinned(String trackId) {
+    return _trackOverrides.containsKey(trackId);
+  }
+
+  /// Returns the pinned override for a track if any
+  DspTrackOverride? getTrackOverride(String trackId) {
+    return _trackOverrides[trackId];
+  }
+
+  /// Updates custom mapping for a specific genre category
+  Future<void> updateGenreMapping(String genreKey, String presetId) async {
+    _customGenreMappings[genreKey] = presetId;
+    state = state.copyWith(revision: state.revision + 1);
+    await LocalPersistenceService.instance.saveDspGenreMappings(_customGenreMappings);
+  }
+
+  /// Toggles whether Genre Auto-Apply is active
+  Future<void> setAutoApplyGenreEnabled(bool enabled) async {
+    _autoApplyGenreEnabled = enabled;
+    state = state.copyWith(revision: state.revision + 1);
+    await LocalPersistenceService.instance.setDspAutoApplyByGenreEnabled(enabled);
+  }
 }
+

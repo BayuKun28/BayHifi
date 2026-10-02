@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../features/player/domain/track.dart';
+import '../features/spotify_importer/data/audio_matcher_service.dart';
 import '../features/youtube_music/data/youtube_music_service.dart';
 
 /// Spotify-grade Audio Caching & Next-Track Prefetch Service
@@ -62,12 +63,16 @@ class AudioCacheService extends ChangeNotifier {
 
   File _getCacheFile(String trackId) {
     final sanitized = _sanitizeId(trackId);
-    return File('${_cacheDir!.path}/$sanitized.cache');
+    final oggFile = File('${_cacheDir!.path}/$sanitized.ogg');
+    if (oggFile.existsSync()) return oggFile;
+    final legacyFile = File('${_cacheDir!.path}/$sanitized.cache');
+    if (legacyFile.existsSync()) return legacyFile;
+    return oggFile;
   }
 
   File _getTempFile(String trackId) {
     final sanitized = _sanitizeId(trackId);
-    return File('${_cacheDir!.path}/$sanitized.tmp');
+    return File('${_cacheDir!.path}/$sanitized.tmp.ogg');
   }
 
   /// Returns cache file for a track ID
@@ -106,13 +111,24 @@ class AudioCacheService extends ChangeNotifier {
 
       final entities = _cacheDir!.listSync();
       for (final entity in entities) {
-        if (entity is File && entity.path.endsWith('.cache')) {
-          final size = entity.lengthSync();
-          if (size > 0) {
-            bytes += size;
-            final fileName = entity.uri.pathSegments.last;
-            final trackId = fileName.substring(0, fileName.length - '.cache'.length);
-            _cachedTrackIds.add(trackId);
+        if (entity is File) {
+          final p = entity.path;
+          if (p.endsWith('.ogg') && !p.endsWith('.tmp.ogg')) {
+            final size = entity.lengthSync();
+            if (size > 0) {
+              bytes += size;
+              final fileName = entity.uri.pathSegments.last;
+              final trackId = fileName.substring(0, fileName.length - '.ogg'.length);
+              _cachedTrackIds.add(trackId);
+            }
+          } else if (p.endsWith('.cache')) {
+            final size = entity.lengthSync();
+            if (size > 0) {
+              bytes += size;
+              final fileName = entity.uri.pathSegments.last;
+              final trackId = fileName.substring(0, fileName.length - '.cache'.length);
+              _cachedTrackIds.add(trackId);
+            }
           }
         }
       }
@@ -130,13 +146,24 @@ class AudioCacheService extends ChangeNotifier {
     int bytes = 0;
     if (_cacheDir!.existsSync()) {
       for (final entity in _cacheDir!.listSync()) {
-        if (entity is File && entity.path.endsWith('.cache')) {
-          final size = entity.lengthSync();
-          if (size > 0) {
-            bytes += size;
-            final fileName = entity.uri.pathSegments.last;
-            final trackId = fileName.substring(0, fileName.length - '.cache'.length);
-            _cachedTrackIds.add(trackId);
+        if (entity is File) {
+          final p = entity.path;
+          if (p.endsWith('.ogg') && !p.endsWith('.tmp.ogg')) {
+            final size = entity.lengthSync();
+            if (size > 0) {
+              bytes += size;
+              final fileName = entity.uri.pathSegments.last;
+              final trackId = fileName.substring(0, fileName.length - '.ogg'.length);
+              _cachedTrackIds.add(trackId);
+            }
+          } else if (p.endsWith('.cache')) {
+            final size = entity.lengthSync();
+            if (size > 0) {
+              bytes += size;
+              final fileName = entity.uri.pathSegments.last;
+              final trackId = fileName.substring(0, fileName.length - '.cache'.length);
+              _cachedTrackIds.add(trackId);
+            }
           }
         }
       }
@@ -190,9 +217,35 @@ class AudioCacheService extends ChangeNotifier {
           notifyListeners();
           return null;
         }
+      } else if (track.id.startsWith('spotify_') ||
+          (track.remoteUrl?.startsWith('spotify:') ?? false)) {
+        // Spotify streaming track: match to YouTube stream on the fly
+        final matched = await AudioMatcherService.instance.matchTrack(track);
+        if (matched == null) {
+          debugPrint('[AudioCacheService] No audio match found for Spotify track: ${track.title} by ${track.artist}');
+          _downloadProgress.remove(track.id);
+          notifyListeners();
+          return null;
+        }
+
+        final downloadedPath = await YouTubeMusicService.instance.downloadAudio(
+          'yt_${matched.videoId}',
+          tempFile,
+          onProgress: (p) {
+            _downloadProgress[track.id] = p;
+            onProgress?.call(p);
+            notifyListeners();
+          },
+        );
+
+        if (downloadedPath == null) {
+          _downloadProgress.remove(track.id);
+          notifyListeners();
+          return null;
+        }
       } else {
         final streamUrl = track.streamUrl ?? track.remoteUrl;
-        if (streamUrl == null || streamUrl.isEmpty) {
+        if (streamUrl == null || streamUrl.isEmpty || !streamUrl.startsWith('http')) {
           _downloadProgress.remove(track.id);
           notifyListeners();
           return null;
@@ -211,6 +264,7 @@ class AudioCacheService extends ChangeNotifier {
           },
         );
       }
+
 
       if (await tempFile.exists() && await tempFile.length() > 0) {
         if (await targetFile.exists()) {

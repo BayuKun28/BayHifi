@@ -235,9 +235,10 @@ void main() {
       expect(find.byType(TextFormField), findsNWidgets(3));
     });
 
-    testWidgets('UnifiedLibraryScreen displays dedicated Navidrome empty state when filter is Navidrome and disconnected', (tester) async {
+    testWidgets('UnifiedLibraryScreen displays dedicated Navidrome empty state when cloud+navidrome filter active and disconnected', (tester) async {
       final controller = UnifiedLibraryController(initialTracks: const []);
-      controller.setFilter(LibrarySourceFilter.navidrome);
+      controller.setFilter(LibrarySourceFilter.cloud);
+      controller.setCloudSubFilter(CloudSubFilter.navidrome);
 
       await tester.pumpWidget(
         ProviderScope(

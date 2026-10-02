@@ -4,8 +4,13 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../core/widgets/studio_artwork_widget.dart';
+import '../../player/domain/track.dart';
+import '../../player/presentation/controllers/player_controller.dart';
 import '../domain/dsp_models.dart';
 import 'controllers/dsp_rack_controller.dart';
+import 'widgets/genre_rules_config_modal.dart';
+import 'widgets/studio_track_dsp_preset_sheet.dart';
 import '../../pro_q_studio/presentation/pro_q_studio_screen.dart';
 import 'widgets/gain_reduction_meter.dart';
 import 'widgets/rack_knob_slider.dart';
@@ -22,6 +27,8 @@ class DspRackScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dspState = ref.watch(dspRackControllerProvider);
     final controller = ref.read(dspRackControllerProvider.notifier);
+    final playerState = ref.watch(playerControllerProvider);
+    final currentTrack = playerState.currentTrack;
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
@@ -113,7 +120,13 @@ class DspRackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // 2. STUDIO PRESETS SELECTOR
-          _buildPresetsSelector(context, dspState, controller, isSolid),
+          _buildPresetsSelector(
+            context,
+            dspState,
+            controller,
+            isSolid,
+            currentTrack: currentTrack,
+          ),
           const SizedBox(height: 20),
 
           // UNIT 01: PRE-AMP GAIN STAGE
@@ -703,10 +716,13 @@ class DspRackScreen extends ConsumerWidget {
     BuildContext context,
     DspRackState state,
     DspRackController controller,
-    bool isSolid,
-  ) {
+    bool isSolid, {
+    Track? currentTrack,
+  }) {
     final theme = Theme.of(context);
     final studioPresets = DspPreset.studioPresets;
+    final genrePresets = studioPresets.where((p) => p.id.startsWith('genre_')).toList();
+    final referencePresets = studioPresets.where((p) => !p.id.startsWith('genre_')).toList();
     final customPresets = controller.customPresets;
 
     // Find active preset if any
@@ -728,8 +744,13 @@ class DspRackScreen extends ConsumerWidget {
 
     final isCustomActive = activePreset != null &&
         customPresets.any((p) => p.id == activePreset!.id);
+    final isGenrePreset = activePreset != null && activePreset.id.startsWith('genre_');
 
     final displayName = activePreset?.name ?? 'Manual Tuning (Customized)';
+
+    // Active track resolution status
+    final isTrackPinned = currentTrack != null && controller.isTrackPinned(currentTrack.id);
+    final trackResolution = currentTrack != null ? controller.resolvePresetForTrack(currentTrack) : null;
 
     return Container(
       decoration: BoxDecoration(
@@ -773,12 +794,51 @@ class DspRackScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
+              // Genre Auto-Apply Rules Button
+              InkWell(
+                onTap: () => GenreRulesConfigModal.show(context),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: StudioSurfaceTheme.tintedContainer(
+                      context,
+                      theme.colorScheme.secondary,
+                      isSolid: isSolid,
+                      translucentAlpha: 0.12,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                        size: 13,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'GENRE RULES',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Save Profile Button
               InkWell(
                 onTap: () => _showSaveProfileDialog(context, controller, isSolid),
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(
                     color: StudioSurfaceTheme.tintedContainer(
                       context,
@@ -796,11 +856,11 @@ class DspRackScreen extends ConsumerWidget {
                         size: 13,
                         color: theme.colorScheme.primary,
                       ),
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 4),
                       Text(
-                        'SAVE PROFILE',
+                        'SAVE',
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 10,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
                           color: theme.colorScheme.primary,
@@ -812,6 +872,123 @@ class DspRackScreen extends ConsumerWidget {
               ),
             ],
           ),
+
+          // ─── ACTIVE PLAYING TRACK STATUS BANNER ───────────────────────────
+          if (currentTrack != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isTrackPinned
+                      ? theme.colorScheme.primary.withValues(alpha: 0.4)
+                      : theme.colorScheme.outline.withValues(alpha: 0.15),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: StudioArtworkWidget(
+                      track: currentTrack,
+                      borderRadius: BorderRadius.circular(5),
+                      fallbackIconSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                currentTrack.title,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: isTrackPinned
+                                    ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                                    : (trackResolution?.source == DspResolutionSource.genreAuto
+                                        ? theme.colorScheme.tertiary.withValues(alpha: 0.15)
+                                        : theme.colorScheme.outline.withValues(alpha: 0.1)),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                isTrackPinned
+                                    ? 'PINNED'
+                                    : (trackResolution?.source == DspResolutionSource.genreAuto
+                                        ? 'AUTO: ${trackResolution?.matchedGenre?.toUpperCase() ?? "GENRE"}'
+                                        : 'GLOBAL'),
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w900,
+                                  color: isTrackPinned
+                                      ? theme.colorScheme.primary
+                                      : (trackResolution?.source == DspResolutionSource.genreAuto
+                                          ? theme.colorScheme.tertiary
+                                          : theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '${currentTrack.artist}${currentTrack.genre != null && currentTrack.genre!.isNotEmpty ? " • ${currentTrack.genre}" : ""}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  InkWell(
+                    onTap: () => StudioTrackDspPresetSheet.show(context, currentTrack),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        isTrackPinned ? 'MANAGE' : 'PIN TO TRACK',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: 10),
 
           // COMBO BOX / DROPDOWN SELECTOR
@@ -964,24 +1141,24 @@ class DspRackScreen extends ConsumerWidget {
                 items.add(const PopupMenuDivider());
               }
 
-              // Section 2: Factory Studio Presets
+              // Section 2: Genre Mastering Presets
               items.add(
                 PopupMenuItem<dynamic>(
                   enabled: false,
                   height: 28,
                   child: Text(
-                    'STUDIO FACTORY PRESETS',
+                    'GENRE MASTERING PRESETS (${genrePresets.length})',
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.0,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
               );
 
-              for (final p in studioPresets) {
+              for (final p in genrePresets) {
                 final isSelected = state.activePresetId == p.id;
                 items.add(
                   PopupMenuItem<dynamic>(
@@ -991,7 +1168,7 @@ class DspRackScreen extends ConsumerWidget {
                         HugeIcon(
                           icon: isSelected
                               ? HugeIcons.strokeRoundedCheckmarkCircle02
-                              : HugeIcons.strokeRoundedSlidersVertical,
+                              : HugeIcons.strokeRoundedSparkles,
                           size: 15,
                           color: isSelected
                               ? theme.colorScheme.primary
@@ -1019,6 +1196,77 @@ class DspRackScreen extends ConsumerWidget {
                                   fontSize: 10,
                                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              items.add(const PopupMenuDivider());
+
+              // Section 3: Studio Reference Presets
+              items.add(
+                PopupMenuItem<dynamic>(
+                  enabled: false,
+                  height: 28,
+                  child: Text(
+                    'STUDIO REFERENCE PRESETS (${referencePresets.length})',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0,
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                ),
+              );
+
+              for (final p in referencePresets) {
+                final isSelected = state.activePresetId == p.id;
+                items.add(
+                  PopupMenuItem<dynamic>(
+                    value: p,
+                    child: Row(
+                      children: [
+                        HugeIcon(
+                          icon: isSelected
+                              ? HugeIcons.strokeRoundedCheckmarkCircle02
+                              : HugeIcons.strokeRoundedSlidersVertical,
+                          size: 15,
+                          color: isSelected
+                              ? theme.colorScheme.secondary
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                p.name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                  color: isSelected
+                                      ? theme.colorScheme.secondary
+                                      : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                p.description,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -1053,9 +1301,11 @@ class DspRackScreen extends ConsumerWidget {
                     child: HugeIcon(
                       icon: isCustomActive
                           ? HugeIcons.strokeRoundedBookmark02
-                          : (activePreset != null
-                              ? HugeIcons.strokeRoundedSlidersVertical
-                              : HugeIcons.strokeRoundedAudioWaveform),
+                          : (isGenrePreset
+                              ? HugeIcons.strokeRoundedSparkles
+                              : (activePreset != null
+                                  ? HugeIcons.strokeRoundedSlidersVertical
+                                  : HugeIcons.strokeRoundedAudioWaveform)),
                       size: 16,
                       color: activePreset != null
                           ? theme.colorScheme.primary
@@ -1089,9 +1339,11 @@ class DspRackScreen extends ConsumerWidget {
                                   context,
                                   (isCustomActive
                                       ? const Color(0xFF00E676)
-                                      : (activePreset != null
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.outline)),
+                                      : (isGenrePreset
+                                          ? theme.colorScheme.tertiary
+                                          : (activePreset != null
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.outline))),
                                   isSolid: isSolid,
                                   translucentAlpha: 0.15,
                                 ),
@@ -1100,16 +1352,18 @@ class DspRackScreen extends ConsumerWidget {
                               child: Text(
                                 isCustomActive
                                     ? 'CUSTOM'
-                                    : (activePreset != null ? 'PRESET' : 'MANUAL'),
+                                    : (isGenrePreset ? 'GENRE' : (activePreset != null ? 'PRESET' : 'MANUAL')),
                                 style: TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.5,
                                   color: isCustomActive
                                       ? const Color(0xFF00E676)
-                                      : (activePreset != null
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                                      : (isGenrePreset
+                                          ? theme.colorScheme.tertiary
+                                          : (activePreset != null
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                                 ),
                               ),
                             ),

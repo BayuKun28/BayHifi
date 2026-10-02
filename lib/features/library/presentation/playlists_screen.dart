@@ -11,6 +11,8 @@ import 'screens/smart_playlists_screen.dart';
 import 'widgets/create_custom_playlist_modal.dart';
 import 'widgets/create_smart_playlist_dialog.dart';
 import 'widgets/studio_playlist_action_sheet.dart';
+import '../../spotify_importer/presentation/widgets/universal_import_dialog.dart';
+import '../../../core/widgets/studio_artwork_widget.dart';
 
 /// Studio Dedicated Playlists Screen
 /// Features unified Studio Collections row (Favorites, Hi-Res Masters, Dynamic Smart Playlists)
@@ -100,6 +102,23 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                 onTap: () {
                   Navigator.of(ctx).pop();
                   CreateSmartPlaylistDialog.show(context);
+                },
+              ),
+              ListTile(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: StudioSurfaceTheme.tintedContainer(context, const Color(0xFF1DB954), isSolid: isSolid, translucentAlpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const HugeIcon(icon: HugeIcons.strokeRoundedLink01, size: 18, color: Color(0xFF1DB954)),
+                ),
+                title: const Text('Import from Spotify & YouTube', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                subtitle: const Text('Paste link to stream immediately or download for offline', style: TextStyle(fontSize: 11)),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  UniversalImportDialog.show(context);
                 },
               ),
             ],
@@ -338,36 +357,88 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                      leading: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: StudioSurfaceTheme.tintedContainer(
-                            context,
-                            primary,
-                            isSolid: isSolid,
-                            translucentAlpha: 0.15,
+                      leading: p.coverUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: StudioArtworkWidget(
+                                  url: p.coverUrl,
+                                  width: 44,
+                                  height: 44,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: StudioSurfaceTheme.tintedContainer(
+                                  context,
+                                  p.sourceType == 'spotify'
+                                      ? const Color(0xFF1DB954)
+                                      : (p.sourceType == 'youtube'
+                                          ? StudioCategoryColors.youtubeMusic
+                                          : primary),
+                                  isSolid: isSolid,
+                                  translucentAlpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: HugeIcon(
+                                  icon: p.sourceType == 'spotify' || p.sourceType == 'youtube'
+                                      ? HugeIcons.strokeRoundedLink01
+                                      : HugeIcons.strokeRoundedPlaylist01,
+                                  color: p.sourceType == 'spotify'
+                                      ? const Color(0xFF1DB954)
+                                      : (p.sourceType == 'youtube'
+                                          ? StudioCategoryColors.youtubeMusic
+                                          : primary),
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              p.name,
+                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlaylist01,
-                            color: primary,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        p.name,
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                          if (p.isStreaming)
+                            Container(
+                              margin: const EdgeInsets.only(left: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: p.sourceType == 'spotify'
+                                    ? const Color(0xFF1DB954).withValues(alpha: 0.2)
+                                    : StudioCategoryColors.youtubeMusic.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                p.sourceType.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w900,
+                                  color: p.sourceType == 'spotify'
+                                      ? const Color(0xFF1DB954)
+                                      : StudioCategoryColors.youtubeMusic,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       subtitle: Text(
-                        p.description.isNotEmpty
-                            ? '${p.description} • ${p.trackCount} Tracks'
-                            : '${p.trackCount} Tracks',
+                        p.isStreaming
+                            ? '${p.trackCount} Tracks • ${p.downloadedCount} Offline'
+                            : (p.description.isNotEmpty
+                                ? '${p.description} • ${p.trackCount} Tracks'
+                                : '${p.trackCount} Tracks'),
                         style: TextStyle(
                           fontSize: 11,
                           fontFeatures: AppTypography.audioFigures,

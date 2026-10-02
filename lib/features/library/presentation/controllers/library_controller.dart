@@ -14,13 +14,17 @@ import '../../domain/library_collection_models.dart';
 import '../../domain/smart_playlist_models.dart';
 import '../../domain/smart_playlist_evaluator.dart';
 
-enum LibrarySourceFilter { all, offline, navidrome, hiRes, untagged }
+enum LibrarySourceFilter { all, offline, cloud, hiRes, untagged }
+
+/// Sub-filter applied when [LibrarySourceFilter.cloud] is active.
+enum CloudSubFilter { all, spotify, navidrome, youtube }
 
 @immutable
 class UnifiedLibraryState {
   const UnifiedLibraryState({
     this.tracks = const [],
     this.selectedFilter = LibrarySourceFilter.all,
+    this.cloudSubFilter = CloudSubFilter.all,
     this.currentTab = CollectionTab.tracks,
     this.sortField = SortField.title,
     this.sortDirection = SortDirection.ascending,
@@ -39,6 +43,7 @@ class UnifiedLibraryState {
 
   final List<Track> tracks;
   final LibrarySourceFilter selectedFilter;
+  final CloudSubFilter cloudSubFilter;
   final CollectionTab currentTab;
   final SortField sortField;
   final SortDirection sortDirection;
@@ -54,17 +59,62 @@ class UnifiedLibraryState {
   final List<SmartPlaylist> smartPlaylists;
   final Set<String> favoriteTrackIds;
 
+  /// Whether a track belongs to the "cloud" category (not yet downloaded to local storage).
+  static bool _isCloudTrack(Track t) {
+    final hasLocal = t.filePath != null && t.filePath!.isNotEmpty;
+    if (hasLocal) return false;
+    return (t.remoteUrl != null && t.remoteUrl!.isNotEmpty) ||
+        t.id.startsWith('spotify_') ||
+        t.id.startsWith('yt_');
+  }
+
+  static bool _isSpotifyCloudTrack(Track t) =>
+      !_hasLocalFile(t) &&
+      (t.id.startsWith('spotify_') || (t.remoteUrl?.startsWith('spotify') ?? false));
+
+  static bool _isNavidromeCloudTrack(Track t) =>
+      !_hasLocalFile(t) &&
+      !(t.id.startsWith('spotify_')) &&
+      !(t.id.startsWith('yt_')) &&
+      (t.remoteUrl != null && t.remoteUrl!.isNotEmpty);
+
+  static bool _isYouTubeCloudTrack(Track t) =>
+      !_hasLocalFile(t) &&
+      (t.id.startsWith('yt_') || (t.remoteUrl?.contains('youtube') ?? false) || (t.remoteUrl?.contains('googlevideo') ?? false));
+
+  static bool _hasLocalFile(Track t) => t.filePath != null && t.filePath!.isNotEmpty;
+
   /// Daftar lagu yang telah difilter dan diurutkan
   List<Track> get filteredTracks {
     final list = tracks.where((t) {
       // 1. Source filter
-      final matchesSource = switch (selectedFilter) {
-        LibrarySourceFilter.all => true,
-        LibrarySourceFilter.offline => t.filePath != null && t.filePath!.isNotEmpty,
-        LibrarySourceFilter.navidrome => t.remoteUrl != null && t.remoteUrl!.isNotEmpty,
-        LibrarySourceFilter.hiRes => t.isHiRes,
-        LibrarySourceFilter.untagged => t.isUntagged,
-      };
+      bool matchesSource;
+      switch (selectedFilter) {
+        case LibrarySourceFilter.all:
+          matchesSource = true;
+          break;
+        case LibrarySourceFilter.offline:
+          matchesSource = _hasLocalFile(t);
+          break;
+        case LibrarySourceFilter.cloud:
+          if (!_isCloudTrack(t)) {
+            matchesSource = false;
+          } else {
+            matchesSource = switch (cloudSubFilter) {
+              CloudSubFilter.all => true,
+              CloudSubFilter.spotify => _isSpotifyCloudTrack(t),
+              CloudSubFilter.navidrome => _isNavidromeCloudTrack(t),
+              CloudSubFilter.youtube => _isYouTubeCloudTrack(t),
+            };
+          }
+          break;
+        case LibrarySourceFilter.hiRes:
+          matchesSource = t.isHiRes;
+          break;
+        case LibrarySourceFilter.untagged:
+          matchesSource = t.isUntagged;
+          break;
+      }
 
       if (!matchesSource) return false;
 
@@ -262,16 +312,34 @@ class UnifiedLibraryState {
   /// Koleksi Folder
   List<FolderModel> get folders {
     final map = <String, List<Track>>{};
+    final pathMap = <String, String>{};
+
     for (final t in filteredTracks) {
-      final path = t.filePath ?? 'Navidrome Cloud Library';
-      final folderName = path.contains('/')
-          ? path.substring(0, path.lastIndexOf('/')).split('/').last
-          : 'Root Audio Directory';
-      map.putIfAbsent(folderName, () => []).add(t);
+      if (t.filePath != null && t.filePath!.isNotEmpty) {
+        final normalized = t.filePath!.replaceAll('\\', '/');
+        final lastSlash = normalized.lastIndexOf('/');
+        final parentPath = lastSlash != -1 ? normalized.substring(0, lastSlash) : normalized;
+        final folderName = parentPath.split('/').where((s) => s.isNotEmpty).isNotEmpty
+            ? parentPath.split('/').where((s) => s.isNotEmpty).last
+            : 'Music Folder';
+
+        map.putIfAbsent(folderName, () => []).add(t);
+        pathMap.putIfAbsent(folderName, () => parentPath);
+      } else if (t.id.startsWith('spotify_') || (t.remoteUrl?.startsWith('spotify') ?? false)) {
+        map.putIfAbsent('Spotify Cloud Library', () => []).add(t);
+        pathMap.putIfAbsent('Spotify Cloud Library', () => 'spotify://cloud');
+      } else if (t.remoteUrl != null && t.remoteUrl!.isNotEmpty) {
+        map.putIfAbsent('Navidrome Cloud Library', () => []).add(t);
+        pathMap.putIfAbsent('Navidrome Cloud Library', () => 'subsonic://cloud');
+      } else {
+        map.putIfAbsent('Cloud & Streaming', () => []).add(t);
+        pathMap.putIfAbsent('Cloud & Streaming', () => 'cloud://streaming');
+      }
     }
 
     return map.entries.map((e) {
-      return FolderModel(path: e.key, name: e.key, tracks: e.value);
+      final folderPath = pathMap[e.key] ?? e.key;
+      return FolderModel(path: folderPath, name: e.key, tracks: e.value);
     }).toList();
   }
 
@@ -279,10 +347,13 @@ class UnifiedLibraryState {
       LocalPersistenceService.instance.getMusicFolders();
 
   int get totalTracksCount => tracks.length;
-  int get offlineTracksCount =>
-      tracks.where((t) => t.filePath != null && t.filePath!.isNotEmpty).length;
-  int get navidromeTracksCount =>
-      tracks.where((t) => t.remoteUrl != null && t.remoteUrl!.isNotEmpty).length;
+  int get offlineTracksCount => tracks.where(_hasLocalFile).length;
+  int get cloudTracksCount => tracks.where(_isCloudTrack).length;
+  int get spotifyCloudCount => tracks.where(_isSpotifyCloudTrack).length;
+  int get navidromeCloudCount => tracks.where(_isNavidromeCloudTrack).length;
+  int get youtubeCloudCount => tracks.where(_isYouTubeCloudTrack).length;
+  // Keep for backward compat
+  int get navidromeTracksCount => navidromeCloudCount;
   int get hiResTracksCount => tracks.where((t) => t.isHiRes).length;
   int get untaggedTracksCount => tracks.where((t) => t.isUntagged).length;
 
@@ -297,6 +368,7 @@ class UnifiedLibraryState {
   UnifiedLibraryState copyWith({
     List<Track>? tracks,
     LibrarySourceFilter? selectedFilter,
+    CloudSubFilter? cloudSubFilter,
     CollectionTab? currentTab,
     SortField? sortField,
     SortDirection? sortDirection,
@@ -316,6 +388,7 @@ class UnifiedLibraryState {
     return UnifiedLibraryState(
       tracks: tracks ?? this.tracks,
       selectedFilter: selectedFilter ?? this.selectedFilter,
+      cloudSubFilter: cloudSubFilter ?? this.cloudSubFilter,
       currentTab: currentTab ?? this.currentTab,
       sortField: sortField ?? this.sortField,
       sortDirection: sortDirection ?? this.sortDirection,
@@ -359,7 +432,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
         _onlineTagger = onlineTagger ?? OnlineMetadataService(),
         super(UnifiedLibraryState(
           tracks: initialTracks ?? _loadSavedTracks(),
-          customPlaylists: initialCustomPlaylists ?? const [],
+          customPlaylists: initialCustomPlaylists ?? _loadSavedCustomPlaylists(),
           smartPlaylists: initialSmartPlaylists ?? _loadSavedSmartPlaylists(),
           favoriteTrackIds: LocalPersistenceService.instance.getFavoriteTrackIds().toSet(),
         )) {
@@ -393,6 +466,18 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     return SmartPlaylistEvaluator.defaultPresets;
   }
 
+  static List<PlaylistModel> _loadSavedCustomPlaylists() {
+    try {
+      final savedMaps = LocalPersistenceService.instance.getCustomPlaylists();
+      if (savedMaps.isNotEmpty) {
+        return savedMaps.map(PlaylistModel.fromMap).toList();
+      }
+    } catch (e) {
+      debugPrint('[UnifiedLibraryController] Error loading custom playlists: $e');
+    }
+    return const [];
+  }
+
   static List<Track> _loadSavedTracks() {
     try {
       final savedMaps = LocalPersistenceService.instance.getSavedLibraryTracks();
@@ -407,10 +492,12 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
 
   void reloadFromPersistence() {
     final tracks = _loadSavedTracks();
+    final customPlaylists = _loadSavedCustomPlaylists();
     final smartPlaylists = _loadSavedSmartPlaylists();
     final favIds = LocalPersistenceService.instance.getFavoriteTrackIds().toSet();
     state = state.copyWith(
       tracks: tracks,
+      customPlaylists: customPlaylists,
       smartPlaylists: smartPlaylists,
       favoriteTrackIds: favIds,
     );
@@ -428,7 +515,15 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   }
 
   void setFilter(LibrarySourceFilter filter) {
-    state = state.copyWith(selectedFilter: filter);
+    state = state.copyWith(
+      selectedFilter: filter,
+      // Reset sub-filter when switching to a different top-level filter
+      cloudSubFilter: CloudSubFilter.all,
+    );
+  }
+
+  void setCloudSubFilter(CloudSubFilter sub) {
+    state = state.copyWith(cloudSubFilter: sub);
   }
 
   void setSearchQuery(String query) {
@@ -484,9 +579,40 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
       isCustom: true,
       createdAt: DateTime.now(),
     );
+    final updated = [...state.customPlaylists, newPlaylist];
+    _persistCustomPlaylists(updated);
     state = state.copyWith(
-      customPlaylists: [...state.customPlaylists, newPlaylist],
+      customPlaylists: updated,
       statusMessage: 'Playlist "$name" successfully created.',
+    );
+  }
+
+  /// Imports a streaming playlist (Spotify / YouTube) into user collections
+  void importStreamingPlaylist(PlaylistModel playlist) {
+    final existingIndex = state.customPlaylists.indexWhere((p) => p.id == playlist.id);
+    final updated = List<PlaylistModel>.from(state.customPlaylists);
+    if (existingIndex >= 0) {
+      updated[existingIndex] = playlist;
+    } else {
+      updated.add(playlist);
+    }
+    _persistCustomPlaylists(updated);
+
+    // Also register or update newly imported tracks in library with rich metadata/artwork
+    final Map<String, Track> trackMap = {
+      for (final t in state.tracks) t.id: t,
+    };
+    for (final t in playlist.tracks) {
+      if (!trackMap.containsKey(t.id) || (trackMap[t.id]?.albumArtUrl == null && t.albumArtUrl != null)) {
+        trackMap[t.id] = t;
+      }
+    }
+    final combined = trackMap.values.toList();
+    _persistTracks(combined);
+    state = state.copyWith(
+      tracks: combined,
+      customPlaylists: updated,
+      statusMessage: 'Imported "${playlist.name}" (${playlist.tracks.length} tracks).',
     );
   }
 
@@ -494,21 +620,44 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     final updated = state.customPlaylists.map((p) {
       if (p.id == playlistId) {
         if (p.tracks.any((t) => t.id == track.id)) return p;
-        return PlaylistModel(
-          id: p.id,
-          name: p.name,
-          description: p.description,
-          tracks: [...p.tracks, track],
-          isCustom: p.isCustom,
-          createdAt: p.createdAt,
-        );
+        return p.copyWith(tracks: [...p.tracks, track]);
       }
       return p;
     }).toList();
 
+    _persistCustomPlaylists(updated);
     state = state.copyWith(
       customPlaylists: updated,
       statusMessage: 'Track added to playlist.',
+    );
+  }
+
+  /// Updates a single track in the library state, persistence, and any custom playlists (e.g. after download)
+  void updateTrack(Track updatedTrack) {
+    final existingIndex = state.tracks.indexWhere((t) => t.id == updatedTrack.id);
+    final updatedTracks = List<Track>.from(state.tracks);
+    if (existingIndex >= 0) {
+      updatedTracks[existingIndex] = updatedTrack;
+    } else {
+      updatedTracks.add(updatedTrack);
+    }
+
+    final updatedCustomPlaylists = state.customPlaylists.map((p) {
+      final trackIndex = p.tracks.indexWhere((t) => t.id == updatedTrack.id);
+      if (trackIndex >= 0) {
+        final newPlaylistTracks = List<Track>.from(p.tracks);
+        newPlaylistTracks[trackIndex] = updatedTrack;
+        return p.copyWith(tracks: newPlaylistTracks);
+      }
+      return p;
+    }).toList();
+
+    _persistTracks(updatedTracks);
+    _persistCustomPlaylists(updatedCustomPlaylists);
+
+    state = state.copyWith(
+      tracks: updatedTracks,
+      customPlaylists: updatedCustomPlaylists,
     );
   }
 
@@ -1145,6 +1294,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   /// Delete a custom playlist
   void deletePlaylist(String playlistId) {
     final updated = state.customPlaylists.where((p) => p.id != playlistId).toList();
+    _persistCustomPlaylists(updated);
     state = state.copyWith(
       customPlaylists: updated,
       statusMessage: 'Playlist deleted.',
@@ -1155,17 +1305,14 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   void renamePlaylist(String playlistId, String newName, {String? newDescription}) {
     final updated = state.customPlaylists.map((p) {
       if (p.id == playlistId) {
-        return PlaylistModel(
-          id: p.id,
+        return p.copyWith(
           name: newName,
           description: newDescription ?? p.description,
-          tracks: p.tracks,
-          isCustom: true,
-          createdAt: p.createdAt,
         );
       }
       return p;
     }).toList();
+    _persistCustomPlaylists(updated);
     state = state.copyWith(
       customPlaylists: updated,
       statusMessage: 'Playlist "$newName" updated.',
@@ -1177,18 +1324,27 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     final index = state.customPlaylists.indexWhere((p) => p.id == playlistId);
     if (index < 0) return;
     final original = state.customPlaylists[index];
-    final copy = PlaylistModel(
+    final copy = original.copyWith(
       id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
       name: '${original.name} (Copy)',
-      description: original.description,
       tracks: List.from(original.tracks),
-      isCustom: true,
       createdAt: DateTime.now(),
     );
+    final updated = [...state.customPlaylists, copy];
+    _persistCustomPlaylists(updated);
     state = state.copyWith(
-      customPlaylists: [...state.customPlaylists, copy],
+      customPlaylists: updated,
       statusMessage: 'Playlist "${original.name}" duplicated.',
     );
+  }
+
+  Future<void> _persistCustomPlaylists(List<PlaylistModel> list) async {
+    try {
+      final maps = list.map((p) => p.toMap()).toList();
+      await LocalPersistenceService.instance.saveCustomPlaylists(maps);
+    } catch (e) {
+      debugPrint('[UnifiedLibraryController] Error persisting custom playlists: $e');
+    }
   }
 
   // ─── SMART PLAYLISTS METHODS ───────────────────────────────────────────────

@@ -229,6 +229,70 @@ void main() {
       expect(find.text('Export M3U8 Archive'), findsOneWidget);
       expect(find.text('Delete Playlist'), findsOneWidget);
     });
+
+    testWidgets('StudioPlaylistActionSheet delete flow executes safely without disposed ref exception', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          unifiedLibraryProvider.overrideWith(
+            (ref) => UnifiedLibraryController(
+              initialTracks: [testTrack1],
+              initialCustomPlaylists: [testPlaylist],
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      bool deletedCallbackFired = false;
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppThemeBuilder.buildTheme(AppPalette.namidaCyan, isDark: true),
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () {
+                    StudioPlaylistActionSheet.showForPlaylist(
+                      context,
+                      playlist: testPlaylist,
+                      onDeleted: () {
+                        deletedCallbackFired = true;
+                      },
+                    );
+                  },
+                  child: const Text('Open Sheet'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Open bottom sheet
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      // Tap Delete Playlist in sheet
+      await tester.tap(find.text('Delete Playlist'));
+      await tester.pumpAndSettle();
+
+      // Verify confirmation dialog
+      expect(find.text('DELETE PLAYLIST?'), findsOneWidget);
+      expect(find.text('Are you sure you want to delete "Acoustic Studio Masters"?'), findsOneWidget);
+
+      // Confirm delete in dialog
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+
+      // Verify deleted from state & callback fired
+      final playlists = container.read(unifiedLibraryProvider).customPlaylists;
+      expect(playlists.any((p) => p.id == testPlaylist.id), isFalse);
+      expect(deletedCallbackFired, isTrue);
+    });
   });
 
   group('Phase 36.4: PlaylistDetailScreen & SmartPlaylistsScreen Tests', () {

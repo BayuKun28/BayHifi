@@ -37,8 +37,8 @@ class LibraryBatchActionsBar extends ConsumerWidget {
     final isAllSelected = selectedCount > 0 && selectedCount == totalCount;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(24),
@@ -68,24 +68,29 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                 },
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedCancel01,
-                  size: 18,
+                  size: 17,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                visualDensity: VisualDensity.compact,
+                style: IconButton.styleFrom(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  minimumSize: const Size(30, 30),
+                ),
                 tooltip: 'Cancel Selection',
               ),
               const SizedBox(width: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                 decoration: BoxDecoration(
                   color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   '$selectedCount',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w800,
                     color: primary,
                     fontFeatures: const [FontFeature.tabularFigures()],
@@ -108,7 +113,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                 theme: theme,
                 primary: primary,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 3),
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
@@ -118,7 +123,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                 theme: theme,
                 primary: primary,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 3),
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
@@ -128,7 +133,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                 theme: theme,
                 primary: primary,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 3),
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
@@ -138,7 +143,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                 theme: theme,
                 primary: primary,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 3),
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
@@ -175,17 +180,20 @@ class LibraryBatchActionsBar extends ConsumerWidget {
       },
       icon: HugeIcon(
         icon: icon,
-        size: 18,
+        size: 17,
         color: isActive ? primary : theme.colorScheme.onSurface,
       ),
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
       tooltip: tooltip,
+      visualDensity: VisualDensity.compact,
       style: IconButton.styleFrom(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: const Size(32, 32),
         backgroundColor: isActive
             ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid)
             : Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

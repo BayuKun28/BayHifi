@@ -146,9 +146,7 @@ class YoutubeHttpClient extends http.BaseClient {
     int errorCount = 0,
     required StreamClient streamClient,
   }) {
-    print('[YouTubeHttpClient] getStream called for tag=${streamInfo.tag}, fragments=${streamInfo.fragments.length}, isHls=${streamInfo is HlsStreamInfo}, size=${streamInfo.size.totalBytes}');
     if (streamInfo.fragments.isNotEmpty) {
-      print('[YouTubeHttpClient] Dispatching to _getFragmentedStream (${streamInfo.fragments.length} fragments)');
       // DASH(fragmented) stream
       return _getFragmentedStream(
         streamInfo,
@@ -159,10 +157,8 @@ class YoutubeHttpClient extends http.BaseClient {
       );
     }
     if (streamInfo is HlsStreamInfo) {
-      print('[YouTubeHttpClient] Dispatching to _getHlsStream');
       return _getHlsStream(streamInfo);
     }
-    print('[YouTubeHttpClient] Dispatching to _getStream');
     // Normal stream
     return _getStream(
       streamInfo,
@@ -183,10 +179,8 @@ class YoutubeHttpClient extends http.BaseClient {
   }) async* {
     // This is the base url.
     final url = streamInfo.url;
-    print('[YouTubeHttpClient] _getFragmentedStream base url: $url');
     for (int i = 0; i < streamInfo.fragments.length; i++) {
       final fragment = streamInfo.fragments[i];
-      print('[YouTubeHttpClient] Fetching fragment $i: ${fragment.path}');
       final req = await retry(
         this,
         () => get(Uri.parse(url.toString() + fragment.path)),
@@ -205,20 +199,24 @@ class YoutubeHttpClient extends http.BaseClient {
   }) async* {
     var url = streamInfo.url;
     var bytesCount = start;
-    // Google Video CDN limits Range requests to max 512KB per request for Android clients;
-    // larger ranges (>= 1MB or full file) are rejected with HTTP 403 Forbidden.
     const chunkSize = 512 * 1024; // 512 KB
     while (!_closed && (streamInfo.size.totalBytes <= 0 || bytesCount < streamInfo.size.totalBytes)) {
       try {
+        final from = bytesCount;
+        final totalBytes = streamInfo.size.totalBytes;
+        int to = from + chunkSize - 1;
+        if (totalBytes > 0 && to >= totalBytes) {
+          to = totalBytes - 1;
+        }
+        final sqIndex = from ~/ chunkSize;
+        final chunkUrl = url.replace(
+          queryParameters: {
+            ...url.queryParameters,
+            'sq': '$sqIndex',
+          },
+        );
         final response = await retry(this, () async {
-          final from = bytesCount;
-          final totalBytes = streamInfo.size.totalBytes;
-          int to = from + chunkSize - 1;
-          if (totalBytes > 0 && to >= totalBytes) {
-            to = totalBytes - 1;
-          }
-
-          final request = http.Request('GET', url);
+          final request = http.Request('GET', chunkUrl);
           request.headers['Range'] = 'bytes=$from-$to';
           return send(request);
         });
@@ -226,17 +224,8 @@ class YoutubeHttpClient extends http.BaseClient {
           try {
             _validateResponse(response, response.statusCode);
           } on FatalFailureException {
-            final newManifest =
-                await streamClient.getManifest(streamInfo.videoId);
-            final stream = newManifest.streams
-                .firstWhereOrNull((e) => e.tag == streamInfo.tag);
-            if (stream == null) {
-              _logger.severe(
-                  'Error: Could not find the stream in the new manifest (due to Youtube error)');
-              rethrow;
-            }
-            url = stream.url;
-            continue;
+            // Google CDN rate limit on adaptive audio streams reached; end stream cleanly
+            break;
           }
         }
         int receivedInThisChunk = 0;
@@ -252,7 +241,8 @@ class YoutubeHttpClient extends http.BaseClient {
         errorCount = 0;
       } on HttpClientClosedException {
         break;
-      } on Exception catch (_) {
+      } on Exception catch (e, st) {
+        _logger.warning('Exception in _getStream: $e', e, st);
         if (errorCount >= 5) {
           rethrow;
         }

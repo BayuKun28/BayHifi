@@ -19,11 +19,14 @@ import 'screens/artist_detail_screen.dart';
 import 'screens/folder_detail_screen.dart';
 import 'screens/genre_detail_screen.dart';
 import '../../youtube_music/presentation/youtube_discovery_screen.dart';
+import 'controllers/library_selection_controller.dart';
 import 'widgets/artist_avatar_widget.dart';
 import 'widgets/batch_track_tag_editor_modal.dart';
 import 'widgets/library_batch_actions_bar.dart';
 import 'widgets/online_batch_auto_tagger_modal.dart';
 import 'widgets/track_tile.dart';
+import '../../download_manager/presentation/controllers/download_controller.dart';
+import '../../download_manager/presentation/tabs/library_downloads_tab.dart';
 
 
 /// Studio Music Library Screen (Unified Collection: Tracks, Albums, Artists, Genres, Playlists, Folders)
@@ -38,39 +41,11 @@ class UnifiedLibraryScreen extends ConsumerStatefulWidget {
 class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
-  final Set<String> _selectedTrackIds = {};
   final ScrollController _tracksScrollController = ScrollController();
   final ScrollController _albumsScrollController = ScrollController();
   final ScrollController _artistsScrollController = ScrollController();
   final ScrollController _genresScrollController = ScrollController();
   final ScrollController _foldersScrollController = ScrollController();
-
-  bool get _isMultiSelecting => _selectedTrackIds.isNotEmpty;
-
-  void _toggleTrackSelection(String trackId) {
-    AppHaptics.selectionClick();
-    setState(() {
-      if (_selectedTrackIds.contains(trackId)) {
-        _selectedTrackIds.remove(trackId);
-      } else {
-        _selectedTrackIds.add(trackId);
-      }
-    });
-  }
-
-  void _selectAllTracks(List<Track> tracks) {
-    AppHaptics.selectionClick();
-    setState(() {
-      _selectedTrackIds.addAll(tracks.map((t) => t.id));
-    });
-  }
-
-  void _deselectAllTracks() {
-    AppHaptics.selectionClick();
-    setState(() {
-      _selectedTrackIds.clear();
-    });
-  }
 
   @override
   void dispose() {
@@ -236,7 +211,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                         ref.read(unifiedLibraryProvider.notifier).addTrackToPlaylist(p.id, t);
                       }
                       Navigator.of(ctx).pop();
-                      _deselectAllTracks();
+                      ref.read(librarySelectionProvider.notifier).clear();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Added ${tracks.length} track${tracks.length > 1 ? 's' : ''} to "${p.name}".')),
                       );
@@ -325,13 +300,14 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     final mediaQuery = MediaQuery.of(context);
     final isExpandedLayout = mediaQuery.size.width >= 600 || mediaQuery.orientation == Orientation.landscape;
+    final selectionState = ref.watch(librarySelectionProvider);
 
     return PopScope(
-      canPop: !_isMultiSelecting,
+      canPop: !selectionState.isSelecting,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (_isMultiSelecting) {
-          _deselectAllTracks();
+        if (selectionState.isSelecting) {
+          ref.read(librarySelectionProvider.notifier).clear();
         }
       },
       child: Scaffold(
@@ -673,65 +649,127 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             ),
           ),
 
-          // ─── 2. SOURCE FILTER CHIPS (ALL / OFFLINE / NAVIDROME / HI-RES) ───
+          // ─── 2. SOURCE FILTER CHIPS (ALL / OFFLINE / CLOUD LIBRARY / HI-RES) ───
           if (libraryState.currentTab != CollectionTab.youtube)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildSourceChip(
-                      context: context,
-                      label: 'All Sources (${libraryState.totalTracksCount})',
-                      icon: HugeIcons.strokeRoundedMusicNote01,
-                      accentColor: primaryColor,
-                      filter: LibrarySourceFilter.all,
-                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.all,
-                      onTap: () => controller.setFilter(LibrarySourceFilter.all),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Primary chips row ─────────────────────────────────────
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildSourceChip(
+                          context: context,
+                          label: 'All Sources (${libraryState.totalTracksCount})',
+                          icon: HugeIcons.strokeRoundedMusicNote01,
+                          accentColor: primaryColor,
+                          filter: LibrarySourceFilter.all,
+                          isSelected: libraryState.selectedFilter == LibrarySourceFilter.all,
+                          onTap: () => controller.setFilter(LibrarySourceFilter.all),
+                        ),
+                        const SizedBox(width: 6),
+                        _buildSourceChip(
+                          context: context,
+                          label: 'Offline Local (${libraryState.offlineTracksCount})',
+                          icon: HugeIcons.strokeRoundedFolder01,
+                          accentColor: StudioCategoryColors.storageIndigo,
+                          filter: LibrarySourceFilter.offline,
+                          isSelected: libraryState.selectedFilter == LibrarySourceFilter.offline,
+                          onTap: () => controller.setFilter(LibrarySourceFilter.offline),
+                        ),
+                        const SizedBox(width: 6),
+                        _buildSourceChip(
+                          context: context,
+                          label: 'Cloud Library (${libraryState.cloudTracksCount})',
+                          icon: HugeIcons.strokeRoundedCloud,
+                          accentColor: StudioCategoryColors.navidromeAzure,
+                          filter: LibrarySourceFilter.cloud,
+                          isSelected: libraryState.selectedFilter == LibrarySourceFilter.cloud,
+                          onTap: () => controller.setFilter(LibrarySourceFilter.cloud),
+                        ),
+                        const SizedBox(width: 6),
+                        _buildSourceChip(
+                          context: context,
+                          label: 'Hi-Res Lossless (${libraryState.hiResTracksCount})',
+                          icon: HugeIcons.strokeRoundedCd,
+                          accentColor: StudioCategoryColors.hiResGold,
+                          filter: LibrarySourceFilter.hiRes,
+                          isSelected: libraryState.selectedFilter == LibrarySourceFilter.hiRes,
+                          onTap: () => controller.setFilter(LibrarySourceFilter.hiRes),
+                        ),
+                        const SizedBox(width: 6),
+                        _buildSourceChip(
+                          context: context,
+                          label: 'Untagged (${libraryState.untaggedTracksCount})',
+                          icon: HugeIcons.strokeRoundedAlertCircle,
+                          accentColor: StudioCategoryColors.warmTubeAmber,
+                          filter: LibrarySourceFilter.untagged,
+                          isSelected: libraryState.selectedFilter == LibrarySourceFilter.untagged,
+                          onTap: () => controller.setFilter(LibrarySourceFilter.untagged),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    _buildSourceChip(
-                      context: context,
-                      label: 'Offline Local (${libraryState.offlineTracksCount})',
-                      icon: HugeIcons.strokeRoundedFolder01,
-                      accentColor: StudioCategoryColors.storageIndigo,
-                      filter: LibrarySourceFilter.offline,
-                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.offline,
-                      onTap: () => controller.setFilter(LibrarySourceFilter.offline),
-                    ),
-                    const SizedBox(width: 6),
-                    _buildSourceChip(
-                      context: context,
-                      label: 'Navidrome Cloud (${libraryState.navidromeTracksCount})',
-                      icon: HugeIcons.strokeRoundedCloud,
-                      accentColor: StudioCategoryColors.navidromeAzure,
-                      filter: LibrarySourceFilter.navidrome,
-                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.navidrome,
-                      onTap: () => controller.setFilter(LibrarySourceFilter.navidrome),
-                    ),
-                    const SizedBox(width: 6),
-                    _buildSourceChip(
-                      context: context,
-                      label: 'Hi-Res Lossless (${libraryState.hiResTracksCount})',
-                      icon: HugeIcons.strokeRoundedCd,
-                      accentColor: StudioCategoryColors.hiResGold,
-                      filter: LibrarySourceFilter.hiRes,
-                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.hiRes,
-                      onTap: () => controller.setFilter(LibrarySourceFilter.hiRes),
-                    ),
-                    const SizedBox(width: 6),
-                    _buildSourceChip(
-                      context: context,
-                      label: 'Untagged (${libraryState.untaggedTracksCount})',
-                      icon: HugeIcons.strokeRoundedAlertCircle,
-                      accentColor: StudioCategoryColors.warmTubeAmber,
-                      filter: LibrarySourceFilter.untagged,
-                      isSelected: libraryState.selectedFilter == LibrarySourceFilter.untagged,
-                      onTap: () => controller.setFilter(LibrarySourceFilter.untagged),
-                    ),
-                  ],
-                ),
+                  ),
+                  // ── Cloud sub-chips (animated slide-in) ───────────────────
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    child: libraryState.selectedFilter == LibrarySourceFilter.cloud
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _buildCloudSubChip(
+                                    context: context,
+                                    label: 'All Cloud (${libraryState.cloudTracksCount})',
+                                    icon: HugeIcons.strokeRoundedCloudServer,
+                                    accentColor: StudioCategoryColors.navidromeAzure,
+                                    sub: CloudSubFilter.all,
+                                    isSelected: libraryState.cloudSubFilter == CloudSubFilter.all,
+                                    onTap: () => controller.setCloudSubFilter(CloudSubFilter.all),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _buildCloudSubChip(
+                                    context: context,
+                                    label: 'Spotify (${libraryState.spotifyCloudCount})',
+                                    icon: HugeIcons.strokeRoundedMusic01,
+                                    accentColor: StudioCategoryColors.spotifyGreen,
+                                    sub: CloudSubFilter.spotify,
+                                    isSelected: libraryState.cloudSubFilter == CloudSubFilter.spotify,
+                                    onTap: () => controller.setCloudSubFilter(CloudSubFilter.spotify),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _buildCloudSubChip(
+                                    context: context,
+                                    label: 'Navidrome (${libraryState.navidromeCloudCount})',
+                                    icon: HugeIcons.strokeRoundedCloudSync,
+                                    accentColor: StudioCategoryColors.navidromeAzure,
+                                    sub: CloudSubFilter.navidrome,
+                                    isSelected: libraryState.cloudSubFilter == CloudSubFilter.navidrome,
+                                    onTap: () => controller.setCloudSubFilter(CloudSubFilter.navidrome),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _buildCloudSubChip(
+                                    context: context,
+                                    label: 'YouTube (${libraryState.youtubeCloudCount})',
+                                    icon: HugeIcons.strokeRoundedYoutube,
+                                    accentColor: StudioCategoryColors.youtubeMusic,
+                                    sub: CloudSubFilter.youtube,
+                                    isSelected: libraryState.cloudSubFilter == CloudSubFilter.youtube,
+                                    onTap: () => controller.setCloudSubFilter(CloudSubFilter.youtube),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
               ),
             ),
 
@@ -745,46 +783,46 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _isMultiSelecting
+      bottomNavigationBar: selectionState.isSelecting
           ? SafeArea(
               child: LibraryBatchActionsBar(
-                selectedCount: _selectedTrackIds.length,
+                selectedCount: selectionState.count,
                 totalCount: libraryState.filteredTracks.length,
                 onPlayNext: () {
-                  final selected = libraryState.tracks.where((t) => _selectedTrackIds.contains(t.id)).toList();
+                  final selected = libraryState.tracks.where((t) => selectionState.isSelected(t.id)).toList();
                   for (final t in selected.reversed) {
                     ref.read(playerControllerProvider.notifier).playNext(t);
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Playing ${selected.length} track${selected.length > 1 ? 's' : ''} next.')),
                   );
-                  _deselectAllTracks();
+                  ref.read(librarySelectionProvider.notifier).clear();
                 },
                 onAddToQueue: () {
-                  final selected = libraryState.tracks.where((t) => _selectedTrackIds.contains(t.id)).toList();
+                  final selected = libraryState.tracks.where((t) => selectionState.isSelected(t.id)).toList();
                   for (final t in selected) {
                     ref.read(playerControllerProvider.notifier).addToQueue(t);
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Added ${selected.length} track${selected.length > 1 ? 's' : ''} to Queue.')),
                   );
-                  _deselectAllTracks();
+                  ref.read(librarySelectionProvider.notifier).clear();
                 },
                 onAddToPlaylist: () {
-                  final selected = libraryState.tracks.where((t) => _selectedTrackIds.contains(t.id)).toList();
+                  final selected = libraryState.tracks.where((t) => selectionState.isSelected(t.id)).toList();
                   if (selected.isNotEmpty) {
                     _showAddToPlaylistSheetForTracks(context, selected);
                   }
                 },
                 onBatchEditTags: () {
-                  final selected = libraryState.tracks.where((t) => _selectedTrackIds.contains(t.id)).toList();
+                  final selected = libraryState.tracks.where((t) => selectionState.isSelected(t.id)).toList();
                   if (selected.isNotEmpty) {
                     BatchTrackTagEditorModal.show(context, selected);
                   }
                 },
-                onSelectAll: () => _selectAllTracks(libraryState.filteredTracks),
-                onDeselectAll: _deselectAllTracks,
-                onClose: _deselectAllTracks,
+                onSelectAll: () => ref.read(librarySelectionProvider.notifier).selectAll(libraryState.filteredTracks),
+                onDeselectAll: () => ref.read(librarySelectionProvider.notifier).deselectAll(),
+                onClose: () => ref.read(librarySelectionProvider.notifier).clear(),
               ),
             )
           : null,
@@ -800,11 +838,15 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     ThemeData theme,
     bool isSolid,
   ) {
+    final downloadState = ref.watch(downloadControllerProvider);
+    final activeCount = downloadState.totalActiveCount;
+
     final tabs = [
       (tab: CollectionTab.tracks, label: 'Tracks', count: state.totalTracksCount, icon: HugeIcons.strokeRoundedMusicNote01, color: primaryColor),
       (tab: CollectionTab.albums, label: 'Albums', count: state.albums.length, icon: HugeIcons.strokeRoundedDisc, color: StudioCategoryColors.storageIndigo),
       (tab: CollectionTab.artists, label: 'Artists', count: state.artists.length, icon: HugeIcons.strokeRoundedMic01, color: StudioCategoryColors.bitPerfect),
       (tab: CollectionTab.genres, label: 'Genres', count: state.genres.length, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.hiResGold),
+      (tab: CollectionTab.downloads, label: 'Downloads', count: activeCount > 0 ? activeCount : null, icon: HugeIcons.strokeRoundedDownload01, color: const Color(0xFF10B981)),
       (tab: CollectionTab.folders, label: 'Folders', count: state.folders.length, icon: HugeIcons.strokeRoundedFolder01, color: StudioCategoryColors.libraryScanner),
       (tab: CollectionTab.youtube, label: 'YouTube', count: null, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.youtubeMusic),
     ];
@@ -825,6 +867,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           return InkWell(
             onTap: () {
               AppHaptics.selectionClick();
+              ref.read(librarySelectionProvider.notifier).clear();
               controller.setTab(item.tab);
             },
             borderRadius: BorderRadius.circular(10),
@@ -1014,6 +1057,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       CollectionTab.albums => '${state.albums.length} Albums • ${state.totalTracksCount} Total Tracks',
       CollectionTab.artists => '${state.artists.length} Artists in Library',
       CollectionTab.genres => '${state.genres.length} Audio Genres',
+      CollectionTab.downloads => 'Download Manager • Studio Offline Cache',
       CollectionTab.folders => '${state.folders.length} Directory Folders',
       CollectionTab.youtube => 'YouTube Music HiFi • Global Streaming',
     };
@@ -1034,6 +1078,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     return InkWell(
       onTap: () {
         AppHaptics.selectionClick();
+        ref.read(librarySelectionProvider.notifier).clear();
         onTap();
       },
       borderRadius: BorderRadius.circular(8),
@@ -1066,6 +1111,70 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? accentColor : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Smaller indented sub-chip for cloud source breakdown (Spotify / Navidrome / YouTube).
+  Widget _buildCloudSubChip({
+    required BuildContext context,
+    required String label,
+    required dynamic icon,
+    required Color accentColor,
+    required CloudSubFilter sub,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
+
+    return InkWell(
+      onTap: () {
+        AppHaptics.selectionClick();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? StudioSurfaceTheme.tintedContainer(
+                  context,
+                  accentColor,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.14,
+                  solidBlendAlpha: 0.18,
+                )
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? accentColor.withValues(alpha: 0.5)
+                : theme.colorScheme.outline.withValues(alpha: 0.25),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            HugeIcon(
+              icon: icon,
+              size: 11,
+              color: isSelected ? accentColor : theme.colorScheme.onSurface.withValues(alpha: 0.45),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? accentColor : theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -1127,6 +1236,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       CollectionTab.albums => _buildAlbumsView(context, state, bottomPadding),
       CollectionTab.artists => _buildArtistsView(context, state, bottomPadding),
       CollectionTab.genres => _buildGenresView(context, state, bottomPadding),
+      CollectionTab.downloads => const LibraryDownloadsTab(),
       CollectionTab.folders => _buildFoldersView(context, state, bottomPadding),
       CollectionTab.youtube => _buildYouTubeDiscoveryView(context, bottomPadding),
     };
@@ -1143,6 +1253,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   Widget _buildTracksList(BuildContext context, List<Track> tracks, double bottomPadding) {
     final playback = ref.watch(playerControllerProvider);
     final libraryState = ref.watch(unifiedLibraryProvider);
+    final selectionState = ref.watch(librarySelectionProvider);
     final theme = Theme.of(context);
     final isSolid = ref.isSolidStyle;
     final currentPlayingId = playback.currentTrack?.id;
@@ -1171,23 +1282,23 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         final trackIndex = isUntaggedFilter ? index - 1 : index;
         final track = tracks[trackIndex];
         final isPlayingThis = currentPlayingId == track.id;
-        final isSelected = _selectedTrackIds.contains(track.id);
+        final isSelected = selectionState.isSelected(track.id);
 
         return TrackTile(
           track: track,
           isPlaying: isPlayingThis,
-          isMultiSelecting: _isMultiSelecting,
+          isMultiSelecting: selectionState.isSelecting,
           isSelected: isSelected,
           onTap: () {
             _searchFocusNode.unfocus();
             FocusManager.instance.primaryFocus?.unfocus();
-            if (_isMultiSelecting) {
-              _toggleTrackSelection(track.id);
+            if (selectionState.isSelecting) {
+              ref.read(librarySelectionProvider.notifier).toggle(track.id);
             } else {
               ref.read(playerControllerProvider.notifier).setQueue(tracks, initialIndex: trackIndex);
             }
           },
-          onLongPress: () => _toggleTrackSelection(track.id),
+          onLongPress: () => ref.read(librarySelectionProvider.notifier).toggle(track.id),
           onPlayNext: () => ref.read(playerControllerProvider.notifier).playNext(track),
           onAddToQueue: () => ref.read(playerControllerProvider.notifier).addToQueue(track),
           onAddToPlaylist: () => _showAddToPlaylistSheet(context, track),
@@ -1920,7 +2031,8 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final totalCount = libraryState.totalTracksCount;
 
-    if (libraryState.selectedFilter == LibrarySourceFilter.navidrome &&
+    if (libraryState.selectedFilter == LibrarySourceFilter.cloud &&
+        libraryState.cloudSubFilter == CloudSubFilter.navidrome &&
         libraryState.navidromeConnectionStatus != NavidromeConnectionStatus.connected) {
       return Center(
         child: SingleChildScrollView(

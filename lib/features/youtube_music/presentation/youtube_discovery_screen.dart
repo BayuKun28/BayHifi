@@ -12,7 +12,7 @@ import '../../library/presentation/widgets/studio_track_action_sheet.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
 import 'controllers/youtube_music_controller.dart';
-import 'widgets/youtube_import_playlist_dialog.dart';
+import '../../spotify_importer/presentation/widgets/universal_import_dialog.dart';
 
 /// Material 3 Expressive Studio YouTube Music Discovery & Search Screen
 /// Provides high-bitrate Opus/AAC streaming directly processed through C++ SoLoud DSP master chain.
@@ -76,10 +76,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
 
   void _openImportPlaylistDialog() {
     AppHaptics.lightImpact();
-    showDialog(
-      context: context,
-      builder: (_) => const YouTubeImportPlaylistDialog(),
-    );
+    UniversalImportDialog.show(context);
   }
 
   void _openDspRack() {
@@ -136,7 +133,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                           focusNode: _searchFocusNode,
                           style: const TextStyle(fontSize: 13.5),
                           decoration: InputDecoration(
-                            hintText: 'Search songs, artists, albums, or paste YouTube link...',
+                            hintText: 'Search songs, artists, or paste Spotify/YouTube link...',
                             hintStyle: TextStyle(
                               fontSize: 12.5,
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
@@ -146,6 +143,12 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                             contentPadding: EdgeInsets.zero,
                           ),
                           onChanged: (val) {
+                            final clean = val.trim();
+                            if (clean.contains('spotify.com') || clean.startsWith('spotify:') || clean.contains('youtube.com/playlist')) {
+                              UniversalImportDialog.show(context, initialUrl: clean);
+                              _searchController.clear();
+                              return;
+                            }
                             ytController.onQueryChanged(val);
                           },
                         ),

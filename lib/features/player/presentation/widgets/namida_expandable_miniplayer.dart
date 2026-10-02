@@ -84,6 +84,7 @@ class _NamidaExpandableMiniPlayerState
       CollectionTab.albums => HugeIcons.strokeRoundedAlbum01,
       CollectionTab.artists => HugeIcons.strokeRoundedUser,
       CollectionTab.genres => HugeIcons.strokeRoundedTag01,
+      CollectionTab.downloads => HugeIcons.strokeRoundedDownload01,
       CollectionTab.youtube => HugeIcons.strokeRoundedPlayList,
       CollectionTab.folders => HugeIcons.strokeRoundedFolder01,
     };
@@ -95,6 +96,7 @@ class _NamidaExpandableMiniPlayerState
       CollectionTab.albums => StudioCategoryColors.themingPalettes,
       CollectionTab.artists => StudioCategoryColors.visualizer,
       CollectionTab.genres => StudioCategoryColors.gestures,
+      CollectionTab.downloads => const Color(0xFF10B981),
       CollectionTab.youtube => StudioCategoryColors.youtubeMusic,
       CollectionTab.folders => StudioCategoryColors.libraryScanner,
     };

@@ -47,31 +47,37 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
-                        borderRadius: BorderRadius.circular(8),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedPlayList,
+                          size: 15,
+                          color: primary,
+                        ),
                       ),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedPlayList,
-                        size: 15,
-                        color: primary,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'RECENT LOSSLESS SESSIONS',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.6,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'RECENT LOSSLESS SESSIONS',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.6,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 if (onNavigateToLibrary != null)
                   InkWell(

@@ -179,7 +179,7 @@ class BackupRestoreService {
       // 2. Custom Playlists
       if (restorePlaylists && data['custom_playlists'] is List) {
         final rawList = data['custom_playlists'] as List;
-        final list = rawList.whereType<Map<String, dynamic>>().toList();
+        final list = rawList.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
         await storage.saveCustomPlaylists(list);
         playlistsCount = list.length;
       }
@@ -187,7 +187,7 @@ class BackupRestoreService {
       // 3. Smart Playlists
       if (restoreSmartRules && data['smart_playlists'] is List) {
         final rawList = data['smart_playlists'] as List;
-        final list = rawList.whereType<Map<String, dynamic>>().toList();
+        final list = rawList.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
         await storage.saveSmartPlaylists(list);
         smartCount = list.length;
       }

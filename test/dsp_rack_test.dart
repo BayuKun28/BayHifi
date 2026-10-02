@@ -13,10 +13,12 @@ void main() {
 
       expect(state.isBypassed, false);
       expect(state.masterWet, 1.0);
-      expect(state.preampDb, 0.0);
+      expect(state.preampDb, -1.5);
+      expect(state.tubeExciterEnabled, true);
+      expect(state.stereoWidthEnabled, true);
       // Limiter must be enabled by default for zero-overshoot anti-clipping
       expect(state.limiterEnabled, true);
-      expect(state.limiterOutputCeiling, -1.0);
+      expect(state.limiterOutputCeiling, -0.5);
 
       // Verify parameter clamping
       final modified = state.copyWith(
@@ -57,6 +59,8 @@ void main() {
 
       // Test Tube Exciter
       controller.toggleTubeExciter();
+      expect(controller.state.tubeExciterEnabled, false);
+      controller.toggleTubeExciter();
       expect(controller.state.tubeExciterEnabled, true);
       controller.setTubeDrive(3.5);
       expect(controller.state.tubeDrive, 3.5);
@@ -72,6 +76,8 @@ void main() {
       expect(controller.state.compRatio, 4.0);
 
       // Test Stereo Width Matrix
+      controller.toggleStereoWidth();
+      expect(controller.state.stereoWidthEnabled, false);
       controller.toggleStereoWidth();
       expect(controller.state.stereoWidthEnabled, true);
       controller.setStereoWidth(1.8);
@@ -105,12 +111,19 @@ void main() {
       controller.toggleBypass();
       expect(controller.state.isBypassed, false);
 
-      // Test Reset Rack
+      // Test Reset Rack to Warmth Defaults
       controller.resetToDefaults();
       expect(controller.state.bassBoostEnabled, false);
-      expect(controller.state.tubeExciterEnabled, false);
-      expect(controller.state.preampDb, 0.0);
+      expect(controller.state.tubeExciterEnabled, true);
+      expect(controller.state.stereoWidthEnabled, true);
+      expect(controller.state.preampDb, -1.5);
       expect(controller.state.limiterEnabled, true);
+
+      // Test Reset Rack to Bit-Perfect
+      controller.resetToBitPerfect();
+      expect(controller.state.tubeExciterEnabled, false);
+      expect(controller.state.stereoWidthEnabled, false);
+      expect(controller.state.preampDb, 0.0);
     });
 
     test('4.10 Presets Application and override tracking', () {
@@ -169,7 +182,8 @@ void main() {
 
       // Verify Studio Preset & Profile Selector Combo Box
       expect(find.text('MASTERING PRESET & PROFILE'), findsOneWidget);
-      expect(find.text('SAVE PROFILE'), findsOneWidget);
+      expect(find.text('SAVE'), findsOneWidget);
+      expect(find.text('GENRE RULES'), findsOneWidget);
 
       // Tap combo box to open dropdown
       await tester.tap(find.text('MASTERING PRESET & PROFILE'));

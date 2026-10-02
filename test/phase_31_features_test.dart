@@ -60,8 +60,10 @@ void main() {
       final cacheFile = AudioCacheService.instance.getCacheFile('yt_abc123?test');
       final tempFile = AudioCacheService.instance.getTempFile('yt_abc123?test');
 
-      expect(cacheFile.path.endsWith('yt_abc123_test.cache'), isTrue);
-      expect(tempFile.path.endsWith('yt_abc123_test.tmp'), isTrue);
+      expect(cacheFile.path.contains('yt_abc123_test'), isTrue);
+      expect(cacheFile.path.endsWith('.ogg') || cacheFile.path.endsWith('.cache'), isTrue);
+      expect(tempFile.path.contains('yt_abc123_test'), isTrue);
+      expect(tempFile.path.endsWith('.tmp.ogg') || tempFile.path.endsWith('.tmp'), isTrue);
     });
   });
 

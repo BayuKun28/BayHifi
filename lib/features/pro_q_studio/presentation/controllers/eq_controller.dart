@@ -18,11 +18,12 @@ class EqController extends StateNotifier<EqState> {
   EqController()
       : super(EqState(
           bands: EqBand.default10Bands,
-          selectedBandIndex: 2, // Selected on B2 by default
+          selectedBandIndex: 1, // Selected on B1 by default
           safePreampDb: VirtualDspService.instance.preampGain != 0.0
               ? VirtualDspService.instance.preampGain
-              : -4.3,
+              : -2.0,
         )) {
+    _hydrateActiveState();
     _loadSampleCurves();
     _loadCustomPresetNames();
     Future.microtask(() {
@@ -34,6 +35,52 @@ class EqController extends StateNotifier<EqState> {
   }
 
   bool _isDisposed = false;
+
+  void _hydrateActiveState() {
+    try {
+      final saved = LocalPersistenceService.instance.getActiveEqState();
+      if (saved != null && saved.isNotEmpty) {
+        final bandMaps = saved['bands'];
+        if (bandMaps is List) {
+          final bands = bandMaps
+              .whereType<Map<String, dynamic>>()
+              .toList()
+              .asMap()
+              .entries
+              .map((e) => EqBand.fromMap(e.value, fallbackIndex: e.key + 1))
+              .toList();
+          if (bands.isNotEmpty) {
+            final preamp = (saved['preampDb'] as num? ?? state.safePreampDb).toDouble();
+            final presetName = (saved['activePresetName'] as String?) ?? 'Studio Audiophile Warmth';
+            state = state.copyWith(
+              bands: bands,
+              safePreampDb: preamp,
+              activePresetName: presetName,
+              selectedBandIndex: () => bands.first.index,
+            );
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  void _persistActiveState({bool preserveCurvesIfNull = true}) {
+    try {
+      final saved = LocalPersistenceService.instance.getActiveEqState();
+      final driverName = state.driverFr?.name ??
+          (preserveCurvesIfNull ? (saved?['lastDriverName'] as String?) : null);
+      final targetName = state.targetFr?.name ??
+          (preserveCurvesIfNull ? (saved?['lastTargetName'] as String?) : null);
+
+      LocalPersistenceService.instance.saveActiveEqState(
+        bands: state.bands.map((b) => b.toMap()).toList(),
+        preampDb: state.safePreampDb,
+        activePresetName: state.activePresetName,
+        lastDriverName: driverName,
+        lastTargetName: targetName,
+      );
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -97,6 +144,8 @@ class EqController extends StateNotifier<EqState> {
       // Graceful fallback jika running di test tanpa rootBundle
     }
 
+    if (_isDisposed || !mounted) return;
+
     // Hydrate persistent offline saved curves from LocalPersistenceService
     try {
       final savedMaps = LocalPersistenceService.instance.getSavedFrCurves();
@@ -116,9 +165,34 @@ class EqController extends StateNotifier<EqState> {
     } catch (_) {}
 
     if (_isDisposed || !mounted) return;
+
+    // Resolve persistent last selected Driver & Target if available
+    final savedEq = LocalPersistenceService.instance.getActiveEqState();
+    final lastDriverName = savedEq?['lastDriverName'] as String?;
+    final lastTargetName = savedEq?['lastTargetName'] as String?;
+
+    FrCurveData? selectedDriver;
+    if (lastDriverName != null && lastDriverName.isNotEmpty) {
+      selectedDriver = drivers.cast<FrCurveData?>().firstWhere(
+        (d) => d?.name == lastDriverName,
+        orElse: () => null,
+      );
+    }
+    selectedDriver ??= state.driverFr ?? (drivers.isNotEmpty ? drivers.first : null);
+
+    FrCurveData? selectedTarget;
+    if (lastTargetName != null && lastTargetName.isNotEmpty) {
+      selectedTarget = targets.cast<FrCurveData?>().firstWhere(
+        (t) => t?.name == lastTargetName,
+        orElse: () => null,
+      );
+    }
+    selectedTarget ??= state.targetFr ?? (targets.isNotEmpty ? targets.first : null);
+
+    if (_isDisposed || !mounted) return;
     state = state.copyWith(
-      driverFr: () => state.driverFr ?? (drivers.isNotEmpty ? drivers.first : null),
-      targetFr: () => state.targetFr ?? (targets.isNotEmpty ? targets.first : null),
+      driverFr: () => selectedDriver,
+      targetFr: () => selectedTarget,
       availableDrivers: drivers,
       availableTargets: targets,
     );
@@ -244,9 +318,18 @@ class EqController extends StateNotifier<EqState> {
 
   void resetToDefault() {
     _updateBands(
-      EqBand.default10Bands,
-      selectedIdx: 2,
-      presetName: 'Default 10-Band',
+      EqBand.audiophileWarmthBands,
+      selectedIdx: 1,
+      presetName: 'Studio Audiophile Warmth',
+      markClean: true,
+    );
+  }
+
+  void resetToBitPerfect() {
+    _updateBands(
+      EqBand.flatBands,
+      selectedIdx: 1,
+      presetName: 'Audiophile Bit-Perfect (Flat)',
       markClean: true,
     );
   }
@@ -363,18 +446,22 @@ class EqController extends StateNotifier<EqState> {
 
   void selectDriver(FrCurveData driver) {
     state = state.copyWith(driverFr: () => driver, showFrCurves: true);
+    _persistActiveState();
   }
 
   void selectTarget(FrCurveData target) {
     state = state.copyWith(targetFr: () => target, showFrCurves: true);
+    _persistActiveState();
   }
 
   void deleteDriver() {
     state = state.copyWith(driverFr: () => null);
+    _persistActiveState(preserveCurvesIfNull: false);
   }
 
   void deleteTarget() {
     state = state.copyWith(targetFr: () => null);
+    _persistActiveState(preserveCurvesIfNull: false);
   }
 
   void clearFrCurves() {
@@ -383,6 +470,7 @@ class EqController extends StateNotifier<EqState> {
       targetFr: () => null,
       showFrCurves: false,
     );
+    _persistActiveState(preserveCurvesIfNull: false);
   }
 
   void setPreamp(double gainDb, {bool isAuto = false}) {
@@ -417,6 +505,7 @@ class EqController extends StateNotifier<EqState> {
       driverFr: () => driver,
       showFrCurves: true,
     );
+    _persistActiveState();
   }
 
   void importTarget(FrCurveData target) {
@@ -434,6 +523,7 @@ class EqController extends StateNotifier<EqState> {
       targetFr: () => target,
       showFrCurves: true,
     );
+    _persistActiveState();
   }
 
   bool applyAutoEq() {
@@ -507,31 +597,32 @@ class EqController extends StateNotifier<EqState> {
 
     List<EqBand> presetBands;
     switch (presetName) {
+      case 'Studio Audiophile Warmth':
+      case 'Default 10-Band':
+        presetBands = EqBand.audiophileWarmthBands;
+        break;
+      case 'Audiophile Bit-Perfect (Flat)':
+      case 'Flat / Bit-Perfect':
       case 'Flat':
-        presetBands = EqBand.default10Bands.map((b) => b.copyWith(gainDb: 0.0)).toList();
+        presetBands = EqBand.flatBands;
         break;
-      case 'Bass Boost':
-        presetBands = EqBand.default10Bands.map((b) {
-          if (b.frequency <= 100) return b.copyWith(gainDb: 5.5);
-          if (b.frequency <= 250) return b.copyWith(gainDb: 3.0);
-          return b.copyWith(gainDb: 0.0);
-        }).toList();
+      case 'Harman 2019 Reference':
+      case 'Harman Target 2019':
+        presetBands = EqBand.harmanTargetBands;
         break;
-      case 'V-Shape':
-        presetBands = EqBand.default10Bands.map((b) {
-          if (b.frequency <= 120) return b.copyWith(gainDb: 4.5);
-          if (b.frequency <= 300) return b.copyWith(gainDb: 2.0);
-          if (b.frequency >= 800 && b.frequency <= 3000) return b.copyWith(gainDb: -2.5);
-          if (b.frequency >= 6000) return b.copyWith(gainDb: 3.5);
-          return b.copyWith(gainDb: 0.0);
-        }).toList();
-        break;
+      case 'Vocal & Acoustic Intimacy':
+      case 'Acoustic & Vocal Warmth':
       case 'Vocal Clarity':
-        presetBands = EqBand.default10Bands.map((b) {
-          if (b.frequency >= 1000 && b.frequency <= 4000) return b.copyWith(gainDb: 3.0);
-          if (b.frequency <= 100) return b.copyWith(gainDb: -1.5);
-          return b.copyWith(gainDb: 0.0);
-        }).toList();
+        presetBands = EqBand.vocalAcousticBands;
+        break;
+      case 'Deep Bass & Club Drive':
+      case 'Deep Bass Sub-Impact':
+      case 'Bass Boost':
+        presetBands = EqBand.deepBassBands;
+        break;
+      case 'Air & High-Res Sparkle':
+      case 'Air & Detail Sparkle':
+        presetBands = EqBand.airSparkleBands;
         break;
       case 'Treble Tamer':
         presetBands = EqBand.default10Bands.map((b) {
@@ -540,10 +631,10 @@ class EqController extends StateNotifier<EqState> {
         }).toList();
         break;
       default:
-        presetBands = EqBand.default10Bands;
+        presetBands = EqBand.audiophileWarmthBands;
     }
 
-    _updateBands(presetBands, presetName: presetName, markClean: true);
+    _updateBands(presetBands, selectedIdx: presetBands.first.index, presetName: presetName, markClean: true);
   }
 
   void _updateBands(
@@ -557,15 +648,18 @@ class EqController extends StateNotifier<EqState> {
     final safePreamp = state.autoPreampEnabled
         ? BiquadMath.calculateSafePreamp(bands)
         : state.safePreampDb;
+    final isAuto = presetName?.startsWith('AutoEQ:') ?? false;
     state = state.copyWith(
       bands: bands,
       selectedBandIndex: selectedIdx != null ? () => selectedIdx : null,
       safePreampDb: safePreamp,
       activePresetName: presetName ?? (state.activePresetName == 'Default 10-Band' ? 'Custom' : state.activePresetName),
       isDirty: markClean ? false : true,
+      isAutoEqActive: isAuto,
     );
 
     _syncWithVirtualDsp();
+    _persistActiveState();
   }
 
   void _recalculateSafePreamp() {
@@ -573,6 +667,7 @@ class EqController extends StateNotifier<EqState> {
       final safePreamp = BiquadMath.calculateSafePreamp(state.bands);
       state = state.copyWith(safePreampDb: safePreamp);
       _syncWithVirtualDsp();
+      _persistActiveState();
     }
   }
 }

@@ -148,6 +148,7 @@ class StudioCategoryColors {
 
   // ─── Media, Streaming & Cloud ──────────────────────────────────────────
   static const Color youtubeMusic = Color(0xFFFF4B4B); // YouTube Coral Red
+  static const Color spotifyGreen = Color(0xFF1DB954); // Spotify Emerald Green
   static const Color cloudNavidrome = Color(0xFF0284C7); // Azure Cloud
   static const Color navidromeAzure = Color(0xFF0284C7);
   static const Color storageCache = Color(0xFF6366F1); // Electric Indigo

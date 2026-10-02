@@ -19,17 +19,20 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
   final PlaylistModel? playlist;
   final SmartPlaylist? smartPlaylist;
   final List<Track> tracks;
+  final VoidCallback? onDeleted;
 
   const StudioPlaylistActionSheet({
     super.key,
     this.playlist,
     this.smartPlaylist,
     required this.tracks,
+    this.onDeleted,
   }) : assert(playlist != null || smartPlaylist != null, 'Must provide either playlist or smartPlaylist');
 
   static Future<void> showForPlaylist(
     BuildContext context, {
     required PlaylistModel playlist,
+    VoidCallback? onDeleted,
   }) {
     AppHaptics.lightImpact();
     return showModalBottomSheet(
@@ -42,6 +45,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
       builder: (_) => StudioPlaylistActionSheet(
         playlist: playlist,
         tracks: playlist.tracks,
+        onDeleted: onDeleted,
       ),
     );
   }
@@ -50,6 +54,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
     BuildContext context, {
     required SmartPlaylist smartPlaylist,
     required List<Track> tracks,
+    VoidCallback? onDeleted,
   }) {
     AppHaptics.lightImpact();
     return showModalBottomSheet(
@@ -62,6 +67,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
       builder: (_) => StudioPlaylistActionSheet(
         smartPlaylist: smartPlaylist,
         tracks: tracks,
+        onDeleted: onDeleted,
       ),
     );
   }
@@ -85,53 +91,58 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
     }
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-
+  void _confirmDelete(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: StudioSurfaceTheme.surface(ctx, isSolid: isSolid),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: StudioSurfaceTheme.outline(ctx, isSolid: isSolid),
-            width: 1.0,
-          ),
-        ),
-        title: Text(
-          smartPlaylist != null ? 'DELETE SMART PLAYLIST?' : 'DELETE PLAYLIST?',
-          style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, letterSpacing: 0.6),
-        ),
-        content: Text(
-          'Are you sure you want to delete "$_name"?',
-          style: TextStyle(
-            fontSize: 12.5,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF453A),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      builder: (dialogCtx) => Consumer(
+        builder: (ctx, ref, _) {
+          final theme = Theme.of(ctx);
+          final isSolid = ref.isSolidStyle;
+
+          return AlertDialog(
+            backgroundColor: StudioSurfaceTheme.surface(ctx, isSolid: isSolid),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: StudioSurfaceTheme.outline(ctx, isSolid: isSolid),
+                width: 1.0,
+              ),
             ),
-            onPressed: () {
-              if (smartPlaylist != null) {
-                ref.read(unifiedLibraryProvider.notifier).deleteSmartPlaylist(smartPlaylist!.id);
-              } else if (playlist != null) {
-                ref.read(unifiedLibraryProvider.notifier).deletePlaylist(playlist!.id);
-              }
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
+            title: Text(
+              smartPlaylist != null ? 'DELETE SMART PLAYLIST?' : 'DELETE PLAYLIST?',
+              style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, letterSpacing: 0.6),
+            ),
+            content: Text(
+              'Are you sure you want to delete "$_name"?',
+              style: TextStyle(
+                fontSize: 12.5,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF453A),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () {
+                  if (smartPlaylist != null) {
+                    ref.read(unifiedLibraryProvider.notifier).deleteSmartPlaylist(smartPlaylist!.id);
+                  } else if (playlist != null) {
+                    ref.read(unifiedLibraryProvider.notifier).deletePlaylist(playlist!.id);
+                  }
+                  Navigator.of(ctx).pop();
+                  onDeleted?.call();
+                },
+                child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -287,10 +298,10 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
               subtitle: 'Replace active queue and start playback',
               color: primary,
               onTap: () {
-                Navigator.of(context).pop();
                 if (tracks.isNotEmpty) {
                   ref.read(playerControllerProvider.notifier).setQueue(tracks, initialIndex: 0);
                 }
+                Navigator.of(context).pop();
               },
             ),
             _buildActionTile(
@@ -299,11 +310,11 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
               title: 'Shuffle Play',
               subtitle: 'Play all tracks in randomized studio order',
               onTap: () {
-                Navigator.of(context).pop();
                 if (tracks.isNotEmpty) {
                   final list = List<Track>.from(tracks)..shuffle();
                   ref.read(playerControllerProvider.notifier).setQueue(list, initialIndex: 0);
                 }
+                Navigator.of(context).pop();
               },
             ),
             _buildActionTile(
@@ -312,10 +323,10 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
               title: 'Add to Queue',
               subtitle: 'Append tracks to end of active queue',
               onTap: () {
-                Navigator.of(context).pop();
                 for (final track in tracks) {
                   ref.read(playerControllerProvider.notifier).addToQueue(track);
                 }
+                Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Added ${tracks.length} tracks to queue.')),
                 );
@@ -352,8 +363,8 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
                 title: 'Duplicate Smart Playlist',
                 subtitle: 'Create a cloned smart playlist rule set',
                 onTap: () {
-                  Navigator.of(context).pop();
                   ref.read(unifiedLibraryProvider.notifier).duplicateSmartPlaylist(smartPlaylist!.id);
+                  Navigator.of(context).pop();
                 },
               ),
 
@@ -378,7 +389,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
                 color: const Color(0xFFFF453A),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _confirmDelete(context, ref);
+                  _confirmDelete(context);
                 },
               ),
             ],
