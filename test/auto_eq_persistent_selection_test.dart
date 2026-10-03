@@ -79,6 +79,57 @@ void main() {
       controller2.dispose();
     });
 
+    test('EqController rehydrates built-in models like Moondrop Chu II and Harman In-Ear 2019v2 without offline save', () async {
+      // 1. First Controller Instance: Select built-in Driver and Target
+      final chu2 = FrCurveData.defaultDrivers.firstWhere((d) => d.name == 'Moondrop Chu II');
+      final harman = FrCurveData.defaultTargets.firstWhere((t) => t.name == 'Harman In-Ear 2019v2');
+
+      final controller1 = EqController();
+      controller1.selectDriver(chu2);
+      controller1.selectTarget(harman);
+
+      expect(controller1.state.driverFr?.name, 'Moondrop Chu II');
+      expect(controller1.state.targetFr?.name, 'Harman In-Ear 2019v2');
+
+      await Future.delayed(const Duration(milliseconds: 50));
+      controller1.dispose();
+
+      // 2. Second Controller Instance (Simulating Android kill recent app & restart)
+      final controller2 = EqController();
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      expect(controller2.state.driverFr, isNotNull);
+      expect(controller2.state.driverFr!.name, 'Moondrop Chu II');
+      expect(controller2.state.targetFr, isNotNull);
+      expect(controller2.state.targetFr!.name, 'Harman In-Ear 2019v2');
+
+      controller2.dispose();
+    });
+
+    test('EqController rehydrates custom curve from serialized curve map fallback', () async {
+      // Direct raw write to persistence with serialized curve map but not in saved_fr_curves list
+      await LocalPersistenceService.instance.saveActiveEqState(
+        bands: [],
+        preampDb: -2.0,
+        activePresetName: 'Custom Mode',
+        lastDriverName: 'Rare Unique Headphone',
+        lastDriverCurve: const FrCurveData(
+          name: 'Rare Unique Headphone',
+          frequencies: [20.0, 1000.0, 15000.0],
+          splDb: [85.0, 80.0, 75.0],
+        ).toMap(category: 'driver'),
+      );
+
+      final controller = EqController();
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      expect(controller.state.driverFr, isNotNull);
+      expect(controller.state.driverFr!.name, 'Rare Unique Headphone');
+      expect(controller.state.driverFr!.frequencies, [20.0, 1000.0, 15000.0]);
+
+      controller.dispose();
+    });
+
     test('EqController clears persistent driver/target selection on delete and clear', () async {
       const customDriver = FrCurveData(
         name: 'Tangzu Waner',

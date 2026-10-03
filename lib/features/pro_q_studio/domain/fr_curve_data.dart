@@ -184,5 +184,67 @@ class FrCurveData {
       referenceSpl1kHz: (map['referenceSpl1kHz'] as num?)?.toDouble() ?? 0.0,
     );
   }
+
+  /// Koleksi kurva IEM/Headphone bawaan studio (Single Source of Truth)
+  static final List<FrCurveData> defaultDrivers = [
+    const FrCurveData(
+      name: 'KZ CASTOR BLACK DUDU R',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [87.7, 86.5, 78.0, 88.5, 82.0, 72.0],
+      referenceSpl1kHz: 78.0,
+    ),
+    const FrCurveData(
+      name: 'Moondrop Chu II',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [85.0, 83.0, 75.0, 86.0, 79.0, 70.0],
+      referenceSpl1kHz: 75.0,
+    ),
+    const FrCurveData(
+      name: 'Sennheiser HD600',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [78.0, 80.0, 80.0, 88.0, 82.0, 74.0],
+      referenceSpl1kHz: 80.0,
+    ),
+    const FrCurveData(
+      name: 'Tangzu Wan\'er S.G',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [86.0, 84.0, 76.0, 87.0, 80.0, 71.0],
+      referenceSpl1kHz: 76.0,
+    ),
+    const FrCurveData(
+      name: '7Hz Zero:2',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [87.0, 85.0, 77.0, 87.5, 81.0, 72.0],
+      referenceSpl1kHz: 77.0,
+    ),
+  ];
+
+  /// Koleksi kurva Target Respons bawaan studio (Single Source of Truth)
+  static final List<FrCurveData> defaultTargets = [
+    const FrCurveData(
+      name: 'HBB Target',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [107.5, 105.0, 95.0, 102.5, 96.0, 90.0],
+      referenceSpl1kHz: 95.0,
+    ),
+    const FrCurveData(
+      name: 'Harman In-Ear 2019v2',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [108.0, 106.0, 95.0, 104.0, 98.0, 88.0],
+      referenceSpl1kHz: 95.0,
+    ),
+    const FrCurveData(
+      name: 'IEF Neutral Target',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [95.0, 95.0, 95.0, 103.0, 97.0, 90.0],
+      referenceSpl1kHz: 95.0,
+    ),
+    const FrCurveData(
+      name: 'Harman Over-Ear 2018',
+      frequencies: [20, 100, 1000, 3000, 8000, 20000],
+      splDb: [104.5, 102.0, 95.0, 103.0, 96.5, 85.0],
+      referenceSpl1kHz: 95.0,
+    ),
+  ];
 }
 

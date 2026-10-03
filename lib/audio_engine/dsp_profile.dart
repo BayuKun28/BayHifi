@@ -24,6 +24,7 @@ class DspProfile {
     ],
     this.bassBoostEnabled = false,
     this.bassBoostValue = 1.0,
+    this.bassBoostWet = 1.0,
     this.compEnabled = false,
     this.compAttack = 0.01,
     this.compRelease = 0.2,
@@ -73,6 +74,7 @@ class DspProfile {
   // 2. Bass Boost
   final bool bassBoostEnabled;
   final double bassBoostValue;
+  final double bassBoostWet;
 
   // 3. Compressor
   final bool compEnabled;
@@ -152,6 +154,7 @@ class DspProfile {
       'eq_freqs': eqFreqs.map((e) => e.toString()).join(','),
       'bass_boost_enabled': bassBoostEnabled ? 1 : 0,
       'bass_boost_value': bassBoostValue,
+      'bass_boost_wet': bassBoostWet,
       'comp_enabled': compEnabled ? 1 : 0,
       'comp_attack': compAttack,
       'comp_release': compRelease,
@@ -218,6 +221,7 @@ class DspProfile {
       eqFreqs: parseDoubles(map['eq_freqs'], DspDefaults.eqFreqs),
       bassBoostEnabled: (map['bass_boost_enabled'] as int? ?? 0) == 1,
       bassBoostValue: (map['bass_boost_value'] as num?)?.toDouble() ?? DspDefaults.bassBoostValue,
+      bassBoostWet: (map['bass_boost_wet'] as num?)?.toDouble() ?? 1.0,
       compEnabled: (map['comp_enabled'] as int? ?? 0) == 1,
       compAttack: (map['comp_attack'] as num?)?.toDouble() ?? DspDefaults.compAttack,
       compRelease: (map['comp_release'] as num?)?.toDouble() ?? DspDefaults.compRelease,
@@ -268,6 +272,7 @@ class DspProfile {
     List<double>? eqFreqs,
     bool? bassBoostEnabled,
     double? bassBoostValue,
+    double? bassBoostWet,
     bool? compEnabled,
     double? compAttack,
     double? compRelease,
@@ -313,6 +318,7 @@ class DspProfile {
       eqFreqs: eqFreqs ?? this.eqFreqs,
       bassBoostEnabled: bassBoostEnabled ?? this.bassBoostEnabled,
       bassBoostValue: bassBoostValue ?? this.bassBoostValue,
+      bassBoostWet: bassBoostWet ?? this.bassBoostWet,
       compEnabled: compEnabled ?? this.compEnabled,
       compAttack: compAttack ?? this.compAttack,
       compRelease: compRelease ?? this.compRelease,

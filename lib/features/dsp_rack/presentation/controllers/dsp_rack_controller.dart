@@ -117,7 +117,10 @@ class DspRackController extends StateNotifier<DspRackState> {
       // 1. Dynamic Bass Boost
       dsp.toggleBassBoost(state.bassBoostEnabled);
       if (state.bassBoostEnabled) {
-        dsp.setBassBoostValue(state.bassBoostAmount);
+        dsp.setBassBoostParams(
+          boost: state.bassBoostAmount,
+          wet: state.bassBoostWet * state.masterWet,
+        );
       }
 
       // 2. Tube Harmonic Exciter

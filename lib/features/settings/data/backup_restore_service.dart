@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../../core/database/local_persistence_service.dart';
+import '../../../../core/storage/storage_permission_service.dart';
 
 /// Validation report for a candidate backup file
 class BackupValidationResult {
@@ -52,7 +55,9 @@ class BackupRestoreService {
 
   BackupRestoreService._();
 
-  /// Create a complete JSON archive of all user settings, playlists, smart rules & favorites
+  Timer? _debounceTimer;
+
+  /// Create a complete JSON archive of all user settings, playlists, smart rules, favorites & DSP states
   String createBackupJson({
     bool includeHistory = true,
     bool includeLibrary = true,
@@ -68,6 +73,13 @@ class BackupRestoreService {
       'smart_playlists': storage.getSmartPlaylists(),
       'favorite_track_ids': storage.getFavoriteTrackIds(),
       'saved_music_folders': storage.getMusicFolders(),
+      'active_eq_state': storage.getActiveEqState(),
+      'custom_eq_presets': storage.getCustomEqPresets(),
+      'saved_fr_curves': storage.getSavedFrCurves(),
+      'dsp_rack_state': storage.getDspRackState(),
+      'dsp_track_overrides': storage.getDspTrackOverrides(),
+      'dsp_genre_mappings': storage.getDspGenreMappings(),
+      'dsp_auto_apply_genre_enabled': storage.isDspAutoApplyByGenreEnabled(),
     };
 
     if (includeHistory) {
@@ -151,6 +163,7 @@ class BackupRestoreService {
     bool restoreTheme = true,
     bool restoreFolders = true,
     bool restoreHistory = false,
+    bool restoreDsp = true,
   }) async {
     final validation = validateBackup(jsonString);
     if (!validation.isValid) {
@@ -215,6 +228,55 @@ class BackupRestoreService {
         }
       }
 
+      // 7. DSP, Pro-Q EQ & AutoEQ Persistence
+      if (restoreDsp) {
+        if (data['dsp_rack_state'] is Map) {
+          final dspState = Map<String, dynamic>.from(data['dsp_rack_state'] as Map);
+          await storage.saveDspRackState(dspState);
+        }
+        if (data['dsp_track_overrides'] is Map) {
+          final raw = data['dsp_track_overrides'] as Map;
+          for (final entry in raw.entries) {
+            if (entry.key is String && entry.value is Map) {
+              final map = Map<String, dynamic>.from(entry.value as Map);
+              map['trackId'] = entry.key as String;
+              await storage.saveDspTrackOverride(map);
+            }
+          }
+        }
+        if (data['dsp_genre_mappings'] is Map) {
+          final raw = data['dsp_genre_mappings'] as Map;
+          final mappings = <String, String>{};
+          raw.forEach((k, v) {
+            if (k is String && v is String) mappings[k] = v;
+          });
+          await storage.saveDspGenreMappings(mappings);
+        }
+        if (data['dsp_auto_apply_genre_enabled'] is bool) {
+          await storage.setDspAutoApplyByGenreEnabled(data['dsp_auto_apply_genre_enabled'] as bool);
+        }
+        if (data['active_eq_state'] is Map) {
+          final eq = Map<String, dynamic>.from(data['active_eq_state'] as Map);
+          final rawBands = eq['bands'] as List?;
+          final bands = rawBands?.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList() ?? [];
+          await storage.saveActiveEqState(
+            bands: bands,
+            preampDb: (eq['preampDb'] as num?)?.toDouble() ?? 0.0,
+            activePresetName: eq['activePresetName'] as String? ?? 'Flat',
+            lastDriverName: eq['lastDriverName'] as String?,
+            lastTargetName: eq['lastTargetName'] as String?,
+            lastDriverCurve: eq['lastDriverCurve'] is Map ? Map<String, dynamic>.from(eq['lastDriverCurve'] as Map) : null,
+            lastTargetCurve: eq['lastTargetCurve'] is Map ? Map<String, dynamic>.from(eq['lastTargetCurve'] as Map) : null,
+          );
+        }
+        if (data['saved_fr_curves'] is List) {
+          final rawCurves = data['saved_fr_curves'] as List;
+          for (final c in rawCurves.whereType<Map>()) {
+            await storage.saveFrCurve(Map<String, dynamic>.from(c));
+          }
+        }
+      }
+
       if (data['player_customization_settings'] != null) {
         await storage.saveSetting('player_customization_settings', data['player_customization_settings']);
       }
@@ -238,6 +300,52 @@ class BackupRestoreService {
     } catch (e) {
       return RestoreResult(success: false, message: 'Restore error: $e');
     }
+  }
+
+  /// Export backup JSON directly to public shared directory (immune to Clear App Data)
+  Future<File?> autoExportToPublicDirectory() async {
+    try {
+      final jsonString = createBackupJson();
+      final backupFile = await StoragePermissionService.instance.getPublicBackupFile();
+      await backupFile.writeAsString(jsonString, flush: true);
+      debugPrint('[BackupRestoreService] Auto-exported backup to ${backupFile.path}');
+      return backupFile;
+    } catch (e) {
+      debugPrint('[BackupRestoreService] Auto-export to public directory notice: $e');
+      return null;
+    }
+  }
+
+  /// Debounced auto-backup trigger (schedules an export 3 seconds after last state mutation)
+  void scheduleAutoBackup() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 3), () {
+      autoExportToPublicDirectory();
+    });
+  }
+
+  /// Checks if local database is empty and automatically restores from public backup file if found
+  Future<bool> autoRestoreIfDatabaseEmpty() async {
+    if (!LocalPersistenceService.instance.isEmpty) {
+      return false;
+    }
+
+    try {
+      final backupFile = await StoragePermissionService.instance.getPublicBackupFile();
+      if (await backupFile.exists()) {
+        final content = await backupFile.readAsString();
+        if (content.trim().isNotEmpty) {
+          final res = await restoreFromBackupJson(content);
+          if (res.success) {
+            debugPrint('[BackupRestoreService] Auto-restored library state from ${backupFile.path}');
+            return true;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[BackupRestoreService] Auto-restore on startup notice: $e');
+    }
+    return false;
   }
 
   /// Export backup JSON directly to a file on local storage

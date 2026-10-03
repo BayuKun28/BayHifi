@@ -7,6 +7,8 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../core/storage/storage_permission_dialog.dart';
+import '../../../../core/storage/storage_permission_service.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../data/metadata_tagger_service.dart';
@@ -149,6 +151,21 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
   }
 
   Future<void> _executeBatchTagging() async {
+    if (Platform.isAndroid) {
+      final hasManage = await StoragePermissionService.instance.hasManageExternalStoragePermission();
+      if (!hasManage && mounted) {
+        final granted = await StoragePermissionDialog.show(
+          context,
+          featureName: 'Batch Physical Audio Tagging',
+          rationale:
+              'Baydev HiFi requires "All Files Access" to write ID3 tags directly into multiple audio files simultaneously on your device storage.',
+        );
+        if (granted) {
+          await Future.delayed(const Duration(milliseconds: 300));
+        }
+      }
+    }
+
     setState(() {
       _isProcessing = true;
       _progress = 0.0;

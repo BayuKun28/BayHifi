@@ -124,11 +124,36 @@ class BatchTaggingItem {
   });
 }
 
+enum PhysicalTagWriteStatus {
+  success,
+  permissionDenied,
+  fileNotFound,
+  unsupportedFormat,
+  virtualTrack,
+}
+
+/// Detailed result of a physical audio tag writing operation
+class PhysicalTagWriteResult {
+  final PhysicalTagWriteStatus status;
+  final String? errorMessage;
+
+  const PhysicalTagWriteResult({
+    required this.status,
+    this.errorMessage,
+  });
+
+  bool get isSuccess =>
+      status == PhysicalTagWriteStatus.success || status == PhysicalTagWriteStatus.virtualTrack;
+  bool get isPhysicalSuccess => status == PhysicalTagWriteStatus.success;
+  bool get isPermissionDenied => status == PhysicalTagWriteStatus.permissionDenied;
+}
+
 /// Result summary of batch tagging operation
 class BatchTaggingResult {
   final int totalCount;
   final int successCount;
   final int failedCount;
+  final int permissionDeniedCount;
   final List<String> failedFiles;
   final List<Track> updatedTracks;
 
@@ -136,6 +161,7 @@ class BatchTaggingResult {
     required this.totalCount,
     required this.successCount,
     required this.failedCount,
+    this.permissionDeniedCount = 0,
     required this.failedFiles,
     required this.updatedTracks,
   });
@@ -279,11 +305,14 @@ class MetadataTaggerService {
   }
 
   /// Write metadata tags directly to the physical audio file
-  Future<bool> writePhysicalTags(String filePath, AudioTagData tagData) async {
+  Future<PhysicalTagWriteResult> writePhysicalTags(String filePath, AudioTagData tagData) async {
     final file = File(filePath);
     if (!file.existsSync()) {
       debugPrint('[MetadataTaggerService] Cannot write tags, file does not exist: $filePath');
-      return false;
+      return const PhysicalTagWriteResult(
+        status: PhysicalTagWriteStatus.fileNotFound,
+        errorMessage: 'File does not exist on disk.',
+      );
     }
 
     try {
@@ -318,10 +347,23 @@ class MetadataTaggerService {
       );
 
       await at.AudioTags.write(filePath, tag);
-      return true;
+      return const PhysicalTagWriteResult(status: PhysicalTagWriteStatus.success);
     } catch (e) {
+      final errStr = e.toString().toLowerCase();
       debugPrint('[MetadataTaggerService] Error writing physical tags to $filePath: $e');
-      return false;
+      if (errStr.contains('permission') ||
+          errStr.contains('eacces') ||
+          errStr.contains('read-only') ||
+          errStr.contains('access denied')) {
+        return PhysicalTagWriteResult(
+          status: PhysicalTagWriteStatus.permissionDenied,
+          errorMessage: e.toString(),
+        );
+      }
+      return PhysicalTagWriteResult(
+        status: PhysicalTagWriteStatus.unsupportedFormat,
+        errorMessage: e.toString(),
+      );
     }
   }
 
@@ -349,6 +391,7 @@ class MetadataTaggerService {
   }) async {
     int success = 0;
     int failed = 0;
+    int permissionDenied = 0;
     final failedFiles = <String>[];
     final updatedTracks = <Track>[];
 
@@ -364,18 +407,19 @@ class MetadataTaggerService {
         cachedArtPath = await cacheCoverArt(tagData.artworkBytes!, original.id);
       }
 
-      bool writeOk = false;
+      PhysicalTagWriteResult writeResult =
+          const PhysicalTagWriteResult(status: PhysicalTagWriteStatus.virtualTrack);
       if (original.filePath != null && original.filePath!.isNotEmpty) {
-        writeOk = await writePhysicalTags(original.filePath!, tagData);
-      } else {
-        // Virtual/cloud track update without physical write
-        writeOk = true;
+        writeResult = await writePhysicalTags(original.filePath!, tagData);
       }
 
-      if (writeOk) {
+      if (writeResult.isSuccess) {
         success++;
       } else {
         failed++;
+        if (writeResult.isPermissionDenied) {
+          permissionDenied++;
+        }
         if (original.filePath != null) {
           failedFiles.add(original.filePath!);
         }
@@ -395,6 +439,7 @@ class MetadataTaggerService {
       totalCount: items.length,
       successCount: success,
       failedCount: failed,
+      permissionDeniedCount: permissionDenied,
       failedFiles: failedFiles,
       updatedTracks: updatedTracks,
     );

@@ -7,6 +7,8 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../core/storage/storage_permission_dialog.dart';
+import '../../../../core/storage/storage_permission_service.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
 import '../../data/metadata_tagger_service.dart';
@@ -47,6 +49,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
   Uint8List? _artworkBytes;
   String? _artworkMimeType;
   bool _isSaving = false;
+  bool _hasManagePermission = true;
 
   static const List<String> _genrePresets = [
     'Audiophile',
@@ -77,6 +80,17 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
     _discTotalController = TextEditingController(text: t.discTotal?.toString() ?? '');
     _lyricsController = TextEditingController(text: t.lyrics ?? '');
     _artworkBytes = t.albumArtBytes;
+    _checkStoragePermission();
+  }
+
+  Future<void> _checkStoragePermission() async {
+    if (kIsWeb || !Platform.isAndroid || widget.track.filePath == null) return;
+    final hasManage = await StoragePermissionService.instance.hasManageExternalStoragePermission();
+    if (mounted) {
+      setState(() {
+        _hasManagePermission = hasManage;
+      });
+    }
   }
 
   @override
@@ -189,6 +203,21 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
         ),
       );
       return;
+    }
+
+    if (Platform.isAndroid && widget.track.filePath != null) {
+      final hasManage = await StoragePermissionService.instance.hasManageExternalStoragePermission();
+      if (!hasManage && mounted) {
+        final granted = await StoragePermissionDialog.show(
+          context,
+          featureName: 'Direct Physical Audio Tagging',
+          rationale:
+              'Baydev HiFi requires "All Files Access" to permanently embed tags and artwork directly into this audio file on disk.',
+        );
+        if (granted) {
+          await _checkStoragePermission();
+        }
+      }
     }
 
     setState(() => _isSaving = true);
@@ -377,6 +406,66 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
               ),
               const SizedBox(height: 12),
               Divider(height: 1, color: outline),
+
+              // ─── STORAGE STATUS INDICATOR ─────────────────────────────────
+              if (widget.track.filePath != null) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  child: InkWell(
+                    onTap: _hasManagePermission
+                        ? null
+                        : () async {
+                            final granted = await StoragePermissionDialog.show(
+                              context,
+                              featureName: 'Direct Physical Audio Tagging',
+                            );
+                            if (granted) {
+                              await _checkStoragePermission();
+                            }
+                          },
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _hasManagePermission
+                            ? cs.primaryContainer.withValues(alpha: 0.25)
+                            : cs.errorContainer.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: _hasManagePermission
+                              ? cs.primary.withValues(alpha: 0.3)
+                              : cs.error.withValues(alpha: 0.4),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          HugeIcon(
+                            icon: _hasManagePermission
+                                ? HugeIcons.strokeRoundedCheckmarkCircle02
+                                : HugeIcons.strokeRoundedAlertCircle,
+                            size: 15,
+                            color: _hasManagePermission ? cs.primary : cs.error,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _hasManagePermission
+                                  ? 'Physical Tagging Active — Tags will be written permanently to disk'
+                                  : 'App-Only Storage — Tap to enable All Files Access for direct file write',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: _hasManagePermission ? cs.onSurface : cs.error,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
 
               // ─── SCROLLABLE FORM ─────────────────────────────────────────
               Flexible(

@@ -71,6 +71,10 @@ class EqController extends StateNotifier<EqState> {
           (preserveCurvesIfNull ? (saved?['lastDriverName'] as String?) : null);
       final targetName = state.targetFr?.name ??
           (preserveCurvesIfNull ? (saved?['lastTargetName'] as String?) : null);
+      final driverMap = state.driverFr?.toMap(category: 'driver') ??
+          (preserveCurvesIfNull ? (saved?['lastDriverCurve'] as Map<String, dynamic>?) : null);
+      final targetMap = state.targetFr?.toMap(category: 'target') ??
+          (preserveCurvesIfNull ? (saved?['lastTargetCurve'] as Map<String, dynamic>?) : null);
 
       LocalPersistenceService.instance.saveActiveEqState(
         bands: state.bands.map((b) => b.toMap()).toList(),
@@ -78,6 +82,9 @@ class EqController extends StateNotifier<EqState> {
         activePresetName: state.activePresetName,
         lastDriverName: driverName,
         lastTargetName: targetName,
+        lastDriverCurve: driverMap,
+        lastTargetCurve: targetMap,
+        preserveCurvesIfNull: preserveCurvesIfNull,
       );
     } catch (_) {}
   }
@@ -120,8 +127,9 @@ class EqController extends StateNotifier<EqState> {
   }
 
   Future<void> _loadSampleCurves() async {
-    final drivers = <FrCurveData>[];
-    final targets = <FrCurveData>[];
+    // 1. Inisialisasi dengan Single Source of Truth kurva bawaan studio
+    final drivers = List<FrCurveData>.from(FrCurveData.defaultDrivers);
+    final targets = List<FrCurveData>.from(FrCurveData.defaultTargets);
 
     try {
       final driverText = await rootBundle
@@ -138,26 +146,43 @@ class EqController extends StateNotifier<EqState> {
         name: 'HBB Target',
       );
 
-      drivers.add(driver);
-      targets.add(target);
+      final dIdx = drivers.indexWhere((d) => d.name == driver.name);
+      if (dIdx >= 0) {
+        drivers[dIdx] = driver;
+      } else {
+        drivers.add(driver);
+      }
+
+      final tIdx = targets.indexWhere((t) => t.name == target.name);
+      if (tIdx >= 0) {
+        targets[tIdx] = target;
+      } else {
+        targets.add(target);
+      }
     } catch (_) {
       // Graceful fallback jika running di test tanpa rootBundle
     }
 
     if (_isDisposed || !mounted) return;
 
-    // Hydrate persistent offline saved curves from LocalPersistenceService
+    // 2. Hydrate kurva offline yang disimpan pengguna dari LocalPersistenceService
     try {
       final savedMaps = LocalPersistenceService.instance.getSavedFrCurves();
       for (final map in savedMaps) {
         final curve = FrCurveData.fromMap(map);
         final category = map['category'] as String?;
         if (category == 'target' || curve.name.toLowerCase().contains('target')) {
-          if (!targets.any((t) => t.name == curve.name)) {
+          final idx = targets.indexWhere((t) => t.name == curve.name);
+          if (idx >= 0) {
+            targets[idx] = curve;
+          } else {
             targets.add(curve);
           }
         } else {
-          if (!drivers.any((d) => d.name == curve.name)) {
+          final idx = drivers.indexWhere((d) => d.name == curve.name);
+          if (idx >= 0) {
+            drivers[idx] = curve;
+          } else {
             drivers.add(curve);
           }
         }
@@ -166,26 +191,54 @@ class EqController extends StateNotifier<EqState> {
 
     if (_isDisposed || !mounted) return;
 
-    // Resolve persistent last selected Driver & Target if available
+    // 3. Resolve persistent last selected Driver & Target
     final savedEq = LocalPersistenceService.instance.getActiveEqState();
     final lastDriverName = savedEq?['lastDriverName'] as String?;
     final lastTargetName = savedEq?['lastTargetName'] as String?;
+    final lastDriverCurveMap = savedEq?['lastDriverCurve'] as Map<String, dynamic>?;
+    final lastTargetCurveMap = savedEq?['lastTargetCurve'] as Map<String, dynamic>?;
+
+    String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
     FrCurveData? selectedDriver;
-    if (lastDriverName != null && lastDriverName.isNotEmpty) {
+    if (lastDriverName != null && lastDriverName.trim().isNotEmpty) {
+      final normTarget = normalize(lastDriverName);
       selectedDriver = drivers.cast<FrCurveData?>().firstWhere(
-        (d) => d?.name == lastDriverName,
+        (d) => d != null && (d.name == lastDriverName || normalize(d.name) == normTarget),
         orElse: () => null,
       );
+    }
+    if (selectedDriver == null && lastDriverCurveMap != null && lastDriverCurveMap.isNotEmpty) {
+      try {
+        final curve = FrCurveData.fromMap(lastDriverCurveMap);
+        if (curve.frequencies.isNotEmpty) {
+          selectedDriver = curve;
+          if (!drivers.any((d) => d.name == curve.name)) {
+            drivers.add(curve);
+          }
+        }
+      } catch (_) {}
     }
     selectedDriver ??= state.driverFr ?? (drivers.isNotEmpty ? drivers.first : null);
 
     FrCurveData? selectedTarget;
-    if (lastTargetName != null && lastTargetName.isNotEmpty) {
+    if (lastTargetName != null && lastTargetName.trim().isNotEmpty) {
+      final normTarget = normalize(lastTargetName);
       selectedTarget = targets.cast<FrCurveData?>().firstWhere(
-        (t) => t?.name == lastTargetName,
+        (t) => t != null && (t.name == lastTargetName || normalize(t.name) == normTarget),
         orElse: () => null,
       );
+    }
+    if (selectedTarget == null && lastTargetCurveMap != null && lastTargetCurveMap.isNotEmpty) {
+      try {
+        final curve = FrCurveData.fromMap(lastTargetCurveMap);
+        if (curve.frequencies.isNotEmpty) {
+          selectedTarget = curve;
+          if (!targets.any((t) => t.name == curve.name)) {
+            targets.add(curve);
+          }
+        }
+      } catch (_) {}
     }
     selectedTarget ??= state.targetFr ?? (targets.isNotEmpty ? targets.first : null);
 

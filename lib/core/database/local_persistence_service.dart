@@ -18,6 +18,31 @@ class LocalPersistenceService {
 
   bool get isInitialized => _isInitialized;
 
+  /// Returns true if the database has no stored playlists, favorites, folders, or tracks
+  bool get isEmpty {
+    if (_cache.isEmpty) return true;
+    final hasPlaylists = _cache['custom_playlists'] is List && (_cache['custom_playlists'] as List).isNotEmpty;
+    final hasFavorites = _cache['favorite_track_ids'] is List && (_cache['favorite_track_ids'] as List).isNotEmpty;
+    final hasFolders = _cache['saved_music_folders'] is List && (_cache['saved_music_folders'] as List).isNotEmpty;
+    final hasTracks = _cache['saved_library_tracks'] is List && (_cache['saved_library_tracks'] as List).isNotEmpty;
+    return !hasPlaylists && !hasFavorites && !hasFolders && !hasTracks;
+  }
+
+  /// Exports full raw internal cache for backup archiving
+  Map<String, dynamic> exportFullSnapshot() {
+    return Map<String, dynamic>.from(_cache);
+  }
+
+  /// Imports full snapshot and persists to disk
+  Future<void> importFullSnapshot(Map<String, dynamic> snapshot, {bool overwrite = true}) async {
+    if (overwrite) {
+      _cache = Map<String, dynamic>.from(snapshot);
+    } else {
+      _cache.addAll(snapshot);
+    }
+    await _save();
+  }
+
   /// Inisialisasi file penyimpanan persisten di direktori dokumen aplikasi
   Future<void> init({String? customPath}) async {
     if (_isInitialized && customPath == null) return;
@@ -499,31 +524,39 @@ class LocalPersistenceService {
     return null;
   }
 
-  /// Saves the currently applied EQ state, including last selected Driver & Target curve names.
+  /// Saves the currently applied EQ state, including last selected Driver & Target curve names and serialized curves.
   Future<void> saveActiveEqState({
     required List<Map<String, dynamic>> bands,
     required double preampDb,
     required String activePresetName,
     String? lastDriverName,
     String? lastTargetName,
+    Map<String, dynamic>? lastDriverCurve,
+    Map<String, dynamic>? lastTargetCurve,
+    bool preserveCurvesIfNull = false,
   }) async {
+    final existing = getActiveEqState();
     _cache['active_eq_state'] = {
       'bands': bands,
       'preampDb': preampDb,
       'activePresetName': activePresetName,
-      'lastDriverName': lastDriverName,
-      'lastTargetName': lastTargetName,
+      'lastDriverName': preserveCurvesIfNull ? (lastDriverName ?? existing?['lastDriverName']) : lastDriverName,
+      'lastTargetName': preserveCurvesIfNull ? (lastTargetName ?? existing?['lastTargetName']) : lastTargetName,
+      'lastDriverCurve': preserveCurvesIfNull ? (lastDriverCurve ?? existing?['lastDriverCurve']) : lastDriverCurve,
+      'lastTargetCurve': preserveCurvesIfNull ? (lastTargetCurve ?? existing?['lastTargetCurve']) : lastTargetCurve,
       'savedAt': DateTime.now().toIso8601String(),
     };
     await _save();
   }
 
-  /// Returns the last selected Driver & Target curve names.
-  Map<String, String?> getLastSelectedAutoEqCurves() {
+  /// Returns the last selected Driver & Target curve names and serialized maps.
+  Map<String, dynamic> getLastSelectedAutoEqCurves() {
     final state = getActiveEqState();
     return {
       'driverName': state?['lastDriverName'] as String?,
       'targetName': state?['lastTargetName'] as String?,
+      'driverCurve': state?['lastDriverCurve'] as Map<String, dynamic>?,
+      'targetCurve': state?['lastTargetCurve'] as Map<String, dynamic>?,
     };
   }
 

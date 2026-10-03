@@ -50,6 +50,7 @@ class VirtualDspService extends ChangeNotifier {
   List<double> get eqQFactors => activeProfile.eqQFactors;
   List<double> get eqFreqs => activeProfile.eqFreqs;
   double get bassBoostValue => activeProfile.bassBoostValue;
+  double get bassBoostWet => activeProfile.bassBoostWet;
   double get compAttack => activeProfile.compAttack;
   double get compRelease => activeProfile.compRelease;
   double get compThreshold => activeProfile.compThreshold;
@@ -208,6 +209,16 @@ class VirtualDspService extends ChangeNotifier {
 
   void setBassBoostValue(double val) {
     _pendingEdits = _ensurePending().copyWith(bassBoostValue: val);
+    _markDirty();
+    if (bassBoostEnabled) _applyBassBoost();
+    notifyListeners();
+  }
+
+  void setBassBoostParams({required double boost, required double wet}) {
+    _pendingEdits = _ensurePending().copyWith(
+      bassBoostValue: boost,
+      bassBoostWet: wet.clamp(0.0, 1.0),
+    );
     _markDirty();
     if (bassBoostEnabled) _applyBassBoost();
     notifyListeners();
@@ -593,7 +604,8 @@ class VirtualDspService extends ChangeNotifier {
   void _applyBassBoost() {
     try {
       if (!SoLoud.instance.isInitialized) return;
-      SoLoud.instance.filters.bassBoostFilter.boost.value = bassBoostValue;
+      SoLoud.instance.filters.bassBoostFilter.boost.value = bassBoostValue.clamp(0.0, 3.5);
+      SoLoud.instance.filters.bassBoostFilter.wet.value = bassBoostWet.clamp(0.0, 1.0);
     } catch (e) {
       debugPrint('[VirtualDspService] BassBoost apply error: $e');
     }

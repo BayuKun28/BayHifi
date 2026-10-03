@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 55 Fase (Fase 1–55 Selesai • 100% Passed • 435/435 Passed)
+- **Total Fase**: 56 Fase (Fase 1–56 Selesai • 100% Passed • 452/452 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 55: Per-Track DSP Mastering Preset System, Genre-Based Auto-Apply Engine & Rules Customizer (Complete — 0 Errors, 0 Warnings • 435/435 Passed)_
+- **Status Proyek**: _Phase 56: Android Storage, Physical Metadata Tagging & Automated Library Backup Architecture (Complete — 0 Errors, 0 Warnings • 452/452 Passed)_
 
 ---
 
@@ -1479,7 +1479,41 @@ Implementasi sistem adaptasi mastering DSP cerdas otomatis berbasis genre metada
 - [x] **55.7 Persistent AutoEQ Driver & Target Curves Hydration**:
   - [x] Penyimpanan otomatis nama Driver IEM (`lastDriverName`) dan Target Curve (`lastTargetName`) pada `LocalPersistenceService.saveActiveEqState()`.
   - [x] Hidrasi otomatis saat `EqController` pertama kali dimuat sehingga pilihan Driver dan Target terakhir pengguna langsung aktif di Pro-Q Studio & modal AutoEQ.
-  - [x] Validasi test suite di `test/auto_eq_persistent_selection_test.dart` (3/3 passing tests).
+  - [x] Validasi test suite di `test/auto_eq_persistent_selection_test.dart`.
+- [x] **55.8 Persistent AutoEQ Android Lifecycle Fix & Studio Bass Boost Recalibration**:
+  - [x] **Single Source of Truth Kurva AutoEQ**: `FrCurveData.defaultDrivers` dan `FrCurveData.defaultTargets` dijadikan dataset bersama untuk `EqController` dan `AutoEqModalDialog`.
+  - [x] **Serialisasi Kurva Fallback**: Penyimpanan map kurva lengkap (`lastDriverCurve` & `lastTargetCurve`) di `LocalPersistenceService` menjamin pemulihan 100% pada lifecycle Android (restart, swipe recent apps).
+  - [x] **Parameter Wet pada Bass Boost Engine**: `VirtualDspService` menerapkan `bassBoostFilter.wet.value = bassBoostWet.clamp(0.0, 1.0)` dan clamping perlindungan engine $\le 3.5$.
+  - [x] **Rekalibrasi Preset Genre Audiophile**: Penyesuaian preset mastering genre (Rock: bass boost non-aktif untuk artikulasi gitar/drum; EDM: boost diturunkan ke 2.0 / wet 0.50; Hip-Hop: 2.2 / wet 0.50; R&B: 1.4 / wet 0.35; Deep Bass: 2.2 / wet 0.55) demi transparansi vokal, kejernihan transient, dan perlindungan limiter dari kompresi berlebih.
+  - [x] **Zero Regression Testing**: 441/441 tests passing (100%), 0 errors, 0 warnings pada `flutter analyze`.
+
+---
+
+## Fase 56: Android Storage, Physical Metadata Tagging & Automated Library Backup Architecture
+
+Arsitektur penyimpanan publik bersama, injeksi tag fisik langsung (*physical audio tagging*), perizinan akses berkas penuh (*All Files Access*), serta sistem pencadangan dan pemulihan otomatis (*Auto-Backup & Restore*) agar seluruh data lagu, metadata, cover art, playlist, dan DSP preset tetap 100% persisten dan kebal terhadap penghapusan data aplikasi (Clear App Data).
+
+- [x] **56.1 Public Shared Storage Migration for Downloads & Media**
+  - [x] Update `NativeDownloadService.getDownloadDirectory()` di Android untuk memprioritaskan folder publik `/storage/emulated/0/Music/BaydevHiFi` (fallback: `/storage/emulated/0/Download/BaydevHiFi`) daripada folder privat aplikasi `Android/data/`.
+  - [x] Pastikan scanner lokal `LocalAudioScanner` mendaftarkan folder publik tersebut secara default.
+- [x] **56.2 Storage Permission Service & M3E Permission Dialog**
+  - [x] Buat `StoragePermissionService` untuk mengecek & meminta `Permission.manageExternalStorage` di Android 11+ (API 30+) dan granular permissions.
+  - [x] Buat `StoragePermissionDialog` Material 3 Expressive yang menjelaskan perlunya izin All Files Access untuk retensi file & tag fisik permanen.
+- [x] **56.3 Physical Audio Tagging Engine & Result Status**
+  - [x] Tambahkan enum `PhysicalTagWriteStatus` pada `MetadataTaggerService`.
+  - [x] Pastikan penulisan ID3v2.4 / Vorbis / M4A metadata dan cover art bytes berhasil secara fisik di disk dengan verifikasi pasca-tulis.
+  - [x] Update `AudioTaggerService` saat proses download selesai untuk langsung mengunci tag fisik ke dalam file.
+- [x] **56.4 Automated Library Backup & Restore System (`LibraryBackupService`)**
+  - [x] Buat `LibraryBackupService` dengan fungsi debounced `autoExportBackup()` ke file publik `Music/BaydevHiFi/baydev_hifi_backup.json`.
+  - [x] Implementasikan `autoRestoreIfEmpty()` saat database internal kosong (pasca-install atau pasca-Clear App Data).
+  - [x] Tambahkan tombol Export & Import Backup manual di menu Settings.
+- [x] **56.5 UI Status Feedback & Error Resilience**
+  - [x] Tambahkan indikator status fisik vs memori-saja pada `MetadataTagEditorSheet` dan `BatchTrackTagEditorModal`.
+  - [x] Intersepsi tombol simpan jika izin belum ada dengan opsi meminta izin terlebih dahulu.
+- [x] **56.6 Comprehensive Testing & Zero Regression**
+  - [x] Unit & Widget tests untuk `LibraryBackupService`, `StoragePermissionService`, dan status penulisan tag fisik.
+  - [x] Verifikasi suite 100% lolos dengan `flutter test` dan 0 lint warnings pada `flutter analyze`.
+
 
 
 

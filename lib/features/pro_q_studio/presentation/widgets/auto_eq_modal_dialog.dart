@@ -29,49 +29,6 @@ class AutoEqModalDialog extends ConsumerStatefulWidget {
 }
 
 class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
-  // Built-in presets untuk kemudahan switching langsung
-  static final List<FrCurveData> _defaultTargets = [
-    FrCurveData(
-      name: 'HBB Target',
-      frequencies: const [20, 100, 1000, 3000, 8000, 20000],
-      splDb: const [107.5, 105.0, 95.0, 102.5, 96.0, 90.0],
-      referenceSpl1kHz: 95.0,
-    ),
-    FrCurveData(
-      name: 'Harman In-Ear 2019v2',
-      frequencies: const [20, 100, 1000, 3000, 8000, 20000],
-      splDb: const [108.0, 106.0, 95.0, 104.0, 98.0, 88.0],
-      referenceSpl1kHz: 95.0,
-    ),
-    FrCurveData(
-      name: 'IEF Neutral Target',
-      frequencies: const [20, 100, 1000, 3000, 8000, 20000],
-      splDb: const [95.0, 95.0, 95.0, 103.0, 97.0, 90.0],
-      referenceSpl1kHz: 95.0,
-    ),
-  ];
-
-  static final List<FrCurveData> _defaultDrivers = [
-    FrCurveData(
-      name: 'KZ CASTOR BLACK DUDU R',
-      frequencies: const [20, 100, 1000, 3000, 8000, 20000],
-      splDb: const [87.7, 86.5, 78.0, 88.5, 82.0, 72.0],
-      referenceSpl1kHz: 78.0,
-    ),
-    FrCurveData(
-      name: 'Moondrop Chu II',
-      frequencies: const [20, 100, 1000, 3000, 8000, 20000],
-      splDb: const [85.0, 83.0, 75.0, 86.0, 79.0, 70.0],
-      referenceSpl1kHz: 75.0,
-    ),
-    FrCurveData(
-      name: 'Sennheiser HD600',
-      frequencies: const [20, 100, 1000, 3000, 8000, 20000],
-      splDb: const [78.0, 80.0, 80.0, 88.0, 82.0, 74.0],
-      referenceSpl1kHz: 80.0,
-    ),
-  ];
-
   // Helper to decode URL-encoded and underscore names for clean UI display
   String _cleanName(String? s) {
     if (s == null || s.trim().isEmpty) return '';
@@ -619,10 +576,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
 
   Widget _buildDriverDropdown(EqState state, EqController notifier, bool isSolid, ThemeData theme) {
     final driver = state.driverFr;
-    final allDrivers = [
-      ..._defaultDrivers,
-      ...state.availableDrivers.where((d) => !_defaultDrivers.any((x) => x.name == d.name)),
-    ];
+    final allDrivers = state.availableDrivers.isNotEmpty
+        ? state.availableDrivers
+        : FrCurveData.defaultDrivers;
 
     return PopupMenuButton<FrCurveData>(
       color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
@@ -700,10 +656,9 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
 
   Widget _buildTargetDropdown(EqState state, EqController notifier, bool isSolid, ThemeData theme) {
     final target = state.targetFr;
-    final allTargets = [
-      ..._defaultTargets,
-      ...state.availableTargets.where((t) => !_defaultTargets.any((x) => x.name == t.name)),
-    ];
+    final allTargets = state.availableTargets.isNotEmpty
+        ? state.availableTargets
+        : FrCurveData.defaultTargets;
 
     return PopupMenuButton<FrCurveData>(
       color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),

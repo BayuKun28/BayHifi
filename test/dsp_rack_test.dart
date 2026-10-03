@@ -54,8 +54,10 @@ void main() {
       // Test Dynamic Bass Boost
       controller.toggleBassBoost();
       expect(controller.state.bassBoostEnabled, true);
-      controller.setBassBoostAmount(4.5);
-      expect(controller.state.bassBoostAmount, 4.5);
+      controller.setBassBoostAmount(2.2);
+      expect(controller.state.bassBoostAmount, 2.2);
+      controller.setBassBoostWet(0.55);
+      expect(controller.state.bassBoostWet, 0.55);
 
       // Test Tube Exciter
       controller.toggleTubeExciter();

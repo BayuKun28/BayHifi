@@ -7,6 +7,8 @@ import '../../../player/domain/track.dart';
 import '../../../navidrome/data/subsonic_client.dart';
 import '../../../navidrome/domain/subsonic_models.dart';
 import '../../../../core/database/local_persistence_service.dart';
+import '../../../../core/storage/storage_permission_service.dart';
+import '../../../settings/data/backup_restore_service.dart';
 import '../../data/local_audio_scanner.dart';
 import '../../data/metadata_tagger_service.dart';
 import '../../data/online_metadata_service.dart';
@@ -438,6 +440,15 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
         )) {
     // Non-blocking differential startup sync for newly added tracks, missing artwork, and Navidrome session
     Future.microtask(() async {
+      final didRestore = await BackupRestoreService.instance.autoRestoreIfDatabaseEmpty();
+      if (didRestore) {
+        state = state.copyWith(
+          tracks: _loadSavedTracks(),
+          customPlaylists: _loadSavedCustomPlaylists(),
+          smartPlaylists: _loadSavedSmartPlaylists(),
+          favoriteTrackIds: LocalPersistenceService.instance.getFavoriteTrackIds().toSet(),
+        );
+      }
       await syncNewTracksOnStartup();
       await recoverMissingArtwork();
       await restoreNavidromeSession();
@@ -934,7 +945,17 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
 
   /// Scan local music library (picks a directory if none saved, or rescans saved folders)
   Future<void> scanLocalMusic() async {
-    final savedFolders = LocalPersistenceService.instance.getMusicFolders();
+    var savedFolders = LocalPersistenceService.instance.getMusicFolders();
+    if (savedFolders.isEmpty && !kIsWeb && Platform.isAndroid) {
+      try {
+        final publicMusicDir = await StoragePermissionService.instance.getPublicMusicDirectory();
+        if (publicMusicDir.existsSync()) {
+          savedFolders = [publicMusicDir.path];
+          await LocalPersistenceService.instance.saveMusicFolders(savedFolders);
+        }
+      } catch (_) {}
+    }
+
     if (savedFolders.isNotEmpty) {
       await rescanSavedFolders();
     } else {
@@ -1224,8 +1245,10 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
       cachedArtPath = await _tagger.cacheCoverArt(tagData.artworkBytes!, original.id);
     }
 
+    PhysicalTagWriteResult writeResult =
+        const PhysicalTagWriteResult(status: PhysicalTagWriteStatus.virtualTrack);
     if (writeToFile && original.filePath != null && original.filePath!.isNotEmpty) {
-      await _tagger.writePhysicalTags(original.filePath!, tagData);
+      writeResult = await _tagger.writePhysicalTags(original.filePath!, tagData);
     }
 
     final updated = tagData.applyToTrack(original, newAlbumArtUrl: cachedArtPath);
@@ -1233,9 +1256,17 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     updatedList[idx] = updated;
 
     await _persistTracks(updatedList);
+    BackupRestoreService.instance.scheduleAutoBackup();
+
+    final statusSuffix = writeResult.isPhysicalSuccess
+        ? ' (Saved to audio file)'
+        : (writeResult.isPermissionDenied
+            ? ' (App storage only — grant storage access for file write)'
+            : '');
+
     state = state.copyWith(
       tracks: updatedList,
-      statusMessage: 'Updated tags for "${updated.title}".',
+      statusMessage: 'Updated tags for "${updated.title}"$statusSuffix.',
     );
     return updated;
   }
@@ -1255,6 +1286,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
       }).toList();
 
       await _persistTracks(updatedList);
+      BackupRestoreService.instance.scheduleAutoBackup();
       state = state.copyWith(
         tracks: updatedList,
         isScanning: false,

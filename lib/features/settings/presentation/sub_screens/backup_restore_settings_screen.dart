@@ -28,11 +28,12 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
     );
 
     final file = await BackupRestoreService.instance.saveBackupToFile(jsonStr);
+    await BackupRestoreService.instance.autoExportToPublicDirectory();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Backup saved: ${file.path.split('/').last}'),
+          content: Text('Backup saved to storage: ${file.path.split('/').last}'),
           behavior: SnackBarBehavior.floating,
         ),
       );

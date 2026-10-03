@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import 'package:baydev_hifi/core/database/local_persistence_service.dart';
+import 'package:baydev_hifi/core/storage/storage_permission_service.dart';
 import '../../player/domain/track.dart';
 import '../../spotify_importer/data/audio_matcher_service.dart';
 import '../../youtube_music/data/webm_to_ogg_remuxer.dart';
@@ -24,37 +24,7 @@ class NativeDownloadService {
 
   /// Resolves the default music download directory across Android and Desktop platforms
   Future<Directory> getDownloadDirectory() async {
-    Directory targetDir;
-    if (Platform.isAndroid) {
-      try {
-        final extDirs = await getExternalStorageDirectories(type: StorageDirectory.music);
-        if (extDirs != null && extDirs.isNotEmpty) {
-          targetDir = Directory('${extDirs.first.path}/BaydevHiFi');
-        } else {
-          final docDir = await getApplicationDocumentsDirectory();
-          targetDir = Directory('${docDir.path}/Music');
-        }
-      } catch (_) {
-        final docDir = await getApplicationDocumentsDirectory();
-        targetDir = Directory('${docDir.path}/Music');
-      }
-    } else if (Platform.isLinux || Platform.isMacOS) {
-      final home = Platform.environment['HOME'];
-      if (home != null && Directory('$home/Music').existsSync()) {
-        targetDir = Directory('$home/Music/BaydevHiFi');
-      } else {
-        final docDir = await getApplicationDocumentsDirectory();
-        targetDir = Directory('${docDir.path}/BaydevHiFi');
-      }
-    } else {
-      final docDir = await getApplicationDocumentsDirectory();
-      targetDir = Directory('${docDir.path}/BaydevHiFi');
-    }
-
-    if (!targetDir.existsSync()) {
-      targetDir.createSync(recursive: true);
-    }
-    return targetDir;
+    return await StoragePermissionService.instance.getPublicMusicDirectory();
   }
 
   /// Sanitizes track title and artist into a safe cross-platform file name

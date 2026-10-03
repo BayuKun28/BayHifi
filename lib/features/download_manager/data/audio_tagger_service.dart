@@ -64,9 +64,9 @@ class AudioTaggerService {
       );
 
       // 3. Write physical tags
-      final success = await _tagger.writePhysicalTags(filePath, tagData);
-      debugPrint('[AudioTaggerService] Tagging $filePath: ${success ? "SUCCESS" : "FAILED"}');
-      return success;
+      final result = await _tagger.writePhysicalTags(filePath, tagData);
+      debugPrint('[AudioTaggerService] Tagging $filePath: ${result.status.name}');
+      return result.isSuccess;
     } catch (e, st) {
       debugPrint('[AudioTaggerService] Error tagging file $filePath: $e\n$st');
       return false;
