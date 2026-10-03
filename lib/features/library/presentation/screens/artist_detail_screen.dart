@@ -294,13 +294,14 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                // Artist Circular Avatar with Squircle/Circle Glow
+                                // Artist Circular Avatar with Squircle/Circle Glow & Tap to Zoom Lightbox
                                 ArtistAvatarWidget(
                                   artistName: widget.artist.name,
                                   fallbackCoverBytes: widget.artist.coverBytes,
                                   fallbackCoverUrl: widget.artist.coverUrl,
                                   radius: 52,
                                   iconSize: 42,
+                                  enableLightboxOnTap: true,
                                 ),
                                 const SizedBox(width: 16),
                                 // Artist Details
@@ -379,6 +380,7 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                                   fallbackCoverUrl: widget.artist.coverUrl,
                                   radius: 16,
                                   iconSize: 16,
+                                  enableLightboxOnTap: true,
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(

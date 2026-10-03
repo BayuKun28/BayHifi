@@ -8,6 +8,7 @@ import '../../app/theme/app_haptics.dart';
 import '../../app/theme/app_typography.dart';
 import '../../app/theme/studio_surface_theme.dart';
 import '../../audio_engine/fft_processor.dart';
+import '../../core/widgets/studio_artwork_lightbox.dart';
 import '../../core/widgets/studio_artwork_widget.dart';
 import '../../features/dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../features/library/presentation/controllers/library_controller.dart';
@@ -81,6 +82,19 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
           backgroundColor: Colors.transparent,
           builder: (_) => const NowPlayingQueueSheet(),
         );
+        break;
+      case ArtworkGestureAction.viewFullArtwork:
+        if (track != null) {
+          StudioArtworkLightbox.show(
+            context,
+            track: track,
+            bytes: track.albumArtBytes,
+            url: track.albumArtUrl,
+            title: track.title,
+            subtitle: track.artist,
+            formatTag: track.format.name.toUpperCase(),
+          );
+        }
         break;
       case ArtworkGestureAction.none:
         ref.read(playerExpansionProvider.notifier).expand();

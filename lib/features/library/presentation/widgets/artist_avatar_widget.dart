@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
+import '../../../../core/widgets/studio_artwork_lightbox.dart';
 import '../../data/artist_metadata_service.dart';
 
 /// Refined Studio Artist Avatar Widget
@@ -12,6 +14,8 @@ class ArtistAvatarWidget extends StatefulWidget {
   final String? fallbackCoverUrl;
   final double radius;
   final double iconSize;
+  final VoidCallback? onTap;
+  final bool enableLightboxOnTap;
 
   const ArtistAvatarWidget({
     super.key,
@@ -20,6 +24,8 @@ class ArtistAvatarWidget extends StatefulWidget {
     this.fallbackCoverUrl,
     this.radius = 24,
     this.iconSize = 20,
+    this.onTap,
+    this.enableLightboxOnTap = false,
   });
 
   @override
@@ -59,26 +65,24 @@ class _ArtistAvatarWidgetState extends State<ArtistAvatarWidget> {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
+    Widget avatar;
+
     if (_onlineImageUrl != null && _onlineImageUrl!.isNotEmpty) {
-      return CircleAvatar(
+      avatar = CircleAvatar(
         radius: widget.radius,
         backgroundColor: theme.colorScheme.surfaceContainerHighest,
         backgroundImage: NetworkImage(_onlineImageUrl!),
       );
-    }
-
-    if (widget.fallbackCoverBytes != null && widget.fallbackCoverBytes!.isNotEmpty) {
-      return CircleAvatar(
+    } else if (widget.fallbackCoverBytes != null && widget.fallbackCoverBytes!.isNotEmpty) {
+      avatar = CircleAvatar(
         radius: widget.radius,
         backgroundColor: theme.colorScheme.surfaceContainerHighest,
         backgroundImage: MemoryImage(widget.fallbackCoverBytes!),
       );
-    }
-
-    if (widget.fallbackCoverUrl != null && widget.fallbackCoverUrl!.isNotEmpty) {
+    } else if (widget.fallbackCoverUrl != null && widget.fallbackCoverUrl!.isNotEmpty) {
       final cleanUrl = widget.fallbackCoverUrl!.trim();
       if (cleanUrl.startsWith('http')) {
-        return CircleAvatar(
+        avatar = CircleAvatar(
           radius: widget.radius,
           backgroundColor: theme.colorScheme.surfaceContainerHighest,
           backgroundImage: NetworkImage(cleanUrl),
@@ -89,15 +93,44 @@ class _ArtistAvatarWidgetState extends State<ArtistAvatarWidget> {
             : cleanUrl;
         final file = File(filePath);
         if (file.existsSync()) {
-          return CircleAvatar(
+          avatar = CircleAvatar(
             radius: widget.radius,
             backgroundColor: theme.colorScheme.surfaceContainerHighest,
             backgroundImage: FileImage(file),
           );
+        } else {
+          avatar = _buildFallbackIcon(primary);
         }
       }
+    } else {
+      avatar = _buildFallbackIcon(primary);
     }
 
+    if (widget.onTap != null || widget.enableLightboxOnTap) {
+      return GestureDetector(
+        onTap: () {
+          if (widget.onTap != null) {
+            widget.onTap!();
+          } else if (widget.enableLightboxOnTap) {
+            AppHaptics.selectionClick();
+            StudioArtworkLightbox.show(
+              context,
+              bytes: widget.fallbackCoverBytes,
+              url: _onlineImageUrl ?? widget.fallbackCoverUrl,
+              title: widget.artistName,
+              subtitle: 'Artist Discography',
+              formatTag: 'ARTIST PROFILE',
+            );
+          }
+        },
+        child: avatar,
+      );
+    }
+
+    return avatar;
+  }
+
+  Widget _buildFallbackIcon(Color primary) {
     return CircleAvatar(
       radius: widget.radius,
       backgroundColor: primary.withValues(alpha: 0.15),

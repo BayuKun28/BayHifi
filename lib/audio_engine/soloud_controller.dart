@@ -407,7 +407,7 @@ class SoLoudController {
 
   void _startPositionTracking() {
     _positionTimer?.cancel();
-    _positionTimer = Timer.periodic(const Duration(milliseconds: 50), (_) {
+    _positionTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       if (isPlaying) {
         _positionController.add(position);
       }

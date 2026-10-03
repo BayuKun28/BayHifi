@@ -553,6 +553,8 @@ class GesturesSettingsScreen extends ConsumerWidget {
         return HugeIcons.strokeRoundedAudioBook04;
       case ArtworkGestureAction.openQueue:
         return HugeIcons.strokeRoundedPlaylist01;
+      case ArtworkGestureAction.viewFullArtwork:
+        return HugeIcons.strokeRoundedImage02;
       case ArtworkGestureAction.none:
         return HugeIcons.strokeRoundedCancel01;
     }

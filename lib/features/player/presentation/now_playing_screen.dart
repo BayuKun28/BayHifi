@@ -6,6 +6,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
+import '../../../core/widgets/studio_artwork_lightbox.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../library/domain/library_collection_models.dart';
 import '../../library/presentation/controllers/library_controller.dart';
@@ -203,6 +204,19 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       case ArtworkGestureAction.openQueue:
         NowPlayingQueueSheet.show(context);
         break;
+      case ArtworkGestureAction.viewFullArtwork:
+        if (track != null) {
+          StudioArtworkLightbox.show(
+            context,
+            track: track,
+            bytes: track.albumArtBytes,
+            url: track.albumArtUrl,
+            title: track.title,
+            subtitle: track.artist,
+            formatTag: track.format.name.toUpperCase(),
+          );
+        }
+        break;
       case ArtworkGestureAction.none:
         break;
     }
@@ -210,14 +224,32 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final playback = ref.watch(playerControllerProvider);
+    final track = ref.watch(playerControllerProvider.select((s) => s.currentTrack));
+    final status = ref.watch(playerControllerProvider.select((s) => s.status));
+    final isShuffle = ref.watch(playerControllerProvider.select((s) => s.isShuffle));
+    final repeatMode = ref.watch(playerControllerProvider.select((s) => s.repeatMode));
+    final playbackSpeed = ref.watch(playerControllerProvider.select((s) => s.playbackSpeed));
+    final pitchSemitones = ref.watch(playerControllerProvider.select((s) => s.pitchSemitones));
+    final queue = ref.watch(playerControllerProvider.select((s) => s.queue));
+    final queueIndex = ref.watch(playerControllerProvider.select((s) => s.queueIndex));
+
+    final playback = PlaybackState(
+      status: status,
+      currentTrack: track,
+      isShuffle: isShuffle,
+      repeatMode: repeatMode,
+      playbackSpeed: playbackSpeed,
+      pitchSemitones: pitchSemitones,
+      queue: queue,
+      queueIndex: queueIndex,
+    );
+
     final sleepTimer = ref.watch(sleepTimerControllerProvider);
     final libraryState = ref.watch(unifiedLibraryProvider);
     final libraryController = ref.read(unifiedLibraryProvider.notifier);
     final displaySettings = ref.watch(playerCustomizationProvider);
     final eqState = ref.watch(eqControllerProvider);
 
-    final track = playback.currentTrack;
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
@@ -695,7 +727,6 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     child: SynchronizedLyricsView(
                       key: const ValueKey('lyrics_view'),
                       lyricsResult: _lyricsResult,
-                      currentPosition: playback.position,
                       isLoading: _isLoadingLyrics,
                       onRefresh: track != null ? () => _fetchLyrics(track, forceOnline: true) : null,
                       trackId: track?.id,
@@ -842,16 +873,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           const SizedBox(height: 6),
 
           // 5. Customizable Time Bar (Slim / Capsule / Segmented / Waveform)
-          CustomTimeBar(
-            position: playback.position,
-            duration: playback.duration,
-            style: displaySettings.timeBarStyle,
-            primaryColor: primary,
-            timeDisplayMode: playback.timeDisplayMode,
-            onToggleTimeDisplayMode: () =>
-                ref.read(playerControllerProvider.notifier).toggleTimeDisplayMode(),
-            onSeek: (newPos) => ref.read(playerControllerProvider.notifier).seek(newPos),
-          ),
+          const _NowPlayingIsolatedProgressBar(),
 
           const SizedBox(height: 6),
 
@@ -1401,16 +1423,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 const SizedBox(height: 4),
 
                 // 3. Customizable Time Bar
-                CustomTimeBar(
-                  position: playback.position,
-                  duration: playback.duration,
-                  style: displaySettings.timeBarStyle,
-                  primaryColor: primary,
-                  timeDisplayMode: playback.timeDisplayMode,
-                  onToggleTimeDisplayMode: () =>
-                      ref.read(playerControllerProvider.notifier).toggleTimeDisplayMode(),
-                  onSeek: (newPos) => ref.read(playerControllerProvider.notifier).seek(newPos),
-                ),
+                const _NowPlayingIsolatedProgressBar(),
 
                 const SizedBox(height: 6),
 
@@ -1436,3 +1449,32 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     );
   }
 }
+
+/// Isolated progress bar that exclusively listens to position & duration updates,
+/// eliminating root screen rebuild cascades on high-frequency playback ticks.
+class _NowPlayingIsolatedProgressBar extends ConsumerWidget {
+  const _NowPlayingIsolatedProgressBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final position = ref.watch(playerControllerProvider.select((s) => s.position));
+    final duration = ref.watch(playerControllerProvider.select((s) => s.duration));
+    final timeDisplayMode = ref.watch(playerControllerProvider.select((s) => s.timeDisplayMode));
+    final timeBarStyle = ref.watch(playerCustomizationProvider.select((s) => s.timeBarStyle));
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return RepaintBoundary(
+      child: CustomTimeBar(
+        position: position,
+        duration: duration,
+        style: timeBarStyle,
+        primaryColor: primary,
+        timeDisplayMode: timeDisplayMode,
+        onToggleTimeDisplayMode: () =>
+            ref.read(playerControllerProvider.notifier).toggleTimeDisplayMode(),
+        onSeek: (newPos) => ref.read(playerControllerProvider.notifier).seek(newPos),
+      ),
+    );
+  }
+}
+

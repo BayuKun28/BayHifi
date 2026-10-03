@@ -90,6 +90,7 @@ enum ArtworkGestureAction {
   openProQStudio('Pro-Q Studio EQ', 'Open interactive 32-band Parametric Equalizer'),
   openDspRack('Mastering DSP Rack', 'Open 10-module hardware mastering DSP rack'),
   openQueue('Up Next Queue', 'Open active playback queue bottom sheet'),
+  viewFullArtwork('View Full Artwork', 'Display interactive zoomable high-resolution artwork lightbox'),
   none('No Action', 'Do nothing on gesture trigger');
 
   final String label;

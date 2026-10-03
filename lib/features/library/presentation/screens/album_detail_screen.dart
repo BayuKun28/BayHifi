@@ -6,6 +6,7 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../core/widgets/studio_artwork_lightbox.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
@@ -263,33 +264,48 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                // Album Cover Art with Squircle Studio Border
-                                Hero(
-                                  tag: 'album_art_${widget.album.name}_${widget.album.artist}',
-                                  child: Container(
-                                    width: 130,
-                                    height: 130,
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(18),
-                                      border: Border.all(
-                                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
-                                        width: 1.0,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.25),
-                                          blurRadius: 16,
-                                          offset: const Offset(0, 8),
-                                        ),
-                                      ],
-                                    ),
-                                    child: StudioArtworkWidget(
+                                // Album Cover Art with Squircle Studio Border & Tap to Zoom Lightbox
+                                GestureDetector(
+                                  onTap: () {
+                                    AppHaptics.selectionClick();
+                                    StudioArtworkLightbox.show(
+                                      context,
                                       track: widget.album.firstTrack,
                                       bytes: widget.album.coverBytes,
                                       url: widget.album.coverUrl,
-                                      borderRadius: BorderRadius.circular(17),
-                                      fallbackIconSize: 44,
+                                      title: widget.album.name,
+                                      subtitle: widget.album.artist,
+                                      formatTag: widget.album.isHiRes ? 'HI-RES LOSSLESS' : 'STUDIO ALBUM',
+                                      heroTag: 'album_art_${widget.album.name}_${widget.album.artist}',
+                                    );
+                                  },
+                                  child: Hero(
+                                    tag: 'album_art_${widget.album.name}_${widget.album.artist}',
+                                    child: Container(
+                                      width: 130,
+                                      height: 130,
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(18),
+                                        border: Border.all(
+                                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                                          width: 1.0,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.25),
+                                            blurRadius: 16,
+                                            offset: const Offset(0, 8),
+                                          ),
+                                        ],
+                                      ),
+                                      child: StudioArtworkWidget(
+                                        track: widget.album.firstTrack,
+                                        bytes: widget.album.coverBytes,
+                                        url: widget.album.coverUrl,
+                                        borderRadius: BorderRadius.circular(17),
+                                        fallbackIconSize: 44,
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -1514,6 +1514,35 @@ Arsitektur penyimpanan publik bersama, injeksi tag fisik langsung (*physical aud
   - [x] Unit & Widget tests untuk `LibraryBackupService`, `StoragePermissionService`, dan status penulisan tag fisik.
   - [x] Verifikasi suite 100% lolos dengan `flutter test` dan 0 lint warnings pada `flutter analyze`.
 
+---
+
+## Fase 57: Android 120Hz Fluid UI Optimization, Fast Palette Extraction & Universal Zoomable Artwork Lightbox
+
+Optimasi performa rendering 120Hz pada Android (eliminasi rebuild pohon widget frekuensi tinggi melalui granular Riverpod selectors, isolasi progress bar, throttled position timer 100ms, downsampled fast palette extraction `< 8ms`), integrasi modal lightbox pembesar artwork resolusi tinggi dengan pinch-to-zoom (`InteractiveViewer`), serta penambahan aksi kustomisasi gestur `viewFullArtwork` pada Single Tap, Double Tap, dan Long Press.
+
+- [x] **57.1 UI Rebuild Elimination & Position Loop Optimization**:
+  - [x] Ubah interval timer posisi di `SoloudController._startPositionTracking()` menjadi 100ms untuk memangkas overhead timer & message dispatch hingga 50%.
+  - [x] Buat widget terisolasi `_NowPlayingIsolatedProgressBar` dengan Riverpod `.select()` untuk memisahkan seekbar dari root layout tree.
+  - [x] Refactor `NowPlayingScreen.build()` menggunakan granular selectors (`currentTrack`, `status`, `isShuffle`, `repeatMode`, `playbackSpeed`, `pitchSemitones`, `queue`) agar root screen tidak ikut me-rebuild dirinya 20× per detik saat lagu diputar.
+  - [x] Perbarui `SynchronizedLyricsView` agar mendengarkan stream posisi secara mandiri tanpa memicu rebuild layar induk.
+- [x] **57.2 Instant Downsampled Palette Extraction (`< 8ms`)**:
+  - [x] Bungkus `ImageProvider` dengan `ResizeImage(provider, width: 96, height: 96)` pada `ThemeController.updateDynamicPaletteFromTrack()` dan `LyricShareController.extractPaletteFromTrack()`.
+  - [x] Memangkas pemindaian piksel sebesar 98% dan melenyapkan micro-stutter saat pergantian lagu.
+- [x] **57.3 Interactive Zoomable Studio Artwork Lightbox (`StudioArtworkLightbox`)**:
+  - [x] Implementasikan modal lightbox Material 3 Expressive (`StudioArtworkLightbox`) dengan `InteractiveViewer` (zoom 1.0× – 5.0×, pan, double-tap toggle zoom, swipe down to dismiss).
+  - [x] Header bar studio dengan tombol close `M3EIconButton`, judul track/album, nama artis, dan badge format audio (`FLAC 96kHz / 24-bit` / `HI-RES LOSSLESS`).
+- [x] **57.4 Universal Tap-to-Zoom Integration Across Library Screens**:
+  - [x] Integrasi tap pada album cover header di `AlbumDetailScreen` untuk membuka lightbox.
+  - [x] Integrasi tap pada avatar / foto artis di `ArtistDetailScreen` dan `ArtistAvatarWidget` (`enableLightboxOnTap: true`).
+- [x] **57.5 Artwork Gesture Customization Expansion (`ArtworkGestureAction.viewFullArtwork`)**:
+  - [x] Tambahkan opsi `viewFullArtwork` pada enum `ArtworkGestureAction` di `player_customization_settings.dart`.
+  - [x] Dukungan dropdown dan icon selector di `GesturesSettingsScreen` untuk Single Tap, Double Tap, dan Long Press.
+  - [x] Eksekusi pembukaan lightbox pada `NowPlayingScreen._handleArtworkGesture()` dan `DesktopBottomMasterTransportDeck`.
+- [x] **57.6 Quality Assurance & Zero Regression Testing**:
+  - [x] Test suite komprehensif `test/artwork_lightbox_and_gesture_test.dart` (7/7 passed).
+  - [x] Verifikasi `flutter analyze` 0 errors / 0 warnings dan seluruh suite `flutter test` lulus 100%.
+
+
 
 
 

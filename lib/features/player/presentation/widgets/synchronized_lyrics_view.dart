@@ -13,7 +13,7 @@ import '../controllers/player_controller.dart';
 /// Real-time Synchronized & Plain LRC Lyrics Display with East Asian Romanization & Timing Offset Synchronizer
 class SynchronizedLyricsView extends ConsumerStatefulWidget {
   final LyricsResult lyricsResult;
-  final Duration currentPosition;
+  final Duration? currentPosition;
   final bool isLoading;
   final VoidCallback? onRefresh;
   final String? trackId;
@@ -21,7 +21,7 @@ class SynchronizedLyricsView extends ConsumerStatefulWidget {
   const SynchronizedLyricsView({
     super.key,
     required this.lyricsResult,
-    required this.currentPosition,
+    this.currentPosition,
     this.isLoading = false,
     this.onRefresh,
     this.trackId,
@@ -38,6 +38,9 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
   LyricsDisplayMode _displayMode = LyricsDisplayMode.dualLine;
   Duration _timingOffset = Duration.zero;
 
+  Duration get _effectivePosition =>
+      widget.currentPosition ?? ref.read(playerControllerProvider).position;
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +50,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
       if (widget.lyricsResult.isSynced && widget.lyricsResult.lines.isNotEmpty) {
         final activeIndex = LrcParser.findActiveIndex(
           widget.lyricsResult.lines,
-          widget.currentPosition,
+          _effectivePosition,
           offset: _timingOffset,
         );
         if (activeIndex >= 0) {
@@ -101,7 +104,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
       if (widget.lyricsResult.isSynced && widget.lyricsResult.lines.isNotEmpty) {
         final activeIndex = LrcParser.findActiveIndex(
           widget.lyricsResult.lines,
-          widget.currentPosition,
+          _effectivePosition,
           offset: _timingOffset,
         );
         if (activeIndex >= 0) {
@@ -124,7 +127,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     if (widget.lyricsResult.isSynced && widget.lyricsResult.lines.isNotEmpty) {
       final activeIndex = LrcParser.findActiveIndex(
         widget.lyricsResult.lines,
-        widget.currentPosition,
+        _effectivePosition,
         offset: _timingOffset,
       );
       if (activeIndex != _lastActiveIndex && activeIndex >= 0) {
@@ -262,8 +265,28 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
 
     final isSynced = widget.lyricsResult.isSynced;
     final lines = widget.lyricsResult.lines;
+
+    if (widget.currentPosition == null && isSynced && lines.isNotEmpty) {
+      ref.listen<Duration>(
+        playerControllerProvider.select((s) => s.position),
+        (previous, current) {
+          final activeIdx = LrcParser.findActiveIndex(
+            lines,
+            current,
+            offset: _timingOffset,
+          );
+          if (activeIdx != _lastActiveIndex && activeIdx >= 0) {
+            setState(() {
+              _lastActiveIndex = activeIdx;
+            });
+            _scrollToActiveLine(activeIdx);
+          }
+        },
+      );
+    }
+
     final activeIndex = isSynced
-        ? LrcParser.findActiveIndex(lines, widget.currentPosition, offset: _timingOffset)
+        ? LrcParser.findActiveIndex(lines, _effectivePosition, offset: _timingOffset)
         : -1;
 
     return Stack(

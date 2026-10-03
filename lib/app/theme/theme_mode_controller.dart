@@ -622,7 +622,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
 
     try {
       final generator = await PaletteGenerator.fromImageProvider(
-        provider,
+        ResizeImage(provider, width: 96, height: 96),
         maximumColorCount: 16,
       ).timeout(const Duration(seconds: 3));
 
