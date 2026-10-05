@@ -12,6 +12,7 @@ import 'controllers/dsp_rack_controller.dart';
 import 'widgets/genre_rules_config_modal.dart';
 import 'widgets/studio_track_dsp_preset_sheet.dart';
 import '../../pro_q_studio/presentation/pro_q_studio_screen.dart';
+import '../../hardware_dac/presentation/screens/hardware_dac_studio_screen.dart';
 import 'widgets/gain_reduction_meter.dart';
 import 'widgets/rack_knob_slider.dart';
 import 'widgets/rack_unit_card.dart';
@@ -114,6 +115,9 @@ class DspRackScreen extends ConsumerWidget {
         children: [
           // 0. PRO-Q STUDIO EQ LAUNCHER BANNER
           _buildProQStudioBanner(context, isSolid),
+
+          // 0.1 HARDWARE DAC BRIDGE & FLASHER BANNER
+          _buildHardwareDacBanner(context, isSolid),
 
           // 1. MASTER HEADER & A/B COMPARISON STRIP
           _buildMasterSection(context, dspState, controller, isSolid),
@@ -1541,6 +1545,168 @@ class DspRackScreen extends ConsumerWidget {
                         icon: HugeIcons.strokeRoundedArrowRight01,
                         size: 13,
                         color: proQColor,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHardwareDacBanner(BuildContext context, bool isSolid) {
+    final theme = Theme.of(context);
+    final dacAccentColor = theme.colorScheme.tertiary;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: isSolid
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            AppHaptics.lightImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const HardwareDacStudioScreen(),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: StudioSurfaceTheme.tintedContainer(
+                      context,
+                      dacAccentColor,
+                      isSolid: isSolid,
+                      translucentAlpha: 0.16,
+                      solidBlendAlpha: 0.2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedUsb,
+                      color: dacAccentColor,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: dacAccentColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'HARDWARE DAC BRIDGE',
+                              style: TextStyle(
+                                color: dacAccentColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.8,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Kiwi Ears AD1 & Universal DSP Flasher',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Direct USB HID 5-band hardware tuning & flash',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontSize: 11,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: StudioSurfaceTheme.tintedContainer(
+                      context,
+                      dacAccentColor,
+                      isSolid: isSolid,
+                      translucentAlpha: 0.16,
+                      solidBlendAlpha: 0.2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'CONNECT',
+                        style: TextStyle(
+                          color: dacAccentColor,
+                          fontSize: 10.0,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowRight01,
+                        size: 12,
+                        color: dacAccentColor,
                       ),
                     ],
                   ),

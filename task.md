@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 56 Fase (Fase 1–56 Selesai • 100% Passed • 452/452 Passed)
+- **Total Fase**: 58 Fase (Fase 1–58 Selesai • 100% Passed • 483/483 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 56: Android Storage, Physical Metadata Tagging & Automated Library Backup Architecture (Complete — 0 Errors, 0 Warnings • 452/452 Passed)_
+- **Status Proyek**: _Phase 58: Hardware DAC Bridge & DSP Flasher (Kiwi Ears AD1 & KTmicro/CB-Series) Architecture (Complete — 0 Errors, 0 Warnings • 483/483 Passed)_
 
 ---
 
@@ -1541,10 +1541,45 @@ Optimasi performa rendering 120Hz pada Android (eliminasi rebuild pohon widget f
 - [x] **57.6 Quality Assurance & Zero Regression Testing**:
   - [x] Test suite komprehensif `test/artwork_lightbox_and_gesture_test.dart` (7/7 passed).
   - [x] Verifikasi `flutter analyze` 0 errors / 0 warnings dan seluruh suite `flutter test` lulus 100%.
+---
 
+## Fase 58: Hardware DAC Bridge & DSP Flasher Architecture (Kiwi Ears AD1 & Universal KTmicro / CB DSP DACs)
 
+Arsitektur hardware DAC bridge untuk mendeteksi USB-C DSP DAC (Kiwi Ears AD1, S-Link, Allegro Mini, FiiO JA11, JCALLY JM12, CB-Series DACs), membaca register PEQ aktif, mengatur parameter biquad secara realtime, mem-flash/burn konfigurasi ke EEPROM chip hardware, serta mengintegrasikan konversi otomatis 5-band dari profil AutoEQ Cloud & Pro-Q Studio.
 
-
-
+- [x] **58.1 Domain Entities & Models (`lib/features/hardware_dac/domain/models/`)**:
+  - [x] Buat `DacDevice` (id, vendorId, productId, productName, chipset, maxBands, isConnected, isEqEnabled, globalGainDb).
+  - [x] Buat `DacBandConfig` (bandIndex, frequency, gainDb, qFactor, filterType, isBypassed).
+  - [x] Buat `DacPeqProfile` (id, name, bands, preampGainDb).
+  - [x] Buat enum `DacChipset` (kt0211l, kt1132l, kt3016l, cb5000x, cb3000s, unknown) dan `DacFilterType`.
+- [x] **58.2 Binary Packet Codec & Serialization (`lib/features/hardware_dac/data/protocols/`)**:
+  - [x] Implementasikan `DacPacketEncoder` untuk merakit paket 10-byte HID (Freq LE $\times 10$, Gain LE $\times 10$ signed 16-bit, Q LE $\times 1000$, Write/Read/Save/Clear command bytes).
+  - [x] Implementasikan `DacPacketDecoder` untuk parsing respons raw byte register, flag sukses, dan ekstraksi status DAC.
+- [x] **58.3 Hardware Driver Abstraction (`lib/features/hardware_dac/data/drivers/`)**:
+  - [x] Buat abstract interface `DacDriver`.
+  - [x] Implementasikan `KiwiEarsKtDriver` untuk KT_0211L, KT_1132L, dan KT_3016L chipsets.
+  - [x] Implementasikan `CbDacDriver` untuk CB_5000X dan CB_3000S chipsets.
+- [x] **58.4 Cross-Platform Transport Layer & Mock Simulator (`lib/features/hardware_dac/data/transports/`)**:
+  - [x] Buat abstract interface `DacTransport`.
+  - [x] Implementasikan `MockDacTransport` untuk simulasi offline, testing deterministik, dan preview tanpa perangkat fisik.
+  - [x] Implementasikan `AndroidUsbTransport` dan `LinuxHidRawTransport` dengan platform guards.
+- [x] **58.5 AutoEQ to 5-Band Hardware Curve Fitter (`lib/features/hardware_dac/domain/services/`)**:
+  - [x] Implementasikan `AutoEqToHardwareFitter` untuk mereduksi kurva multi-band AutoEQ Cloud / Pro-Q menjadi 5 titik anchor hardware biquad terbaik (Sub-bass, Lower Mids, Ear Gain, Sibilance, Air).
+  - [x] Kalkulasi safe pre-amp gain otomatis untuk mencegah distorsi clipping digital pada DAC hardware.
+- [x] **58.6 State Management & Controllers (`lib/features/hardware_dac/presentation/controllers/`)**:
+  - [x] Buat `DacBridgeState` dan `DacBridgeController` (Riverpod StateNotifier).
+  - [x] Buat `DacPeqNotifier` untuk kontrol reaktif slider 5-band dan update realtime.
+- [x] **58.7 Presentation Layer & Pure Material 3 Expressive UI (`lib/features/hardware_dac/presentation/`)**:
+  - [x] Buat `DacHeroStatusCard` dengan badge chipset, resolusi, status koneksi, dan switch enable/bypass.
+  - [x] Buat `HardwareCurveVisualizer` (CustomPainter 20Hz–20kHz biquad frequency response curve).
+  - [x] Buat `DacBandSliderTile` dengan `M3ESlider` (Freq, Gain, Q) dan `FontFeature.tabularFigures()`.
+  - [x] Buat `DacActionToolbar` dengan tombol `M3EButton` ("Read from DAC", "Burn to Flash", "Import AutoEQ", "Reset").
+  - [x] Buat `AutoEqFlashDialog` untuk modal preview fitting dan flash langsung ke hardware DAC.
+  - [x] Buat `HardwareDacStudioScreen` dan integrasikan launcher di `DSP Rack` & `AutoEQ Cloud Browser`.
+- [x] **58.8 Comprehensive Testing & Zero Regression**:
+  - [x] Unit tests untuk binary packet codec, KT driver, CB driver, dan `AutoEqToHardwareFitter`.
+  - [x] StateNotifier unit tests untuk `DacBridgeController`.
+  - [x] Widget tests untuk `HardwareDacStudioScreen` dan komponen UI M3 Expressive.
+  - [x] Verifikasi `flutter test` lulus 100% dan `flutter analyze` 0 errors / 0 warnings.
 
 
