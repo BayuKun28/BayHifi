@@ -62,21 +62,22 @@ class DacPacketDecoder {
     return rawVal != 0;
   }
 
-  /// Parses a 10-byte global gain register response (register 0x3B).
+  /// Parses a 10-byte global gain register response (register 0x3B, `DacAnaGain_ALL`).
+  ///
   /// Format:
-  ///   Byte 6..7: Little-Endian signed Int16 representing Gain in 0.05 dB units (Gain * 20).
+  ///   Byte 6..9: Little-Endian 32-bit uint holding 4-bit step index (bits 0..3: 0..15).
+  ///   Step index 13 represents 0.0 dB (Unity gain), with 1.5 dB per step.
   double? parseKtGlobalGainResponse(Uint8List response) {
-    if (response.length < 8) return null;
+    if (response.length < 7) return null;
 
     final byte6 = response[6];
-    final byte7 = response[7];
-    var rawGain = (byte7 << 8) | byte6;
-    if (rawGain > 32767) {
-      rawGain -= 65536; // Convert two's complement to signed negative
-    }
+    final byte7 = response.length > 7 ? response[7] : 0;
+    final byte8 = response.length > 8 ? response[8] : 0;
+    final byte9 = response.length > 9 ? response[9] : 0;
+    final rawVal = (byte9 << 24) | (byte8 << 16) | (byte7 << 8) | byte6;
+    final stepIndex = rawVal & 0x0F;
 
-    final gainDb = rawGain / 20.0;
-    return gainDb.clamp(-18.0, 3.0);
+    return DacPacketEncoder.ktStepIndexToGainDb(stepIndex);
   }
 
   /// Verifies acknowledgment or status flag in response buffer.

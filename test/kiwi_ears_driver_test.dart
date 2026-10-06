@@ -110,13 +110,23 @@ void main() {
     test('Reads and writes Global Hardware Volume / Preamp', () async {
       await driver.initialize();
 
-      final writeGainOk = await driver.writeGlobalGain(-3.5);
+      // Write -3.0 dB (Index 11)
+      final writeGainOk = await driver.writeGlobalGain(-3.0);
       expect(writeGainOk, isTrue);
-      expect(driver.cachedGlobalGain, closeTo(-3.5, 0.1));
+      expect(driver.cachedGlobalGain, closeTo(-3.0, 0.01));
 
       final readGain = await driver.readGlobalGain();
       expect(readGain, isNotNull);
-      expect(readGain!, closeTo(-3.5, 0.1));
+      expect(readGain!, closeTo(-3.0, 0.01));
+
+      // Write -6.0 dB (Index 9)
+      final writeGain6Ok = await driver.writeGlobalGain(-6.0);
+      expect(writeGain6Ok, isTrue);
+      expect(driver.cachedGlobalGain, closeTo(-6.0, 0.01));
+
+      final readGain6 = await driver.readGlobalGain();
+      expect(readGain6, isNotNull);
+      expect(readGain6!, closeTo(-6.0, 0.01));
     });
   });
 }

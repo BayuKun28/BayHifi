@@ -174,9 +174,27 @@ class DacPacketEncoder {
     return packet;
   }
 
-  /// Encodes a 10-byte packet to write Global Master Preamp Gain to register 0x3B.
-  /// Formula for KT02H20 / KT0211L:
-  ///   Gain LE = round(gainDb * 20) (signed Int16 in 0.05 dB steps, e.g. -3.0 dB -> -60 -> 0xFFC4)
+  /// Converts dB (-18.0 .. +3.0 dB) to Kiwi Ears / KTmicro 4-bit step index (1..15).
+  ///
+  /// Official Kiwi Ears AD1 step map (register 0x3B `DacAnaGain_ALL`):
+  ///   Index 0: Mute (null)
+  ///   Index 1: -18.0 dB .. Index 13: 0.0 dB .. Index 15: +3.0 dB (1.5 dB steps)
+  static int gainDbToKtStepIndex(double gainDb) {
+    return (13 + (gainDb / 1.5).round()).clamp(1, 15);
+  }
+
+  /// Converts Kiwi Ears / KTmicro 4-bit step index (0..15) to dB.
+  static double ktStepIndexToGainDb(int stepIndex) {
+    if (stepIndex <= 0) return -18.0;
+    final clamped = stepIndex.clamp(1, 15);
+    return (clamped - 13) * 1.5;
+  }
+
+  /// Encodes a 10-byte packet to write Global Master Preamp Gain to register 0x3B (DacAnaGain_ALL).
+  ///
+  /// Formula for Kiwi Ears AD1 / KT0211L:
+  ///   Byte 6..9: Little-Endian 32-bit uint holding the 4-bit step index (1..15).
+  ///   For example, -3.0 dB maps to Step Index 11 (0x0B).
   Uint8List encodeKtWriteGlobalGain({
     required int registerAddress,
     required double gainDb,
@@ -189,13 +207,12 @@ class DacPacketEncoder {
     packet[4] = KtCommands.writeReg; // 0x57 ('W')
     packet[5] = 0x00;
 
-    // Gain in 0.05 dB steps (gainDb * 20, signed Int16 Little-Endian)
-    final gainInt = (gainDb * 20).round().clamp(-360, 60);
-    final gainUint16 = gainInt < 0 ? (65536 + gainInt) : gainInt;
-    packet[6] = gainUint16 & 0xFF;
-    packet[7] = (gainUint16 >> 8) & 0xFF;
-    packet[8] = 0x00;
-    packet[9] = 0x00;
+    // Convert gainDb to 4-bit step index (1..15)
+    final stepIndex = gainDbToKtStepIndex(gainDb);
+    packet[6] = stepIndex & 0xFF;
+    packet[7] = (stepIndex >> 8) & 0xFF;
+    packet[8] = (stepIndex >> 16) & 0xFF;
+    packet[9] = (stepIndex >> 24) & 0xFF;
 
     return packet;
   }

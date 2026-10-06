@@ -97,20 +97,55 @@ void main() {
       expect(clearPacket[4], equals(0x43)); // 'C'
     });
 
-    test('Encodes and decodes Global Gain correctly', () {
-      // Gain: -3.0 dB -> raw = -3.0 * 20 = -60 (65536 - 60 = 65476 = 0xFFC4) -> Low: 0xC4, High: 0xFF
-      final packet = encoder.encodeKtWriteGlobalGain(
+    test('Encodes and decodes Global Gain step indices correctly', () {
+      // Gain: -3.0 dB -> Step Index 11 (0x0B)
+      final packetNeg3 = encoder.encodeKtWriteGlobalGain(
         registerAddress: Kt0211Registers.dacVol,
         gainDb: -3.0,
       );
 
-      expect(packet[0], equals(0x3B));
-      expect(packet[6], equals(0xC4));
-      expect(packet[7], equals(0xFF));
+      expect(packetNeg3[0], equals(0x3B));
+      expect(packetNeg3[4], equals(KtCommands.writeReg)); // 0x57 ('W')
+      expect(packetNeg3[6], equals(11)); // 0x0B (Index 11 = -3.0 dB)
+      expect(packetNeg3[7], equals(0x00));
+      expect(packetNeg3[8], equals(0x00));
+      expect(packetNeg3[9], equals(0x00));
 
-      final decodedGain = decoder.parseKtGlobalGainResponse(packet);
-      expect(decodedGain, isNotNull);
-      expect(decodedGain, closeTo(-3.0, 0.01));
+      final decodedGainNeg3 = decoder.parseKtGlobalGainResponse(packetNeg3);
+      expect(decodedGainNeg3, isNotNull);
+      expect(decodedGainNeg3, closeTo(-3.0, 0.01));
+
+      // Gain: 0.0 dB -> Step Index 13 (0x0D)
+      final packetUnity = encoder.encodeKtWriteGlobalGain(
+        registerAddress: Kt0211Registers.dacVol,
+        gainDb: 0.0,
+      );
+      expect(packetUnity[6], equals(13));
+      expect(decoder.parseKtGlobalGainResponse(packetUnity), closeTo(0.0, 0.01));
+
+      // Gain: -13.5 dB -> Step Index 4 (0x04)
+      final packetNeg13_5 = encoder.encodeKtWriteGlobalGain(
+        registerAddress: Kt0211Registers.dacVol,
+        gainDb: -13.5,
+      );
+      expect(packetNeg13_5[6], equals(4));
+      expect(decoder.parseKtGlobalGainResponse(packetNeg13_5), closeTo(-13.5, 0.01));
+
+      // Gain: -18.0 dB -> Step Index 1 (0x01)
+      final packetMin = encoder.encodeKtWriteGlobalGain(
+        registerAddress: Kt0211Registers.dacVol,
+        gainDb: -18.0,
+      );
+      expect(packetMin[6], equals(1));
+      expect(decoder.parseKtGlobalGainResponse(packetMin), closeTo(-18.0, 0.01));
+
+      // Gain: +3.0 dB -> Step Index 15 (0x0F)
+      final packetMax = encoder.encodeKtWriteGlobalGain(
+        registerAddress: Kt0211Registers.dacVol,
+        gainDb: 3.0,
+      );
+      expect(packetMax[6], equals(15));
+      expect(decoder.parseKtGlobalGainResponse(packetMax), closeTo(3.0, 0.01));
     });
 
     test('Verifies Success Flag correctly', () {

@@ -129,11 +129,11 @@ class DacGlobalGainCard extends StatelessWidget {
                     value: clampedGain,
                     min: -18.0,
                     max: 3.0,
-                    divisions: 210, // 0.1 dB step
+                    divisions: 14, // 1.5 dB step intervals
                     onChanged: isConnected
                         ? (val) {
-                            final rounded = (val * 10).round() / 10.0;
-                            onChanged(rounded);
+                            final snapped = (val / 1.5).round() * 1.5;
+                            onChanged(snapped);
                           }
                         : null,
                   ),
@@ -156,14 +156,16 @@ class DacGlobalGainCard extends StatelessWidget {
 
             const SizedBox(height: 8),
 
-            // Quick Preset Chips
+            // Quick Preset Chips (Matching hardware 1.5 dB steps)
             Wrap(
               spacing: 6,
               runSpacing: 6,
               children: [
+                _buildQuickGainChip(context, label: '-12.0 dB', value: -12.0),
                 _buildQuickGainChip(context, label: '-6.0 dB', value: -6.0),
+                _buildQuickGainChip(context, label: '-4.5 dB', value: -4.5),
                 _buildQuickGainChip(context, label: '-3.0 dB', value: -3.0),
-                _buildQuickGainChip(context, label: '-1.0 dB', value: -1.0),
+                _buildQuickGainChip(context, label: '-1.5 dB', value: -1.5),
                 _buildQuickGainChip(context, label: '0.0 dB (Unity)', value: 0.0),
                 _buildQuickGainChip(context, label: '+1.5 dB', value: 1.5),
                 _buildQuickGainChip(context, label: '+3.0 dB', value: 3.0),
@@ -182,7 +184,7 @@ class DacGlobalGainCard extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isSelected = (globalGainDb - value).abs() < 0.05;
+    final isSelected = (globalGainDb - value).abs() < 0.1;
 
     return InkWell(
       borderRadius: BorderRadius.circular(6),
