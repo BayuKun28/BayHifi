@@ -1644,6 +1644,30 @@ Perbaikan menyeluruh bug auto-advance antrean musik (*Auto-Next Stalling Bug*) m
   - [x] `test/auto_next_playback_and_signal_flow_test.dart`: 6 tests untuk string formatters AutoEQ/DAC, render 1-row capsule dengan animated connectors, dan siklus queue advance `skipNext()`.
   - [x] Verifikasi `flutter test` lulus 100% dan `flutter analyze` 0 errors / 0 warnings.
 
+---
+
+## Fase 61: AutoEQ Driver, Target & Active State Cold-Boot Persistence & Audio Engine Restoration (Completed)
+
+Perbaikan komprehensif persistensi kurva AutoEQ (`driverFr`, `targetFr`, `isAutoEqActive`, `isEnabled`, `bandResolution`, `tuningMode`) saat cold boot (aplikasi di-kill dan dibuka kembali di Android/Desktop), hidrasi synchronous kurva, pemulihan filter biquad langsung ke `VirtualDspService` & SoLoud audio engine, dan tampilan pill Now Playing aktif tanpa jeda.
+
+- [x] **61.1 LocalPersistenceService AutoEQ State Schema Update (`lib/core/database/local_persistence_service.dart`)**:
+  - [x] Memperluas `saveActiveEqState()` untuk menerima dan menyimpan `isAutoEqActive`, `isEnabled`, `bandResolution`, dan `tuningMode`.
+  - [x] Menjaga serialisasi `lastDriverCurve` dan `lastTargetCurve` map agar kurva kustom tersimpan utuh di disk JSON storage.
+- [x] **61.2 Synchronous Curve & Active State Hydration (`lib/features/pro_q_studio/presentation/controllers/eq_controller.dart`)**:
+  - [x] Di `_hydrateActiveState()`: Memulihkan `isAutoEqActive`, `isEnabled`, `bandResolution`, dan `tuningMode` seketika saat instansiasi controller.
+  - [x] Rekonstruksi instan `driverFr` dan `targetFr` dari serialized curve map (`FrCurveData.fromMap`) atau pencocokan nama bawaan studio secara synchronous.
+  - [x] Di `_loadSampleCurves()`: Mempertahankan kurva dan status `isAutoEqActive` yang telah terhidrasi saat loading asset sampel factory selesai.
+  - [x] Di `_persistActiveState()`, `togglePower()`, `setTuningMode()`, `setBandResolution()`, `setPreamp()`, dan `applyAutoEq()`: Menyimpan seluruh status mutasi aktif ke disk secara deterministik.
+- [x] **61.3 Universal Backup & Restore Service Compatibility (`lib/features/settings/data/backup_restore_service.dart`)**:
+  - [x] Menyertakan `isAutoEqActive`, `isEnabled`, `bandResolution`, dan `tuningMode` saat memulihkan snapshot database dari file cadangan.
+- [x] **61.4 Comprehensive Unit & Widget Test Suite (`test/auto_eq_cold_boot_persistence_test.dart`)**:
+  - [x] Validasi `LocalPersistenceService` menyimpan dan mengembalikan state AutoEQ lengkap (curves, flags, resolution).
+  - [x] Validasi `EqController` melakukan hidrasi synchronous `driverFr`, `targetFr`, dan `isAutoEqActive == true` saat cold boot.
+  - [x] Validasi `applyAutoEq()` mengaktifkan `isAutoEqActive` dan menulis data ke storage secara konsisten.
+  - [x] Validasi widget `StudioDspBentoCapsule` merender pill aktif dengan nama driver terformat (misal `KZ CASTOR...`) saat cold boot.
+  - [x] Menjalankan `flutter test` (516/516 tests passing) dan `flutter analyze` (0 errors, 0 warnings).
+
+
 
 
 

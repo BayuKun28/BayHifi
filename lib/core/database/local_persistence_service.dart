@@ -524,7 +524,7 @@ class LocalPersistenceService {
     return null;
   }
 
-  /// Saves the currently applied EQ state, including last selected Driver & Target curve names and serialized curves.
+  /// Saves the currently applied EQ state, including last selected Driver & Target curve names, serialized curves, and active status.
   Future<void> saveActiveEqState({
     required List<Map<String, dynamic>> bands,
     required double preampDb,
@@ -534,6 +534,10 @@ class LocalPersistenceService {
     Map<String, dynamic>? lastDriverCurve,
     Map<String, dynamic>? lastTargetCurve,
     bool preserveCurvesIfNull = false,
+    bool isAutoEqActive = false,
+    bool isEnabled = true,
+    String? bandResolution,
+    String? tuningMode,
   }) async {
     final existing = getActiveEqState();
     _cache['active_eq_state'] = {
@@ -544,6 +548,10 @@ class LocalPersistenceService {
       'lastTargetName': preserveCurvesIfNull ? (lastTargetName ?? existing?['lastTargetName']) : lastTargetName,
       'lastDriverCurve': preserveCurvesIfNull ? (lastDriverCurve ?? existing?['lastDriverCurve']) : lastDriverCurve,
       'lastTargetCurve': preserveCurvesIfNull ? (lastTargetCurve ?? existing?['lastTargetCurve']) : lastTargetCurve,
+      'isAutoEqActive': isAutoEqActive,
+      'isEnabled': isEnabled,
+      'bandResolution': bandResolution ?? (existing?['bandResolution'] as String?),
+      'tuningMode': tuningMode ?? (existing?['tuningMode'] as String?),
       'savedAt': DateTime.now().toIso8601String(),
     };
     await _save();

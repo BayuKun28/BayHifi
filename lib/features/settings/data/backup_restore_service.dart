@@ -267,6 +267,10 @@ class BackupRestoreService {
             lastTargetName: eq['lastTargetName'] as String?,
             lastDriverCurve: eq['lastDriverCurve'] is Map ? Map<String, dynamic>.from(eq['lastDriverCurve'] as Map) : null,
             lastTargetCurve: eq['lastTargetCurve'] is Map ? Map<String, dynamic>.from(eq['lastTargetCurve'] as Map) : null,
+            isAutoEqActive: eq['isAutoEqActive'] as bool? ?? (eq['activePresetName'] as String? ?? '').startsWith('AutoEQ:'),
+            isEnabled: eq['isEnabled'] as bool? ?? true,
+            bandResolution: eq['bandResolution'] as String?,
+            tuningMode: eq['tuningMode'] as String?,
           );
         }
         if (data['saved_fr_curves'] is List) {

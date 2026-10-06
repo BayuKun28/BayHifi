@@ -41,25 +41,98 @@ class EqController extends StateNotifier<EqState> {
       final saved = LocalPersistenceService.instance.getActiveEqState();
       if (saved != null && saved.isNotEmpty) {
         final bandMaps = saved['bands'];
+        List<EqBand>? bands;
         if (bandMaps is List) {
-          final bands = bandMaps
+          bands = bandMaps
               .whereType<Map<String, dynamic>>()
               .toList()
               .asMap()
               .entries
               .map((e) => EqBand.fromMap(e.value, fallbackIndex: e.key + 1))
               .toList();
-          if (bands.isNotEmpty) {
-            final preamp = (saved['preampDb'] as num? ?? state.safePreampDb).toDouble();
-            final presetName = (saved['activePresetName'] as String?) ?? 'Studio Audiophile Warmth';
-            state = state.copyWith(
-              bands: bands,
-              safePreampDb: preamp,
-              activePresetName: presetName,
-              selectedBandIndex: () => bands.first.index,
+        }
+
+        final preamp = (saved['preampDb'] as num? ?? state.safePreampDb).toDouble();
+        final presetName = (saved['activePresetName'] as String?) ?? state.activePresetName;
+        final isAuto = (saved['isAutoEqActive'] as bool?) ?? presetName.startsWith('AutoEQ:');
+        final isEnabled = (saved['isEnabled'] as bool?) ?? state.isEnabled;
+
+        // Band resolution & tuning mode
+        BandResolution bandRes = state.bandResolution;
+        final resStr = saved['bandResolution'] as String?;
+        if (resStr != null) {
+          bandRes = BandResolution.values.firstWhere(
+            (r) => r.name == resStr,
+            orElse: () => state.bandResolution,
+          );
+        }
+
+        TuningMode tuningMode = state.tuningMode;
+        final modeStr = saved['tuningMode'] as String?;
+        if (modeStr != null) {
+          tuningMode = TuningMode.values.firstWhere(
+            (m) => m.name == modeStr,
+            orElse: () => state.tuningMode,
+          );
+        }
+
+        // Synchronously deserialize driver & target curves if available
+        FrCurveData? driver;
+        final driverMap = saved['lastDriverCurve'];
+        if (driverMap is Map<String, dynamic> && driverMap.isNotEmpty) {
+          try {
+            final parsed = FrCurveData.fromMap(driverMap);
+            if (parsed.frequencies.isNotEmpty) {
+              driver = parsed;
+            }
+          } catch (_) {}
+        }
+        if (driver == null) {
+          final lastDriverName = saved['lastDriverName'] as String?;
+          if (lastDriverName != null && lastDriverName.trim().isNotEmpty) {
+            final norm = lastDriverName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+            driver = FrCurveData.defaultDrivers.cast<FrCurveData?>().firstWhere(
+              (d) => d != null && (d.name.toLowerCase() == lastDriverName.toLowerCase() ||
+                  d.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '') == norm),
+              orElse: () => null,
             );
           }
         }
+
+        FrCurveData? target;
+        final targetMap = saved['lastTargetCurve'];
+        if (targetMap is Map<String, dynamic> && targetMap.isNotEmpty) {
+          try {
+            final parsed = FrCurveData.fromMap(targetMap);
+            if (parsed.frequencies.isNotEmpty) {
+              target = parsed;
+            }
+          } catch (_) {}
+        }
+        if (target == null) {
+          final lastTargetName = saved['lastTargetName'] as String?;
+          if (lastTargetName != null && lastTargetName.trim().isNotEmpty) {
+            final norm = lastTargetName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+            target = FrCurveData.defaultTargets.cast<FrCurveData?>().firstWhere(
+              (t) => t != null && (t.name.toLowerCase() == lastTargetName.toLowerCase() ||
+                  t.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '') == norm),
+              orElse: () => null,
+            );
+          }
+        }
+
+        state = state.copyWith(
+          bands: bands != null && bands.isNotEmpty ? bands : state.bands,
+          safePreampDb: preamp,
+          activePresetName: presetName,
+          selectedBandIndex: () => bands != null && bands.isNotEmpty ? bands.first.index : state.selectedBandIndex,
+          isAutoEqActive: isAuto,
+          isEnabled: isEnabled,
+          bandResolution: bandRes,
+          tuningMode: tuningMode,
+          driverFr: driver != null ? () => driver : null,
+          targetFr: target != null ? () => target : null,
+        );
       }
     } catch (_) {}
   }
@@ -85,6 +158,10 @@ class EqController extends StateNotifier<EqState> {
         lastDriverCurve: driverMap,
         lastTargetCurve: targetMap,
         preserveCurvesIfNull: preserveCurvesIfNull,
+        isAutoEqActive: state.isAutoEqActive,
+        isEnabled: state.isEnabled,
+        bandResolution: state.bandResolution.name,
+        tuningMode: state.tuningMode.name,
       );
     } catch (_) {}
   }
@@ -193,15 +270,24 @@ class EqController extends StateNotifier<EqState> {
 
     // 3. Resolve persistent last selected Driver & Target
     final savedEq = LocalPersistenceService.instance.getActiveEqState();
-    final lastDriverName = savedEq?['lastDriverName'] as String?;
-    final lastTargetName = savedEq?['lastTargetName'] as String?;
+    final lastDriverName = state.driverFr?.name ?? (savedEq?['lastDriverName'] as String?);
+    final lastTargetName = state.targetFr?.name ?? (savedEq?['lastTargetName'] as String?);
     final lastDriverCurveMap = savedEq?['lastDriverCurve'] as Map<String, dynamic>?;
     final lastTargetCurveMap = savedEq?['lastTargetCurve'] as Map<String, dynamic>?;
 
     String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
     FrCurveData? selectedDriver;
-    if (lastDriverName != null && lastDriverName.trim().isNotEmpty) {
+    if (state.driverFr != null) {
+      final match = drivers.firstWhere(
+        (d) => d.name == state.driverFr!.name || normalize(d.name) == normalize(state.driverFr!.name),
+        orElse: () => state.driverFr!,
+      );
+      selectedDriver = match;
+      if (!drivers.any((d) => d.name == match.name)) {
+        drivers.add(match);
+      }
+    } else if (lastDriverName != null && lastDriverName.trim().isNotEmpty) {
       final normTarget = normalize(lastDriverName);
       selectedDriver = drivers.cast<FrCurveData?>().firstWhere(
         (d) => d != null && (d.name == lastDriverName || normalize(d.name) == normTarget),
@@ -222,7 +308,16 @@ class EqController extends StateNotifier<EqState> {
     selectedDriver ??= state.driverFr ?? (drivers.isNotEmpty ? drivers.first : null);
 
     FrCurveData? selectedTarget;
-    if (lastTargetName != null && lastTargetName.trim().isNotEmpty) {
+    if (state.targetFr != null) {
+      final match = targets.firstWhere(
+        (t) => t.name == state.targetFr!.name || normalize(t.name) == normalize(state.targetFr!.name),
+        orElse: () => state.targetFr!,
+      );
+      selectedTarget = match;
+      if (!targets.any((t) => t.name == match.name)) {
+        targets.add(match);
+      }
+    } else if (lastTargetName != null && lastTargetName.trim().isNotEmpty) {
       final normTarget = normalize(lastTargetName);
       selectedTarget = targets.cast<FrCurveData?>().firstWhere(
         (t) => t != null && (t.name == lastTargetName || normalize(t.name) == normTarget),
@@ -472,6 +567,7 @@ class EqController extends StateNotifier<EqState> {
     final nextState = !state.isEnabled;
     state = state.copyWith(isEnabled: nextState);
     _syncWithVirtualDsp();
+    _persistActiveState();
   }
 
   void toggleRta() {
@@ -486,10 +582,12 @@ class EqController extends StateNotifier<EqState> {
 
   void setTuningMode(TuningMode mode) {
     state = state.copyWith(tuningMode: mode);
+    _persistActiveState();
   }
 
   void setBandResolution(BandResolution res) {
     state = state.copyWith(bandResolution: res);
+    _persistActiveState();
   }
 
   void setAbComparison(AbComparisonMode mode) {
@@ -533,6 +631,7 @@ class EqController extends StateNotifier<EqState> {
       autoPreampEnabled: isAuto,
     );
     VirtualDspService.instance.setPreampGain(clamped);
+    _persistActiveState();
   }
 
   void toggleAutoPreamp() {
@@ -606,6 +705,9 @@ class EqController extends StateNotifier<EqState> {
       abMode: AbComparisonMode.bActive,
       safePreampDb: result.safePreampDb,
     );
+
+    _syncWithVirtualDsp();
+    _persistActiveState();
 
     return true;
   }
