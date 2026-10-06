@@ -54,7 +54,8 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
       });
     }
     _initAutoConnect();
-    if (enableHotplugWatcher) {
+    final isTest = Platform.environment.containsKey('FLUTTER_TEST');
+    if (enableHotplugWatcher && !isTest) {
       _startHotplugWatcher();
     }
   }

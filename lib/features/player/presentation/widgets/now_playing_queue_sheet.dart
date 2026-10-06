@@ -7,6 +7,7 @@ import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/playback_state.dart';
 import '../../domain/track.dart';
 import '../controllers/player_controller.dart';
+import 'add_tracks_to_queue_sheet.dart';
 
 class NowPlayingQueueSheet extends ConsumerStatefulWidget {
   const NowPlayingQueueSheet({super.key});
@@ -172,6 +173,18 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
 
                 Row(
                   children: [
+                    // Add Tracks to Queue (Namida Style)
+                    IconButton(
+                      onPressed: () {
+                        AddTracksToQueueSheet.show(context);
+                      },
+                      icon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedPlayList,
+                        size: 20,
+                        color: primary,
+                      ),
+                      tooltip: 'Add Tracks to Queue',
+                    ),
                     // Shuffle Toggle
                     IconButton(
                       onPressed: () {

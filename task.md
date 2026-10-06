@@ -1582,4 +1582,44 @@ Arsitektur hardware DAC bridge untuk mendeteksi USB-C DSP DAC (Kiwi Ears AD1, S-
   - [x] Widget tests untuk `HardwareDacStudioScreen` dan komponen UI M3 Expressive.
   - [x] Verifikasi `flutter test` lulus 100% dan `flutter analyze` 0 errors / 0 warnings.
 
+---
+
+## Fase 59: Instant Mix Generation, Namida-Style Queue Additions, & Connected Studio Signal Chain (Completed)
+
+Integrasi cerdas fitur kurasi playlist otomatis *Instant Mix* berbasis seed track, penambahan trek batch fleksibel ke active queue ala Namida, dan visualisasi interconnected *Studio Audio Signal Chain* di Now Playing screen.
+
+- [x] **59.1 Deterministic Instant Mix Algorithm Engine (`lib/features/library/domain/instant_mix_engine.dart`)**:
+  - [x] `InstantMixEngine`: Algoritma clustering multi-kriteria berbasis bobot skor adaptif (Genre compatibility matrix, Mood energy/valence heuristics, Era/Decade proximity, Favorit boost).
+  - [x] Anti-repetition dispersion guard: Mencegah 3 trek berurutan dari artis yang sama.
+  - [x] Dukungan 4 kriteria: `genre`, `mood`, `artistEra`, `smartRandom`.
+  - [x] Ekstraksi 10 mood studio: `chillAcoustic`, `energeticWorkout`, `deepFocus`, `nightDrive`, `euphoricDance`, `melancholicBallad`, `warmVintage`, `hiResAudiophile`, `darkIntense`, `ambientSpace`.
+- [x] **59.2 Instant Mix Modal Configuration Sheet (`lib/features/library/presentation/widgets/instant_mix_config_sheet.dart`)**:
+  - [x] Pure Material 3 Expressive bottom sheet dengan seed track preview hero card.
+  - [x] Mix Criteria selector chips (`HugeIcons.strokeRoundedSparkles`, `HugeIcons.strokeRoundedSlidersVertical`, `HugeIcons.strokeRoundedMic01`, `HugeIcons.strokeRoundedShuffle`).
+  - [x] Track count selector dengan default autofill **10 tracks** (opsi: 5, 10, 20, 50).
+  - [x] Tombol aksi primary `[ START INSTANT MIX ]` yang langsung memutar seed track di index 0 dan mengisi active queue dengan hasil mix.
+- [x] **59.3 Studio Track Context Menu Integration (`lib/features/library/presentation/widgets/studio_track_action_sheet.dart`)**:
+  - [x] Menambahkan opsi `Instant Mix` di 3-dots track action sheet perpustakaan musik.
+- [x] **59.4 Namida-Style Dynamic Batch Queue Additions (`lib/features/player/presentation/widgets/add_tracks_to_queue_sheet.dart`)**:
+  - [x] Pure Material 3 Expressive bottom sheet untuk menambah antrean lagu dari Now Playing / Queue Sheet tanpa memotong lagu yang sedang diputar.
+  - [x] Mode seleksi: `Smart Random Mix`, `Specific Mood Mix`, `Similar to Current Song`, `Favorites Only`.
+  - [x] Default autofill **10 tracks** dengan selector jumlah trek (5, 10, 20, 50).
+  - [x] Penempatan antrean: `Play Next (Up Next)` atau `Append to End of Queue`.
+  - [x] Integrasi tombol `Add Tracks to Queue` (`HugeIcons.strokeRoundedPlayList`) di header `NowPlayingQueueSheet`.
+- [x] **59.5 Player Controller Queue Operations (`lib/features/player/presentation/controllers/player_controller.dart`)**:
+  - [x] `startInstantMix(Track seedTrack, List<Track> mixTracks)`: Memutar seed track seketika di posisi 0 dan memuat active queue.
+  - [x] `addTracksToQueue(List<Track> newTracks, {bool playNext = false})`: Menyisipkan atau menambahkan trek ke queue yang sedang berjalan tanpa gangguan audio.
+- [x] **59.6 Connected 3-Stage Studio Audio Signal Chain Capsule (`lib/features/player/presentation/widgets/studio_dsp_bento_capsule.dart`)**:
+  - [x] Redesain shortcut capsule di Now Playing screen menjadi interconnected 3-stage pipeline tactile visual:
+    `[ 🎧 AutoEQ ] ➔ [ 🎛️ DSP Rack ] ➔ [ ⚡ Hardware DAC ]`
+  - [x] Stage 1 (AutoEQ): Menampilkan profil driver aktif atau status Direct, membuka `AutoEqModalDialog` saat di-tap.
+  - [x] Stage 2 (DSP Rack): Menampilkan jumlah unit aktif (misal `DSP (3)`) atau Flat, membuka `DspRackScreen` saat di-tap.
+  - [x] Stage 3 (Hardware DAC): Menampilkan status live koneksi hardware DAC (misal `DAC • AD1`) dengan mint active indicator atau `DAC Direct`, membuka `HardwareDacStudioScreen` saat di-tap.
+  - [x] Visual chevron connector terintegrasi dengan studio border & surface styling.
+- [x] **59.7 Unit, Widget Tests & Zero Regression Validation**:
+  - [x] `test/instant_mix_engine_test.dart`: 7 unit tests untuk genre clustering, mood mapping, era proximity, dan anti-repetition artist dispersion.
+  - [x] `test/instant_mix_and_queue_addition_test.dart`: 7 unit and widget tests untuk controller, InstantMixConfigSheet, AddTracksToQueueSheet, dan StudioDspBentoCapsule 3-stage signal chain.
+  - [x] Menjalankan `flutter test` dan `flutter analyze` dengan hasil 100% lulus dan 0 errors / 0 warnings.
+
+
 

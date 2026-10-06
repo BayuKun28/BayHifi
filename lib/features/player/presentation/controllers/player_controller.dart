@@ -337,6 +337,63 @@ class PlayerController extends StateNotifier<PlaybackState> {
     _saveSession();
   }
 
+  /// Starts playback with [seedTrack] at index 0 and populates [mixTracks] into the active queue.
+  Future<void> startInstantMix(Track seedTrack, List<Track> mixTracks) async {
+    final fullQueue = [seedTrack, ...mixTracks];
+    state = state.copyWith(
+      originalQueue: fullQueue,
+      queue: fullQueue,
+      queueIndex: 0,
+      currentTrack: seedTrack,
+      isShuffle: false,
+    );
+    _saveSession();
+    await playTrack(seedTrack);
+  }
+
+  /// Appends or inserts a batch of [newTracks] to the queue without disrupting current playback.
+  void addTracksToQueue(List<Track> newTracks, {bool playNext = false}) {
+    if (newTracks.isEmpty) return;
+
+    final currentQueue = List<Track>.from(state.queue);
+    final currentOriginal = List<Track>.from(
+      state.originalQueue.isNotEmpty ? state.originalQueue : state.queue,
+    );
+
+    if (currentQueue.isEmpty) {
+      state = state.copyWith(
+        queue: newTracks,
+        originalQueue: newTracks,
+        queueIndex: 0,
+      );
+      playTrack(newTracks.first);
+      _saveSession();
+      return;
+    }
+
+    if (playNext) {
+      final insertIndex = (state.queueIndex + 1).clamp(0, currentQueue.length);
+      currentQueue.insertAll(insertIndex, newTracks);
+
+      final current = state.currentTrack;
+      final origIdx = current != null ? currentOriginal.indexWhere((t) => t.id == current.id) : -1;
+      if (origIdx != -1) {
+        currentOriginal.insertAll(origIdx + 1, newTracks);
+      } else {
+        currentOriginal.addAll(newTracks);
+      }
+    } else {
+      currentQueue.addAll(newTracks);
+      currentOriginal.addAll(newTracks);
+    }
+
+    state = state.copyWith(
+      queue: currentQueue,
+      originalQueue: currentOriginal,
+    );
+    _saveSession();
+  }
+
   /// Reorders a track within the queue
   void reorderQueue(int oldIndex, int newIndex) {
     if (oldIndex < 0 || oldIndex >= state.queue.length) return;

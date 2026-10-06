@@ -15,6 +15,7 @@ import '../../domain/library_collection_models.dart';
 import '../controllers/library_controller.dart';
 import '../screens/album_detail_screen.dart';
 import '../screens/artist_detail_screen.dart';
+import 'instant_mix_config_sheet.dart';
 import 'metadata_tag_editor_sheet.dart';
 import '../../../download_manager/presentation/controllers/download_controller.dart';
 
@@ -319,6 +320,27 @@ class StudioTrackActionSheet extends ConsumerWidget {
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
+                },
+              ),
+
+              // 3. Instant Mix
+              ListTile(
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedSparkles,
+                  size: 20,
+                  color: primary,
+                ),
+                title: const Text('Instant Mix', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                  'Generate smart queue from this track',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  InstantMixConfigSheet.show(context, seedTrack: track);
                 },
               ),
 
