@@ -19,6 +19,7 @@ class AndroidUsbHidTransport implements DacTransport {
   DacDevice? _device;
   bool _isConnected = false;
   void Function()? _onDisconnected;
+  void Function()? _onDeviceAttached;
   final StreamController<Uint8List> _inputReportController =
       StreamController<Uint8List>.broadcast();
 
@@ -29,6 +30,8 @@ class AndroidUsbHidTransport implements DacTransport {
         if (detachedName == null || _device?.id == detachedName) {
           await disconnect();
         }
+      } else if (call.method == 'onDeviceAttached' || call.method == 'onPermissionGranted') {
+        _onDeviceAttached?.call();
       }
     });
   }
@@ -42,6 +45,11 @@ class AndroidUsbHidTransport implements DacTransport {
   @override
   void setOnDisconnectListener(void Function() onDisconnected) {
     _onDisconnected = onDisconnected;
+  }
+
+  /// Sets a callback for device attached and permission granted events.
+  void setOnDeviceAttachedListener(void Function() onAttached) {
+    _onDeviceAttached = onAttached;
   }
 
   /// Queries Android UsbManager via MethodChannel to locate connected USB DSP DACs.

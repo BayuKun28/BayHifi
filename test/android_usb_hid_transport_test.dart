@@ -139,5 +139,22 @@ void main() {
         isTrue,
       );
     });
+
+    test('Invokes onDeviceAttached listener when native sends event', () async {
+      final transport = AndroidUsbHidTransport(channel: channel, isAndroid: true);
+      bool attachedNotified = false;
+      transport.setOnDeviceAttachedListener(() {
+        attachedNotified = true;
+      });
+
+      // Simulate native MethodChannel event
+      final byteData = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('onPermissionGranted', {'deviceName': '/dev/bus/usb/001/002'}),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage('com.baydev.baydev_hifi/usb_hid', byteData, (_) {});
+
+      expect(attachedNotified, isTrue);
+    });
   });
 }

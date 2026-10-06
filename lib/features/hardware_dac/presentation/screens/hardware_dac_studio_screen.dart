@@ -85,32 +85,12 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
             tooltip: 'Rescan USB DAC',
             onPressed: dacState.isBusy
                 ? null
-                : () => controller.scanAndConnect(),
+                : () => controller.scanAndConnect(isManual: true),
           ),
         ],
       ),
       body: SafeArea(
-        child: dacState.status == DacBridgeStatus.scanning ||
-                dacState.status == DacBridgeStatus.connecting
-            ? _buildLoadingState(context)
-            : _buildContent(context, dacState, controller),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const M3EProgressIndicator.circular(strokeWidth: 3.0),
-          const SizedBox(height: 16),
-          Text(
-            'Detecting USB DSP DAC...',
-            style: TextStyle(color: colorScheme.onSurfaceVariant),
-          ),
-        ],
+        child: _buildContent(context, dacState, controller),
       ),
     );
   }

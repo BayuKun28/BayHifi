@@ -45,6 +45,14 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
     bool enableHotplugWatcher = true,
   }) : super(DacBridgeState(availablePresets: DacPeqProfile.builtInPresets)) {
     driver.transport.setOnDisconnectListener(_handleTransportDisconnect);
+    if (driver.transport is AndroidUsbHidTransport) {
+      (driver.transport as AndroidUsbHidTransport).setOnDeviceAttachedListener(() {
+        _lastAttemptedDeviceId = null;
+        if (!state.isConnected && _activeConnectFuture == null) {
+          scanAndConnect();
+        }
+      });
+    }
     _initAutoConnect();
     if (enableHotplugWatcher) {
       _startHotplugWatcher();
@@ -54,8 +62,11 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
   final DacDriver driver;
   final AutoEqToHardwareFitter fitter;
   Timer? _hotplugTimer;
+  Future<void>? _activeConnectFuture;
+  String? _lastAttemptedDeviceId;
 
   void _handleTransportDisconnect() {
+    _lastAttemptedDeviceId = null;
     if (state.isConnected || state.device != null) {
       state = state.copyWith(
         status: DacBridgeStatus.disconnected,
@@ -73,6 +84,8 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
   }
 
   Future<void> _checkHotplugStatus() async {
+    if (_activeConnectFuture != null) return;
+
     if (state.isConnected) {
       final currentDev = state.device;
       if (currentDev != null) {
@@ -97,15 +110,27 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
       if (Platform.isLinux) {
         try {
           final devices = await LinuxHidRawTransport.enumerateDevices();
-          if (devices.isNotEmpty) {
-            await scanAndConnect();
+          if (devices.isEmpty) {
+            _lastAttemptedDeviceId = null;
+          } else {
+            final target = devices.first;
+            if (target.id != _lastAttemptedDeviceId) {
+              _lastAttemptedDeviceId = target.id;
+              await scanAndConnect(targetDevice: target);
+            }
           }
         } catch (_) {}
       } else if (Platform.isAndroid) {
         try {
           final devices = await AndroidUsbHidTransport.enumerateDevices();
-          if (devices.isNotEmpty) {
-            await scanAndConnect();
+          if (devices.isEmpty) {
+            _lastAttemptedDeviceId = null;
+          } else {
+            final target = devices.first;
+            if (target.id != _lastAttemptedDeviceId) {
+              _lastAttemptedDeviceId = target.id;
+              await scanAndConnect(targetDevice: target);
+            }
           }
         } catch (_) {}
       }
@@ -117,7 +142,31 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
   }
 
   /// Scans for connected USB DACs and establishes HID connection.
-  Future<void> scanAndConnect({DacDevice? targetDevice}) async {
+  Future<void> scanAndConnect({DacDevice? targetDevice, bool isManual = false}) async {
+    if (_activeConnectFuture != null) {
+      if (!isManual) {
+        return _activeConnectFuture!;
+      }
+      try {
+        await _activeConnectFuture;
+      } catch (_) {}
+    }
+
+    final future = _performScanAndConnect(targetDevice: targetDevice, isManual: isManual);
+    _activeConnectFuture = future;
+    try {
+      await future;
+    } finally {
+      if (_activeConnectFuture == future) {
+        _activeConnectFuture = null;
+      }
+    }
+  }
+
+  Future<void> _performScanAndConnect({DacDevice? targetDevice, bool isManual = false}) async {
+    if (isManual) {
+      _lastAttemptedDeviceId = null;
+    }
     state = state.copyWith(status: DacBridgeStatus.connecting);
 
     try {
@@ -166,6 +215,7 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
 
   /// Disconnects the active USB DAC session.
   Future<void> disconnect() async {
+    _lastAttemptedDeviceId = null;
     await driver.transport.disconnect();
     state = state.copyWith(
       status: DacBridgeStatus.disconnected,
