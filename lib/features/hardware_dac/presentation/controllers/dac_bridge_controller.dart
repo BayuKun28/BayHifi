@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../pro_q_studio/domain/eq_band.dart';
 import '../../data/drivers/dac_driver.dart';
 import '../../data/drivers/kiwi_ears_kt_driver.dart';
+import '../../data/transports/android_usb_hid_transport.dart';
 import '../../data/transports/dac_transport.dart';
 import '../../data/transports/linux_hidraw_transport.dart';
 import '../../data/transports/mock_dac_transport.dart';
@@ -17,6 +18,8 @@ import 'dac_bridge_state.dart';
 final dacTransportProvider = Provider<DacTransport>((ref) {
   if (Platform.isLinux) {
     return LinuxHidRawTransport();
+  } else if (Platform.isAndroid) {
+    return AndroidUsbHidTransport();
   }
   return MockDacTransport(autoConnect: false);
 });
@@ -72,11 +75,18 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
   Future<void> _checkHotplugStatus() async {
     if (state.isConnected) {
       final currentDev = state.device;
-      if (currentDev != null && Platform.isLinux) {
-        final file = File(currentDev.id);
-        if (!file.existsSync() || !driver.transport.isConnected) {
-          await driver.transport.disconnect();
-          _handleTransportDisconnect();
+      if (currentDev != null) {
+        if (Platform.isLinux) {
+          final file = File(currentDev.id);
+          if (!file.existsSync() || !driver.transport.isConnected) {
+            await driver.transport.disconnect();
+            _handleTransportDisconnect();
+          }
+        } else if (Platform.isAndroid) {
+          if (!driver.transport.isConnected) {
+            await driver.transport.disconnect();
+            _handleTransportDisconnect();
+          }
         }
       }
     } else if (state.status != DacBridgeStatus.connecting &&
@@ -87,6 +97,13 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
       if (Platform.isLinux) {
         try {
           final devices = await LinuxHidRawTransport.enumerateDevices();
+          if (devices.isNotEmpty) {
+            await scanAndConnect();
+          }
+        } catch (_) {}
+      } else if (Platform.isAndroid) {
+        try {
+          final devices = await AndroidUsbHidTransport.enumerateDevices();
           if (devices.isNotEmpty) {
             await scanAndConnect();
           }
