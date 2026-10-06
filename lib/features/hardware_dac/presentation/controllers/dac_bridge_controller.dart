@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../pro_q_studio/domain/eq_band.dart';
@@ -17,7 +18,7 @@ final dacTransportProvider = Provider<DacTransport>((ref) {
   if (Platform.isLinux) {
     return LinuxHidRawTransport();
   }
-  return MockDacTransport();
+  return MockDacTransport(autoConnect: false);
 });
 
 /// Riverpod provider for the main Hardware DAC Bridge controller.
@@ -38,12 +39,61 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
   DacBridgeController({
     required this.driver,
     required this.fitter,
+    bool enableHotplugWatcher = true,
   }) : super(DacBridgeState(availablePresets: DacPeqProfile.builtInPresets)) {
+    driver.transport.setOnDisconnectListener(_handleTransportDisconnect);
     _initAutoConnect();
+    if (enableHotplugWatcher) {
+      _startHotplugWatcher();
+    }
   }
 
   final DacDriver driver;
   final AutoEqToHardwareFitter fitter;
+  Timer? _hotplugTimer;
+
+  void _handleTransportDisconnect() {
+    if (state.isConnected || state.device != null) {
+      state = state.copyWith(
+        status: DacBridgeStatus.disconnected,
+        device: () => null,
+        statusBannerMessage: () => 'USB DAC disconnected.',
+      );
+    }
+  }
+
+  void _startHotplugWatcher() {
+    _hotplugTimer?.cancel();
+    _hotplugTimer = Timer.periodic(const Duration(milliseconds: 1500), (_) {
+      _checkHotplugStatus();
+    });
+  }
+
+  Future<void> _checkHotplugStatus() async {
+    if (state.isConnected) {
+      final currentDev = state.device;
+      if (currentDev != null && Platform.isLinux) {
+        final file = File(currentDev.id);
+        if (!file.existsSync() || !driver.transport.isConnected) {
+          await driver.transport.disconnect();
+          _handleTransportDisconnect();
+        }
+      }
+    } else if (state.status != DacBridgeStatus.connecting &&
+        state.status != DacBridgeStatus.reading &&
+        state.status != DacBridgeStatus.writing &&
+        state.status != DacBridgeStatus.flashing) {
+      // Silently check if a DAC has been plugged in
+      if (Platform.isLinux) {
+        try {
+          final devices = await LinuxHidRawTransport.enumerateDevices();
+          if (devices.isNotEmpty) {
+            await scanAndConnect();
+          }
+        } catch (_) {}
+      }
+    }
+  }
 
   Future<void> _initAutoConnect() async {
     await scanAndConnect();
@@ -278,5 +328,11 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
         errorMessage: () => 'Failed to read from hardware: $e',
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _hotplugTimer?.cancel();
+    super.dispose();
   }
 }

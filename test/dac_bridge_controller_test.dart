@@ -80,5 +80,27 @@ void main() {
       expect(controller.state.bands[0].gainDb, closeTo(0.0, 0.1));
       expect(controller.state.hasUnsavedFlashChanges, isFalse);
     });
+
+    test('Handles DAC disconnection cleanly and clears state device', () async {
+      await controller.scanAndConnect();
+      expect(controller.state.isConnected, isTrue);
+
+      await controller.disconnect();
+      expect(controller.state.isConnected, isFalse);
+      expect(controller.state.device, isNull);
+      expect(controller.state.status, equals(DacBridgeStatus.disconnected));
+    });
+
+    test('Automatically handles transport disconnect notification event', () async {
+      await controller.scanAndConnect();
+      expect(controller.state.isConnected, isTrue);
+
+      // Simulate physical cable pull / transport disconnect
+      await transport.disconnect();
+
+      expect(controller.state.isConnected, isFalse);
+      expect(controller.state.device, isNull);
+      expect(controller.state.status, equals(DacBridgeStatus.disconnected));
+    });
   });
 }

@@ -24,7 +24,11 @@ class LinuxHidRawTransport implements DacTransport {
   DacDevice? get currentDevice => _device;
 
   @override
-  bool get isConnected => _device != null && _writeRaf != null && _readRaf != null;
+  bool get isConnected {
+    if (_device == null || _writeRaf == null || _readRaf == null) return false;
+    final file = File(_device!.id);
+    return file.existsSync();
+  }
 
   @override
   void setOnDisconnectListener(void Function() onDisconnected) {
@@ -152,7 +156,12 @@ class LinuxHidRawTransport implements DacTransport {
     packet[0] = reportId;
     packet.setRange(1, packet.length, data);
 
-    await _writeRaf!.writeFrom(packet);
+    try {
+      await _writeRaf!.writeFrom(packet);
+    } catch (e) {
+      await disconnect();
+      throw StateError('Failed to write to Linux HID transport: $e');
+    }
   }
 
   @override
@@ -172,7 +181,12 @@ class LinuxHidRawTransport implements DacTransport {
     packet[0] = reportId;
     packet.setRange(1, packet.length, data);
 
-    await _writeRaf!.writeFrom(packet);
+    try {
+      await _writeRaf!.writeFrom(packet);
+    } catch (e) {
+      await disconnect();
+      throw StateError('Failed to write command to Linux HID transport: $e');
+    }
 
     try {
       final buffer = Uint8List(64);
@@ -192,6 +206,9 @@ class LinuxHidRawTransport implements DacTransport {
       final reg = data.isNotEmpty ? data[0] : 0xFF;
       throw TimeoutException(
           'DAC response timed out on register 0x${reg.toRadixString(16)}');
+    } catch (e) {
+      await disconnect();
+      rethrow;
     }
   }
 
