@@ -20,6 +20,11 @@ class SoLoudController {
   final _positionController = StreamController<Duration>.broadcast();
   Stream<Duration> get positionStream => _positionController.stream;
 
+  final _playbackEndedController = StreamController<void>.broadcast();
+  Stream<void> get onPlaybackEnded => _playbackEndedController.stream;
+
+  StreamSubscription? _sourceFinishedSub;
+
   double _volume = 1.0;
   double _preampDb = 0.0;
   double _replayGainDb = 0.0;
@@ -137,6 +142,14 @@ class SoLoudController {
       _currentHandle = handle;
       SoLoud.instance.setVolume(handle, targetVolume);
 
+      _sourceFinishedSub?.cancel();
+      _sourceFinishedSub = source.allInstancesFinished.listen((_) {
+        if (requestId == _playRequestId) {
+          debugPrint('[SoLoudController] allInstancesFinished triggered naturally for file: $filePath');
+          _playbackEndedController.add(null);
+        }
+      });
+
       _startPositionTracking();
 
       return handle;
@@ -179,6 +192,14 @@ class SoLoudController {
       _currentHandle = handle;
       SoLoud.instance.setVolume(handle, targetVolume);
 
+      _sourceFinishedSub?.cancel();
+      _sourceFinishedSub = source.allInstancesFinished.listen((_) {
+        if (requestId == _playRequestId) {
+          debugPrint('[SoLoudController] allInstancesFinished triggered naturally for URL: $url');
+          _playbackEndedController.add(null);
+        }
+      });
+
       _startPositionTracking();
 
       return handle;
@@ -211,6 +232,14 @@ class SoLoudController {
       );
       _currentHandle = handle;
       SoLoud.instance.setVolume(handle, targetVolume);
+
+      _sourceFinishedSub?.cancel();
+      _sourceFinishedSub = source.allInstancesFinished.listen((_) {
+        if (requestId == _playRequestId) {
+          debugPrint('[SoLoudController] allInstancesFinished triggered naturally for AudioSource');
+          _playbackEndedController.add(null);
+        }
+      });
 
       _startPositionTracking();
       return handle;
@@ -294,6 +323,9 @@ class SoLoudController {
 
   /// Menghentikan audio yang aktif dan membersihkan voice/source tanpa membatalkan requestId aktif
   Future<void> _stopCurrentAudio() async {
+    _sourceFinishedSub?.cancel();
+    _sourceFinishedSub = null;
+
     final handle = _currentHandle;
     if (handle != null && SoLoud.instance.getIsValidVoiceHandle(handle)) {
       SoLoud.instance.stop(handle);
@@ -417,11 +449,14 @@ class SoLoudController {
   /// Shutdown dan bersihkan resource audio
   Future<void> deinit() async {
     _positionTimer?.cancel();
+    _sourceFinishedSub?.cancel();
+    _sourceFinishedSub = null;
     await stop();
     if (_isInitialized) {
       SoLoud.instance.deinit();
       _isInitialized = false;
     }
     await _positionController.close();
+    await _playbackEndedController.close();
   }
 }

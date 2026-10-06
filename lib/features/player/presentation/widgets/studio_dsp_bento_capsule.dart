@@ -6,28 +6,85 @@ import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import '../../../dsp_rack/presentation/dsp_rack_screen.dart';
+import '../../../hardware_dac/domain/models/dac_device.dart';
 import '../../../hardware_dac/presentation/controllers/dac_bridge_controller.dart';
 import '../../../hardware_dac/presentation/screens/hardware_dac_studio_screen.dart';
 import '../../../pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../../../pro_q_studio/presentation/widgets/auto_eq_modal_dialog.dart';
+import '../controllers/player_controller.dart';
 
 /// Unified Studio Audio Signal Flow Chain Capsule for NowPlayingScreen.
-/// Displays an interconnected, 3-stage tactile pipeline:
-/// [ 🎧 AutoEQ ] ➔ [ 🎛️ DSP Rack ] ➔ [ ⚡ Hardware DAC ]
-class StudioDspBentoCapsule extends ConsumerWidget {
+/// Displays an interconnected, 1-row compact 3-stage tactile pipeline with live signal flow animation:
+/// [ 🎧 AutoEQ ] ➔ ➔ ➔ [ 🎛️ DSP Rack ] ➔ ➔ ➔ [ ⚡ Hardware DAC ]
+class StudioDspBentoCapsule extends ConsumerStatefulWidget {
   const StudioDspBentoCapsule({super.key});
 
-  String _decodeClean(String? s) {
-    if (s == null || s.trim().isEmpty) return '';
+  /// Formats AutoEQ driver names cleanly (e.g. "KZ Castor Bass Black Dudu R" -> "KZ CASTOR...")
+  static String formatAutoEqLabel(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return 'AutoEQ';
+    String clean = raw.replaceAll('_', ' ').replaceAll('%20', ' ').trim();
     try {
-      return Uri.decodeComponent(s).replaceAll('_', ' ');
-    } catch (_) {
-      return s.replaceAll('%20', ' ').replaceAll('_', ' ');
+      clean = Uri.decodeComponent(clean);
+    } catch (_) {}
+
+    final words = clean.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return 'AutoEQ';
+
+    if (words.length == 1) {
+      final w = words[0].toUpperCase();
+      return w.length > 10 ? '${w.substring(0, 8)}...' : w;
     }
+
+    // Combine first two principal tokens (e.g. "KZ CASTOR", "CHU II", "HD 600")
+    final primary = '${words[0]} ${words[1]}'.toUpperCase();
+    if (words.length > 2 || primary.length > 13) {
+      if (primary.length > 13) {
+        return '${primary.substring(0, 11).trim()}...';
+      }
+      return '$primary...';
+    }
+    return primary;
+  }
+
+  /// Formats Hardware DAC names with Brand & Model cleanly (e.g. "Kiwi Ears AD1" -> "KIWI AD1")
+  static String formatDacLabel(DacDevice? device) {
+    if (device == null) return 'DAC Direct';
+    String name = device.productName.trim();
+    if (name.isEmpty) return 'DAC Active';
+
+    name = name.replaceAll('Kiwi Ears', 'KIWI').trim();
+    final upper = name.toUpperCase();
+    if (upper.length > 12) {
+      return 'DAC • ${upper.substring(0, 9)}...';
+    }
+    return 'DAC • $upper';
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudioDspBentoCapsule> createState() => _StudioDspBentoCapsuleState();
+}
+
+class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _flowController;
+
+  @override
+  void initState() {
+    super.initState();
+    _flowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+  }
+
+  @override
+  void dispose() {
+    _flowController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isSolid = ref.isSolidStyle;
@@ -35,13 +92,23 @@ class StudioDspBentoCapsule extends ConsumerWidget {
     final eqState = ref.watch(eqControllerProvider);
     final dspState = ref.watch(dspRackControllerProvider);
     final dacState = ref.watch(dacBridgeControllerProvider);
+    final isPlaying = ref.watch(playerControllerProvider.select((s) => s.isPlaying));
+
+    if (isPlaying) {
+      if (!_flowController.isAnimating) {
+        _flowController.repeat();
+      }
+    } else {
+      if (_flowController.isAnimating) {
+        _flowController.stop();
+        _flowController.value = 0.0;
+      }
+    }
 
     // 1. AutoEQ State
-    final rawDriver = _decodeClean(eqState.driverFr?.name);
-    final driverName = rawDriver.isNotEmpty ? rawDriver : 'Direct';
-    final rawTarget = _decodeClean(eqState.targetFr?.name);
-    final targetName = rawTarget.isNotEmpty ? rawTarget : 'Harman 2019';
-    final isAutoActive = eqState.isAutoEqActive;
+    final rawDriver = eqState.driverFr?.name;
+    final isAutoActive = eqState.isAutoEqActive && rawDriver != null && rawDriver.isNotEmpty;
+    final autoEqLabel = isAutoActive ? StudioDspBentoCapsule.formatAutoEqLabel(rawDriver) : 'AutoEQ';
 
     // 2. DSP Rack State
     int activeDspCount = 0;
@@ -56,12 +123,11 @@ class StudioDspBentoCapsule extends ConsumerWidget {
       if (dspState.limiterEnabled) activeDspCount++;
     }
     final isDspActive = !dspState.isBypassed && activeDspCount > 0;
+    final dspLabel = isDspActive ? 'DSP ($activeDspCount)' : 'DSP Rack';
 
     // 3. Hardware DAC State
     final isDacConnected = dacState.isConnected && dacState.device != null;
-    final dacName = isDacConnected
-        ? (dacState.device?.productName.replaceAll('Kiwi Ears', '').trim() ?? 'DAC')
-        : 'Direct';
+    final dacLabel = isDacConnected ? StudioDspBentoCapsule.formatDacLabel(dacState.device) : 'DAC Direct';
     const mintColor = Color(0xFF10B981);
 
     return SingleChildScrollView(
@@ -75,7 +141,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
           children: [
             // ─── STAGE 1: AutoEQ Profile ──────────────────────────────
             Tooltip(
-              message: 'Stage 1: AutoEQ Target Curve ($driverName • $targetName)',
+              message: 'Stage 1: AutoEQ Target Curve (${rawDriver ?? 'Direct'})',
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -85,8 +151,8 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                     AutoEqModalDialog.show(context);
                   },
                   child: Container(
-                    height: 28,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    height: 27,
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                     decoration: BoxDecoration(
                       color: isAutoActive
                           ? StudioCategoryColors.autoEq.withValues(alpha: isSolid ? 0.18 : 0.14)
@@ -94,7 +160,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isAutoActive
-                            ? StudioCategoryColors.autoEq.withValues(alpha: 0.4)
+                            ? StudioCategoryColors.autoEq.withValues(alpha: 0.45)
                             : colorScheme.outlineVariant.withValues(alpha: 0.3),
                         width: 0.8,
                       ),
@@ -104,18 +170,19 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                       children: [
                         const HugeIcon(
                           icon: HugeIcons.strokeRoundedHeadphones,
-                          size: 12,
+                          size: 11.5,
                           color: StudioCategoryColors.autoEq,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          isAutoActive ? 'AutoEQ • $driverName' : 'AutoEQ',
+                          autoEqLabel,
                           style: TextStyle(
-                            fontSize: 9.5,
+                            fontSize: 9.0,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
                             color: isAutoActive
                                 ? StudioCategoryColors.autoEq
-                                : colorScheme.onSurface.withValues(alpha: 0.8),
+                                : colorScheme.onSurface.withValues(alpha: 0.85),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -127,14 +194,11 @@ class StudioDspBentoCapsule extends ConsumerWidget {
               ),
             ),
 
-            // ─── CONNECTOR 1 ──────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowRight01,
-                size: 11,
-                color: colorScheme.outline.withValues(alpha: 0.6),
-              ),
+            // ─── CONNECTOR 1: Flow Animation ──────────────────────────
+            _AnimatedSignalConnector(
+              animation: _flowController,
+              isPlaying: isPlaying,
+              color: isAutoActive ? StudioCategoryColors.autoEq : colorScheme.outline,
             ),
 
             // ─── STAGE 2: Mastering DSP Rack ──────────────────────────
@@ -153,8 +217,8 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                     );
                   },
                   child: Container(
-                    height: 28,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    height: 27,
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                     decoration: BoxDecoration(
                       color: isDspActive
                           ? StudioCategoryColors.dspMastering.withValues(alpha: isSolid ? 0.18 : 0.14)
@@ -162,7 +226,7 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isDspActive
-                            ? StudioCategoryColors.dspMastering.withValues(alpha: 0.4)
+                            ? StudioCategoryColors.dspMastering.withValues(alpha: 0.45)
                             : colorScheme.outlineVariant.withValues(alpha: 0.3),
                         width: 0.8,
                       ),
@@ -172,18 +236,19 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                       children: [
                         HugeIcon(
                           icon: HugeIcons.strokeRoundedSlidersVertical,
-                          size: 12,
+                          size: 11.5,
                           color: isDspActive ? StudioCategoryColors.dspMastering : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          isDspActive ? 'DSP ($activeDspCount)' : 'DSP Rack',
+                          dspLabel,
                           style: TextStyle(
-                            fontSize: 9.5,
+                            fontSize: 9.0,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
                             color: isDspActive
                                 ? StudioCategoryColors.dspMastering
-                                : colorScheme.onSurface.withValues(alpha: 0.8),
+                                : colorScheme.onSurface.withValues(alpha: 0.85),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -195,20 +260,17 @@ class StudioDspBentoCapsule extends ConsumerWidget {
               ),
             ),
 
-            // ─── CONNECTOR 2 ──────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowRight01,
-                size: 11,
-                color: colorScheme.outline.withValues(alpha: 0.6),
-              ),
+            // ─── CONNECTOR 2: Flow Animation ──────────────────────────
+            _AnimatedSignalConnector(
+              animation: _flowController,
+              isPlaying: isPlaying,
+              color: isDspActive ? StudioCategoryColors.dspMastering : (isDacConnected ? mintColor : colorScheme.outline),
             ),
 
             // ─── STAGE 3: Hardware DAC Bridge ─────────────────────────
             Tooltip(
               message: isDacConnected
-                  ? 'Stage 3: Hardware DAC Bridge (${dacState.device?.productName} Connected & Active)'
+                  ? 'Stage 3: Hardware DAC Bridge (${dacState.device?.productName} Active)'
                   : 'Stage 3: Hardware DAC Bridge (Direct Audio Output)',
               child: Material(
                 color: Colors.transparent,
@@ -223,8 +285,8 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                     );
                   },
                   child: Container(
-                    height: 28,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    height: 27,
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                     decoration: BoxDecoration(
                       color: isDacConnected
                           ? mintColor.withValues(alpha: isSolid ? 0.20 : 0.15)
@@ -242,8 +304,8 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                       children: [
                         if (isDacConnected) ...[
                           Container(
-                            width: 6,
-                            height: 6,
+                            width: 5.5,
+                            height: 5.5,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                               color: mintColor,
@@ -253,19 +315,20 @@ class StudioDspBentoCapsule extends ConsumerWidget {
                         ] else ...[
                           HugeIcon(
                             icon: HugeIcons.strokeRoundedUsb,
-                            size: 12,
+                            size: 11.5,
                             color: colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 4),
                         ],
                         Text(
-                          isDacConnected ? 'DAC • $dacName' : 'DAC Direct',
+                          dacLabel,
                           style: TextStyle(
-                            fontSize: 9.5,
+                            fontSize: 9.0,
                             fontWeight: isDacConnected ? FontWeight.w800 : FontWeight.w700,
+                            letterSpacing: 0.2,
                             color: isDacConnected
                                 ? mintColor
-                                : colorScheme.onSurface.withValues(alpha: 0.8),
+                                : colorScheme.onSurface.withValues(alpha: 0.85),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -279,6 +342,60 @@ class StudioDspBentoCapsule extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Compact micro signal flow connector with traveling wave pulse animation.
+class _AnimatedSignalConnector extends StatelessWidget {
+  const _AnimatedSignalConnector({
+    required this.animation,
+    required this.isPlaying,
+    required this.color,
+  });
+
+  final Animation<double> animation;
+  final bool isPlaying;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isPlaying) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedArrowRight01,
+          size: 10,
+          color: color.withValues(alpha: 0.35),
+        ),
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        final progress = animation.value;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(2, (index) {
+              final phase = (progress - (index * 0.35)) % 1.0;
+              final wave = (1.0 - (phase - 0.5).abs() * 2.0).clamp(0.0, 1.0);
+              final alpha = 0.25 + (wave * 0.75);
+
+              return Opacity(
+                opacity: alpha,
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowRight01,
+                  size: 9.0,
+                  color: color,
+                ),
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }

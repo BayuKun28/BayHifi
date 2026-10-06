@@ -1621,5 +1621,29 @@ Integrasi cerdas fitur kurasi playlist otomatis *Instant Mix* berbasis seed trac
   - [x] `test/instant_mix_and_queue_addition_test.dart`: 7 unit and widget tests untuk controller, InstantMixConfigSheet, AddTracksToQueueSheet, dan StudioDspBentoCapsule 3-stage signal chain.
   - [x] Menjalankan `flutter test` dan `flutter analyze` dengan hasil 100% lulus dan 0 errors / 0 warnings.
 
+---
+
+## Fase 60: Auto-Next Playback Engine Native Event Fix & Compact 1-Row Animated Signal Flow Chain (Completed)
+
+Perbaikan menyeluruh bug auto-advance antrean musik (*Auto-Next Stalling Bug*) menggunakan integrasi event native `flutter_soloud` C++ engine, pemformatan teks ringkas 1 baris untuk AutoEQ, DSP Rack & Hardware DAC, serta animasi interaktif aliran sinyal studio real-time (*Real-Time Studio Signal Flow Animation*).
+
+- [x] **60.1 Native SoLoud Playback Completion Stream (`lib/audio_engine/soloud_controller.dart`)**:
+  - [x] Menambahkan `_playbackEndedController` broadcast stream dan getter `Stream<void> get onPlaybackEnded`.
+  - [x] Mengikat event native `source.allInstancesFinished` pada `playFile()`, `playUrl()`, dan `playAudioSource()`, menjamin sinyal audio selesai terpancar seketika saat decoding C++ berakhir.
+  - [x] Penanganan aman pembatalan subscription saat pergantian track (`_stopCurrentAudio()` dan `deinit()`).
+- [x] **60.2 Multi-Tier Auto-Advance Engine (`lib/features/player/presentation/controllers/player_controller.dart`)**:
+  - [x] Integrasi listener event `_audioEngine.onPlaybackEnded` untuk memicu `_onTrackEnded()` deterministik tanpa bergantung pada polling interval timer.
+  - [x] Dual-guard fallback berbasis threshold posisi adaptif $\ge \text{duration} - 250\text{ ms}$.
+  - [x] Perlindungan race condition dengan flag `_isAdvancing` dan delay pelepasan lock 300ms untuk mencegah duplikasi lompatan antrean.
+- [x] **60.3 Compact 1-Row Studio Signal Chain & Live Flow Animation (`lib/features/player/presentation/widgets/studio_dsp_bento_capsule.dart`)**:
+  - [x] Format AutoEQ cerdas: Truncation nama driver dengan ellipsis (misal `KZ Castor Bass Black Dudu R` $\rightarrow$ `KZ CASTOR...`, `Moondrop Chu II DSP` $\rightarrow$ `MOONDROP CHU...`, `Aria` $\rightarrow$ `ARIA`).
+  - [x] Format Hardware DAC rapi: Menampilkan merk & tipe (misal `DAC • KIWI AD1` / `DAC • AD1`, atau `DAC Direct` saat tidak terhubung).
+  - [x] Animasi Aliran Sinyal Studio (`_AnimatedSignalConnector`): Pulsa gelombang visual berjalan dari **AutoEQ $\rightarrow$ DSP Rack $\rightarrow$ Hardware DAC** secara dinamis saat lagu berputar (`isPlaying == true`), dan beralih ke resting state saat pause.
+  - [x] Desain 1-row ultra-kompak responsif tanpa overflow pada semua lebar layar smartphone.
+- [x] **60.4 Comprehensive Unit & Widget Test Suite**:
+  - [x] `test/auto_next_playback_and_signal_flow_test.dart`: 6 tests untuk string formatters AutoEQ/DAC, render 1-row capsule dengan animated connectors, dan siklus queue advance `skipNext()`.
+  - [x] Verifikasi `flutter test` lulus 100% dan `flutter analyze` 0 errors / 0 warnings.
+
+
 
 

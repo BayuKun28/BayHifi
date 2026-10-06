@@ -32,6 +32,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
   final SoLoudController _audioEngine;
   final Ref? _ref;
   StreamSubscription<Duration>? _posSub;
+  StreamSubscription<void>? _playbackEndedSub;
   bool _isAdvancing = false;
   PlayerPlaybackSettings _playbackSettings = const PlayerPlaybackSettings();
 
@@ -136,6 +137,16 @@ class PlayerController extends StateNotifier<PlaybackState> {
   }
 
   void _initListener() {
+    _posSub?.cancel();
+    _playbackEndedSub?.cancel();
+
+    _playbackEndedSub = _audioEngine.onPlaybackEnded.listen((_) {
+      if (state.isPlaying && !_isAdvancing) {
+        debugPrint('[PlayerController] onPlaybackEnded event received naturally -> advancing queue...');
+        _onTrackEnded();
+      }
+    });
+
     _posSub = _audioEngine.positionStream.listen((pos) {
       if (state.isPlaying) {
         final trackDur = state.currentTrack?.duration ?? Duration.zero;
@@ -155,10 +166,11 @@ class PlayerController extends StateNotifier<PlaybackState> {
         );
         _syncAudioHandler();
 
-        // Check if track has finished playing
+        // Safety fallback check if track has finished playing
         if (currentDur > Duration.zero &&
-            pos >= currentDur - const Duration(milliseconds: 350) &&
+            pos >= currentDur - const Duration(milliseconds: 250) &&
             !_isAdvancing) {
+          debugPrint('[PlayerController] position threshold safety trigger -> advancing queue...');
           _onTrackEnded();
         }
       }
@@ -683,22 +695,27 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
   /// Handle track ending naturally
   Future<void> _onTrackEnded() async {
+    if (_isAdvancing) return;
     _isAdvancing = true;
 
-    if (state.repeatMode == PlaybackRepeatMode.one) {
-      seek(Duration.zero);
-      resume();
-      _isAdvancing = false;
-      return;
-    }
+    try {
+      if (state.repeatMode == PlaybackRepeatMode.one) {
+        seek(Duration.zero);
+        resume();
+        return;
+      }
 
-    if (state.hasQueue) {
-      await skipNext();
-    } else {
-      await stop();
+      if (state.hasQueue) {
+        await skipNext(autoPlay: true);
+      } else {
+        await stop();
+      }
+    } finally {
+      // Release advancing lock after short delay to prevent double transitions
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _isAdvancing = false;
+      });
     }
-
-    _isAdvancing = false;
   }
 
   /// Toggle play / pause
@@ -1073,6 +1090,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
   @override
   void dispose() {
     _posSub?.cancel();
+    _playbackEndedSub?.cancel();
     super.dispose();
   }
 }

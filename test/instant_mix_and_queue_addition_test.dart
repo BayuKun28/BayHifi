@@ -201,7 +201,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('DAC • AD1'), findsOneWidget);
+      expect(find.textContaining('DAC • KIWI AD1'), findsOneWidget);
     });
   });
 }
