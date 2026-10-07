@@ -155,10 +155,11 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       ),
                       if (_searchController.text.isNotEmpty)
                         M3EIconButton(
-                          icon: const HugeIcon(
+                          variant: M3EIconButtonVariant.standard,
+                          icon: HugeIcon(
                             icon: HugeIcons.strokeRoundedCancel01,
-                            size: 16,
-                            color: Colors.grey,
+                            size: 20,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                           onPressed: () {
                             AppHaptics.selectionClick();
@@ -287,9 +288,10 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         scrolledUnderElevation: 0,
         leading: Navigator.of(context).canPop()
             ? M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedArrowLeft01,
-                  size: 20,
+                  size: 22,
                   color: theme.colorScheme.onSurface,
                 ),
                 onPressed: () {
@@ -353,18 +355,20 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         ),
         actions: [
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedSlidersHorizontal,
-              size: 20,
+              size: 22,
               color: StudioCategoryColors.dspMastering,
             ),
             tooltip: 'Open DSP Mastering Rack',
             onPressed: _openDspRack,
           ),
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedPlayList,
-              size: 20,
+              size: 22,
               color: StudioCategoryColors.youtubeMusic,
             ),
             tooltip: 'Import Playlist URL',
@@ -843,10 +847,11 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   ),
                 const SizedBox(width: 6),
                 M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedRefresh,
-                    size: 16,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    size: 22,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   tooltip: 'Refresh Charts',
                   onPressed: () {
@@ -1176,10 +1181,11 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             children: [
               // Start Radio Button
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedRadio,
-                  size: 18,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                  size: 22,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Start Smart Track Radio',
                 onPressed: () {
@@ -1195,10 +1201,11 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               ),
               // Unified Track Action Sheet
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedMoreVertical,
-                  size: 18,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  size: 22,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Track Options',
                 onPressed: () {

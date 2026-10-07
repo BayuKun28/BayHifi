@@ -141,10 +141,11 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                     Tooltip(
                       message: 'Share Lyric Card',
                       child: M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedShare08,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                          size: 18,
+                          color: theme.colorScheme.onSurface,
+                          size: 22,
                         ),
                         onPressed: () {
                           if (currentTrack != null && _lyricsResult.lines.isNotEmpty) {
@@ -177,10 +178,11 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                     const SizedBox(width: 4),
                   ],
                   M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
                     icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedRefresh,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      size: 22,
                     ),
                     onPressed: () {
                       if (currentTrack != null) {
@@ -190,10 +192,11 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                   ),
                   const SizedBox(width: 4),
                   M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
                     icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedCancel01,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      size: 22,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),

@@ -87,27 +87,30 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
       appBar: AppBar(
         title: const Text('DYNAMIC SMART PLAYLISTS'),
         leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 20,
+            size: 22,
             color: theme.colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedRefresh,
-              size: 18,
+              size: 22,
               color: theme.colorScheme.onSurfaceVariant,
             ),
             tooltip: 'Restore Default Presets',
             onPressed: _restorePresets,
           ),
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedAddCircle,
-              size: 20,
+              size: 22,
               color: primary,
             ),
             tooltip: 'Create Smart Rule',
@@ -321,10 +324,11 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           M3EIconButton(
+                            variant: M3EIconButtonVariant.standard,
                             icon: HugeIcon(
                               icon: HugeIcons.strokeRoundedMoreVertical,
-                              size: 18,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                              size: 22,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             onPressed: () {
                               StudioPlaylistActionSheet.showForSmartPlaylist(

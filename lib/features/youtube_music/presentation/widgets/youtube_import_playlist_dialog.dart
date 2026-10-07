@@ -190,10 +190,11 @@ class _YouTubeImportPlaylistDialogState
                   children: [
                     if (_urlController.text.isNotEmpty)
                       M3EIconButton(
-                        icon: const HugeIcon(
+                        variant: M3EIconButtonVariant.standard,
+                        icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
-                          size: 16,
-                          color: Colors.grey,
+                          size: 20,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         onPressed: () {
                           setState(() {
@@ -202,9 +203,10 @@ class _YouTubeImportPlaylistDialogState
                         },
                       ),
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedClipboard,
-                        size: 18,
+                        size: 22,
                         color: primary,
                       ),
                       tooltip: 'Paste from Clipboard',

@@ -63,13 +63,14 @@ class LibraryBatchActionsBar extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 onPressed: () {
                   AppHaptics.selectionClick();
                   onClose();
                 },
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedCancel01,
-                  size: 17,
+                  size: 20,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Cancel Selection',
@@ -168,13 +169,14 @@ class LibraryBatchActionsBar extends ConsumerWidget {
     bool isActive = false,
   }) {
     return M3EIconButton(
+      variant: M3EIconButtonVariant.standard,
       onPressed: () {
         AppHaptics.lightImpact();
         onTap();
       },
       icon: HugeIcon(
         icon: icon,
-        size: 17,
+        size: 20,
         color: isActive ? primary : theme.colorScheme.onSurface,
       ),
       tooltip: tooltip,

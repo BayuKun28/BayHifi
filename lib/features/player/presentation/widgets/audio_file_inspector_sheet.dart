@@ -475,9 +475,10 @@ class AudioFileInspectorSheet extends ConsumerWidget {
             ),
           ),
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedCopy01,
-              size: 16,
+              size: 20,
               color: theme.colorScheme.onSurfaceVariant,
             ),
             tooltip: 'Copy $title',

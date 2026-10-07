@@ -87,10 +87,11 @@ class GenreRulesConfigModal extends ConsumerWidget {
                     ),
                   ),
                   M3EIconButton(
-                    icon: const HugeIcon(
+                    variant: M3EIconButtonVariant.standard,
+                    icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedCancel01,
-                      size: 18,
-                      color: Colors.grey,
+                      size: 22,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),

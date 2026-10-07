@@ -320,6 +320,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         // Left: Collapse Chevron Button
         if (widget.onCollapse != null)
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: widget.onCollapse,
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedArrowDown01,
@@ -445,14 +446,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             // Favorite Button
             if (track != null)
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 onPressed: () {
                   AppHaptics.selectionClick();
                   libraryController.toggleFavorite(track.id);
                 },
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedFavourite,
-                  color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  size: 22,
+                  color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurfaceVariant,
+                  size: 24,
                 ),
                 tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
               )
@@ -481,10 +483,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         // Left: Collapse Chevron Button
         if (widget.onCollapse != null)
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: widget.onCollapse,
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedArrowDown01,
-              size: 20,
+              size: 22,
               color: theme.colorScheme.onSurface,
             ),
             tooltip: 'Collapse to MiniPlayer',
@@ -531,54 +534,58 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 children: [
               // 1. Open Local File
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 onPressed: _pickAndPlayFile,
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedFolder01,
-                  size: 18,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  size: 22,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Open Audio File',
               ),
 
               // 2. Playback Speed & Pitch Engine
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 onPressed: () {
                   AppHaptics.lightImpact();
                   PlaybackSpeedPitchSheet.show(context);
                 },
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedDashboardSpeed01,
-                  size: 18,
+                  size: 22,
                   color: (playback.playbackSpeed != 1.0 || playback.pitchSemitones != 0.0)
                       ? primary
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Speed & Pitch (${playback.playbackSpeed.toStringAsFixed(1)}x)',
               ),
 
               // 3. Studio Desk & Car Docking Mode
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 onPressed: () {
                   AppHaptics.lightImpact();
                   StudioDeskDockingScreen.show(context);
                 },
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedCar01,
-                  size: 18,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  size: 22,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Studio Desk & Car Mode',
               ),
 
               // 4. Full-Screen Pro-Q Studio Equalizer
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 onPressed: () {
                   AppHaptics.selectionClick();
                   widget.onOpenProQStudio();
                 },
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedSlidersVertical,
-                  size: 18,
+                  size: 22,
                   color: primary,
                 ),
                 tooltip: 'Pro-Q Studio Equalizer',
@@ -587,14 +594,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               // 5. Technical Audio Specs Inspector
               if (track != null)
                 M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   onPressed: () {
                     AppHaptics.lightImpact();
                     AudioFileInspectorSheet.show(context, track);
                   },
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedInformationCircle,
-                    size: 18,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                    size: 22,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   tooltip: 'Audio Specs Inspector',
                 ),
@@ -650,14 +658,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               // 7. Favorite Button
               if (track != null)
                 M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   onPressed: () {
                     AppHaptics.selectionClick();
                     libraryController.toggleFavorite(track.id);
                   },
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedFavourite,
-                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                    size: 18,
+                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurfaceVariant,
+                    size: 22,
                   ),
                   tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
                 ),
@@ -896,6 +905,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             borderRadius: BorderRadius.circular(14),
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.selectionClick();
               ref.read(playerControllerProvider.notifier).toggleShuffle();
@@ -904,8 +914,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               icon: HugeIcons.strokeRoundedShuffle,
               color: playback.isShuffle
                   ? primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              size: 20,
+                  : theme.colorScheme.onSurfaceVariant,
+              size: 22,
             ),
             tooltip: 'Shuffle Playback',
           ),
@@ -925,6 +935,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               ref.read(playerControllerProvider.notifier).seekBackward();
             },
             child: M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
               onPressed: () {
                 AppHaptics.lightImpact();
                 ref.read(playerControllerProvider.notifier).skipPrevious();
@@ -957,6 +968,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             ],
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.mediumImpact();
               ref.read(playerControllerProvider.notifier).togglePlayPause();
@@ -997,6 +1009,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               ref.read(playerControllerProvider.notifier).seekForward();
             },
             child: M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
               onPressed: () {
                 AppHaptics.lightImpact();
                 ref.read(playerControllerProvider.notifier).skipNext();
@@ -1022,6 +1035,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             borderRadius: BorderRadius.circular(14),
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.selectionClick();
               ref.read(playerControllerProvider.notifier).toggleRepeatMode();
@@ -1032,8 +1046,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   : HugeIcons.strokeRoundedRepeat,
               color: playback.repeatMode != PlaybackRepeatMode.off
                   ? primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              size: 20,
+                  : theme.colorScheme.onSurfaceVariant,
+              size: 22,
             ),
             tooltip: 'Repeat Mode (${playback.repeatMode.name.toUpperCase()})',
           ),

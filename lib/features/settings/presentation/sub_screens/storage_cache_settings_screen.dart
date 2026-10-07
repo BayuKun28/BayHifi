@@ -105,22 +105,24 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
       appBar: AppBar(
         title: const Text('STORAGE & CACHE QUOTA'),
         leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 20,
+            size: 22,
             color: theme.colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.lightImpact();
               _loadStorageSummary(showLoading: true);
             },
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedRefresh,
-              size: 20,
+              size: 22,
               color: primary,
             ),
             tooltip: 'Refresh Storage Metrics',
@@ -384,8 +386,9 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           ),
           const SizedBox(width: 8),
           M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: onClear,
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 16, color: theme.colorScheme.error),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 20, color: theme.colorScheme.error),
             tooltip: 'Clear',
           ),
         ],

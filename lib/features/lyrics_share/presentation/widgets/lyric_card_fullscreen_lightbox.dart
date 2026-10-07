@@ -221,13 +221,14 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                     children: [
                       // Close button
                       M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
                         onPressed: () {
                           AppHaptics.lightImpact();
                           Navigator.of(context).pop();
                         },
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
-                          size: 20,
+                          size: 22,
                           color: Colors.white.withValues(alpha: 0.9),
                         ),
                         tooltip: 'Close Preview',
@@ -269,11 +270,12 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                       const Spacer(),
                       // Reset Zoom Button
                       M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
                         tooltip: 'Reset Zoom (Double-Tap)',
                         onPressed: _resetZoom,
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedEye,
-                          size: 18,
+                          size: 22,
                           color: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),

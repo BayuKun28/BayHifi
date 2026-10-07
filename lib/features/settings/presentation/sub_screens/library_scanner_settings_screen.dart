@@ -48,9 +48,10 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
       appBar: AppBar(
         title: const Text('LIBRARY SCANNER & SLEEP TIMER'),
         leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 20,
+            size: 22,
             color: theme.colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).pop(),
@@ -536,7 +537,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       ),
                     ),
                     M3EIconButton(
-                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 16, color: Color(0xFFFF453A)),
+                      variant: M3EIconButtonVariant.standard,
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 20, color: Color(0xFFFF453A)),
                       tooltip: 'Remove Folder',
                       onPressed: () {
                         AppHaptics.lightImpact();

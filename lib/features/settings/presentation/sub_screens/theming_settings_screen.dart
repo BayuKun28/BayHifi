@@ -74,9 +74,10 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
       appBar: AppBar(
         title: const Text('THEMING & COLOR PALETTES'),
         leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 20,
+            size: 22,
             color: theme.colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).pop(),

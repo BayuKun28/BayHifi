@@ -322,10 +322,11 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                       )
                     else
                       M3EIconButton(
-                        icon: const HugeIcon(
+                        variant: M3EIconButtonVariant.standard,
+                        icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedArrowRight01,
-                          size: 18,
-                          color: Colors.grey,
+                          size: 22,
+                          color: primary,
                         ),
                         onPressed: _resolveUrl,
                       ),

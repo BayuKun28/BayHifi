@@ -40,9 +40,10 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
       appBar: AppBar(
         title: const Text('AUDIO HARDWARE & DAC ENGINE'),
         leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 20,
+            size: 22,
             color: theme.colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).pop(),

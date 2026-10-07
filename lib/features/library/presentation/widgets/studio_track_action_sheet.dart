@@ -421,7 +421,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
               ListTile(
                 leading: HugeIcon(
                   icon: HugeIcons.strokeRoundedFavourite,
-                  size: 20,
+                  size: 22,
                   color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface,
                 ),
                 title: Text(

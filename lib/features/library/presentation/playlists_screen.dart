@@ -186,7 +186,8 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
         ),
         actions: [
           M3EIconButton(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 20, color: primary),
+            variant: M3EIconButtonVariant.standard,
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 22, color: primary),
             tooltip: 'Create Playlist Options',
             onPressed: () => _showCreateOptionsSheet(context),
           ),
@@ -448,10 +449,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           M3EIconButton(
+                            variant: M3EIconButtonVariant.standard,
                             icon: HugeIcon(
                               icon: HugeIcons.strokeRoundedMoreVertical,
-                              size: 18,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                              size: 22,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             onPressed: () {
                               StudioPlaylistActionSheet.showForPlaylist(context, playlist: p);
@@ -569,10 +571,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
               icon: HugeIcon(
                 icon: HugeIcons.strokeRoundedMoreVertical,
-                size: 18,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                size: 22,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               onPressed: onMoreTap,
               tooltip: 'Collection Actions',

@@ -146,10 +146,11 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                       ),
                     ),
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       onPressed: () => Navigator.pop(context),
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
-                        size: 18,
+                        size: 22,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       tooltip: 'Close',

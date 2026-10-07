@@ -183,6 +183,7 @@ class _StudioArtworkLightboxState extends State<StudioArtworkLightbox>
                     children: [
                       // Close button
                       M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
                         onPressed: () => Navigator.of(context).pop(),
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,

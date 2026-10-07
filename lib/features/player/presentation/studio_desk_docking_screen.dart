@@ -695,13 +695,14 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
             borderRadius: BorderRadius.circular(14),
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.selectionClick();
               playerNotifier.toggleShuffle();
             },
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedShuffle,
-              size: 20,
+              size: 22,
               color: playback.isShuffle ? primary : theme.colorScheme.onSurfaceVariant,
             ),
             tooltip: 'Shuffle',
@@ -717,6 +718,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
             borderRadius: BorderRadius.circular(14),
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.lightImpact();
               playerNotifier.skipPrevious();
@@ -747,6 +749,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
             ],
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.mediumImpact();
               playerNotifier.togglePlayPause();
@@ -778,6 +781,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
             borderRadius: BorderRadius.circular(14),
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.lightImpact();
               playerNotifier.skipNext();
@@ -802,6 +806,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
             borderRadius: BorderRadius.circular(14),
           ),
           child: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             onPressed: () {
               AppHaptics.selectionClick();
               playerNotifier.toggleRepeatMode();
@@ -810,7 +815,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               icon: playback.repeatMode == PlaybackRepeatMode.one
                   ? HugeIcons.strokeRoundedRepeatOne01
                   : HugeIcons.strokeRoundedRepeat,
-              size: 20,
+              size: 22,
               color: playback.repeatMode != PlaybackRepeatMode.off ? primary : theme.colorScheme.onSurfaceVariant,
             ),
             tooltip: 'Repeat',

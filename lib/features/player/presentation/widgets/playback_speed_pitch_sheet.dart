@@ -110,11 +110,12 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                 ],
               ),
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 onPressed: () => Navigator.of(context).pop(),
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedCancel01,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  size: 22,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

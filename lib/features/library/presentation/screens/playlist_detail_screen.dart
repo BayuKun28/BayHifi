@@ -161,35 +161,21 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
               backgroundColor: StudioSurfaceTheme.surface(context, isSolid: isSolid),
               surfaceTintColor: Colors.transparent,
               leading: M3EIconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.85),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-                  ),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowLeft01,
-                    size: 18,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                variant: M3EIconButtonVariant.standard,
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowLeft01,
+                  size: 22,
+                  color: theme.colorScheme.onSurface,
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               actions: [
                 M3EIconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.85),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-                    ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedMoreVertical,
-                      size: 18,
-                      color: theme.colorScheme.onSurface,
-                    ),
+                  variant: M3EIconButtonVariant.standard,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedMoreVertical,
+                    size: 22,
+                    color: theme.colorScheme.onSurface,
                   ),
                   onPressed: () {
                     if (isSmart) {
@@ -545,7 +531,8 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       M3EIconButton(
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedDownload01, size: 16, color: accentColor),
+                        variant: M3EIconButtonVariant.tonal,
+                        icon: HugeIcon(icon: HugeIcons.strokeRoundedDownload01, size: 20, color: accentColor),
                         tooltip: 'Download All Tracks',
                         onPressed: () {
                           if (tracks.isNotEmpty) {
@@ -563,19 +550,22 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       const SizedBox(width: 4),
                       if (isSmart)
                         M3EIconButton(
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedEdit02, size: 16, color: accentColor),
+                          variant: M3EIconButtonVariant.tonal,
+                          icon: HugeIcon(icon: HugeIcons.strokeRoundedEdit02, size: 20, color: accentColor),
                           tooltip: 'Edit Rules',
                           onPressed: () => CreateSmartPlaylistDialog.show(context, initialPlaylist: currentSmartPlaylist),
                         )
                       else if (currentPlaylist?.isCustom == true)
                         M3EIconButton(
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedEdit02, size: 16, color: accentColor),
+                          variant: M3EIconButtonVariant.tonal,
+                          icon: HugeIcon(icon: HugeIcons.strokeRoundedEdit02, size: 20, color: accentColor),
                           tooltip: 'Edit Details',
                           onPressed: () => CreateCustomPlaylistModal.show(context, initialPlaylist: currentPlaylist),
                         ),
                       const SizedBox(width: 4),
                       M3EIconButton(
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 16, color: accentColor),
+                        variant: M3EIconButtonVariant.tonal,
+                        icon: HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 20, color: accentColor),
                         tooltip: 'Export M3U8',
                         onPressed: () => _exportM3u8(context, title, tracks),
                       ),

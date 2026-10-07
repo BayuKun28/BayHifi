@@ -307,10 +307,11 @@ class TrackTile extends ConsumerWidget {
             children: [
               if (settings.trackShowDirectFav)
                 M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedFavourite,
-                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface.withValues(alpha: 0.35),
-                    size: 18,
+                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurfaceVariant,
+                    size: 22,
                   ),
                   tooltip: isFav ? 'Remove Favorite' : 'Favorite Track',
                   onPressed: () {
@@ -319,10 +320,11 @@ class TrackTile extends ConsumerWidget {
                   },
                 ),
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedMoreVertical,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  size: 22,
                 ),
                 tooltip: 'Track Options',
                 onPressed: () => StudioTrackActionSheet.show(context, track),

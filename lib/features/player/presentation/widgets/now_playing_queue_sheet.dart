@@ -176,33 +176,36 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                   children: [
                     // Add Tracks to Queue (Namida Style)
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       onPressed: () {
                         AddTracksToQueueSheet.show(context);
                       },
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedPlayList,
-                        size: 20,
+                        size: 22,
                         color: primary,
                       ),
                       tooltip: 'Add Tracks to Queue',
                     ),
                     // Shuffle Toggle
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       onPressed: () {
                         AppHaptics.selectionClick();
                         controller.toggleShuffle();
                       },
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedShuffle,
-                        size: 20,
+                        size: 22,
                         color: playback.isShuffle
                             ? primary
-                            : const Color(0xFF64748B),
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                       tooltip: 'Shuffle Queue',
                     ),
                     // Repeat Mode Toggle
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       onPressed: () {
                         AppHaptics.selectionClick();
                         controller.toggleRepeatMode();
@@ -211,23 +214,24 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                         icon: playback.repeatMode == PlaybackRepeatMode.one
                             ? HugeIcons.strokeRoundedRepeatOne01
                             : HugeIcons.strokeRoundedRepeat,
-                        size: 20,
+                        size: 22,
                         color: playback.repeatMode != PlaybackRepeatMode.off
                             ? primary
-                            : const Color(0xFF64748B),
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                       tooltip: 'Repeat Mode',
                     ),
                     // Clear Queue
                     if (playback.queue.isNotEmpty)
                       M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
                         onPressed: () {
                           AppHaptics.mediumImpact();
                           controller.clearQueue();
                         },
                         icon: const HugeIcon(
                           icon: HugeIcons.strokeRoundedDelete02,
-                          size: 20,
+                          size: 22,
                           color: Color(0xFFFF3B30),
                         ),
                         tooltip: 'Clear Queue',
@@ -363,6 +367,7 @@ class _QueueTrackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3.5),
       decoration: BoxDecoration(
@@ -509,9 +514,10 @@ class _QueueTrackTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 icon: const HugeIcon(
                   icon: HugeIcons.strokeRoundedCancel01,
-                  size: 16,
+                  size: 20,
                   color: Color(0xFFFF3B30),
                 ),
                 onPressed: onRemove,
@@ -519,10 +525,10 @@ class _QueueTrackTile extends StatelessWidget {
               ),
               ReorderableDragStartListener(
                 index: index,
-                child: const HugeIcon(
+                child: HugeIcon(
                   icon: HugeIcons.strokeRoundedDragDropVertical,
-                  size: 18,
-                  color: Color(0xFF64748B),
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

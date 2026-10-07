@@ -298,9 +298,9 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                               HugeIcon(
                                 icon: HugeIcons.strokeRoundedFavourite,
                                 color: isFav
-                                    ? theme.colorScheme.error
-                                    : theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                                size: 18,
+                                    ? const Color(0xFFFF2D55)
+                                    : theme.colorScheme.onSurfaceVariant,
+                                size: 20,
                               ),
                               if (isFav)
                                 Positioned(
@@ -401,10 +401,11 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
 
                     // Previous
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedPrevious,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                        size: 18,
+                        color: theme.colorScheme.onSurface,
+                        size: 22,
                       ),
                       onPressed: () {
                         AppHaptics.lightImpact();
@@ -453,10 +454,11 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
 
                     // Next
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedNext,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                        size: 18,
+                        color: theme.colorScheme.onSurface,
+                        size: 22,
                       ),
                       onPressed: () {
                         AppHaptics.lightImpact();
@@ -636,10 +638,11 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
               Tooltip(
                 message: 'Audio Specs Inspector',
                 child: M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedInformationCircle,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
                   ),
                   onPressed: () {
                     if (track != null) {
@@ -654,10 +657,11 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
               Tooltip(
                 message: 'Synchronized Lyrics',
                 child: M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedMusicNote01,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
                   ),
                   onPressed: () {
                     AppHaptics.selectionClick();
@@ -670,10 +674,11 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
               Tooltip(
                 message: 'Up Next Queue',
                 child: M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedQueue01,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
                   ),
                   onPressed: () {
                     AppHaptics.selectionClick();
@@ -691,10 +696,11 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
               Tooltip(
                 message: 'Pro-Q Studio Parametric EQ',
                 child: M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedSlidersVertical,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
                   ),
                   onPressed: () {
                     AppHaptics.selectionClick();
@@ -714,14 +720,15 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       icon: HugeIcon(
                         icon: playback.volume == 0.0
                             ? HugeIcons.strokeRoundedVolumeOff
                             : (playback.volume < 0.5
                                 ? HugeIcons.strokeRoundedVolumeLow
                                 : HugeIcons.strokeRoundedVolumeHigh),
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                        size: 16,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        size: 20,
                       ),
                       onPressed: () {
                         AppHaptics.selectionClick();

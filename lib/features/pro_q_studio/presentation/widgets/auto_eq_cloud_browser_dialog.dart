@@ -163,10 +163,11 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                       ),
                     ),
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       onPressed: () => Navigator.of(context).pop(),
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
-                        size: 18,
+                        size: 22,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       tooltip: 'Close',
@@ -788,10 +789,11 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 20,
-            color: theme.colorScheme.onSurfaceVariant,
+            size: 22,
+            color: theme.colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).pop(null),
           tooltip: 'Back',
@@ -870,9 +872,10 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
               builder: (_, value, child) => value.text.isEmpty
                   ? const SizedBox.shrink()
                   : M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
-                        size: 18,
+                        size: 20,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       onPressed: () => _controller.clear(),
