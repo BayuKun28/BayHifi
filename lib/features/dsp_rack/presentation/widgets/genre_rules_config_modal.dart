@@ -86,7 +86,7 @@ class GenreRulesConfigModal extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  IconButton(
+                  M3EIconButton(
                     icon: const HugeIcon(
                       icon: HugeIcons.strokeRoundedCancel01,
                       size: 18,

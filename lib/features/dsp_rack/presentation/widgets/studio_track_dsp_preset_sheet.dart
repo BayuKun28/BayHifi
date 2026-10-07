@@ -156,7 +156,7 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  IconButton(
+                  M3EIconButton(
                     icon: const HugeIcon(
                       icon: HugeIcons.strokeRoundedSlidersHorizontal,
                       size: 20,

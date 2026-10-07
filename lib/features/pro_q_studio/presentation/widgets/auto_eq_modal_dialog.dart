@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/fr_curve_data.dart';
@@ -144,7 +145,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                         ],
                       ),
                     ),
-                    IconButton(
+                    M3EIconButton(
                       onPressed: () => Navigator.pop(context),
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../data/library_indexer_service.dart';
@@ -334,7 +335,7 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
               // Action Buttons
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: M3EButton.filled(
                   onPressed: _purgeAllRedundantDuplicates,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedSparkles,
@@ -348,11 +349,6 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
                       fontWeight: FontWeight.w800,
                       color: theme.colorScheme.onPrimary,
                     ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../data/auto_eq_cloud_service.dart';
 import '../../domain/auto_eq_cloud_model.dart';
@@ -161,7 +162,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                         ],
                       ),
                     ),
-                    IconButton(
+                    M3EIconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
@@ -349,7 +350,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                             final Color driverColor = theme.colorScheme.secondary;
 
                             final Widget setButton = isTarget
-                                ? ElevatedButton.icon(
+                                ? M3EButton.elevated(
                                     onPressed: () async {
                                       final curve = await _service.downloadItem(item);
                                       eqNotifier.importTarget(curve);
@@ -363,16 +364,6 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                         );
                                       }
                                     },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isSelectedAsTarget
-                                          ? theme.colorScheme.primary
-                                          : targetColor,
-                                      foregroundColor: isSelectedAsTarget
-                                          ? theme.colorScheme.onPrimary
-                                          : Colors.black,
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
                                     icon: HugeIcon(
                                       icon: isSelectedAsTarget
                                           ? HugeIcons.strokeRoundedCheckmarkCircle02
@@ -387,7 +378,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   )
-                                : ElevatedButton.icon(
+                                : M3EButton.elevated(
                                     onPressed: () async {
                                       final curve = await _service.downloadItem(item);
                                       eqNotifier.importDriver(curve);
@@ -401,16 +392,6 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                         );
                                       }
                                     },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isSelectedAsDriver
-                                          ? theme.colorScheme.primary
-                                          : driverColor,
-                                      foregroundColor: isSelectedAsDriver
-                                          ? theme.colorScheme.onPrimary
-                                          : theme.colorScheme.onSecondary,
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
                                     icon: HugeIcon(
                                       icon: isSelectedAsDriver
                                           ? HugeIcons.strokeRoundedCheckmarkCircle02
@@ -426,7 +407,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                     ),
                                   );
 
-                            final Widget solveButton = OutlinedButton(
+                            final Widget solveButton = M3EButton.outlined(
                               onPressed: () async {
                                 final curve = await _service.downloadItem(item);
                                 if (isTarget) {
@@ -465,15 +446,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                   }
                                 }
                               },
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                side: BorderSide(
-                                  color: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.8),
-                                  width: 0.8,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              child: Text(
+                              label: Text(
                                 'SOLVE',
                                 style: TextStyle(
                                   color: theme.colorScheme.primary,
@@ -814,7 +787,7 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
         backgroundColor: theme.colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -835,16 +808,9 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-              ),
+            child: M3EButton.filled(
               onPressed: _submit,
-              child: const Text(
+              label: const Text(
                 'SEARCH',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
               ),
@@ -903,7 +869,7 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
               valueListenable: _controller,
               builder: (_, value, child) => value.text.isEmpty
                   ? const SizedBox.shrink()
-                  : IconButton(
+                  : M3EIconButton(
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
                         size: 18,

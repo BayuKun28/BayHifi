@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../controllers/eq_controller.dart';
 
@@ -212,15 +213,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
           alignment: WrapAlignment.spaceBetween,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: theme.colorScheme.onSurfaceVariant,
-                side: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+            M3EButton.outlined(
               onPressed: () {
                 _importTextController.text = _demoSquiglinkText;
               },
@@ -230,15 +223,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: theme.colorScheme.primary,
-                side: BorderSide(color: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6)),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+            M3EButton.outlined(
               onPressed: () async {
                 final data = await Clipboard.getData('text/plain');
                 if (data?.text != null && data!.text!.isNotEmpty) {
@@ -253,15 +238,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+            M3EButton.filled(
               onPressed: () {
                 final text = _importTextController.text.trim();
                 if (text.isEmpty) return;
@@ -328,15 +305,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
           spacing: 8,
           runSpacing: 8,
           children: [
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+            M3EButton.filled(
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: exportedSquiglink));
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -353,15 +322,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: theme.colorScheme.secondary,
-                side: BorderSide(color: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6)),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+            M3EButton.outlined(
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: exportedWavelet));
                 ScaffoldMessenger.of(context).showSnackBar(

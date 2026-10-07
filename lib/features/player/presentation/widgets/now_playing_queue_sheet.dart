@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -174,7 +175,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                 Row(
                   children: [
                     // Add Tracks to Queue (Namida Style)
-                    IconButton(
+                    M3EIconButton(
                       onPressed: () {
                         AddTracksToQueueSheet.show(context);
                       },
@@ -186,7 +187,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                       tooltip: 'Add Tracks to Queue',
                     ),
                     // Shuffle Toggle
-                    IconButton(
+                    M3EIconButton(
                       onPressed: () {
                         AppHaptics.selectionClick();
                         controller.toggleShuffle();
@@ -201,7 +202,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                       tooltip: 'Shuffle Queue',
                     ),
                     // Repeat Mode Toggle
-                    IconButton(
+                    M3EIconButton(
                       onPressed: () {
                         AppHaptics.selectionClick();
                         controller.toggleRepeatMode();
@@ -219,7 +220,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                     ),
                     // Clear Queue
                     if (playback.queue.isNotEmpty)
-                      IconButton(
+                      M3EIconButton(
                         onPressed: () {
                           AppHaptics.mediumImpact();
                           controller.clearQueue();
@@ -507,7 +508,7 @@ class _QueueTrackTile extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
+              M3EIconButton(
                 icon: const HugeIcon(
                   icon: HugeIcons.strokeRoundedCancel01,
                   size: 16,

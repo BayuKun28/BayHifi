@@ -189,7 +189,7 @@ class _YouTubeImportPlaylistDialogState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (_urlController.text.isNotEmpty)
-                      IconButton(
+                      M3EIconButton(
                         icon: const HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
                           size: 16,
@@ -201,7 +201,7 @@ class _YouTubeImportPlaylistDialogState
                           });
                         },
                       ),
-                    IconButton(
+                    M3EIconButton(
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedClipboard,
                         size: 18,
@@ -247,11 +247,11 @@ class _YouTubeImportPlaylistDialogState
               spacing: 8,
               runSpacing: 8,
               children: [
-                TextButton(
+                M3EButton.text(
                   onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
-                OutlinedButton.icon(
+                M3EButton.outlined(
                   onPressed: _isLoading || _urlController.text.trim().isEmpty
                       ? null
                       : () => _importPlaylist(autoPlay: false),
@@ -262,7 +262,7 @@ class _YouTubeImportPlaylistDialogState
                   ),
                   label: const Text('Add to Queue'),
                 ),
-                FilledButton.icon(
+                M3EButton.filled(
                   onPressed: _isLoading || _urlController.text.trim().isEmpty
                       ? null
                       : () => _importPlaylist(autoPlay: true),

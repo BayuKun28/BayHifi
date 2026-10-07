@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -316,11 +317,11 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                         child: SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: M3EProgressIndicator.circular(strokeWidth: 2),
                         ),
                       )
                     else
-                      IconButton(
+                      M3EIconButton(
                         icon: const HugeIcon(
                           icon: HugeIcons.strokeRoundedArrowRight01,
                           size: 18,
@@ -461,29 +462,17 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                   runSpacing: 8,
                   alignment: WrapAlignment.end,
                   children: [
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      ),
+                    M3EButton.outlined(
                       icon: const HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 16, color: Colors.grey),
                       label: const Text('Stream Now', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       onPressed: _handleStreamNow,
                     ),
-                    FilledButton.tonalIcon(
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      ),
+                    M3EButton.tonal(
                       icon: HugeIcon(icon: HugeIcons.strokeRoundedPlaylist01, size: 16, color: primary),
                       label: const Text('Import Playlist', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       onPressed: _handleImportPlaylist,
                     ),
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      ),
+                    M3EButton.filled(
                       icon: const HugeIcon(icon: HugeIcons.strokeRoundedDownload01, size: 16, color: Colors.white),
                       label: const Text('Download All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
                       onPressed: _handleDownloadAll,

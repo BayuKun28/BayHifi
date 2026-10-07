@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -473,7 +474,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
               ],
             ),
           ),
-          IconButton(
+          M3EIconButton(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedCopy01,
               size: 16,

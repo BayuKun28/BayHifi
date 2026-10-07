@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -179,8 +180,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               // Cancel Button
               SizedBox(
                 width: double.infinity,
-                height: 46,
-                child: OutlinedButton.icon(
+                child: M3EButton.outlined(
                   onPressed: () {
                     AppHaptics.mediumImpact();
                     timerController.cancelTimer();
@@ -196,14 +196,6 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                     style: TextStyle(
                       color: AppColors.crimsonAlert,
                       fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: isSolid ? theme.colorScheme.outline : AppColors.crimsonAlert.withValues(alpha: 0.6),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                 ),
@@ -341,8 +333,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               // Start Button
               SizedBox(
                 width: double.infinity,
-                height: 48,
-                child: FilledButton.icon(
+                child: M3EButton.filled(
                   onPressed: () {
                     AppHaptics.mediumImpact();
                     timerController.startTimer(
@@ -362,12 +353,6 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                     style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       color: Colors.black,
-                    ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                 ),
@@ -463,9 +448,8 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               ],
             ),
           ),
-          Switch(
+          M3ESwitch(
             value: value,
-            activeThumbColor: primaryColor,
             onChanged: (val) {
               AppHaptics.selectionClick();
               onChanged(val);
