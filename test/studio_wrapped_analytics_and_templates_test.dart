@@ -3,21 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:baydev_hifi/core/database/local_persistence_service.dart';
+import 'package:baydev_hifi/features/analytics/data/playback_analytics_service.dart';
 import 'package:baydev_hifi/features/analytics/domain/audiophile_persona.dart';
 import 'package:baydev_hifi/features/analytics/domain/playback_log_entry.dart';
 import 'package:baydev_hifi/features/analytics/domain/studio_wrapped_calculator.dart';
 import 'package:baydev_hifi/features/analytics/domain/studio_wrapped_data.dart';
+import 'package:baydev_hifi/features/analytics/presentation/details/studio_listening_stats_detail_screen.dart';
 import 'package:baydev_hifi/features/analytics/presentation/story/studio_wrapped_story_screen.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/studio_wrapped_export_hub.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/abstract_aura_view.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/artist_lineup_poster_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/bento_studio_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/cassette_jcard_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/concert_ticket_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/cyber_spec_card_view.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/genre_spectrum_card_view.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/persona_master_card_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/sticker_collage_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/thermal_receipt_view.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/top_tracks_chart_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/vinyl_gatefold_view.dart';
+import 'package:baydev_hifi/features/dashboard/presentation/widgets/listening_statistics_card.dart';
 import 'package:baydev_hifi/features/dashboard/presentation/widgets/studio_wrapped_bento_banner.dart';
+import 'package:baydev_hifi/features/player/domain/track.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -284,7 +292,7 @@ void main() {
     });
   });
 
-  group('Studio Wrapped Visual Templates Widget Tests (All 8 Styles)', () {
+  group('Studio Wrapped Visual Templates Widget Tests (All 12 Styles)', () {
     const calculator = StudioWrappedCalculator();
     final sampleData = calculator.calculate(rawLogs: [], timeFilter: RecapTimeFilter.year2026);
 
@@ -453,10 +461,85 @@ void main() {
       expect(find.text('CORE MASTER ASSET'), findsOneWidget);
       expect(find.text('TELEMETRY MATRIX [TOP 4]'), findsOneWidget);
     });
+
+    testWidgets('Renders PersonaMasterCardView (Dedicated Focus 1) with archetype & radar', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: PersonaMasterCardView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('AUDIOPHILE ARCHETYPE // 2026'), findsOneWidget);
+      expect(find.text(sampleData.persona.title.toUpperCase()), findsOneWidget);
+      expect(find.text('ENERGY INDEX'), findsOneWidget);
+      expect(find.text('SIGNAL CHAIN HARDWARE'), findsOneWidget);
+    });
+
+    testWidgets('Renders ArtistLineupPosterView (Dedicated Focus 2) with festival hierarchy', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ArtistLineupPosterView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('BAYDEV HI-FI FESTIVAL // 2026'), findsOneWidget);
+      expect(find.text('TOP HEADLINER #1'), findsOneWidget);
+      expect(find.text(sampleData.topArtists.first.artist), findsWidgets);
+      expect(find.text('STAGE TIME'), findsOneWidget);
+    });
+
+    testWidgets('Renders GenreSpectrumCardView (Dedicated Focus 3) with frequency & bars', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: GenreSpectrumCardView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('SONIC SPECTRUM // 2026'), findsOneWidget);
+      expect(find.text('ACOUSTIC SPECTRUM DISTRIBUTION'), findsOneWidget);
+      expect(find.text('DOMINANT SOUND ECOSYSTEM'), findsOneWidget);
+    });
+
+    testWidgets('Renders TopTracksChartView (Dedicated Focus 4) with #01 spotlight & top 10', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: TopTracksChartView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('MASTER TRACKS CHART // 2026'), findsOneWidget);
+      expect(find.text('OFFICIAL RANKING'), findsOneWidget);
+      expect(find.text('MOST PLAYED ANTHEM'), findsOneWidget);
+      expect(find.text('TOTAL STREAMS'), findsOneWidget);
+    });
   });
 
   group('Studio Wrapped Interactive Story & Hub Integration Tests', () {
-    testWidgets('StudioWrappedStoryScreen navigates through slides and reveals persona', (tester) async {
+    testWidgets('StudioWrappedStoryScreen navigates through slides and reveals quick export actions', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -474,11 +557,14 @@ void main() {
       await tester.tapAt(const Offset(600, 300));
       await tester.pump(const Duration(milliseconds: 350));
       expect(find.text('TOP TRACKS OF 2026'), findsOneWidget);
+      expect(find.text('EXPORT TRACKS CHART'), findsOneWidget);
 
       // Advance to Slide 3 (Top Artists)
       await tester.tapAt(const Offset(600, 300));
       await tester.pump(const Duration(milliseconds: 350));
       expect(find.text('SONIC INSPIRATIONS'), findsOneWidget);
+      expect(find.text('FESTIVAL POSTER'), findsOneWidget);
+      expect(find.text('SONIC SPECTRUM'), findsOneWidget);
 
       // Advance to Slide 4 (Audio Purity)
       await tester.tapAt(const Offset(600, 300));
@@ -499,10 +585,12 @@ void main() {
       await tester.tapAt(const Offset(600, 300));
       await tester.pump(const Duration(milliseconds: 350));
       expect(find.text('YOUR 2026 AUDIOPHILE ARCHETYPE'), findsOneWidget);
-      expect(find.text('EXPORT & SHARE RECAP CARDS'), findsOneWidget);
+      expect(find.text('EXPORT PERSONA MASTER CARD'), findsOneWidget);
+      expect(find.text('CHOOSE EXPORT STYLE (12 TEMPLATES)'), findsOneWidget);
+      expect(find.text('OPEN FULL EXPORT GALLERY'), findsOneWidget);
     });
 
-    testWidgets('StudioWrappedExportHub switches between all 8 templates smoothly', (tester) async {
+    testWidgets('StudioWrappedExportHub switches between categories and all 12 templates smoothly', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -513,50 +601,51 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('STUDIO RECAP GALLERY'), findsOneWidget);
-      expect(find.text('SHARE RECAP STORY'), findsOneWidget);
+      expect(find.text('ALL-IN-ONE RECAPS'), findsOneWidget);
+      expect(find.text('DEDICATED FOCUS CARDS'), findsOneWidget);
 
       // Switch to Stickers Template
       await tester.tap(find.text('STICKERS'));
       await tester.pumpAndSettle();
       expect(find.text('2026 RECAP // LOSSLESS'), findsOneWidget);
 
-      // Switch to Bento Template
-      await tester.tap(find.text('BENTO'));
-      await tester.pumpAndSettle();
-      expect(find.text('HI-RES PURITY'), findsOneWidget);
-
-      // Switch to Cassette Template
-      await tester.tap(find.text('CASSETTE'));
-      await tester.pumpAndSettle();
-      expect(find.text('2026 MASTER TAPE REEL'), findsOneWidget);
-
-      // Switch to Aura Wave Template
-      await tester.tap(find.text('AURA WAVE'));
-      await tester.pumpAndSettle();
-      expect(find.text('SONIC RESONANCE 2026'), findsOneWidget);
-
-      // Switch to Vinyl LP Template
-      await tester.tap(find.text('VINYL LP'));
-      await tester.pumpAndSettle();
-      expect(find.text('ORIGINAL MASTER RECORDING'), findsOneWidget);
-
-      // Scroll template bar to the right
-      await tester.drag(find.text('AURA WAVE'), const Offset(-350, 0));
+      // Switch Category to Dedicated Focus Cards
+      await tester.tap(find.text('DEDICATED FOCUS CARDS'));
       await tester.pumpAndSettle();
 
-      // Switch to VIP Ticket Template
-      await tester.tap(find.text('VIP TICKET'));
+      // Tap Persona Archetype
+      await tester.tap(find.text('PERSONA ARCHETYPE'));
       await tester.pumpAndSettle();
-      expect(find.text('BAYDEV HI-FI TOUR • 2026'), findsOneWidget);
+      expect(find.text('AUDIOPHILE ARCHETYPE // 2026'), findsOneWidget);
 
-      // Scroll further to the end
-      await tester.drag(find.text('VIP TICKET'), const Offset(-300, 0));
+      // Tap Festival Lineup
+      await tester.tap(find.text('FESTIVAL LINEUP'));
+      await tester.pumpAndSettle();
+      expect(find.text('BAYDEV HI-FI FESTIVAL // 2026'), findsOneWidget);
+
+      // Tap Sonic Spectrum
+      await tester.tap(find.text('SONIC SPECTRUM'));
+      await tester.pumpAndSettle();
+      expect(find.text('SONIC SPECTRUM // 2026'), findsOneWidget);
+
+      // Tap Tracks Chart
+      await tester.tap(find.text('TRACKS CHART'));
+      await tester.pumpAndSettle();
+      expect(find.text('MASTER TRACKS CHART // 2026'), findsOneWidget);
+    });
+
+    testWidgets('StudioWrappedExportHub supports initialStyle parameter', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: StudioWrappedExportHub(initialStyle: WrappedTemplateStyle.topTracksChart),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      // Switch to Cyber HUD Template
-      await tester.tap(find.text('CYBER HUD'));
-      await tester.pumpAndSettle();
-      expect(find.text('SYSTEM DIAGNOSTIC // 2026'), findsOneWidget);
+      expect(find.text('MASTER TRACKS CHART // 2026'), findsOneWidget);
+      expect(find.text('OFFICIAL RANKING'), findsOneWidget);
     });
 
     testWidgets('StudioWrappedBentoBanner renders properly in dashboard flow', (tester) async {
@@ -576,4 +665,176 @@ void main() {
       expect(find.text('TEMPLATES'), findsOneWidget);
     });
   });
+
+  group('Studio Listening Insights & Dashboard Telemetry Tests', () {
+    test('Calculates TopAlbumRank metrics and rankings correctly', () {
+      final now = DateTime(2026, 6, 15);
+      final logs = [
+        PlaybackLogEntry(
+          id: 'log_a1',
+          trackId: 't1',
+          title: 'Comfortably Numb',
+          artist: 'Pink Floyd',
+          album: 'The Wall',
+          genre: 'Progressive Rock',
+          durationPlayedMs: 360000,
+          trackDurationMs: 360000,
+          format: 'flac',
+          sampleRate: 96000,
+          bitDepth: 24,
+          timestamp: now,
+        ),
+        PlaybackLogEntry(
+          id: 'log_a2',
+          trackId: 't2',
+          title: 'Hey You',
+          artist: 'Pink Floyd',
+          album: 'The Wall',
+          genre: 'Progressive Rock',
+          durationPlayedMs: 240000,
+          trackDurationMs: 240000,
+          format: 'flac',
+          sampleRate: 96000,
+          bitDepth: 24,
+          timestamp: now,
+        ),
+        PlaybackLogEntry(
+          id: 'log_b1',
+          trackId: 't3',
+          title: 'Bohemian Rhapsody',
+          artist: 'Queen',
+          album: 'A Night at the Opera',
+          genre: 'Rock',
+          durationPlayedMs: 350000,
+          trackDurationMs: 350000,
+          format: 'flac',
+          sampleRate: 44100,
+          bitDepth: 16,
+          timestamp: now,
+        ),
+      ];
+
+      const calc = StudioWrappedCalculator();
+      final data = calc.calculate(rawLogs: logs);
+
+      expect(data.topAlbums.length, 2);
+      expect(data.topAlbums.first.album, 'The Wall');
+      expect(data.topAlbums.first.artist, 'Pink Floyd');
+      expect(data.topAlbums.first.rank, 1);
+      expect(data.topAlbums.first.trackCount, 2);
+      expect(data.topAlbums.first.playCount, 2);
+      expect(data.topAlbums[1].album, 'A Night at the Opera');
+      expect(data.topAlbums[1].rank, 2);
+      expect(data.topAlbum?.album, 'The Wall');
+    });
+
+    testWidgets('ListeningStatisticsCard renders telemetry, artists, tracks, and opens detail screen', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: ListeningStatisticsCard(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('AUDIOPHILE LISTENING STATS'), findsOneWidget);
+      expect(find.text('Listening Time'), findsOneWidget);
+      expect(find.text('Total Plays'), findsOneWidget);
+      expect(find.text('Lossless Purity'), findsOneWidget);
+      expect(find.text('View All'), findsOneWidget);
+      expect(find.text('Explore full listening insights & signal telemetry'), findsOneWidget);
+
+      // Tap View All Insights
+      await tester.tap(find.text('View All'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Listening Insights'), findsOneWidget);
+      expect(find.text('Deep playback telemetry & signal metrics'), findsOneWidget);
+    });
+
+    testWidgets('StudioListeningStatsDetailScreen renders all sections, filter switcher, and launchers', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: StudioListeningStatsDetailScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Listening Insights'), findsOneWidget);
+      expect(find.text('2026 Studio Wrapped'), findsOneWidget);
+      expect(find.text('Last 30 Days Recap'), findsOneWidget);
+      expect(find.text('All-Time Journey'), findsOneWidget);
+
+      expect(find.text('AUDIOPHILE ARCHETYPE'), findsOneWidget);
+      expect(find.text('TOTAL TIME'), findsOneWidget);
+      expect(find.text('TRACKS PLAYED'), findsOneWidget);
+      expect(find.text('UNIQUE ARTISTS'), findsOneWidget);
+      expect(find.text('UNIQUE ALBUMS'), findsOneWidget);
+
+      expect(find.text('TOP 10 TRACKS'), findsOneWidget);
+      expect(find.text('TOP ARTISTS'), findsOneWidget);
+      expect(find.text('TOP ALBUMS'), findsOneWidget);
+      expect(find.text('GENRE SPECTRUM'), findsOneWidget);
+      expect(find.text('SIGNAL CHAIN PURITY'), findsOneWidget);
+      expect(find.text('HARDWARE & DSP TELEMETRY'), findsOneWidget);
+      expect(find.text('Interactive Story'), findsOneWidget);
+      expect(find.text('Export Hub'), findsOneWidget);
+
+      // Switch time filter to Last 30 Days Recap
+      await tester.tap(find.text('Last 30 Days Recap'));
+      await tester.pumpAndSettle();
+      expect(find.text('Last 30 Days Recap'), findsOneWidget);
+    });
+
+    test('studioWrappedDataProvider updates reactively in real time when logPlaySession is called', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // Simulate logging a new song
+      const newTrack = Track(
+        id: 'realtime_track_99',
+        title: 'Shine On You Crazy Diamond',
+        artist: 'Pink Floyd',
+        album: 'Wish You Were Here',
+        duration: Duration(minutes: 13),
+        format: AudioFormat.flac,
+        sampleRate: 96000,
+        bitDepth: 24,
+      );
+
+      await container.read(playbackAnalyticsServiceProvider).logPlaySession(
+        track: newTrack,
+        durationPlayed: const Duration(minutes: 13),
+      );
+
+      final updatedData = container.read(studioWrappedDataProvider);
+      expect(updatedData.totalTracksPlayed, 1);
+      expect(updatedData.topTracks.any((t) => t.title == 'Shine On You Crazy Diamond'), isTrue);
+      expect(updatedData.topArtists.any((a) => a.artist == 'Pink Floyd'), isTrue);
+
+      // Log a second track to verify incremental telemetry
+      const track2 = Track(
+        id: 'realtime_track_100',
+        title: 'Comfortably Numb',
+        artist: 'Pink Floyd',
+        album: 'The Wall',
+        duration: Duration(minutes: 6),
+        format: AudioFormat.flac,
+      );
+      await container.read(playbackAnalyticsServiceProvider).logPlaySession(
+        track: track2,
+        durationPlayed: const Duration(minutes: 6),
+      );
+
+      final secondUpdated = container.read(studioWrappedDataProvider);
+      expect(secondUpdated.totalTracksPlayed, 2);
+      expect(secondUpdated.topTracks.any((t) => t.title == 'Comfortably Numb'), isTrue);
+    });
+  });
 }
+

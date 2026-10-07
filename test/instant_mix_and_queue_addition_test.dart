@@ -148,8 +148,15 @@ void main() {
   group('StudioDspBentoCapsule 3-Stage Signal Chain Widget Tests', () {
     testWidgets('Renders 3-stage signal chain (AutoEQ -> DSP Rack -> Hardware DAC)', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        ProviderScope(
+          overrides: [
+            dacBridgeControllerProvider.overrideWith(
+              (ref) => _FakeDacController(
+                const DacBridgeState(status: DacBridgeStatus.disconnected),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
             home: Scaffold(
               body: Center(
                 child: StudioDspBentoCapsule(),

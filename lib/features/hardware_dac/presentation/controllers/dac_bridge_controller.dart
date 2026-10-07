@@ -16,6 +16,10 @@ import 'dac_bridge_state.dart';
 
 /// Riverpod provider for the hardware DAC transport layer.
 final dacTransportProvider = Provider<DacTransport>((ref) {
+  final isTest = Platform.environment.containsKey('FLUTTER_TEST');
+  if (isTest) {
+    return MockDacTransport(autoConnect: false);
+  }
   if (Platform.isLinux) {
     return LinuxHidRawTransport();
   } else if (Platform.isAndroid) {

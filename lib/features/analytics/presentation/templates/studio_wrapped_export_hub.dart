@@ -6,15 +6,45 @@ import '../../data/playback_analytics_service.dart';
 import '../../data/wrapped_image_exporter.dart';
 import '../../domain/studio_wrapped_data.dart';
 import 'widgets/abstract_aura_view.dart';
+import 'widgets/artist_lineup_poster_view.dart';
 import 'widgets/bento_studio_view.dart';
 import 'widgets/cassette_jcard_view.dart';
 import 'widgets/concert_ticket_view.dart';
 import 'widgets/cyber_spec_card_view.dart';
+import 'widgets/genre_spectrum_card_view.dart';
+import 'widgets/persona_master_card_view.dart';
 import 'widgets/sticker_collage_view.dart';
 import 'widgets/thermal_receipt_view.dart';
+import 'widgets/top_tracks_chart_view.dart';
 import 'widgets/vinyl_gatefold_view.dart';
 
+enum WrappedTemplateCategory {
+  allInOne,
+  dedicatedFocus,
+}
+
+extension WrappedTemplateCategoryExt on WrappedTemplateCategory {
+  String get label {
+    switch (this) {
+      case WrappedTemplateCategory.allInOne:
+        return 'All-in-One Recaps';
+      case WrappedTemplateCategory.dedicatedFocus:
+        return 'Dedicated Focus Cards';
+    }
+  }
+
+  dynamic get icon {
+    switch (this) {
+      case WrappedTemplateCategory.allInOne:
+        return HugeIcons.strokeRoundedSparkles;
+      case WrappedTemplateCategory.dedicatedFocus:
+        return HugeIcons.strokeRoundedTarget01;
+    }
+  }
+}
+
 enum WrappedTemplateStyle {
+  // All-in-One Category
   receipt,
   stickers,
   bento,
@@ -23,9 +53,33 @@ enum WrappedTemplateStyle {
   vinylGatefold,
   concertTicket,
   cyberSpec,
+  // Dedicated Focus Category
+  personaCard,
+  lineupPoster,
+  genreSpectrum,
+  topTracksChart,
 }
 
 extension WrappedTemplateStyleExt on WrappedTemplateStyle {
+  WrappedTemplateCategory get category {
+    switch (this) {
+      case WrappedTemplateStyle.receipt:
+      case WrappedTemplateStyle.stickers:
+      case WrappedTemplateStyle.bento:
+      case WrappedTemplateStyle.cassette:
+      case WrappedTemplateStyle.abstractAura:
+      case WrappedTemplateStyle.vinylGatefold:
+      case WrappedTemplateStyle.concertTicket:
+      case WrappedTemplateStyle.cyberSpec:
+        return WrappedTemplateCategory.allInOne;
+      case WrappedTemplateStyle.personaCard:
+      case WrappedTemplateStyle.lineupPoster:
+      case WrappedTemplateStyle.genreSpectrum:
+      case WrappedTemplateStyle.topTracksChart:
+        return WrappedTemplateCategory.dedicatedFocus;
+    }
+  }
+
   String get label {
     switch (this) {
       case WrappedTemplateStyle.receipt:
@@ -44,6 +98,14 @@ extension WrappedTemplateStyleExt on WrappedTemplateStyle {
         return 'VIP Ticket';
       case WrappedTemplateStyle.cyberSpec:
         return 'Cyber HUD';
+      case WrappedTemplateStyle.personaCard:
+        return 'Persona Archetype';
+      case WrappedTemplateStyle.lineupPoster:
+        return 'Festival Lineup';
+      case WrappedTemplateStyle.genreSpectrum:
+        return 'Sonic Spectrum';
+      case WrappedTemplateStyle.topTracksChart:
+        return 'Tracks Chart';
     }
   }
 
@@ -65,12 +127,25 @@ extension WrappedTemplateStyleExt on WrappedTemplateStyle {
         return HugeIcons.strokeRoundedTicket01;
       case WrappedTemplateStyle.cyberSpec:
         return HugeIcons.strokeRoundedCpu;
+      case WrappedTemplateStyle.personaCard:
+        return HugeIcons.strokeRoundedUser;
+      case WrappedTemplateStyle.lineupPoster:
+        return HugeIcons.strokeRoundedMic01;
+      case WrappedTemplateStyle.genreSpectrum:
+        return HugeIcons.strokeRoundedSlidersVertical;
+      case WrappedTemplateStyle.topTracksChart:
+        return HugeIcons.strokeRoundedAward01;
     }
   }
 }
 
 class StudioWrappedExportHub extends ConsumerStatefulWidget {
-  const StudioWrappedExportHub({super.key});
+  final WrappedTemplateStyle? initialStyle;
+
+  const StudioWrappedExportHub({
+    super.key,
+    this.initialStyle,
+  });
 
   @override
   ConsumerState<StudioWrappedExportHub> createState() => _StudioWrappedExportHubState();
@@ -78,9 +153,17 @@ class StudioWrappedExportHub extends ConsumerStatefulWidget {
 
 class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub> {
   final GlobalKey _cardKey = GlobalKey();
-  WrappedTemplateStyle _selectedTemplate = WrappedTemplateStyle.receipt;
+  late WrappedTemplateCategory _selectedCategory;
+  late WrappedTemplateStyle _selectedTemplate;
   bool _isReceiptDark = true;
   bool _isExporting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTemplate = widget.initialStyle ?? WrappedTemplateStyle.receipt;
+    _selectedCategory = _selectedTemplate.category;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +171,10 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
     final isSolid = ref.isSolidStyle;
     final wrappedData = ref.watch(studioWrappedDataProvider);
     final activeFilter = ref.watch(studioWrappedFilterProvider);
+
+    final currentCategoryTemplates = WrappedTemplateStyle.values
+        .where((s) => s.category == _selectedCategory)
+        .toList();
 
     return Scaffold(
       backgroundColor: StudioSurfaceTheme.surface(context, isSolid: isSolid),
@@ -148,14 +235,80 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
       ),
       body: Column(
         children: [
-          // ─── 1. TEMPLATE SELECTOR BAR ──────────────────────────────
+          // ─── 1. CATEGORY TIER SWITCHER (All-in-One vs Dedicated Focus) ──
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+            child: Row(
+              children: WrappedTemplateCategory.values.map((cat) {
+                final isSelected = _selectedCategory == cat;
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        setState(() {
+                          _selectedCategory = cat;
+                          final matching = WrappedTemplateStyle.values.where((s) => s.category == cat).toList();
+                          if (!matching.contains(_selectedTemplate)) {
+                            _selectedTemplate = matching.first;
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? theme.colorScheme.primary.withValues(alpha: 0.18)
+                              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.25),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                            width: isSelected ? 1.4 : 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            HugeIcon(
+                              icon: cat.icon,
+                              size: 14,
+                              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                cat.label.toUpperCase(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                                  letterSpacing: 0.6,
+                                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          // ─── 2. TEMPLATE SELECTOR HORIZONTAL BAR ──────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
-                children: WrappedTemplateStyle.values.map((style) {
+                children: currentCategoryTemplates.map((style) {
                   final isSelected = _selectedTemplate == style;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
@@ -167,7 +320,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                         });
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? theme.colorScheme.primary.withValues(alpha: 0.22)
@@ -185,14 +338,14 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                           children: [
                             HugeIcon(
                               icon: style.icon,
-                              size: 14,
+                              size: 13,
                               color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               style.label.toUpperCase(),
                               style: TextStyle(
-                                fontSize: 10.0,
+                                fontSize: 9.5,
                                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
                                 letterSpacing: 0.5,
                                 color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
@@ -208,7 +361,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
             ),
           ),
 
-          // ─── 2. LIVE INTERACTIVE CARD PREVIEW ──────────────────────
+          // ─── 3. LIVE INTERACTIVE CARD PREVIEW ──────────────────────
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -222,7 +375,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
             ),
           ),
 
-          // ─── 3. BOTTOM ACTION BAR ──────────────────────────────────
+          // ─── 4. BOTTOM ACTION BAR ──────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             decoration: BoxDecoration(
@@ -293,6 +446,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
 
   Widget _buildSelectedTemplateWidget(StudioWrappedData data) {
     switch (_selectedTemplate) {
+      // All-in-One templates
       case WrappedTemplateStyle.receipt:
         return ThermalReceiptView(data: data, isDarkMode: _isReceiptDark);
       case WrappedTemplateStyle.stickers:
@@ -309,6 +463,15 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
         return ConcertTicketView(data: data);
       case WrappedTemplateStyle.cyberSpec:
         return CyberSpecCardView(data: data);
+      // Dedicated Focus templates
+      case WrappedTemplateStyle.personaCard:
+        return PersonaMasterCardView(data: data);
+      case WrappedTemplateStyle.lineupPoster:
+        return ArtistLineupPosterView(data: data);
+      case WrappedTemplateStyle.genreSpectrum:
+        return GenreSpectrumCardView(data: data);
+      case WrappedTemplateStyle.topTracksChart:
+        return TopTracksChartView(data: data);
     }
   }
 
@@ -341,3 +504,4 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
     }
   }
 }
+

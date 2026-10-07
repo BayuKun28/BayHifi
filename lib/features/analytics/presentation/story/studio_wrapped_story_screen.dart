@@ -502,6 +502,58 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
             },
           ),
         ),
+
+        // Contextual Quick-Export Action Pill
+        const SizedBox(height: 10),
+        Center(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              _pauseStory();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const StudioWrappedExportHub(
+                    initialStyle: WrappedTemplateStyle.topTracksChart,
+                  ),
+                ),
+              ).then((_) => _resumeStory());
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.4), width: 0.8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedAward01,
+                    size: 13,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'EXPORT TRACKS CHART',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
+                    size: 11,
+                    color: theme.colorScheme.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -676,6 +728,97 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               ),
             );
           }).toList(),
+        ),
+
+        // Contextual Quick-Export Pills for Artists and Genres
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () {
+                _pauseStory();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const StudioWrappedExportHub(
+                      initialStyle: WrappedTemplateStyle.lineupPoster,
+                    ),
+                  ),
+                ).then((_) => _resumeStory());
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.4), width: 0.8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedMic01,
+                      size: 12,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'FESTIVAL POSTER',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () {
+                _pauseStory();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const StudioWrappedExportHub(
+                      initialStyle: WrappedTemplateStyle.genreSpectrum,
+                    ),
+                  ),
+                ).then((_) => _resumeStory());
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white24, width: 0.8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedSlidersVertical,
+                      size: 12,
+                      color: Colors.white70,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      'SONIC SPECTRUM',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1125,7 +1268,167 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               );
             }).toList(),
           ),
+          const SizedBox(height: 14),
+
+          // Direct Persona Quick-Export Action
+          InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              _pauseStory();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const StudioWrappedExportHub(
+                    initialStyle: WrappedTemplateStyle.personaCard,
+                  ),
+                ),
+              ).then((_) => _resumeStory());
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: theme.colorScheme.primary, width: 1.2),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 14, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'EXPORT PERSONA MASTER CARD',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 12, color: theme.colorScheme.primary),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 20),
+
+          // Horizontal Mini-Gallery Showcase Carousel (12 Templates)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Row(
+                    children: [
+                      const HugeIcon(icon: HugeIcons.strokeRoundedSparkles, size: 13, color: Colors.white70),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'CHOOSE EXPORT STYLE (12 TEMPLATES)',
+                        style: TextStyle(
+                          fontSize: 9.0,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.0,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'TAP TO PREVIEW',
+                        style: TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.primary,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 68,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: WrappedTemplateStyle.values.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final style = WrappedTemplateStyle.values[index];
+                      final isFocus = style.category == WrappedTemplateCategory.dedicatedFocus;
+
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          _pauseStory();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => StudioWrappedExportHub(initialStyle: style),
+                            ),
+                          ).then((_) => _resumeStory());
+                        },
+                        child: Container(
+                          width: 104,
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isFocus
+                                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                                : Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isFocus
+                                  ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                                  : Colors.white12,
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              HugeIcon(
+                                icon: style.icon,
+                                size: 16,
+                                color: isFocus ? theme.colorScheme.primary : Colors.white,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                style.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: isFocus ? theme.colorScheme.primary : Colors.white,
+                                ),
+                              ),
+                              Text(
+                                isFocus ? 'FOCUS CARD' : 'ALL-IN-ONE',
+                                style: const TextStyle(
+                                  fontSize: 7.0,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.4,
+                                  color: Colors.white54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
 
           // Primary Action: Open Export Hub
           SizedBox(
@@ -1146,7 +1449,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               },
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 18, color: Colors.black),
               label: const Text(
-                'EXPORT & SHARE RECAP CARDS',
+                'OPEN FULL EXPORT GALLERY',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.0),
               ),
             ),

@@ -132,6 +132,47 @@ class TopArtistRank {
 }
 
 @immutable
+class TopAlbumRank {
+  final int rank;
+  final String album;
+  final String artist;
+  final int playCount;
+  final int totalMinutes;
+  final int trackCount;
+  final String? artworkUrl;
+
+  const TopAlbumRank({
+    required this.rank,
+    required this.album,
+    required this.artist,
+    required this.playCount,
+    required this.totalMinutes,
+    required this.trackCount,
+    this.artworkUrl,
+  });
+
+  Map<String, dynamic> toMap() => {
+    'rank': rank,
+    'album': album,
+    'artist': artist,
+    'playCount': playCount,
+    'totalMinutes': totalMinutes,
+    'trackCount': trackCount,
+    'artworkUrl': artworkUrl,
+  };
+
+  factory TopAlbumRank.fromMap(Map<String, dynamic> map) => TopAlbumRank(
+    rank: (map['rank'] as num?)?.toInt() ?? 1,
+    album: map['album'] as String? ?? 'Unknown Album',
+    artist: map['artist'] as String? ?? 'Unknown Artist',
+    playCount: (map['playCount'] as num?)?.toInt() ?? 0,
+    totalMinutes: (map['totalMinutes'] as num?)?.toInt() ?? 0,
+    trackCount: (map['trackCount'] as num?)?.toInt() ?? 1,
+    artworkUrl: map['artworkUrl'] as String?,
+  );
+}
+
+@immutable
 class GenreBreakdown {
   final String genre;
   final int playCount;
@@ -251,6 +292,7 @@ class StudioWrappedData {
   final int uniqueAlbumsCount;
   final List<TopTrackRank> topTracks;
   final List<TopArtistRank> topArtists;
+  final List<TopAlbumRank> topAlbums;
   final List<GenreBreakdown> topGenres;
   final AudioPurityReport purityReport;
   final String favoriteAutoEqDriver;
@@ -273,6 +315,7 @@ class StudioWrappedData {
     required this.uniqueAlbumsCount,
     required this.topTracks,
     required this.topArtists,
+    this.topAlbums = const [],
     required this.topGenres,
     required this.purityReport,
     required this.favoriteAutoEqDriver,
@@ -296,6 +339,7 @@ class StudioWrappedData {
 
   TopTrackRank? get topTrack => topTracks.isNotEmpty ? topTracks.first : null;
   TopArtistRank? get topArtist => topArtists.isNotEmpty ? topArtists.first : null;
+  TopAlbumRank? get topAlbum => topAlbums.isNotEmpty ? topAlbums.first : null;
   GenreBreakdown? get topGenre => topGenres.isNotEmpty ? topGenres.first : null;
 
   int get totalListeningMinutes => totalMinutes;
@@ -317,6 +361,7 @@ class StudioWrappedData {
     'uniqueAlbumsCount': uniqueAlbumsCount,
     'topTracks': topTracks.map((t) => t.toMap()).toList(),
     'topArtists': topArtists.map((a) => a.toMap()).toList(),
+    'topAlbums': topAlbums.map((al) => al.toMap()).toList(),
     'topGenres': topGenres.map((g) => g.toMap()).toList(),
     'purityReport': purityReport.toMap(),
     'favoriteAutoEqDriver': favoriteAutoEqDriver,
@@ -370,6 +415,11 @@ class StudioWrappedData {
       topArtists: (map['topArtists'] as List?)
               ?.whereType<Map<String, dynamic>>()
               .map(TopArtistRank.fromMap)
+              .toList() ??
+          [],
+      topAlbums: (map['topAlbums'] as List?)
+              ?.whereType<Map<String, dynamic>>()
+              .map(TopAlbumRank.fromMap)
               .toList() ??
           [],
       topGenres: (map['topGenres'] as List?)

@@ -1688,46 +1688,80 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
 - [x] **62.3 Riverpod State Architecture & Auto Session Hook (`lib/features/analytics/data/playback_analytics_service.dart` & `lib/features/player/presentation/controllers/player_controller.dart`)**:
   - [x] Provider `playbackAnalyticsServiceProvider`, `studioWrappedFilterProvider` (`allTime`, `thisYear`, `last30Days`), dan `studioWrappedDataProvider`.
   - [x] Hook otomatis `_logSessionAnalytics(track, duration)` di `PlayerController` pada event `_onTrackEnded()`, pergantian lagu `_playTrackInternal()`, dan penghentian lagu `stop()`.
-- [x] **62.4 Eight Distinct Visual Recap Export Templates (`lib/features/analytics/presentation/templates/widgets/`)**:
-  - [x] **Template 1: Hi-Fi Studio Thermal Receipt (`thermal_receipt_view.dart`)**:
-    - Gaya *Receiptify* audiophile dengan custom painter gerigi sobekan kertas (*sawtooth paper tear*), barcode dinamis, tabel item bernomor, dan angka monospaced tabular.
-  - [x] **Template 2: Studio Sticker Slap & Tape Collage (`sticker_collage_view.dart`)**:
-    - Kolase bergaya Y2K / 3D tilted dengan stiker bersudut rotasi acak halus, bayangan realistis (*drop shadows*), stiker holografis *Certified Hi-Res Lossless*, dan isolasi studio tape.
-  - [x] **Template 3: Modern Bento Studio (`bento_studio_view.dart`)**:
-    - Tata letak grid bento modular Pure Material 3 Expressive, visualisasi horizontal progress bar genre, badge persona, artwork album/artis dinamis, dan palette studio bergradien lembut.
-  - [x] **Template 4: Vintage Cassette J-Card (`cassette_jcard_view.dart`)**:
-    - Desain insert kaset pita analog retro lengkap dengan visual spul kaset ganda (*tape spools*), tracklist bergaris indeks A/B side, dan badge *Chrome Type II High-Bias*.
-  - [x] **Template 5: Abstract Soundwave & Acoustic Aura (`abstract_aura_view.dart`)**:
-    - Desain gelombang suara fluida matematis (*procedural bezier ribbons*), radiant acoustic halo dengan artwork album, dynamic range dB gauge, dan HUD energi akustik.
-  - [x] **Template 6: 12" Vinyl Gatefold & LP Record (`vinyl_gatefold_view.dart`)**:
-    - Piringan hitam vinyl 12" realistis dengan alur micro-grooves, anisotropic light reflection sheen (sudut 45° & 225°), label tengah spindle artwork, segel 33⅓ RPM, runout matrix serial, dan daftar track Side A/B.
-  - [x] **Template 7: VIP Concert Ticket Stub & Backstage Pass (`concert_ticket_view.dart`)**:
-    - Tiket konser fisik premium dengan gerigi perforasi sobekan samping, header foil holografis berkilau, telemetri kursi VIP (`SEC: LOSSLESS • ROW: 24-BIT • SEAT: 96K`), daftar setlist panggung, dan barcode pass terverifikasi.
-  - [x] **Template 8: Cyber Tech Spec & Hardware IC HUD (`cyber_spec_card_view.dart`)**:
-    - Skematik datasheet hardware DSP bergaya cyberpunk / Tokyo studio engineering HUD, crosshair reticle target, memori optik inti artwork album, dan matriks telemetri sinyal DAC 32-bit float.
+- [x] **62.4 Twelve Distinct Visual Recap Export Templates (`lib/features/analytics/presentation/templates/widgets/`)**:
+  - **Category A: All-in-One Comprehensive Recaps (8 Templates)**:
+    - [x] **Template 1: Hi-Fi Studio Thermal Receipt (`thermal_receipt_view.dart`)**:
+      - Gaya *Receiptify* audiophile dengan custom painter gerigi sobekan kertas (*sawtooth paper tear*), barcode dinamis, tabel item bernomor, dan angka monospaced tabular.
+    - [x] **Template 2: Studio Sticker Slap & Tape Collage (`sticker_collage_view.dart`)**:
+      - Kolase bergaya Y2K / 3D tilted dengan stiker bersudut rotasi acak halus, bayangan realistis (*drop shadows*), stiker holografis *Certified Hi-Res Lossless*, dan isolasi studio tape.
+    - [x] **Template 3: Modern Bento Studio (`bento_studio_view.dart`)**:
+      - Tata letak grid bento modular Pure Material 3 Expressive, visualisasi horizontal progress bar genre, badge persona, artwork album/artis dinamis, dan palette studio bergradien lembut.
+    - [x] **Template 4: Vintage Cassette J-Card (`cassette_jcard_view.dart`)**:
+      - Desain insert kaset pita analog retro lengkap dengan visual spul kaset ganda (*tape spools*), tracklist bergaris indeks A/B side, dan badge *Chrome Type II High-Bias*.
+    - [x] **Template 5: Abstract Soundwave & Acoustic Aura (`abstract_aura_view.dart`)**:
+      - Desain gelombang suara fluida matematis (*procedural bezier ribbons*), radiant acoustic halo dengan artwork album, dynamic range dB gauge, dan HUD energi akustik.
+    - [x] **Template 6: 12" Vinyl Gatefold & LP Record (`vinyl_gatefold_view.dart`)**:
+      - Piringan hitam vinyl 12" realistis dengan alur micro-grooves, anisotropic light reflection sheen (sudut 45° & 225°), label tengah spindle artwork, segel 33⅓ RPM, runout matrix serial, dan daftar track Side A/B.
+    - [x] **Template 7: VIP Concert Ticket Stub & Backstage Pass (`concert_ticket_view.dart`)**:
+      - Tiket konser fisik premium dengan gerigi perforasi sobekan samping, header foil holografis berkilau, telemetri kursi VIP (`SEC: LOSSLESS • ROW: 24-BIT • SEAT: 96K`), daftar setlist panggung, dan barcode pass terverifikasi.
+    - [x] **Template 8: Cyber Tech Spec & Hardware IC HUD (`cyber_spec_card_view.dart`)**:
+      - Skematik datasheet hardware DSP bergaya cyberpunk / Tokyo studio engineering HUD, crosshair reticle target, memori optik inti artwork album, dan matriks telemetri sinyal DAC 32-bit float.
+  - **Category B: Dedicated Focus Cards / Template Terfokus (4 Templates)**:
+    - [x] **Template 9: Persona Master Card (`persona_master_card_view.dart`)**:
+      - Kartu fokus arketipe audiophile persona dengan concentric halo seal, acoustic telemetry radar (Energy Index, Dynamic Range dB, Lossless Purity %), quote filosofi suara, signature gear, dan status rantai hardware.
+    - [x] **Template 10: Top Artists Festival Lineup Poster (`artist_lineup_poster_view.dart`)**:
+      - Desain poster festival musik megah dengan Headliner #1 spotlight avatar, sub-headliners grid, supporting acts tag cloud, dan telemetri panggung (Stage Time, Pass Type VIP All-Access).
+    - [x] **Template 11: Genre & Sonic Spectrum Card (`genre_spectrum_card_view.dart`)**:
+      - Visualisasi spektrum frekuensi multi-warna, dominant sound ecosystem hero, acoustic spectrum distribution bar, dan peringkat top 4 genre dengan persentase presisi.
+    - [x] **Template 12: Top 10 Master Tracks Chart (`top_tracks_chart_view.dart`)**:
+      - Papan chart peringkat #01 hingga #10 dengan spotlight anthem #1 hero artwork, detail format bit-perfect, hitungan putaran (*plays*), dan durasi menit per track.
 - [x] **62.5 Harmonic Resonance Analytics & Audio Data Modeling (`HarmonicResonanceProfile` & `StudioWrappedCalculator`)**:
   - [x] Algoritma kalkulasi profil resonansi harmonik (`energyScore`, `timbralSignature`, `dynamicRangeDb`, `peakTimeWindow`, `waveSeedAmplitudes`).
   - [x] Klasifikasi otomatis karakter sonik: *Warm Harmonic Analog (Tube Drive)*, *Pure Bit-Perfect Transparent*, *Visceral Sub-Bass Impact*, atau *Studio Reference Linear*.
   - [x] Generator kurva gelombang bezier deterministik berbasis riwayat playback dan rasio Hi-Res/Lossless.
 - [x] **62.6 Multi-Template Export Hub & High-Res PNG Share (`lib/features/analytics/presentation/templates/studio_wrapped_export_hub.dart` & `lib/features/analytics/data/wrapped_image_exporter.dart`)**:
+  - [x] Two-Tier Segmented Category Switcher: `[ 🌟 All-in-One Recaps (8) ]` vs `[ 🎯 Dedicated Focus Cards (4) ]`.
   - [x] Preview interaktif kartu rekap 9:16 di dalam frame studio.
-  - [x] Switcher bar horizontal interaktif untuk 8 template visual dengan ikon HugeIcons dan label terintegrasi.
+  - [x] Switcher bar horizontal interaktif untuk ke-12 template visual dengan ikon HugeIcons dan label terintegrasi.
+  - [x] Navigasi kontekstual dengan parameter `initialStyle` dari slide story.
   - [x] Toggle paper styling (*Dark Ink* / *Classic Light Paper*).
   - [x] Rasterisasi off-screen `RepaintBoundary` beresolusi tinggi (pixelRatio 3.0 = 1080p+) dan pembagian langsung via `SharePlus.instance.share`.
 - [x] **62.7 Interactive 7-Slide Fullscreen Story Player (`lib/features/analytics/presentation/story/studio_wrapped_story_screen.dart`)**:
   - [x] Slide 1: Welcome & Total Listening Time Hero.
-  - [x] Slide 2: Top Tracks Countdown (#1 spotlight + #2–#5 rotation dengan `StudioArtworkWidget`).
-  - [x] Slide 3: Top Artists & Genre Ecosystem breakdown dengan artwork artist.
+  - [x] Slide 2: Top Tracks Countdown (#1 spotlight + #2–#5 rotation dengan `StudioArtworkWidget`) + **Quick-Export Button `[ 🏆 EXPORT TRACKS CHART ]`**.
+  - [x] Slide 3: Top Artists & Genre Ecosystem breakdown dengan artwork artist + **Quick-Export Buttons `[ 🎤 FESTIVAL POSTER ]` & `[ 🧬 SONIC SPECTRUM ]`**.
   - [x] Slide 4: Audio Purity & Lossless Bit-Rate breakdown (FLAC vs Hi-Res vs MP3).
   - [x] Slide 5: Studio Hardware & Signal Chain profile (AutoEQ + DSP Units + DAC).
   - [x] Slide 6: Grand Persona Reveal (Holographic badge, personality description, signature sound tags).
-  - [x] Slide 7: Complete Studio Summary & direct shortcut button to Export Hub.
+  - [x] Slide 7: Grand Reveal Summary + **Direct Shortcut `[ 🌟 EXPORT PERSONA MASTER CARD ]`** + **Interactive 12-Template Mini-Gallery Carousel** + Direct button to Export Gallery.
   - [x] Multi-segment animated top progress bar, gesture tap kiri (mundur), tap kanan (maju), dan long-press (pause).
 - [x] **62.8 Dashboard Bento Integration (`lib/features/dashboard/presentation/widgets/studio_wrapped_bento_banner.dart`)**:
   - [x] Banner bento modular Material 3 Expressive di layar utama dengan persona live badge, total listening minutes, artwork thumbnail, dan aksi instan `[ Open Story ]` / `[ Export Hub ]`.
-- [x] **62.9 Comprehensive Unit & Widget Test Suite (`test/studio_wrapped_analytics_and_templates_test.dart`)**:
-  - [x] 20 unit & widget tests mencakup: log serialization, persona determination, harmonic resonance calculations, rendering ke-8 visual templates tanpa overflow, story player 7-slide transitions, Export Hub switcher ke-8 gaya, dan dashboard bento banner.
-  - [x] Verifikasi zero regression: `flutter test` lulus 100% (536/536 tests passing) dan `flutter analyze` bersih (0 errors, 0 warnings).
+- [x] **Phase 63 — Dedicated Studio Listening Insights Detail Screen & Dashboard Bento Modernization**:
+  - [x] **63.1 Domain Model & Album Aggregation (`TopAlbumRank`)**:
+    - [x] Added `TopAlbumRank` domain model in `lib/features/analytics/domain/studio_wrapped_data.dart` with `rank`, `album`, `artist`, `playCount`, `totalMinutes`, `trackCount`, `artworkUrl`, and JSON serialization.
+    - [x] Implemented `_AlbumAggregator` in `lib/features/analytics/domain/studio_wrapped_calculator.dart` to compute ranked albums by listening duration and unique track IDs, with high-fidelity sample album fallback.
+  - [x] **63.2 Dedicated Studio Listening Insights & Analytics Detail Screen (`lib/features/analytics/presentation/details/studio_listening_stats_detail_screen.dart`)**:
+    - [x] Sticky Header with back navigation, subtitle, and instant action shortcuts to Story Recap and Export Hub.
+    - [x] Time Range Switcher pill group (`2026 Studio Wrapped`, `Last 30 Days`, `All-Time Journey`) reacting via Riverpod `studioWrappedFilterProvider`.
+    - [x] Persona Hero Showcase with archetype badge, personality traits, dynamic 5-axis acoustic radar painter (`_StudioRadarPainter`), and acoustic profile metrics (Timbral Tone, Energy Score, Peak Window).
+    - [x] Core Telemetry 4-Grid: Total Listening Time, Total Tracks Played, Unique Artists, and Unique Albums with `FontFeature.tabularFigures()`.
+    - [x] Top 10 Tracks Spotlight: #01 Champion Hero Card with artwork, format badge (`24-bit / 96kHz FLAC`), play count, total time, and instant playback trigger, plus #02–#10 ranked list tiles.
+    - [x] Top Artists Hall of Fame: Horizontal scrollable cards with circular artist artwork (`StudioArtworkWidget`), rank badge, listening share %, and total minutes.
+    - [x] Top Albums Hall of Fame: Ranked album cards with cover art, artist, track count badge, play count, and total duration.
+    - [x] Genre Spectrum: Percentage breakdown bars with play counts and signature genre indicators.
+    - [x] Audio Purity & Signal Chain: Lossless FLAC vs Hi-Res vs Lossy ratios, Bit-Perfect studio hours, and peak sample rate indicator.
+    - [x] Hardware DAC & DSP Telemetry: Connected DAC bridge hours, AutoEQ driver profile & target curve, and Triode Tube saturation hours.
+    - [x] Bottom Action Launchers: Quick access to Interactive Story Recap and 12-Template Export Hub.
+  - [x] **63.3 Dashboard Listening Statistics Bento Card Modernization (`lib/features/dashboard/presentation/widgets/listening_statistics_card.dart`)**:
+    - [x] Upgraded to pure Material 3 Expressive studio styling with live archetype badge, 3 tabular telemetry tiles, linear Hi-Res lossless progress bar, top 3 artists rotation preview with artwork avatars, top 3 heavy rotation tracks with format badges and instant play, and interactive `"View All"` pill button navigating to `StudioListeningStatsDetailScreen`.
+    - [x] Overflow-proof responsive layout using `Flexible` and ellipsis text wrapping across narrow screens (tested down to 336px).
+  - [x] **63.4 Quality Gate & Test Verification (`test/studio_wrapped_analytics_and_templates_test.dart`)**:
+    - [x] Added unit tests for `TopAlbumRank` calculation and ranking logic.
+    - [x] Added widget tests for `ListeningStatisticsCard` rendering, metrics, and navigation action.
+    - [x] Added widget tests for `StudioListeningStatsDetailScreen` section verification and time filter switcher.
+    - [x] 100% Quality Gate passed: `flutter analyze` (**0 errors, 0 warnings**) & `flutter test` (**544/544 tests passing**).
+
 
 
 

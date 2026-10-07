@@ -110,6 +110,40 @@ class StudioWrappedCalculator {
       );
     }).toList();
 
+    // 4.5. Compute Top Albums
+    final albumMap = <String, _AlbumAggregator>{};
+    for (final log in filteredLogs) {
+      final albumName = log.album.trim().isNotEmpty ? log.album.trim() : 'Unknown Album';
+      final artistName = log.artist.trim().isNotEmpty ? log.artist.trim() : 'Unknown Artist';
+      final key = '${albumName}_$artistName';
+      final agg = albumMap.putIfAbsent(
+        key,
+        () => _AlbumAggregator(album: albumName, artist: artistName, artworkUrl: log.artworkUrl),
+      );
+      if (agg.artworkUrl == null && log.artworkUrl != null) {
+        agg.artworkUrl = log.artworkUrl;
+      }
+      agg.playCount++;
+      agg.trackIds.add(log.trackId.isNotEmpty ? log.trackId : log.title);
+      agg.totalDurationMs += log.durationPlayedMs > 0 ? log.durationPlayedMs : log.trackDurationMs;
+    }
+
+    final sortedAlbums = albumMap.values.toList()
+      ..sort((a, b) => b.totalDurationMs.compareTo(a.totalDurationMs));
+
+    final topAlbums = sortedAlbums.take(5).toList().asMap().entries.map((e) {
+      final agg = e.value;
+      return TopAlbumRank(
+        rank: e.key + 1,
+        album: agg.album,
+        artist: agg.artist,
+        playCount: agg.playCount,
+        totalMinutes: math.max(1, (agg.totalDurationMs / 60000).round()),
+        trackCount: math.max(1, agg.trackIds.length),
+        artworkUrl: agg.artworkUrl,
+      );
+    }).toList();
+
     // 5. Compute Genres Breakdown
     final genreMap = <String, int>{};
     for (final log in filteredLogs) {
@@ -230,6 +264,7 @@ class StudioWrappedCalculator {
       uniqueAlbumsCount: uniqueAlbums,
       topTracks: topTracks,
       topArtists: topArtists,
+      topAlbums: topAlbums,
       topGenres: topGenres,
       purityReport: purityReport,
       favoriteAutoEqDriver: favDriver,
@@ -362,6 +397,7 @@ class StudioWrappedCalculator {
 
     List<TopTrackRank> sampleTracks;
     List<TopArtistRank> sampleArtists;
+    List<TopAlbumRank> sampleAlbums;
 
     if (libraryTracks != null && libraryTracks.isNotEmpty) {
       sampleTracks = libraryTracks.take(5).toList().asMap().entries.map((e) {
@@ -394,6 +430,34 @@ class StudioWrappedCalculator {
           totalMinutes: math.max(30, 900 - (e.key * 120)),
           percentage: double.parse((35.0 - (e.key * 6.0)).clamp(5.0, 45.0).toStringAsFixed(1)),
           artworkUrl: e.value.value,
+        );
+      }).toList();
+
+      final albumMap = <String, _AlbumAggregator>{};
+      for (final t in libraryTracks) {
+        final albumName = t.album.trim().isNotEmpty ? t.album.trim() : 'Studio Master Collection';
+        final artistName = t.artist.trim().isNotEmpty ? t.artist.trim() : 'Baydev HiFi';
+        final key = '${albumName}_$artistName';
+        final agg = albumMap.putIfAbsent(
+          key,
+          () => _AlbumAggregator(album: albumName, artist: artistName, artworkUrl: t.albumArtUrl),
+        );
+        agg.playCount += 12;
+        agg.trackIds.add(t.id);
+        agg.totalDurationMs += (t.duration.inMilliseconds > 0 ? t.duration.inMilliseconds : 240000) * 12;
+      }
+      final sortedSampleAlbums = albumMap.values.toList()
+        ..sort((a, b) => b.totalDurationMs.compareTo(a.totalDurationMs));
+      sampleAlbums = sortedSampleAlbums.take(5).toList().asMap().entries.map((e) {
+        final agg = e.value;
+        return TopAlbumRank(
+          rank: e.key + 1,
+          album: agg.album,
+          artist: agg.artist,
+          playCount: agg.playCount,
+          totalMinutes: math.max(1, (agg.totalDurationMs / 60000).round()),
+          trackCount: math.max(1, agg.trackIds.length),
+          artworkUrl: agg.artworkUrl,
         );
       }).toList();
     } else {
@@ -467,6 +531,14 @@ class StudioWrappedCalculator {
         TopArtistRank(rank: 4, artist: 'The Weeknd', playCount: 80, totalMinutes: 380, percentage: 9.5),
         TopArtistRank(rank: 5, artist: 'Daft Punk', playCount: 65, totalMinutes: 310, percentage: 7.8),
       ];
+
+      sampleAlbums = const <TopAlbumRank>[
+        TopAlbumRank(rank: 1, album: 'The Wall (Lossless Remaster)', artist: 'Pink Floyd', playCount: 142, totalMinutes: 852, trackCount: 26),
+        TopAlbumRank(rank: 2, album: 'The Dark Side of the Moon', artist: 'Pink Floyd', playCount: 98, totalMinutes: 686, trackCount: 10),
+        TopAlbumRank(rank: 3, album: 'A Night at the Opera', artist: 'Queen', playCount: 76, totalMinutes: 456, trackCount: 12),
+        TopAlbumRank(rank: 4, album: 'Hotel California (High-Res 192k)', artist: 'Eagles', playCount: 64, totalMinutes: 416, trackCount: 9),
+        TopAlbumRank(rank: 5, album: 'Starboy', artist: 'The Weeknd', playCount: 52, totalMinutes: 208, trackCount: 18),
+      ];
     }
 
     final sampleGenres = <GenreBreakdown>[
@@ -495,6 +567,7 @@ class StudioWrappedCalculator {
       uniqueAlbumsCount: math.max(sampleTracks.length, 86),
       topTracks: sampleTracks,
       topArtists: sampleArtists,
+      topAlbums: sampleAlbums,
       topGenres: sampleGenres,
       purityReport: samplePurity,
       favoriteAutoEqDriver: 'KZ CASTOR BLACK DUDU R',
@@ -541,6 +614,21 @@ class _ArtistAggregator {
   int totalDurationMs = 0;
 
   _ArtistAggregator({
+    required this.artist,
+    this.artworkUrl,
+  });
+}
+
+class _AlbumAggregator {
+  final String album;
+  final String artist;
+  String? artworkUrl;
+  final Set<String> trackIds = {};
+  int playCount = 0;
+  int totalDurationMs = 0;
+
+  _AlbumAggregator({
+    required this.album,
     required this.artist,
     this.artworkUrl,
   });
