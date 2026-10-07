@@ -10,6 +10,7 @@ import '../../domain/models/lyric_card_layout_style.dart';
 import '../../domain/models/lyric_card_theme.dart';
 import '../../domain/models/lyric_sticker_model.dart';
 import '../controllers/lyric_share_controller.dart';
+import 'lyric_card_fullscreen_lightbox.dart';
 import 'lyric_card_widget.dart';
 
 /// Studio Modal bottom sheet for customizing, previewing, and sharing lyric cards
@@ -21,6 +22,12 @@ class LyricShareSheet extends ConsumerStatefulWidget {
   final Color? vibrantAlbumColor;
   final Color? lightVibrantAlbumColor;
   final String? audioSpec;
+  final String? autoEqProfileName;
+  final String? dspProfileName;
+  final String? dacDeviceName;
+  final DateTime? timestamp;
+  final String? customGearText;
+  final bool initialShowQrCode;
 
   const LyricShareSheet({
     super.key,
@@ -31,6 +38,12 @@ class LyricShareSheet extends ConsumerStatefulWidget {
     this.vibrantAlbumColor,
     this.lightVibrantAlbumColor,
     this.audioSpec,
+    this.autoEqProfileName,
+    this.dspProfileName,
+    this.dacDeviceName,
+    this.timestamp,
+    this.customGearText,
+    this.initialShowQrCode = false,
   });
 
   /// Helper to display the sheet in modern Material 3 bottom modal
@@ -43,22 +56,36 @@ class LyricShareSheet extends ConsumerStatefulWidget {
     Color? vibrantAlbumColor,
     Color? lightVibrantAlbumColor,
     String? audioSpec,
+    String? autoEqProfileName,
+    String? dspProfileName,
+    String? dacDeviceName,
+    DateTime? timestamp,
+    String? customGearText,
+    bool initialShowQrCode = false,
   }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: LyricShareSheet(
-            track: track,
-            allLines: allLines,
-            initialSelectedLine: initialSelectedLine,
-            dominantAlbumColor: dominantAlbumColor,
-            vibrantAlbumColor: vibrantAlbumColor,
-            lightVibrantAlbumColor: lightVibrantAlbumColor,
-            audioSpec: audioSpec,
+      builder: (ctx) => ScaffoldMessenger(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: LyricShareSheet(
+              track: track,
+              allLines: allLines,
+              initialSelectedLine: initialSelectedLine,
+              dominantAlbumColor: dominantAlbumColor,
+              vibrantAlbumColor: vibrantAlbumColor,
+              lightVibrantAlbumColor: lightVibrantAlbumColor,
+              audioSpec: audioSpec,
+              autoEqProfileName: autoEqProfileName,
+              dspProfileName: dspProfileName,
+              dacDeviceName: dacDeviceName,
+              timestamp: timestamp,
+              customGearText: customGearText,
+              initialShowQrCode: initialShowQrCode,
+            ),
           ),
         ),
       ),
@@ -87,6 +114,12 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
         vibrantColor: widget.vibrantAlbumColor,
         lightVibrantColor: widget.lightVibrantAlbumColor,
         audioSpec: widget.audioSpec,
+        autoEqProfileName: widget.autoEqProfileName,
+        dspProfileName: widget.dspProfileName,
+        dacDeviceName: widget.dacDeviceName,
+        timestamp: widget.timestamp,
+        customGearText: widget.customGearText,
+        showQrCode: widget.initialShowQrCode,
       ),
     );
   }
@@ -97,6 +130,21 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
     super.dispose();
   }
 
+  void _showFeedbackSnackbar(BuildContext context, String message, {Duration duration = const Duration(seconds: 3)}) {
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger != null) {
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: duration,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -105,34 +153,39 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
     final maxSheetHeight = MediaQuery.of(context).size.height * 0.92;
 
-    return Container(
-      height: maxSheetHeight,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            // Top Drag Handle & Title Bar
-            _buildHeader(context, theme, state),
+    return ScaffoldMessenger(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Container(
+          height: maxSheetHeight,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                // Top Drag Handle & Title Bar
+                _buildHeader(context, theme, state),
 
-            // 4-Tab Studio Navigation Pill Bar
-            _buildTabSelector(theme, state),
+                // 4-Tab Studio Navigation Pill Bar
+                _buildTabSelector(theme, state),
 
-            const Divider(height: 1, thickness: 0.8),
+                const Divider(height: 1, thickness: 0.8),
 
-            // Tab Content
-            Expanded(
-              child: _buildActiveTabContent(context, theme, state, controller),
+                // Tab Content
+                Expanded(
+                  child: _buildActiveTabContent(context, theme, state, controller),
+                ),
+
+                const Divider(height: 1, thickness: 0.8),
+
+                // Bottom Actions Bar (Save & Share)
+                _buildBottomActionBar(context, theme, state, controller),
+              ],
             ),
-
-            const Divider(height: 1, thickness: 0.8),
-
-            // Bottom Actions Bar (Save & Share)
-            _buildBottomActionBar(context, theme, state, controller),
-          ],
+          ),
         ),
       ),
     );
@@ -320,28 +373,90 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Live Card Preview Stage
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOutCubic,
-                constraints: BoxConstraints(
-                  maxWidth: maxStageWidth,
-                  maxHeight: maxStageHeight,
+          // 1. Live Card Preview Stage (Clickable for Full Screen Lightbox)
+          GestureDetector(
+            onTap: () {
+              AppHaptics.mediumImpact();
+              LyricCardFullScreenLightbox.show(
+                context,
+                config: state.config,
+                colors: state.colors,
+                controller: controller,
+                parentRepaintKey: _repaintBoundaryKey,
+              );
+            },
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.12),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Center(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOutCubic,
+                      constraints: BoxConstraints(
+                        maxWidth: maxStageWidth,
+                        maxHeight: maxStageHeight,
+                      ),
+                      child: LyricCardWidget(
+                        config: state.config,
+                        colors: state.colors,
+                        repaintBoundaryKey: _repaintBoundaryKey,
+                      ),
+                    ),
+                  ),
                 ),
-                child: LyricCardWidget(
-                  config: state.config,
-                  colors: state.colors,
-                  repaintBoundaryKey: _repaintBoundaryKey,
+                // Full Screen Preview Badge
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface.withValues(alpha: 0.90),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.25),
+                        width: 0.8,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.12),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedMaximize02,
+                          size: 12,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Full Screen',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ).animate().fade(duration: 250.ms).scale(begin: const Offset(0.96, 0.96)),
 
@@ -2042,12 +2157,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                       AppHaptics.lightImpact();
                       final path = await controller.saveImageLocally(_repaintBoundaryKey);
                       if (context.mounted && path != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Saved to Gallery: $path'),
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
+                        _showFeedbackSnackbar(context, 'Saved to Gallery: $path');
                       }
                     },
               icon: HugeIcon(
@@ -2076,19 +2186,13 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                       final result = await controller.shareLyricCard(_repaintBoundaryKey);
                       if (context.mounted) {
                         if (result.isMissingPlugin) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Image saved to Gallery! Restart app to enable direct native sharing.'),
-                              duration: Duration(seconds: 4),
-                            ),
+                          _showFeedbackSnackbar(
+                            context,
+                            'Image saved to Gallery! Restart app to enable direct native sharing.',
+                            duration: const Duration(seconds: 4),
                           );
                         } else if (!result.success && result.errorMessage != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(result.errorMessage!),
-                              duration: const Duration(seconds: 3),
-                            ),
-                          );
+                          _showFeedbackSnackbar(context, result.errorMessage!);
                         }
                       }
                     },

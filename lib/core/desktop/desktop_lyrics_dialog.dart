@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../app/theme/app_haptics.dart';
+import '../../features/dsp_rack/presentation/controllers/dsp_rack_controller.dart';
+import '../../features/hardware_dac/presentation/controllers/dac_bridge_controller.dart';
 import '../../features/lyrics_share/presentation/widgets/lyric_share_sheet.dart';
 import '../../features/player/data/lyrics_service.dart';
 import '../../features/player/domain/track.dart';
 import '../../features/player/presentation/controllers/player_controller.dart';
 import '../../features/player/presentation/widgets/synchronized_lyrics_view.dart';
+import '../../features/pro_q_studio/presentation/controllers/eq_controller.dart';
 
 /// Modal dialog lirik tersinkronisasi untuk platform Desktop
 class DesktopLyricsDialog extends ConsumerStatefulWidget {
@@ -145,6 +148,14 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                         ),
                         onPressed: () {
                           if (currentTrack != null && _lyricsResult.lines.isNotEmpty) {
+                            final eqState = ref.read(eqControllerProvider);
+                            final dspState = ref.read(dspRackControllerProvider);
+                            final dacState = ref.read(dacBridgeControllerProvider);
+
+                            final autoEqName = eqState.targetFr?.name ?? eqState.activePresetName;
+                            final dspName = dspState.activePresetId ?? (dspState.isBypassed ? 'Bypassed' : 'Studio Mastering');
+                            final dacName = dacState.isConnected ? (dacState.device?.formattedTitle ?? 'Hardware USB DAC') : 'Bit-Perfect Direct Out';
+
                             AppHaptics.selectionClick();
                             LyricShareSheet.show(
                               context,
@@ -154,6 +165,10 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                                       currentTrack.format.name != 'unknown'
                                   ? '${currentTrack.format.name.toUpperCase()} MASTER'
                                   : 'STUDIO MASTER',
+                              autoEqProfileName: autoEqName.isNotEmpty ? autoEqName : null,
+                              dspProfileName: dspName.isNotEmpty ? dspName : null,
+                              dacDeviceName: dacName.isNotEmpty ? dacName : null,
+                              timestamp: DateTime.now(),
                             );
                           }
                         },

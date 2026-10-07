@@ -5,6 +5,7 @@ import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/models/lyric_card_theme.dart';
 import '../../../domain/models/lyric_share_config.dart';
 import '../components/audiophile_telemetry_stamp.dart';
+import '../components/lyric_qr_link_badge.dart';
 import '../components/lyric_sticker_badge.dart';
 
 /// Template 4: Waveform Timeline Studio Lyric Card View
@@ -40,10 +41,87 @@ class WaveformQuoteCardView extends StatelessWidget {
       endDur = lines.last.timestamp + const Duration(seconds: 4);
     }
 
+    if (isLandscape) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        padding: EdgeInsets.symmetric(
+          horizontal: (14 * scale).clamp(10.0, 20.0),
+          vertical: (8 * scale).clamp(6.0, 14.0),
+        ),
+        decoration: BoxDecoration(
+          color: colors.backgroundColor,
+          borderRadius: BorderRadius.circular(20 * scale),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Waveform HUD Header
+            _buildHeader(scale, startDur, endDur),
+
+            SizedBox(height: 4 * scale),
+
+            // Compact Waveform Graphic Visualizer
+            _buildWaveformBars(scale * 0.75),
+
+            SizedBox(height: 4 * scale),
+
+            // Centered Lyrics (Directly expanded without inflexible Spacers)
+            Expanded(
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: config.textAlign == TextAlign.center
+                      ? Alignment.center
+                      : (config.textAlign == TextAlign.right ? Alignment.centerRight : Alignment.centerLeft),
+                  child: _buildLyricsContent(context),
+                ),
+              ),
+            ),
+
+            if (config.personalNote != null && config.personalNote!.trim().isNotEmpty) ...[
+              SizedBox(height: 2 * scale),
+              Center(
+                child: Text(
+                  '— “${config.personalNote!.trim()}”',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: config.textAlign,
+                  style: TextStyle(
+                    color: colors.accentColor,
+                    fontSize: (8.5 * scale).clamp(7.0, 12.0),
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+
+            if (config.audiophileStamp.hasAnyEnabled) ...[
+              SizedBox(height: 3 * scale),
+              AudiophileTelemetryStamp(
+                track: track,
+                stampConfig: config.audiophileStamp,
+                colors: colors,
+                scale: scale * 0.75,
+                isCompact: true,
+              ),
+            ],
+
+            SizedBox(height: 4 * scale),
+
+            // Footer
+            _buildFooter(context, scale * 0.85),
+          ],
+        ),
+      );
+    }
+
+    // Portrait / Square Layout (1:1, 4:5, 9:16)
     return Container(
       width: double.infinity,
       height: double.infinity,
-      padding: EdgeInsets.all(16 * scale),
+      padding: EdgeInsets.all((14 * scale).clamp(10.0, 20.0)),
       decoration: BoxDecoration(
         color: colors.backgroundColor,
         borderRadius: BorderRadius.circular(20 * scale),
@@ -52,46 +130,9 @@ class WaveformQuoteCardView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Top Waveform HUD Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8 * scale, vertical: 4 * scale),
-                decoration: BoxDecoration(
-                  color: colors.surfaceColor,
-                  borderRadius: BorderRadius.circular(6 * scale),
-                  border: Border.all(color: colors.borderColor, width: 0.8 * scale),
-                ),
-                child: Row(
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedAudioWave01,
-                      size: 13 * scale,
-                      color: colors.accentColor,
-                    ),
-                    SizedBox(width: 5 * scale),
-                    Text(
-                      '${_formatDuration(startDur)} — ${_formatDuration(endDur)}',
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        color: colors.primaryTextColor,
-                        fontSize: 9.5 * scale,
-                        fontWeight: FontWeight.w800,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (config.selectedStickers.isNotEmpty)
-                LyricStickerBadge(
-                  sticker: config.selectedStickers.first,
-                  scale: scale * 0.85,
-                ),
-            ],
-          ),
+          _buildHeader(scale, startDur, endDur),
 
-          SizedBox(height: 12 * scale),
+          SizedBox(height: 10 * scale),
 
           // Waveform Graphic Visualizer
           _buildWaveformBars(scale),
@@ -111,6 +152,24 @@ class WaveformQuoteCardView extends StatelessWidget {
               ),
             ),
           ),
+
+          if (config.personalNote != null && config.personalNote!.trim().isNotEmpty) ...[
+            SizedBox(height: 4 * scale),
+            Center(
+              child: Text(
+                '— “${config.personalNote!.trim()}”',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: config.textAlign,
+                style: TextStyle(
+                  color: colors.accentColor,
+                  fontSize: (9.5 * scale).clamp(8.0, 14.0),
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
 
           const Spacer(),
 
@@ -132,6 +191,114 @@ class WaveformQuoteCardView extends StatelessWidget {
     );
   }
 
+  Widget _buildHeader(double scale, Duration startDur, Duration endDur) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          flex: 6,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (config.showBranding) ...[
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 4 * scale, vertical: 2 * scale),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceColor,
+                    borderRadius: BorderRadius.circular(4 * scale),
+                    border: Border.all(color: colors.borderColor, width: 0.6 * scale),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedAudioWave01,
+                        size: (10 * scale).clamp(8.0, 14.0),
+                        color: colors.accentColor,
+                      ),
+                      SizedBox(width: 3 * scale),
+                      Text(
+                        'BAYDEV',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          color: colors.primaryTextColor,
+                          fontSize: (7.5 * scale).clamp(6.0, 10.0),
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 3 * scale),
+              ],
+              Flexible(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 4 * scale, vertical: 2 * scale),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceColor,
+                    borderRadius: BorderRadius.circular(4 * scale),
+                    border: Border.all(color: colors.borderColor, width: 0.6 * scale),
+                  ),
+                  child: Text(
+                    '${_formatDuration(startDur)} — ${_formatDuration(endDur)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      color: colors.primaryTextColor,
+                      fontSize: (7.5 * scale).clamp(6.0, 11.0),
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 4 * scale),
+        Flexible(
+          flex: 4,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (config.showAudioSpecsBadge) ...[
+                Flexible(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 4 * scale, vertical: 2 * scale),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceColor,
+                      borderRadius: BorderRadius.circular(4 * scale),
+                      border: Border.all(color: colors.borderColor, width: 0.6 * scale),
+                    ),
+                    child: Text(
+                      config.customAudioSpec ?? 'LOSSLESS',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        color: colors.badgeTextColor,
+                        fontSize: (7.0 * scale).clamp(6.0, 10.0),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 3 * scale),
+              ],
+              if (config.selectedStickers.isNotEmpty)
+                LyricStickerBadge(
+                  sticker: config.selectedStickers.first,
+                  scale: scale * 0.75,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildWaveformBars(double scale) {
     const barHeights = [
       0.35, 0.65, 0.45, 0.85, 0.95, 0.60, 0.30, 0.55, 0.80, 1.00,
@@ -140,17 +307,22 @@ class WaveformQuoteCardView extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 24 * scale,
+      height: (20 * scale).clamp(10.0, 26.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: barHeights.map((h) {
-          return Container(
-            width: 3.2 * scale,
-            height: (24 * scale * h).clamp(4.0 * scale, 24.0 * scale),
-            decoration: BoxDecoration(
-              color: colors.accentColor.withValues(alpha: 0.75),
-              borderRadius: BorderRadius.circular(2 * scale),
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: (1.0 * scale).clamp(0.5, 2.0)),
+              child: Center(
+                child: Container(
+                  height: (20 * scale * h).clamp(3.0 * scale, 20.0 * scale),
+                  decoration: BoxDecoration(
+                    color: colors.accentColor.withValues(alpha: 0.75),
+                    borderRadius: BorderRadius.circular(2 * scale),
+                  ),
+                ),
+              ),
             ),
           );
         }).toList(),
@@ -224,11 +396,11 @@ class WaveformQuoteCardView extends StatelessWidget {
       children: [
         if (config.showArtwork) ...[
           ClipRRect(
-            borderRadius: BorderRadius.circular(8 * scale),
+            borderRadius: BorderRadius.circular(6 * scale),
             child: StudioArtworkWidget(
               track: track,
-              width: 38 * scale,
-              height: 38 * scale,
+              width: (34 * scale).clamp(24.0, 48.0),
+              height: (34 * scale).clamp(24.0, 48.0),
               fit: BoxFit.cover,
             ),
           ),
@@ -244,7 +416,7 @@ class WaveformQuoteCardView extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colors.primaryTextColor,
-                  fontSize: 12 * scale,
+                  fontSize: (11 * scale).clamp(8.5, 15.0),
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -254,13 +426,22 @@ class WaveformQuoteCardView extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colors.secondaryTextColor,
-                  fontSize: 9.5 * scale,
+                  fontSize: (9.0 * scale).clamp(7.0, 13.0),
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
+        if (config.showQrCode) ...[
+          SizedBox(width: 6 * scale),
+          LyricQrLinkBadge(
+            track: track,
+            colors: colors,
+            scale: scale * 0.75,
+            size: 28,
+          ),
+        ],
       ],
     );
   }

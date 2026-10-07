@@ -5,6 +5,7 @@ import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/models/lyric_card_theme.dart';
 import '../../../domain/models/lyric_share_config.dart';
 import '../components/audiophile_telemetry_stamp.dart';
+import '../components/lyric_qr_link_badge.dart';
 import '../components/lyric_sticker_badge.dart';
 
 /// Template 6: Abstract Aura Harmonic Color Mesh Lyric View
@@ -53,41 +54,79 @@ class AbstractAuraLyricView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (config.showBranding)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8 * scale, vertical: 4 * scale),
-                    decoration: BoxDecoration(
-                      color: colors.backgroundColor.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(20 * scale),
-                      border: Border.all(color: colors.borderColor, width: 0.8 * scale),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedSun03,
-                          size: 13 * scale,
-                          color: colors.accentColor,
-                        ),
-                        SizedBox(width: 5 * scale),
-                        Text(
-                          'SONIC AURA // 2026',
-                          style: TextStyle(
-                            color: colors.primaryTextColor,
-                            fontSize: 9 * scale,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.8,
+                  Flexible(
+                    flex: 5,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8 * scale, vertical: 4 * scale),
+                      decoration: BoxDecoration(
+                        color: colors.backgroundColor.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(20 * scale),
+                        border: Border.all(color: colors.borderColor, width: 0.8 * scale),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedSun03,
+                            size: 13 * scale,
+                            color: colors.accentColor,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 5 * scale),
+                          Flexible(
+                            child: Text(
+                              'SONIC AURA // 2026',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: colors.primaryTextColor,
+                                fontSize: 9 * scale,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 else
                   const SizedBox.shrink(),
-                if (config.selectedStickers.isNotEmpty)
-                  LyricStickerBadge(
-                    sticker: config.selectedStickers.first,
-                    scale: scale * 0.85,
+                Flexible(
+                  flex: 6,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (config.showAudioSpecsBadge) ...[
+                        Flexible(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6 * scale, vertical: 3 * scale),
+                            decoration: BoxDecoration(
+                              color: colors.backgroundColor.withValues(alpha: 0.75),
+                              borderRadius: BorderRadius.circular(6 * scale),
+                              border: Border.all(color: colors.borderColor, width: 0.6 * scale),
+                            ),
+                            child: Text(
+                              config.customAudioSpec ?? 'STUDIO MASTER',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'monospace',
+                                color: colors.badgeTextColor,
+                                fontSize: 7.5 * scale,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 6 * scale),
+                      ],
+                      if (config.selectedStickers.isNotEmpty)
+                        LyricStickerBadge(
+                          sticker: config.selectedStickers.first,
+                          scale: scale * 0.85,
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
 
@@ -138,7 +177,7 @@ class AbstractAuraLyricView extends StatelessWidget {
               SizedBox(height: 8 * scale),
             ],
 
-            // Footer
+            // Footer Track Info & QR
             Row(
               children: [
                 if (config.showArtwork) ...[
@@ -180,6 +219,15 @@ class AbstractAuraLyricView extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (config.showQrCode) ...[
+                  SizedBox(width: 8 * scale),
+                  LyricQrLinkBadge(
+                    track: track,
+                    colors: colors,
+                    scale: scale * 0.82,
+                    size: 32,
+                  ),
+                ],
               ],
             ),
           ],

@@ -6,6 +6,7 @@ import '../../../../player/domain/track.dart';
 import '../../../domain/models/lyric_card_theme.dart';
 import '../../../domain/models/lyric_share_config.dart';
 import '../components/audiophile_telemetry_stamp.dart';
+import '../components/lyric_qr_link_badge.dart';
 import '../components/lyric_sticker_badge.dart';
 
 /// Template 1: Classic Minimal Studio Card View
@@ -406,6 +407,15 @@ class ClassicMinimalCardView extends StatelessWidget {
             ],
           ),
         ),
+        if (config.showQrCode) ...[
+          SizedBox(width: 8 * scale),
+          LyricQrLinkBadge(
+            track: track,
+            colors: colors,
+            scale: scale * 0.85,
+            size: 34,
+          ),
+        ],
       ],
     );
   }
@@ -456,6 +466,15 @@ class ClassicMinimalCardView extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          if (config.showQrCode) ...[
+            SizedBox(height: 8 * scale),
+            LyricQrLinkBadge(
+              track: track,
+              colors: colors,
+              scale: scale * 0.8,
+              size: 32,
+            ),
+          ],
         ],
       ),
     );

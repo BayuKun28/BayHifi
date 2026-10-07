@@ -88,6 +88,12 @@ class LyricShareController extends StateNotifier<LyricShareState> {
     Color? vibrantColor,
     Color? lightVibrantColor,
     String? audioSpec,
+    String? autoEqProfileName,
+    String? dspProfileName,
+    String? dacDeviceName,
+    DateTime? timestamp,
+    String? customGearText,
+    bool showQrCode = false,
   }) : super(_createInitialState(
           track: track,
           allLines: allLines,
@@ -96,6 +102,12 @@ class LyricShareController extends StateNotifier<LyricShareState> {
           vibrantColor: vibrantColor,
           lightVibrantColor: lightVibrantColor,
           audioSpec: audioSpec,
+          autoEqProfileName: autoEqProfileName,
+          dspProfileName: dspProfileName,
+          dacDeviceName: dacDeviceName,
+          timestamp: timestamp,
+          customGearText: customGearText,
+          showQrCode: showQrCode,
         )) {
     // Automatically extract palette swatches asynchronously on initialization
     extractPaletteFromTrack(track);
@@ -109,10 +121,30 @@ class LyricShareController extends StateNotifier<LyricShareState> {
     Color? vibrantColor,
     Color? lightVibrantColor,
     String? audioSpec,
+    String? autoEqProfileName,
+    String? dspProfileName,
+    String? dacDeviceName,
+    DateTime? timestamp,
+    String? customGearText,
+    bool showQrCode = false,
   }) {
     final selected = initialSelectedLine != null
         ? [initialSelectedLine]
         : (allLines.isNotEmpty ? [allLines.first] : <LyricsLine>[]);
+
+    final initialStamp = AudiophileStampConfig(
+      enabled: true,
+      showSignalChain: true,
+      showAutoEq: true,
+      showDspUnits: true,
+      showDacBridge: true,
+      showTimestamp: true,
+      autoEqProfileName: autoEqProfileName ?? 'Harman Target (Default)',
+      dspProfileName: dspProfileName ?? 'Tube + Limiter DSP',
+      dacDeviceName: dacDeviceName ?? 'Bit-Perfect Direct Out',
+      timestamp: timestamp ?? DateTime.now(),
+      customGearText: customGearText,
+    );
 
     final config = LyricShareConfig(
       track: track,
@@ -124,6 +156,8 @@ class LyricShareController extends StateNotifier<LyricShareState> {
       showBranding: true,
       showRomanized: false,
       customAudioSpec: audioSpec,
+      audiophileStamp: initialStamp,
+      showQrCode: showQrCode,
     );
 
     final colors = LyricCardColors.forBlurredArtwork(

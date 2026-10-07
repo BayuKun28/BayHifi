@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_haptics.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../../core/lyrics/east_asian_romanizer.dart';
-import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
+import '../../../hardware_dac/presentation/controllers/dac_bridge_controller.dart';
 import '../../../lyrics_share/presentation/widgets/lyric_share_sheet.dart';
+import '../../../pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../../data/lyrics_service.dart';
 import '../../domain/lyrics_line.dart';
 import '../controllers/player_controller.dart';
@@ -613,6 +616,14 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     final track = ref.read(playerControllerProvider).currentTrack;
     if (track == null || widget.lyricsResult.lines.isEmpty) return;
 
+    final eqState = ref.read(eqControllerProvider);
+    final dspState = ref.read(dspRackControllerProvider);
+    final dacState = ref.read(dacBridgeControllerProvider);
+
+    final autoEqName = eqState.targetFr?.name ?? eqState.activePresetName;
+    final dspName = dspState.activePresetId ?? (dspState.isBypassed ? 'Bypassed' : 'Studio Mastering');
+    final dacName = dacState.isConnected ? (dacState.device?.formattedTitle ?? 'Hardware USB DAC') : 'Bit-Perfect Direct Out';
+
     AppHaptics.mediumImpact();
     LyricShareSheet.show(
       context,
@@ -622,6 +633,10 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
       audioSpec: track.format.name.isNotEmpty && track.format.name != 'unknown'
           ? '${track.format.name.toUpperCase()} MASTER'
           : 'STUDIO MASTER',
+      autoEqProfileName: autoEqName.isNotEmpty ? autoEqName : null,
+      dspProfileName: dspName.isNotEmpty ? dspName : null,
+      dacDeviceName: dacName.isNotEmpty ? dacName : null,
+      timestamp: DateTime.now(),
     );
   }
 

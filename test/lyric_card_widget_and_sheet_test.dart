@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:baydev_hifi/features/lyrics_share/domain/models/lyric_card_layout_style.dart';
 import 'package:baydev_hifi/features/lyrics_share/domain/models/lyric_card_theme.dart';
 import 'package:baydev_hifi/features/lyrics_share/domain/models/lyric_share_config.dart';
+import 'package:baydev_hifi/features/lyrics_share/presentation/widgets/lyric_card_fullscreen_lightbox.dart';
 import 'package:baydev_hifi/features/lyrics_share/presentation/widgets/lyric_card_widget.dart';
 import 'package:baydev_hifi/features/lyrics_share/presentation/widgets/lyric_share_sheet.dart';
 import 'package:baydev_hifi/features/player/domain/lyrics_line.dart';
@@ -172,5 +173,68 @@ void main() {
     expect(find.text('Is this the real life?'), findsOneWidget);
     expect(find.text('Bohemian Rhapsody'), findsOneWidget);
     expect(find.text('Queen'), findsOneWidget);
+  });
+
+  testWidgets('LyricCardFullScreenLightbox renders interactive preview with ratio pill and actions', (tester) async {
+    const config = LyricShareConfig(
+      track: testTrack,
+      selectedLines: [
+        LyricsLine(timestamp: Duration(seconds: 1), text: 'Is this the real life?'),
+      ],
+      layoutStyle: LyricCardLayoutStyle.waveformQuote,
+      ratio: LyricCardRatio.portrait_4_5,
+      preset: LyricCardThemePreset.studioOledBlack,
+      showBranding: true,
+    );
+
+    final colors = LyricCardColors.fromPreset(LyricCardThemePreset.studioOledBlack);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: LyricCardFullScreenLightbox(
+            config: config,
+            colors: colors,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(LyricCardFullScreenLightbox), findsOneWidget);
+    expect(find.byType(InteractiveViewer), findsOneWidget);
+    expect(find.text('Portrait (4:5) • WAVEFORM TIMELINE'), findsOneWidget);
+  });
+
+  testWidgets('LyricShareSheet displays Full Screen badge and opens lightbox on tap', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: LyricShareSheet(
+              track: testTrack,
+              allLines: testLines,
+              initialSelectedLine: testLines[0],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify Full Screen badge in Studio preview tab
+    expect(find.text('Full Screen'), findsOneWidget);
+
+    // Tap on Full Screen badge
+    await tester.tap(find.text('Full Screen'));
+    await tester.pumpAndSettle();
+
+    // Verify Lightbox is pushed on navigator
+    expect(find.byType(LyricCardFullScreenLightbox), findsOneWidget);
+    expect(find.byType(InteractiveViewer), findsOneWidget);
   });
 }

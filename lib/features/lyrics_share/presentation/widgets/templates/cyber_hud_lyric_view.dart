@@ -4,6 +4,7 @@ import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/models/lyric_card_theme.dart';
 import '../../../domain/models/lyric_share_config.dart';
 import '../components/audiophile_telemetry_stamp.dart';
+import '../components/lyric_qr_link_badge.dart';
 import '../components/lyric_sticker_badge.dart';
 
 /// Template 5: CyberSpec Studio HUD Lyric View
@@ -24,6 +25,11 @@ class CyberHudLyricView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final track = config.track;
+    final topLeftBracket = '┌──[ 0x7F ]';
+    final bottomLeftBracket = config.showBranding ? '└──[ HIFI ]' : '└──[ PCM ]';
+    final audioSpecTag = config.showAudioSpecsBadge
+        ? '[ ${config.customAudioSpec ?? 'LOSSLESS'} ]──┐'
+        : '[ SYNC ]──┐';
 
     return Container(
       width: double.infinity,
@@ -44,7 +50,7 @@ class CyberHudLyricView extends StatelessWidget {
             top: 0,
             left: 0,
             child: Text(
-              '┌──[ 0x7F ]',
+              topLeftBracket,
               maxLines: 1,
               overflow: TextOverflow.clip,
               style: TextStyle(
@@ -59,7 +65,7 @@ class CyberHudLyricView extends StatelessWidget {
             top: 0,
             right: 0,
             child: Text(
-              '[ SYNC ]──┐',
+              audioSpecTag,
               maxLines: 1,
               overflow: TextOverflow.clip,
               style: TextStyle(
@@ -74,7 +80,7 @@ class CyberHudLyricView extends StatelessWidget {
             bottom: 0,
             left: 0,
             child: Text(
-              '└──[ HIFI ]',
+              bottomLeftBracket,
               maxLines: 1,
               overflow: TextOverflow.clip,
               style: TextStyle(
@@ -146,7 +152,7 @@ class CyberHudLyricView extends StatelessWidget {
                   SizedBox(height: 8 * scale),
                 ],
 
-                // Footer
+                // Footer Track Info & QR
                 Row(
                   children: [
                     if (config.showArtwork) ...[
@@ -190,6 +196,15 @@ class CyberHudLyricView extends StatelessWidget {
                         ],
                       ),
                     ),
+                    if (config.showQrCode) ...[
+                      SizedBox(width: 8 * scale),
+                      LyricQrLinkBadge(
+                        track: track,
+                        colors: colors,
+                        scale: scale * 0.82,
+                        size: 32,
+                      ),
+                    ],
                   ],
                 ),
               ],

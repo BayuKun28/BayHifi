@@ -71,11 +71,11 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     }
 
     // 2. AutoEQ Profile
-    if (stampConfig.showAutoEq && stampConfig.autoEqProfileName != null && stampConfig.autoEqProfileName!.isNotEmpty) {
+    if (stampConfig.showAutoEq && stampConfig.effectiveAutoEqName.isNotEmpty) {
       items.add(
         _buildChip(
           icon: HugeIcons.strokeRoundedSlidersVertical,
-          label: 'AUTOEQ: ${stampConfig.autoEqProfileName!.toUpperCase()}',
+          label: 'AUTOEQ: ${stampConfig.effectiveAutoEqName.toUpperCase()}',
           fontSize: fontSize,
           iconSize: iconSize,
         ),
@@ -83,11 +83,11 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     }
 
     // 3. Virtual DSP Units
-    if (stampConfig.showDspUnits && stampConfig.dspProfileName != null && stampConfig.dspProfileName!.isNotEmpty) {
+    if (stampConfig.showDspUnits && stampConfig.effectiveDspChainName.isNotEmpty) {
       items.add(
         _buildChip(
           icon: HugeIcons.strokeRoundedAudioWave01,
-          label: 'DSP: ${stampConfig.dspProfileName!.toUpperCase()}',
+          label: 'DSP: ${stampConfig.effectiveDspChainName.toUpperCase()}',
           fontSize: fontSize,
           iconSize: iconSize,
         ),
@@ -95,11 +95,11 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     }
 
     // 4. Hardware USB DAC Bridge
-    if (stampConfig.showDacBridge && stampConfig.dacDeviceName != null && stampConfig.dacDeviceName!.isNotEmpty) {
+    if (stampConfig.showDacBridge && stampConfig.effectiveDacName.isNotEmpty) {
       items.add(
         _buildChip(
           icon: HugeIcons.strokeRoundedCpu,
-          label: 'DAC: ${stampConfig.dacDeviceName!.toUpperCase()}',
+          label: 'DAC: ${stampConfig.effectiveDacName.toUpperCase()}',
           fontSize: fontSize,
           iconSize: iconSize,
           highlight: true,
@@ -120,11 +120,12 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     }
 
     // 6. Listening Timestamp
-    if (stampConfig.showTimestamp && stampConfig.timestamp != null) {
+    if (stampConfig.showTimestamp) {
+      final effectiveTime = stampConfig.timestamp ?? DateTime.now();
       items.add(
         _buildChip(
           icon: HugeIcons.strokeRoundedClock01,
-          label: _formatTimestamp(stampConfig.timestamp),
+          label: _formatTimestamp(effectiveTime),
           fontSize: fontSize,
           iconSize: iconSize,
         ),
