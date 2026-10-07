@@ -4,8 +4,11 @@ import 'package:palette_generator/palette_generator.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/lyrics_line.dart';
 import '../../../player/domain/track.dart';
+import '../../domain/models/audiophile_stamp_config.dart';
+import '../../domain/models/lyric_card_layout_style.dart';
 import '../../domain/models/lyric_card_theme.dart';
 import '../../domain/models/lyric_share_config.dart';
+import '../../domain/models/lyric_sticker_model.dart';
 import '../services/lyric_image_generator.dart';
 
 /// State of the Lyric Share Sheet & Generator
@@ -448,6 +451,88 @@ class LyricShareController extends StateNotifier<LyricShareState> {
       customAudioSpec: clean,
       clearCustomAudioSpec: clean == null,
     );
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set layout style template
+  void setLayoutStyle(LyricCardLayoutStyle style) {
+    final newConfig = state.config.copyWith(layoutStyle: style);
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Toggle or set dual-line East Asian Romanization subtitles
+  void toggleDualLineRomanized(bool value) {
+    final newConfig = state.config.copyWith(showDualLineRomanized: value);
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set optional personal note / quote caption
+  void setPersonalNote(String? note) {
+    final clean = (note != null && note.trim().isNotEmpty) ? note.trim() : null;
+    final newConfig = state.config.copyWith(
+      personalNote: clean,
+      clearPersonalNote: clean == null,
+    );
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Toggle sticker selection (max 3 stickers)
+  void toggleSticker(LyricStickerType sticker) {
+    final current = List<LyricStickerType>.from(state.config.selectedStickers);
+    if (current.contains(sticker)) {
+      current.remove(sticker);
+    } else {
+      if (current.length >= 3) {
+        current.removeAt(0); // Cycle oldest sticker if exceeding limit
+      }
+      current.add(sticker);
+    }
+    final newConfig = state.config.copyWith(selectedStickers: current);
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set selected stickers directly
+  void setStickers(List<LyricStickerType> stickers) {
+    final newConfig = state.config.copyWith(selectedStickers: stickers);
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Set complete audiophile telemetry stamp configuration
+  void setAudiophileStamp(AudiophileStampConfig stampConfig) {
+    final newConfig = state.config.copyWith(audiophileStamp: stampConfig);
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Update partial audiophile telemetry stamp fields
+  void updateAudiophileStamp({
+    bool? enabled,
+    bool? showFormatRate,
+    bool? showAutoEqProfile,
+    bool? showVirtualDspChain,
+    bool? showHardwareDac,
+    bool? showTimestamp,
+    String? customDacName,
+    String? customAutoEqName,
+    String? customDspChainName,
+  }) {
+    final updatedStamp = state.config.audiophileStamp.copyWith(
+      enabled: enabled,
+      showFormatRate: showFormatRate,
+      showAutoEqProfile: showAutoEqProfile,
+      showVirtualDspChain: showVirtualDspChain,
+      showHardwareDac: showHardwareDac,
+      showTimestamp: showTimestamp,
+      customDacName: customDacName,
+      customAutoEqName: customAutoEqName,
+      customDspChainName: customDspChainName,
+    );
+    final newConfig = state.config.copyWith(audiophileStamp: updatedStamp);
+    state = state.copyWith(config: newConfig, clearStatus: true);
+  }
+
+  /// Toggle QR code badge deep link
+  void toggleQrCode(bool value) {
+    final newConfig = state.config.copyWith(showQrCode: value);
     state = state.copyWith(config: newConfig, clearStatus: true);
   }
 

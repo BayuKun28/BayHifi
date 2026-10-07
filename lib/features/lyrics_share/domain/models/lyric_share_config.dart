@@ -3,13 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../player/domain/lyrics_line.dart';
 import '../../../player/domain/track.dart';
+import 'audiophile_stamp_config.dart';
+import 'lyric_card_layout_style.dart';
 import 'lyric_card_theme.dart';
+import 'lyric_sticker_model.dart';
 
-/// Configuration state for building and rendering a lyric share card
+/// Configuration state for building and rendering a studio lyric share card
 @immutable
 class LyricShareConfig {
   final Track track;
   final List<LyricsLine> selectedLines;
+  final LyricCardLayoutStyle layoutStyle;
   final LyricCardRatio ratio;
   final LyricCardBackgroundMode backgroundMode;
   final LyricCardThemePreset preset;
@@ -40,12 +44,19 @@ class LyricShareConfig {
   final Color? customBackgroundColor;
   final bool showAudioSpecsBadge;
   final bool showBranding;
+  final bool showArtwork;
   final bool showRomanized;
+  final bool showDualLineRomanized;
   final String? customAudioSpec; // e.g. "FLAC 96kHz / 24-bit • Studio Master"
+  final AudiophileStampConfig audiophileStamp;
+  final List<LyricStickerType> selectedStickers;
+  final String? personalNote;
+  final bool showQrCode;
 
   const LyricShareConfig({
     required this.track,
     required this.selectedLines,
+    this.layoutStyle = LyricCardLayoutStyle.classicMinimal,
     this.ratio = LyricCardRatio.story_9_16,
     this.backgroundMode = LyricCardBackgroundMode.blurredArtwork,
     this.preset = LyricCardThemePreset.dynamicAlbumArt,
@@ -64,8 +75,14 @@ class LyricShareConfig {
     this.customBackgroundColor,
     this.showAudioSpecsBadge = true,
     this.showBranding = true,
+    this.showArtwork = true,
     this.showRomanized = false,
+    this.showDualLineRomanized = false,
     this.customAudioSpec,
+    this.audiophileStamp = const AudiophileStampConfig(),
+    this.selectedStickers = const [],
+    this.personalNote,
+    this.showQrCode = false,
   })  : _highlightStyle = highlightStyle,
         _strokeWidth = strokeWidth,
         _backgroundBlurSigma = backgroundBlurSigma,
@@ -74,7 +91,7 @@ class LyricShareConfig {
         _letterSpacing = letterSpacing;
 
   /// Maximum number of selectable lines to maintain clean layout & legibility
-  static const int maxSelectedLines = 5;
+  static const int maxSelectedLines = 6;
 
   /// Returns true if at least one line is selected
   bool get hasSelection => selectedLines.isNotEmpty;
@@ -87,6 +104,7 @@ class LyricShareConfig {
   LyricShareConfig copyWith({
     Track? track,
     List<LyricsLine>? selectedLines,
+    LyricCardLayoutStyle? layoutStyle,
     LyricCardRatio? ratio,
     LyricCardBackgroundMode? backgroundMode,
     LyricCardThemePreset? preset,
@@ -105,13 +123,21 @@ class LyricShareConfig {
     Color? customBackgroundColor,
     bool? showAudioSpecsBadge,
     bool? showBranding,
+    bool? showArtwork,
     bool? showRomanized,
+    bool? showDualLineRomanized,
     String? customAudioSpec,
     bool clearCustomAudioSpec = false,
+    AudiophileStampConfig? audiophileStamp,
+    List<LyricStickerType>? selectedStickers,
+    String? personalNote,
+    bool clearPersonalNote = false,
+    bool? showQrCode,
   }) {
     return LyricShareConfig(
       track: track ?? this.track,
       selectedLines: selectedLines ?? this.selectedLines,
+      layoutStyle: layoutStyle ?? this.layoutStyle,
       ratio: ratio ?? this.ratio,
       backgroundMode: backgroundMode ?? this.backgroundMode,
       preset: preset ?? this.preset,
@@ -130,8 +156,14 @@ class LyricShareConfig {
       customBackgroundColor: customBackgroundColor ?? this.customBackgroundColor,
       showAudioSpecsBadge: showAudioSpecsBadge ?? this.showAudioSpecsBadge,
       showBranding: showBranding ?? this.showBranding,
+      showArtwork: showArtwork ?? this.showArtwork,
       showRomanized: showRomanized ?? this.showRomanized,
+      showDualLineRomanized: showDualLineRomanized ?? this.showDualLineRomanized,
       customAudioSpec: clearCustomAudioSpec ? null : (customAudioSpec ?? this.customAudioSpec),
+      audiophileStamp: audiophileStamp ?? this.audiophileStamp,
+      selectedStickers: selectedStickers ?? this.selectedStickers,
+      personalNote: clearPersonalNote ? null : (personalNote ?? this.personalNote),
+      showQrCode: showQrCode ?? this.showQrCode,
     );
   }
 
@@ -142,6 +174,7 @@ class LyricShareConfig {
           runtimeType == other.runtimeType &&
           track == other.track &&
           listEquals(selectedLines, other.selectedLines) &&
+          layoutStyle == other.layoutStyle &&
           ratio == other.ratio &&
           backgroundMode == other.backgroundMode &&
           preset == other.preset &&
@@ -160,13 +193,20 @@ class LyricShareConfig {
           customBackgroundColor == other.customBackgroundColor &&
           showAudioSpecsBadge == other.showAudioSpecsBadge &&
           showBranding == other.showBranding &&
+          showArtwork == other.showArtwork &&
           showRomanized == other.showRomanized &&
-          customAudioSpec == other.customAudioSpec;
+          showDualLineRomanized == other.showDualLineRomanized &&
+          customAudioSpec == other.customAudioSpec &&
+          audiophileStamp == other.audiophileStamp &&
+          listEquals(selectedStickers, other.selectedStickers) &&
+          personalNote == other.personalNote &&
+          showQrCode == other.showQrCode;
 
   @override
   int get hashCode =>
       track.hashCode ^
       Object.hashAll(selectedLines) ^
+      layoutStyle.hashCode ^
       ratio.hashCode ^
       backgroundMode.hashCode ^
       preset.hashCode ^
@@ -185,6 +225,12 @@ class LyricShareConfig {
       (customBackgroundColor?.hashCode ?? 0) ^
       showAudioSpecsBadge.hashCode ^
       showBranding.hashCode ^
+      showArtwork.hashCode ^
       showRomanized.hashCode ^
-      (customAudioSpec?.hashCode ?? 0);
+      showDualLineRomanized.hashCode ^
+      (customAudioSpec?.hashCode ?? 0) ^
+      audiophileStamp.hashCode ^
+      Object.hashAll(selectedStickers) ^
+      (personalNote?.hashCode ?? 0) ^
+      showQrCode.hashCode;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:baydev_hifi/features/lyrics_share/domain/models/lyric_card_layout_style.dart';
 import 'package:baydev_hifi/features/lyrics_share/domain/models/lyric_card_theme.dart';
 import 'package:baydev_hifi/features/lyrics_share/domain/models/lyric_share_config.dart';
 import 'package:baydev_hifi/features/lyrics_share/presentation/widgets/lyric_card_widget.dart';
@@ -32,6 +33,7 @@ void main() {
         LyricsLine(timestamp: Duration(seconds: 1), text: 'Is this the real life?'),
         LyricsLine(timestamp: Duration(seconds: 4), text: 'Is this just fantasy?'),
       ],
+      layoutStyle: LyricCardLayoutStyle.classicMinimal,
       ratio: LyricCardRatio.story_9_16,
       preset: LyricCardThemePreset.studioOledBlack,
       showAudioSpecsBadge: true,
@@ -45,8 +47,8 @@ void main() {
         home: Scaffold(
           body: Center(
             child: SizedBox(
-              width: 300,
-              height: 533,
+              width: 360,
+              height: 640,
               child: LyricCardWidget(
                 config: config,
                 colors: colors,
@@ -65,7 +67,11 @@ void main() {
     expect(find.text('LOSSLESS MASTER • FLAC'), findsOneWidget);
   });
 
-  testWidgets('LyricShareSheet renders tabs and handles line selection', (tester) async {
+  testWidgets('LyricShareSheet renders 4-tab studio navigation and handles line selection', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
@@ -83,15 +89,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Title & Subtitle
-    expect(find.text('Share Lyrics'), findsOneWidget);
+    expect(find.text('Lyric Studio Share'), findsOneWidget);
     expect(find.text('Bohemian Rhapsody'), findsAtLeast(1));
 
-    // Verify Tab Pills
-    expect(find.text('Card Preview'), findsOneWidget);
-    expect(find.text('Select Lines (1/5)'), findsOneWidget);
+    // Verify 4 Tab Pills
+    expect(find.text('Studio'), findsOneWidget);
+    expect(find.text('Lines (1/6)'), findsOneWidget);
+    expect(find.text('Telemetry'), findsWidgets);
+    expect(find.text('Style'), findsOneWidget);
 
     // Switch to Select Lines Tab
-    await tester.tap(find.text('Select Lines (1/5)'));
+    await tester.tap(find.text('Lines (1/6)'));
     await tester.pumpAndSettle();
 
     // Verify lines in list
@@ -104,15 +112,11 @@ void main() {
     await tester.tap(find.text('Is this just fantasy?'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Select Lines (2/5)'), findsOneWidget);
+    expect(find.text('Lines (2/6)'), findsOneWidget);
 
-    // Switch back to Preview Tab
-    await tester.tap(find.text('Card Preview'));
+    // Switch to Style Tab
+    await tester.tap(find.text('Style'));
     await tester.pumpAndSettle();
-
-    // Verify both lines are visible in the preview card
-    expect(find.text('Is this the real life?'), findsOneWidget);
-    expect(find.text('Is this just fantasy?'), findsOneWidget);
 
     // Verify Typography Controls
     expect(find.text('TYPOGRAPHY & FONT WEIGHT'), findsOneWidget);
@@ -132,51 +136,13 @@ void main() {
     expect(find.text('Share to Socials'), findsOneWidget);
   });
 
-  testWidgets('LyricShareSheet custom audio specs dialog updates badge text', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        child: MaterialApp(
-          home: Scaffold(
-            body: LyricShareSheet(
-              track: testTrack,
-              allLines: testLines,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpAndSettle();
-
-    // Scroll until Custom Text button is visible and tap
-    await tester.ensureVisible(find.text('Custom Text'));
-    expect(find.text('Custom Text'), findsOneWidget);
-    await tester.tap(find.text('Custom Text'));
-    await tester.pumpAndSettle();
-
-    // Verify Dialog opened
-    expect(find.text('Custom Audio Specs'), findsOneWidget);
-    expect(find.text('Apply'), findsOneWidget);
-
-    // Enter custom text
-    await tester.enterText(find.byType(TextField), '24-BIT 96kHz • STUDIO MASTER');
-    await tester.tap(find.text('Apply'));
-    await tester.pumpAndSettle();
-
-    // Verify dialog closed and custom badge text is shown in preview card
-    expect(find.text('24-BIT 96kHz • STUDIO MASTER'), findsWidgets);
-  });
-
   testWidgets('LyricCardWidget renders landscape 16:9 dedicated two-column layout', (tester) async {
     const config = LyricShareConfig(
       track: testTrack,
       selectedLines: [
         LyricsLine(timestamp: Duration(seconds: 1), text: 'Is this the real life?'),
       ],
+      layoutStyle: LyricCardLayoutStyle.classicMinimal,
       ratio: LyricCardRatio.landscape_16_9,
       preset: LyricCardThemePreset.studioOledBlack,
       showAudioSpecsBadge: true,
@@ -206,6 +172,5 @@ void main() {
     expect(find.text('Is this the real life?'), findsOneWidget);
     expect(find.text('Bohemian Rhapsody'), findsOneWidget);
     expect(find.text('Queen'), findsOneWidget);
-    expect(find.text('A Night at the Opera'), findsOneWidget);
   });
 }

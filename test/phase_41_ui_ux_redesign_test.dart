@@ -94,7 +94,7 @@ void main() {
 
   group('Phase 41: UI/UX Redesign & Visual Polish Tests', () {
     testWidgets('1. LyricShareSheet ratio selector is horizontally scrollable', (tester) async {
-      tester.view.physicalSize = const Size(400, 800);
+      tester.view.physicalSize = const Size(600, 1200);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
@@ -113,6 +113,10 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
+
+      // Ensure ratio section is visible
+      await tester.ensureVisible(find.text('Story (9:16)'));
       await tester.pumpAndSettle();
 
       // Verify ratio options exist

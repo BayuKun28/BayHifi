@@ -132,6 +132,7 @@ void main() {
       const LyricsLine(timestamp: Duration(seconds: 25), text: 'Fourth chorus line'),
       const LyricsLine(timestamp: Duration(seconds: 30), text: 'Fifth chorus line'),
       const LyricsLine(timestamp: Duration(seconds: 35), text: 'Outro line'),
+      const LyricsLine(timestamp: Duration(seconds: 40), text: 'Post-outro line'),
     ];
 
     test('Initial state correctly sets initial selected line', () {
@@ -147,7 +148,7 @@ void main() {
       expect(controller.state.config.customAudioSpec, 'FLAC 96kHz / 24-bit');
     });
 
-    test('toggleLineSelection calculates contiguous range up to maxSelectedLines', () {
+    test('toggleLineSelection calculates contiguous range up to maxSelectedLines (6)', () {
       final controller = LyricShareController(
         track: testTrack,
         allLines: allLines,
@@ -161,10 +162,15 @@ void main() {
       expect(controller.state.config.selectedLines[1], allLines[2]);
       expect(controller.state.config.selectedLines[2], allLines[3]);
 
-      // Select line 6 (index 6, distance > 5 lines) -> should reset to single selection of line 6
+      // Select line 6 (index 6, range 1..6 = 6 lines <= 6) -> selects 6 lines
       controller.toggleLineSelection(allLines[6]);
+      expect(controller.state.config.selectedLines.length, 6);
+
+      // Select line 7 (index 7, range 0..7 = 8 lines > 6) from line 0 -> should reset to single selection of line 7
+      controller.toggleLineSelection(allLines[0]);
+      controller.toggleLineSelection(allLines[7]);
       expect(controller.state.config.selectedLines.length, 1);
-      expect(controller.state.config.selectedLines.first, allLines[6]);
+      expect(controller.state.config.selectedLines.first, allLines[7]);
     });
 
     test('Background mode switcher, palette swatches, and custom colors update cleanly', () {

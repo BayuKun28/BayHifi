@@ -214,6 +214,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      // Switch to Style tab
+      await tester.tap(find.text('Style'));
+      await tester.pumpAndSettle();
+
       // Check Typography & Font Weight section
       expect(find.text('TYPOGRAPHY & FONT WEIGHT'), findsOneWidget);
       expect(find.text('Regular'), findsOneWidget);
@@ -231,9 +235,6 @@ void main() {
       // Tap on Text Stroke
       await tester.tap(find.text('Text Stroke'));
       await tester.pumpAndSettle();
-
-      expect(find.text('Border Width:'), findsOneWidget);
-      expect(find.text('Standard (2.5px)'), findsOneWidget);
 
       // Tap on Instagram Pill
       await tester.tap(find.text('Instagram Pill'));

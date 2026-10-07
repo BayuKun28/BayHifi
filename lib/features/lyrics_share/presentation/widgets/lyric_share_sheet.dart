@@ -3,13 +3,16 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_haptics.dart';
+import '../../../../core/lyrics/east_asian_romanizer.dart';
 import '../../../player/domain/lyrics_line.dart';
 import '../../../player/domain/track.dart';
+import '../../domain/models/lyric_card_layout_style.dart';
 import '../../domain/models/lyric_card_theme.dart';
+import '../../domain/models/lyric_sticker_model.dart';
 import '../controllers/lyric_share_controller.dart';
 import 'lyric_card_widget.dart';
 
-/// Modal bottom sheet for customizing, previewing, and sharing lyric cards
+/// Studio Modal bottom sheet for customizing, previewing, and sharing lyric cards
 class LyricShareSheet extends ConsumerStatefulWidget {
   final Track track;
   final List<LyricsLine> allLines;
@@ -47,7 +50,7 @@ class LyricShareSheet extends ConsumerStatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (ctx) => Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
+          constraints: const BoxConstraints(maxWidth: 640),
           child: LyricShareSheet(
             track: track,
             allLines: allLines,
@@ -69,7 +72,8 @@ class LyricShareSheet extends ConsumerStatefulWidget {
 class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   final GlobalKey _repaintBoundaryKey = GlobalKey();
   late final StateNotifierProvider<LyricShareController, LyricShareState> _provider;
-  int _currentTabIndex = 0; // 0 = Preview & Theme, 1 = Select Lines
+  int _currentTabIndex = 0; // 0 = Template & Ratio, 1 = Lines, 2 = Telemetry & Stickers, 3 = Style & Colors
+  final TextEditingController _noteTextController = TextEditingController();
 
   @override
   void initState() {
@@ -88,12 +92,18 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   }
 
   @override
+  void dispose() {
+    _noteTextController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(_provider);
     final controller = ref.read(_provider.notifier);
 
-    final maxSheetHeight = MediaQuery.of(context).size.height * 0.90;
+    final maxSheetHeight = MediaQuery.of(context).size.height * 0.92;
 
     return Container(
       height: maxSheetHeight,
@@ -108,21 +118,19 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             // Top Drag Handle & Title Bar
             _buildHeader(context, theme, state),
 
-            // Tab Selector (Preview & Customize vs Select Lines)
+            // 4-Tab Studio Navigation Pill Bar
             _buildTabSelector(theme, state),
 
             const Divider(height: 1, thickness: 0.8),
 
             // Tab Content
             Expanded(
-              child: _currentTabIndex == 0
-                  ? _buildPreviewTab(context, theme, state, controller)
-                  : _buildSelectLinesTab(theme, state, controller),
+              child: _buildActiveTabContent(context, theme, state, controller),
             ),
 
             const Divider(height: 1, thickness: 0.8),
 
-            // Bottom Actions Bar
+            // Bottom Actions Bar (Save & Share)
             _buildBottomActionBar(context, theme, state, controller),
           ],
         ),
@@ -165,7 +173,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Share Lyrics',
+                      'Lyric Studio Share',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
@@ -203,91 +211,95 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   Widget _buildTabSelector(ThemeData theme, LyricShareState state) {
     final selectedCount = state.config.selectedLines.length;
 
+    final tabs = [
+      (0, 'Studio', HugeIcons.strokeRoundedImage01),
+      (1, 'Lines ($selectedCount/6)', HugeIcons.strokeRoundedTextFont),
+      (2, 'Telemetry', HugeIcons.strokeRoundedSlidersHorizontal),
+      (3, 'Style', HugeIcons.strokeRoundedPaintBoard),
+    ];
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
-          children: [
-            Expanded(
-              child: _buildTabPill(
-                title: 'Card Preview',
-                icon: HugeIcons.strokeRoundedImage01,
-                isSelected: _currentTabIndex == 0,
-                theme: theme,
+          children: tabs.map((tab) {
+            final isSelected = _currentTabIndex == tab.$1;
+            return Expanded(
+              child: GestureDetector(
                 onTap: () {
                   AppHaptics.selectionClick();
-                  setState(() => _currentTabIndex = 0);
+                  setState(() => _currentTabIndex = tab.$1);
                 },
-              ),
-            ),
-            Expanded(
-              child: _buildTabPill(
-                title: 'Select Lines ($selectedCount/5)',
-                icon: HugeIcons.strokeRoundedTextFont,
-                isSelected: _currentTabIndex == 1,
-                theme: theme,
-                onTap: () {
-                  AppHaptics.selectionClick();
-                  setState(() => _currentTabIndex = 1);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabPill({
-    required String title,
-    required dynamic icon,
-    required bool isSelected,
-    required ThemeData theme,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(9),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            HugeIcon(
-              icon: icon,
-              size: 16,
-              color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 5),
-            Flexible(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: tab.$3,
+                        size: 14,
+                        color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          tab.$2,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            );
+          }).toList(),
         ),
       ),
     );
   }
 
-  Widget _buildPreviewTab(
+  Widget _buildActiveTabContent(
+    BuildContext context,
+    ThemeData theme,
+    LyricShareState state,
+    LyricShareController controller,
+  ) {
+    switch (_currentTabIndex) {
+      case 0:
+        return _buildStudioPreviewTab(context, theme, state, controller);
+      case 1:
+        return _buildSelectLinesTab(theme, state, controller);
+      case 2:
+        return _buildTelemetryTab(context, theme, state, controller);
+      case 3:
+        return _buildStyleTab(context, theme, state, controller);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // TAB 0: STUDIO PREVIEW & TEMPLATES
+  // ═════════════════════════════════════════════════════════════════════════
+
+  Widget _buildStudioPreviewTab(
     BuildContext context,
     ThemeData theme,
     LyricShareState state,
@@ -295,7 +307,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   ) {
     final ratio = state.config.ratio;
 
-    // Viewport bounding box constraints tailored to each aspect ratio
     final double maxStageWidth = ratio == LyricCardRatio.landscape_16_9
         ? 340.0
         : (ratio == LyricCardRatio.story_9_16 ? 210.0 : 250.0);
@@ -309,7 +320,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ─── 1. LIVE CARD PREVIEW STAGE ──────────────────────────────────
+          // 1. Live Card Preview Stage
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
@@ -336,36 +347,621 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
           const SizedBox(height: 14),
 
-          // ─── 2. CARD RATIO BENTO ─────────────────────────────────────────
+          // 2. Layout Style Templates Bento
           _buildBentoSection(
             theme: theme,
-            title: 'CARD RATIO',
-            icon: HugeIcons.strokeRoundedAspectRatio,
+            title: 'LAYOUT TEMPLATES (6 STYLES)',
+            icon: HugeIcons.strokeRoundedLayout01,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
-                children: [
-                  for (final r in LyricCardRatio.values) ...[
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: SizedBox(
-                        width: 86,
-                        child: _buildRatioOption(r, state.config.ratio, theme, () {
-                          AppHaptics.selectionClick();
-                          controller.setRatio(r);
-                        }),
-                      ),
-                    ),
-                  ],
-                ],
+                children: LyricCardLayoutStyle.values.map((style) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _buildTemplateStyleCard(style, state.config.layoutStyle, theme, () {
+                      AppHaptics.selectionClick();
+                      controller.setLayoutStyle(style);
+                    }),
+                  );
+                }).toList(),
               ),
             ),
           ),
 
           const SizedBox(height: 12),
 
-          // ─── 3. TYPOGRAPHY & FONT WEIGHT BENTO ───────────────────────────
+          // 3. Aspect Ratio Bento
+          _buildBentoSection(
+            theme: theme,
+            title: 'ASPECT RATIO',
+            icon: HugeIcons.strokeRoundedAspectRatio,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: LyricCardRatio.values.map((r) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: SizedBox(
+                      width: 86,
+                      child: _buildRatioOption(r, state.config.ratio, theme, () {
+                        AppHaptics.selectionClick();
+                        controller.setRatio(r);
+                      }),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 4. Quick Branding & Specs Toggles
+          _buildBentoSection(
+            theme: theme,
+            title: 'QUICK BADGES',
+            icon: HugeIcons.strokeRoundedSparkles,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildQuickToggleCard(
+                    title: 'Branding',
+                    icon: HugeIcons.strokeRoundedSparkles,
+                    isActive: state.config.showBranding,
+                    theme: theme,
+                    onTap: () {
+                      AppHaptics.selectionClick();
+                      controller.toggleBranding(!state.config.showBranding);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildQuickToggleCard(
+                    title: 'Telemetry',
+                    icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                    isActive: state.config.audiophileStamp.enabled,
+                    theme: theme,
+                    onTap: () {
+                      AppHaptics.selectionClick();
+                      controller.updateAudiophileStamp(enabled: !state.config.audiophileStamp.enabled);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildQuickToggleCard(
+                    title: 'QR Link',
+                    icon: HugeIcons.strokeRoundedQrCode,
+                    isActive: state.config.showQrCode,
+                    theme: theme,
+                    onTap: () {
+                      AppHaptics.selectionClick();
+                      controller.toggleQrCode(!state.config.showQrCode);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTemplateStyleCard(
+    LyricCardLayoutStyle style,
+    LyricCardLayoutStyle currentStyle,
+    ThemeData theme,
+    VoidCallback onTap,
+  ) {
+    final isSelected = style == currentStyle;
+
+    dynamic getStyleIcon() {
+      switch (style) {
+        case LyricCardLayoutStyle.classicMinimal:
+          return HugeIcons.strokeRoundedLayout01;
+        case LyricCardLayoutStyle.polaroidFrame:
+          return HugeIcons.strokeRoundedImage01;
+        case LyricCardLayoutStyle.cassetteJCard:
+          return HugeIcons.strokeRoundedAlbum01;
+        case LyricCardLayoutStyle.waveformQuote:
+          return HugeIcons.strokeRoundedAudioWaveform;
+        case LyricCardLayoutStyle.cyberHUD:
+          return HugeIcons.strokeRoundedComputer;
+        case LyricCardLayoutStyle.abstractAura:
+          return HugeIcons.strokeRoundedSparkles;
+      }
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 104,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary.withValues(alpha: 0.15)
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+              ),
+              child: HugeIcon(
+                icon: getStyleIcon(),
+                size: 16,
+                color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              style.label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              style.subtitle,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickToggleCard({
+    required String title,
+    required dynamic icon,
+    required bool isActive,
+    required ThemeData theme,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isActive
+              ? theme.colorScheme.primary.withValues(alpha: 0.15)
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? theme.colorScheme.primary : Colors.transparent,
+            width: 1.2,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            HugeIcon(
+              icon: icon,
+              size: 14,
+              color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // TAB 1: LYRICS & SUBTITLES SELECTION
+  // ═════════════════════════════════════════════════════════════════════════
+
+  Widget _buildSelectLinesTab(
+    ThemeData theme,
+    LyricShareState state,
+    LyricShareController controller,
+  ) {
+    final allLines = state.allLines;
+
+    return Column(
+      children: [
+        // Subtitles Options Header (Dual-Line Romanization)
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+            border: Border(
+              bottom: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedTextFont,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dual-Line Romanization',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'Auto-transliterate CJK (Romaji, Pinyin, Hangul)',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch.adaptive(
+                value: state.config.showDualLineRomanized,
+                onChanged: (val) {
+                  AppHaptics.selectionClick();
+                  controller.toggleDualLineRomanized(val);
+                },
+                activeTrackColor: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
+
+        // List of lines
+        Expanded(
+          child: allLines.isEmpty
+              ? Center(
+                  child: Text(
+                    'No synchronized lyrics available for this track.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                )
+              : ListView.separated(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  itemCount: allLines.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 6),
+                  itemBuilder: (context, index) {
+                    final line = allLines[index];
+                    final isSelected = state.config.selectedLines.contains(line);
+
+                    // Automatic Romanization preview if enabled
+                    String? subtitleText;
+                    if (line.hasRomanization) {
+                      subtitleText = line.effectiveRomanized;
+                    } else if (EastAsianRomanizer.needsRomanization(line.text)) {
+                      subtitleText = EastAsianRomanizer.romanize(line.text);
+                    }
+
+                    return GestureDetector(
+                      onTap: () {
+                        AppHaptics.selectionClick();
+                        controller.toggleLineSelection(line);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.4) : Colors.transparent,
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: HugeIcon(
+                                icon: isSelected
+                                    ? HugeIcons.strokeRoundedCheckmarkCircle02
+                                    : HugeIcons.strokeRoundedCircle,
+                                size: 18,
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    line.text,
+                                    style: TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                      color: isSelected
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  if (subtitleText != null && subtitleText.isNotEmpty) ...[
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      subtitleText,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontStyle: FontStyle.italic,
+                                        color: isSelected
+                                            ? theme.colorScheme.primary.withValues(alpha: 0.8)
+                                            : theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // TAB 2: AUDIOPHILE TELEMETRY, STAMPS & STICKERS
+  // ═════════════════════════════════════════════════════════════════════════
+
+  Widget _buildTelemetryTab(
+    BuildContext context,
+    ThemeData theme,
+    LyricShareState state,
+    LyricShareController controller,
+  ) {
+    final stamp = state.config.audiophileStamp;
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Audiophile Signal Chain Stamp Bento
+          _buildBentoSection(
+            theme: theme,
+            title: 'SIGNAL CHAIN TELEMETRY STAMP',
+            icon: HugeIcons.strokeRoundedSlidersHorizontal,
+            child: Column(
+              children: [
+                _buildToggleRow(
+                  title: 'Master Telemetry Stamp',
+                  subtitle: 'Audiophile signal chain badge on footer',
+                  value: stamp.enabled,
+                  theme: theme,
+                  onChanged: (val) {
+                    AppHaptics.selectionClick();
+                    controller.updateAudiophileStamp(enabled: val);
+                  },
+                ),
+                if (stamp.enabled) ...[
+                  const Divider(height: 12, thickness: 0.6),
+                  _buildToggleRow(
+                    title: 'Format & Sampling Rate',
+                    subtitle: 'e.g. FLAC 96kHz / 24-bit',
+                    value: stamp.showFormatRate,
+                    theme: theme,
+                    onChanged: (val) {
+                      AppHaptics.selectionClick();
+                      controller.updateAudiophileStamp(showFormatRate: val);
+                    },
+                  ),
+                  const Divider(height: 12, thickness: 0.6),
+                  _buildToggleRow(
+                    title: 'AutoEQ Profile Tag',
+                    subtitle: stamp.effectiveAutoEqName,
+                    value: stamp.showAutoEqProfile,
+                    theme: theme,
+                    onChanged: (val) {
+                      AppHaptics.selectionClick();
+                      controller.updateAudiophileStamp(showAutoEqProfile: val);
+                    },
+                  ),
+                  const Divider(height: 12, thickness: 0.6),
+                  _buildToggleRow(
+                    title: 'Virtual DSP Chain',
+                    subtitle: stamp.effectiveDspChainName,
+                    value: stamp.showVirtualDspChain,
+                    theme: theme,
+                    onChanged: (val) {
+                      AppHaptics.selectionClick();
+                      controller.updateAudiophileStamp(showVirtualDspChain: val);
+                    },
+                  ),
+                  const Divider(height: 12, thickness: 0.6),
+                  _buildToggleRow(
+                    title: 'Hardware DAC / USB Bridge',
+                    subtitle: stamp.effectiveDacName,
+                    value: stamp.showHardwareDac,
+                    theme: theme,
+                    onChanged: (val) {
+                      AppHaptics.selectionClick();
+                      controller.updateAudiophileStamp(showHardwareDac: val);
+                    },
+                  ),
+                  const Divider(height: 12, thickness: 0.6),
+                  _buildToggleRow(
+                    title: 'Timestamp & Signature',
+                    subtitle: 'Render timestamp verification tag',
+                    value: stamp.showTimestamp,
+                    theme: theme,
+                    onChanged: (val) {
+                      AppHaptics.selectionClick();
+                      controller.updateAudiophileStamp(showTimestamp: val);
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 2. Studio Stickers Bento
+          _buildBentoSection(
+            theme: theme,
+            title: 'STUDIO STICKERS & STAMPS (MAX 3)',
+            icon: HugeIcons.strokeRoundedAward01,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: LyricStickerType.values.map((type) {
+                final isSelected = state.config.selectedStickers.contains(type);
+                return GestureDetector(
+                  onTap: () {
+                    AppHaptics.selectionClick();
+                    controller.toggleSticker(type);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        HugeIcon(
+                          icon: type.icon,
+                          size: 14,
+                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          type.label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 3. Personal Note / Caption Bento
+          _buildBentoSection(
+            theme: theme,
+            title: 'PERSONAL NOTE / CAPTION',
+            icon: HugeIcons.strokeRoundedEdit02,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _noteTextController,
+                  maxLines: 2,
+                  style: const TextStyle(fontSize: 12.5),
+                  decoration: InputDecoration(
+                    hintText: 'e.g. Listening to this late at night on HD600...',
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (text) {
+                    controller.setPersonalNote(text);
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // TAB 3: STYLING & PALETTE
+  // ═════════════════════════════════════════════════════════════════════════
+
+  Widget _buildStyleTab(
+    BuildContext context,
+    ThemeData theme,
+    LyricShareState state,
+    LyricShareController controller,
+  ) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Typography & Font Weight Bento
           _buildBentoSection(
             theme: theme,
             title: 'TYPOGRAPHY & FONT WEIGHT',
@@ -375,7 +971,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
           const SizedBox(height: 12),
 
-          // ─── 4. TEXT STYLES & HIGHLIGHTS BENTO (IG & SPOTIFY STYLE) ─────
+          // 2. Text Styles & Highlights Bento
           _buildBentoSection(
             theme: theme,
             title: 'TEXT STYLES & HIGHLIGHTS',
@@ -385,7 +981,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
           const SizedBox(height: 12),
 
-          // ─── 5. BACKGROUND & PALETTE BENTO ───────────────────────────────
+          // 3. Background & Palette Bento
           _buildBentoSection(
             theme: theme,
             title: 'BACKGROUND & PALETTE',
@@ -396,55 +992,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 _buildBackgroundModeSelector(theme, state, controller),
                 const SizedBox(height: 10),
                 _buildBackgroundModeOptions(theme, state, controller),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // ─── 6. ELEMENTS & BADGES BENTO ──────────────────────────────────
-          _buildBentoSection(
-            theme: theme,
-            title: 'ELEMENTS & BADGES',
-            icon: HugeIcons.strokeRoundedSlidersHorizontal,
-            child: Column(
-              children: [
-                _buildAudioSpecsToggleRow(
-                  title: 'Audio Specs Badge',
-                  subtitle: 'Hi-Res format telemetry tag',
-                  value: state.config.showAudioSpecsBadge,
-                  customText: state.config.customAudioSpec,
-                  theme: theme,
-                  onChanged: (val) {
-                    AppHaptics.selectionClick();
-                    controller.toggleAudioSpecs(val);
-                  },
-                  onEditCustomText: () => _showCustomAudioSpecDialog(context, theme, state, controller),
-                ),
-                const Divider(height: 12, thickness: 0.6),
-                _buildToggleRow(
-                  title: 'Studio Branding',
-                  subtitle: 'Official Baydev HiFi logo badge',
-                  value: state.config.showBranding,
-                  theme: theme,
-                  onChanged: (val) {
-                    AppHaptics.selectionClick();
-                    controller.toggleBranding(val);
-                  },
-                ),
-                if (state.allLines.any((l) => l.hasRomanization)) ...[
-                  const Divider(height: 12, thickness: 0.6),
-                  _buildToggleRow(
-                    title: 'Phonetic Subtitle',
-                    subtitle: 'Transliterated Latin lyrics',
-                    value: state.config.showRomanized,
-                    theme: theme,
-                    onChanged: (val) {
-                      AppHaptics.selectionClick();
-                      controller.toggleRomanized(val);
-                    },
-                  ),
-                ],
               ],
             ),
           ),
@@ -699,7 +1246,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Style selector chips (Clean, Stroke, Instagram Pill, Spotify Glow)
+        // Style selector chips
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
@@ -749,60 +1296,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             ],
           ),
         ),
-
-        // If Text Stroke is active: Stroke Thickness selector
-        if (config.highlightStyle == LyricCardHighlightStyle.stroke) ...[
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                Text(
-                  'Border Width:',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                for (final stroke in [
-                  (1.5, 'Subtle (1.5px)'),
-                  (2.5, 'Standard (2.5px)'),
-                  (4.0, 'Thick (4.0px)'),
-                ]) ...[
-                  GestureDetector(
-                    onTap: () {
-                      AppHaptics.selectionClick();
-                      controller.setStrokeWidth(stroke.$1);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      margin: const EdgeInsets.only(right: 6),
-                      decoration: BoxDecoration(
-                        color: config.strokeWidth == stroke.$1
-                            ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        stroke.$2,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: config.strokeWidth == stroke.$1 ? FontWeight.w700 : FontWeight.w500,
-                          color: config.strokeWidth == stroke.$1
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
 
         const SizedBox(height: 10),
 
@@ -995,167 +1488,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           size: 16,
           color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
         ),
-      ),
-    );
-  }
-
-  Widget _buildAudioSpecsToggleRow({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required String? customText,
-    required ThemeData theme,
-    required ValueChanged<bool> onChanged,
-    required VoidCallback onEditCustomText,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (value)
-                      GestureDetector(
-                        onTap: onEditCustomText,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedEdit02,
-                                size: 12,
-                                color: theme.colorScheme.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Custom Text',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                Text(
-                  customText != null ? 'Custom: "$customText"' : subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: customText != null ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch.adaptive(
-            value: value,
-            onChanged: onChanged,
-            activeTrackColor: theme.colorScheme.primary,
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCustomAudioSpecDialog(
-    BuildContext context,
-    ThemeData theme,
-    LyricShareState state,
-    LyricShareController controller,
-  ) {
-    final textController = TextEditingController(
-      text: state.config.customAudioSpec ?? '',
-    );
-
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: theme.colorScheme.surfaceContainerHigh,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedMusicNote01,
-              size: 20,
-              color: theme.colorScheme.primary,
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'Custom Audio Specs',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Customize the audio format telemetry badge on the card header.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: textController,
-              autofocus: true,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(
-                hintText: 'e.g. 24-BIT 96kHz • STUDIO MASTER',
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                  ),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              controller.setCustomAudioSpec(null);
-              Navigator.of(dialogCtx).pop();
-            },
-            child: const Text('Reset Auto'),
-          ),
-          FilledButton(
-            onPressed: () {
-              controller.setCustomAudioSpec(textController.text);
-              Navigator.of(dialogCtx).pop();
-            },
-            child: const Text('Apply'),
-          ),
-        ],
       ),
     );
   }
@@ -1687,95 +2019,6 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSelectLinesTab(
-    ThemeData theme,
-    LyricShareState state,
-    LyricShareController controller,
-  ) {
-    final allLines = state.allLines;
-
-    if (allLines.isEmpty) {
-      return Center(
-        child: Text(
-          'No synchronized lyrics available for this track.',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      );
-    }
-
-    return ListView.separated(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      itemCount: allLines.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 6),
-      itemBuilder: (context, index) {
-        final line = allLines[index];
-        final isSelected = state.config.selectedLines.contains(line);
-
-        return GestureDetector(
-          onTap: () {
-            AppHaptics.selectionClick();
-            controller.toggleLineSelection(line);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                  : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                HugeIcon(
-                  icon: isSelected
-                      ? HugeIcons.strokeRoundedCheckmarkCircle02
-                      : HugeIcons.strokeRoundedCircle,
-                  size: 20,
-                  color: isSelected
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        line.text,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      if (line.hasRomanization) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          line.effectiveRomanized,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 

@@ -1762,10 +1762,26 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
     - [x] Added widget tests for `StudioListeningStatsDetailScreen` section verification and time filter switcher.
     - [x] 100% Quality Gate passed: `flutter analyze` (**0 errors, 0 warnings**) & `flutter test` (**544/544 tests passing**).
 
-
-
-
-
-
+- [x] **Phase 64 — Studio Lyric Card Evolution & Multi-Template Redesign (Completed)**:
+  - [x] **64.1 Domain Models & Configuration Expansion (`LyricShareConfig`, `LyricCardLayoutStyle`, `AudiophileStampConfig`)**:
+    - [x] Create `LyricCardLayoutStyle` enum for 6 studio templates (`classicMinimal`, `polaroidFrame`, `cassetteJCard`, `waveformQuote`, `cyberHUD`, `abstractAura`).
+    - [x] Expand `LyricShareConfig` with `layoutStyle`, `showRomanization`, `personalNote`, `showQrCode`, `selectedStickers`, and `audiophileTelemetry`.
+    - [x] Define `LyricStickerType` model for audiophile stamps (Hi-Res Lossless, Bit-Perfect, Warm Tube, Late Night, Certified Audiophile, Purist).
+  - [x] **64.2 Dedicated Template Renderers (`lib/features/lyrics_share/presentation/widgets/templates/`)**:
+    - [x] Implement `ClassicMinimalCardView` (Spotify/Apple Music studio inspired, dual-layer stroke typography, blurred artwork bg).
+    - [x] Implement `PolaroidFrameCardView` (Framed album art, handwritten caption, date stamp, personal note footer).
+    - [x] Implement `CassetteJCardLyricView` (Vintage magnetic tape, Type II Chrome stamp, SIDE A indicator, track credits footer).
+    - [x] Implement `WaveformQuoteCardView` (Amplitude bar visualizer, start-to-end duration pill, track footer).
+    - [x] Implement `CyberHudLyricView` (Tokyo tech HUD wireframe, corner brackets, monospace telemetry matrix).
+    - [x] Implement `AbstractAuraLyricView` (Soft harmonic mesh aura with frosted text pill backing).
+  - [x] **64.3 Telemetry Stamps & Dual-Line Romanization Subtitles**:
+    - [x] Implement `AudiophileTelemetryStamp` (AutoEQ profile, DSP chain, USB DAC model, FLAC/DSD sample rate & bit depth chips).
+    - [x] Integrate `EastAsianRomanizer` into all 6 templates for automatic Romaji/Pinyin/Hangul dual-line subtitles.
+  - [x] **64.4 Material 3 Expressive Customization Sheet (`LyricShareSheet`)**:
+    - [x] Redesign `LyricShareSheet` into a 4-tab studio cockpit: `Template & Ratio`, `Lyrics & Romanization`, `Studio Styling & Telemetry`, `Export & Share`.
+    - [x] Live preview canvas with instant aspect ratio switching (`9:16`, `4:5`, `1:1`, `16:9`).
+  - [x] **64.5 Quality Gate & Test Suite (`test/studio_lyric_card_evolution_test.dart`)**:
+    - [x] 15 comprehensive unit and widget tests for all 6 template styles, Romanization toggles, telemetry stamps, and controller state transitions.
+    - [x] 100% pass rate (15/15 tests) in `flutter test` with 0 errors.
 
 

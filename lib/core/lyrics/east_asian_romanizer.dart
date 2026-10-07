@@ -68,6 +68,9 @@ class EastAsianRomanizer {
     return false;
   }
 
+  /// Alias for hasEastAsianCharacters
+  static bool needsRomanization(String text) => hasEastAsianCharacters(text);
+
   /// Transliterate text automatically detecting script per segment
   static String romanize(String text, {bool includePinyinTones = false, EastAsianScript? forceScript}) {
     if (text.isEmpty) return text;
