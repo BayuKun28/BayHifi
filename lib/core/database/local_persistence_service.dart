@@ -594,7 +594,49 @@ class LocalPersistenceService {
     };
     await _save();
   }
+
+  // ─── 10. STUDIO WRAPPED & PLAYBACK TELEMETRY ───────────────────────────────
+  List<Map<String, dynamic>> getPlaybackHistoryLogs() {
+    final list = _cache['playback_history_logs'];
+    if (list is List) {
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+    }
+    return [];
+  }
+
+  Future<void> logPlaybackSession(Map<String, dynamic> sessionLog) async {
+    final list = getPlaybackHistoryLogs();
+    // Keep a rolling buffer of up to 10,000 playback session entries
+    if (list.length >= 10000) {
+      list.removeAt(0);
+    }
+    list.add(sessionLog);
+    _cache['playback_history_logs'] = list;
+    await _save();
+  }
+
+  Future<void> clearPlaybackHistoryLogs() async {
+    _cache['playback_history_logs'] = <Map<String, dynamic>>[];
+    await _save();
+  }
+
+  Map<String, dynamic>? getCachedWrappedSummary() {
+    final data = _cache['cached_wrapped_summary'];
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return null;
+  }
+
+  Future<void> saveCachedWrappedSummary(Map<String, dynamic> summary) async {
+    _cache['cached_wrapped_summary'] = summary;
+    await _save();
+  }
 }
+
 
 
 

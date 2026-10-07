@@ -1,0 +1,228 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
+import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../analytics/data/playback_analytics_service.dart';
+import '../../../analytics/presentation/story/studio_wrapped_story_screen.dart';
+import '../../../analytics/presentation/templates/studio_wrapped_export_hub.dart';
+
+class StudioWrappedBentoBanner extends ConsumerWidget {
+  const StudioWrappedBentoBanner({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isSolid = ref.isSolidStyle;
+    final wrappedData = ref.watch(studioWrappedDataProvider);
+    final persona = wrappedData.persona;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.4),
+          width: 1.2,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // Background ambient gradient flare
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Tag & Sparkle
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedSparkles,
+                            size: 11,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'STUDIO WRAPPED 2026',
+                            style: TextStyle(
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w900,
+                              color: theme.colorScheme.primary,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${wrappedData.totalListeningMinutes} MINS',
+                      style: TextStyle(
+                        fontFeatures: AppTypography.audioFigures,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Main Persona / Title Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.5), width: 1.2),
+                      ),
+                      child: Center(
+                        child: HugeIcon(
+                          icon: persona.icon,
+                          size: 22,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            persona.title,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Your sound archetype, purity metrics & top tracks are ready.',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w500,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Action Buttons Row
+                Row(
+                  children: [
+                    // Play Interactive Story Button
+                    Expanded(
+                      flex: 6,
+                      child: SizedBox(
+                        height: 38,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            elevation: 0,
+                          ),
+                          onPressed: () {
+                            AppHaptics.mediumImpact();
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const StudioWrappedStoryScreen()),
+                            );
+                          },
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 14, color: Colors.black),
+                          label: const Text(
+                            'PLAY RECAP STORY',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Export Hub & Templates Button
+                    Expanded(
+                      flex: 5,
+                      child: SizedBox(
+                        height: 38,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: BorderSide(
+                              color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          onPressed: () {
+                            AppHaptics.lightImpact();
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const StudioWrappedExportHub()),
+                            );
+                          },
+                          icon: HugeIcon(icon: HugeIcons.strokeRoundedInvoice01, size: 13, color: theme.colorScheme.primary),
+                          label: const Text(
+                            'TEMPLATES',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

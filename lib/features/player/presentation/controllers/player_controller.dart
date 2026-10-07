@@ -18,6 +18,7 @@ import '../../domain/track.dart';
 import '../../../spotify_importer/data/audio_matcher_service.dart';
 import '../../../youtube_music/data/youtube_music_service.dart';
 import '../../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
+import '../../../analytics/data/playback_analytics_service.dart';
 
 final playerControllerProvider =
     StateNotifierProvider<PlayerController, PlaybackState>((ref) {
@@ -496,6 +497,11 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
   /// Plays a track (local audio file or remote stream URL)
   Future<void> playTrack(Track track) async {
+    // Flush analytics for previous playing track if played for a significant duration
+    if (state.currentTrack != null && state.position.inSeconds >= 10) {
+      _logSessionAnalytics(state.currentTrack!, state.position);
+    }
+
     Track targetTrack = track;
     if (track.id.startsWith('yt_')) {
       final videoId = track.id.replaceFirst('yt_', '');
@@ -698,6 +704,12 @@ class PlayerController extends StateNotifier<PlaybackState> {
     if (_isAdvancing) return;
     _isAdvancing = true;
 
+    // Log complete playback session to analytics
+    if (state.currentTrack != null) {
+      final playedDur = state.duration > Duration.zero ? state.duration : state.position;
+      _logSessionAnalytics(state.currentTrack!, playedDur);
+    }
+
     try {
       if (state.repeatMode == PlaybackRepeatMode.one) {
         seek(Duration.zero);
@@ -753,6 +765,9 @@ class PlayerController extends StateNotifier<PlaybackState> {
   }
 
   Future<void> stop() async {
+    if (state.currentTrack != null && state.position.inSeconds >= 10) {
+      _logSessionAnalytics(state.currentTrack!, state.position);
+    }
     await _audioEngine.stop();
     state = state.copyWith(
       status: PlaybackStatus.stopped,
@@ -1084,6 +1099,19 @@ class PlayerController extends StateNotifier<PlaybackState> {
       );
       _syncAudioHandler();
       _saveSession();
+    }
+  }
+
+  void _logSessionAnalytics(Track track, Duration durationPlayed) {
+    try {
+      if (_ref != null) {
+        _ref.read(playbackAnalyticsServiceProvider).logPlaySession(
+              track: track,
+              durationPlayed: durationPlayed,
+            );
+      }
+    } catch (e) {
+      debugPrint('[PlayerController] Error recording playback session analytics: $e');
     }
   }
 
