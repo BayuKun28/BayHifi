@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -22,7 +23,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('VISUAL DYNAMICS & DISPLAY'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -605,12 +606,12 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                 _buildValueBadge(context, theme, primary, '${(settings.parallaxIntensity * 100).toInt()} %', isSolid),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.parallaxIntensity,
               min: 0.2,
               max: 2.0,
               divisions: 18,
-              activeColor: primary,
               onChanged: (val) => controller.setParallaxIntensity(val),
             ),
           ],
@@ -662,12 +663,12 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                 _buildValueBadge(context, theme, primary, '${settings.blurSigma.toInt()} px', isSolid),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.blurSigma,
               min: 4.0,
               max: 30.0,
               divisions: 26,
-              activeColor: primary,
               onChanged: (val) => controller.setBlurSigma(val),
             ),
           ],
@@ -689,12 +690,12 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                 _buildValueBadge(context, theme, primary, '${(settings.ambientGlowIntensity * 100).toInt()} %', isSolid),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.ambientGlowIntensity,
               min: 0.1,
               max: 1.0,
               divisions: 18,
-              activeColor: primary,
               onChanged: (val) => controller.setAmbientGlowIntensity(val),
             ),
           ],
@@ -737,9 +738,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        Switch(
+        M3ESwitch(
           value: value,
-          activeThumbColor: primary,
           onChanged: (val) {
             AppHaptics.lightImpact();
             onChanged(val);

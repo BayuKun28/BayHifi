@@ -47,7 +47,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('LIBRARY SCANNER & SLEEP TIMER'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -380,15 +380,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      side: BorderSide(
-                        color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                        width: 0.8,
-                      ),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
+                  child: M3EButton.outlined(
                     onPressed: () {
                       AppHaptics.lightImpact();
                       timerNotifier.extendTimer(15);
@@ -402,12 +394,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      side: BorderSide(color: const Color(0xFFFF3B30).withValues(alpha: 0.4), width: 0.8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
+                  child: M3EButton.outlined(
                     onPressed: () {
                       AppHaptics.lightImpact();
                       timerNotifier.cancelTimer();
@@ -436,20 +423,12 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        side: BorderSide(
-                          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                          width: 0.8,
-                        ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
+                    child: M3EButton.outlined(
                       onPressed: () {
                         AppHaptics.selectionClick();
                         timerNotifier.startTimer(mins);
                       },
-                      child: Text(
+                      label: Text(
                         '${mins}m',
                         style: TextStyle(
                           fontFeatures: AppTypography.audioFigures,
@@ -467,11 +446,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            child: TextButton.icon(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
+            child: M3EButton(
+              style: M3EButtonStyle.text,
               onPressed: () => SleepTimerSheet.show(context),
               icon: HugeIcon(icon: HugeIcons.strokeRoundedSlidersHorizontal, size: 14, color: primary),
               label: Text(
@@ -559,7 +535,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    IconButton(
+                    M3EIconButton(
                       icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 16, color: Color(0xFFFF453A)),
                       tooltip: 'Remove Folder',
                       onPressed: () {
@@ -614,11 +590,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
           Row(
             children: [
               Expanded(
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
+                child: M3EButton.filled(
                   onPressed: libraryState.isScanning
                       ? null
                       : () {
@@ -630,11 +602,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 ),
               ),
               const SizedBox(width: 8),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+              M3EButton.outlined(
                 onPressed: libraryState.isScanning
                     ? null
                     : () {
@@ -656,7 +624,6 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
 
   Widget _buildLibraryRulesCard(BuildContext context, bool isSolid) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     final storage = LocalPersistenceService.instance;
 
     return Container(
@@ -716,9 +683,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: _autoScanOnStartup,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   setState(() => _autoScanOnStartup = val);

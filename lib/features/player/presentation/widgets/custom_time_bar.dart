@@ -89,21 +89,12 @@ class CustomTimeBar extends StatelessWidget {
     switch (style) {
       case TimeBarStyle.wavy:
         if (WidgetsBinding.instance.runtimeType.toString().contains('Test')) {
-          return SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 4.0,
-              activeTrackColor: primaryColor,
-              inactiveTrackColor: primaryColor.withValues(alpha: 0.25),
-              thumbColor: primaryColor,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-            ),
-            child: Slider(
-              value: progress,
-              onChanged: (val) {
-                final newMs = (val * duration.inMilliseconds).toInt();
-                onSeek(Duration(milliseconds: newMs));
-              },
-            ),
+          return M3ESlider(
+            value: progress,
+            onChanged: (val) {
+              final newMs = (val * duration.inMilliseconds).toInt();
+              onSeek(Duration(milliseconds: newMs));
+            },
           );
         }
         return Padding(
@@ -118,16 +109,9 @@ class CustomTimeBar extends StatelessWidget {
         );
 
       case TimeBarStyle.slim:
-        return SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 3.5,
-            activeTrackColor: primaryColor,
-            inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.4),
-            thumbColor: primaryColor,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-          ),
-          child: Slider(
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: M3ESlider(
             value: progress,
             onChanged: (val) {
               final newMs = (val * duration.inMilliseconds).toInt();
@@ -137,20 +121,9 @@ class CustomTimeBar extends StatelessWidget {
         );
 
       case TimeBarStyle.capsule:
-        return SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 8.0,
-            activeTrackColor: primaryColor,
-            inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
-            thumbColor: Colors.white,
-            thumbShape: const RoundSliderThumbShape(
-              enabledThumbRadius: 7,
-              elevation: 3,
-            ),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-            trackShape: const RoundedRectSliderTrackShape(),
-          ),
-          child: Slider(
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: M3ESlider(
             value: progress,
             onChanged: (val) {
               final newMs = (val * duration.inMilliseconds).toInt();
@@ -310,16 +283,9 @@ class CustomTimeBar extends StatelessWidget {
         );
 
       case TimeBarStyle.glowingPill:
-        return SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 5.0,
-            activeTrackColor: primaryColor,
-            inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
-            thumbColor: primaryColor,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-          ),
-          child: Slider(
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: M3ESlider(
             value: progress,
             onChanged: (val) {
               final newMs = (val * duration.inMilliseconds).toInt();

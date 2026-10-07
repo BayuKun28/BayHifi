@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/player_customization_settings.dart';
@@ -21,7 +22,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('GESTURES & TRACK TILES'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -380,9 +381,8 @@ class GesturesSettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        Switch(
+        M3ESwitch(
           value: value,
-          activeThumbColor: primary,
           onChanged: (val) {
             AppHaptics.lightImpact();
             onChanged(val);

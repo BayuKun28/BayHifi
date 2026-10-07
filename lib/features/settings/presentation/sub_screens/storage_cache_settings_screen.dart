@@ -104,7 +104,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('STORAGE & CACHE QUOTA'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -113,7 +113,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
+          M3EIconButton(
             onPressed: () {
               AppHaptics.lightImpact();
               _loadStorageSummary(showLoading: true);
@@ -205,7 +205,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 const SizedBox(height: 24),
 
                 // ─── 4. 1-CLICK MASTER PURGE BUTTON ───────────────────────────────
-                FilledButton.icon(
+                M3EButton.filled(
                   onPressed: () {
                     AppHaptics.heavyImpact();
                     _clearAllCaches();
@@ -222,13 +222,6 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                       fontSize: 12,
                       letterSpacing: 0.6,
                     ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: theme.colorScheme.error,
-                    foregroundColor: theme.colorScheme.onError,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    elevation: 0,
                   ),
                 ),
               ],
@@ -390,12 +383,10 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
             ),
           ),
           const SizedBox(width: 8),
-          IconButton(
+          M3EIconButton(
             onPressed: onClear,
             icon: HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 16, color: theme.colorScheme.error),
             tooltip: 'Clear',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 /// Reusable Audio Parameter Slider with tabular figures readout
 class RackKnobSlider extends StatelessWidget {
@@ -67,23 +68,13 @@ class RackKnobSlider extends StatelessWidget {
             ),
           ],
         ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 3.5,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.5),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-            activeTrackColor: color,
-            inactiveTrackColor: color.withValues(alpha: 0.15),
-            thumbColor: color,
-            overlayColor: color.withValues(alpha: 0.15),
-          ),
-          child: Slider(
-            value: value.clamp(min, max),
-            min: min,
-            max: max,
-            divisions: divisions,
-            onChanged: onChanged,
-          ),
+        const SizedBox(height: 4),
+        M3ESlider(
+          value: value.clamp(min, max),
+          min: min,
+          max: max,
+          divisions: (divisions != null && divisions! > 0) ? divisions : null,
+          onChanged: onChanged,
         ),
       ],
     );

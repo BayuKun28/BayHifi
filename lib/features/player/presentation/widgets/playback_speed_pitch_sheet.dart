@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -108,7 +109,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                   ),
                 ],
               ),
-              IconButton(
+              M3EIconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedCancel01,
@@ -167,25 +168,19 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    trackHeight: 3.5,
-                    activeTrackColor: primary,
-                    thumbColor: primary,
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-                  ),
-                  child: Slider(
-                    value: speed.clamp(0.25, 3.0),
-                    min: 0.25,
-                    max: 3.0,
-                    divisions: 55,
-                    onChanged: (val) {
-                      AppHaptics.selectionClick();
-                      playerNotifier.setPlaybackSpeed(val);
-                      settingsNotifier.setPlaybackSpeed(val);
-                    },
-                  ),
+                const SizedBox(height: 6),
+                M3ESlider(
+                  value: speed.clamp(0.25, 3.0),
+                  min: 0.25,
+                  max: 3.0,
+                  divisions: 55,
+                  onChanged: (val) {
+                    AppHaptics.selectionClick();
+                    playerNotifier.setPlaybackSpeed(val);
+                    settingsNotifier.setPlaybackSpeed(val);
+                  },
                 ),
+                const SizedBox(height: 8),
                 // Quick preset chips
                 Wrap(
                   spacing: 6,
@@ -277,25 +272,19 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    trackHeight: 3.5,
-                    activeTrackColor: theme.colorScheme.secondary,
-                    thumbColor: theme.colorScheme.secondary,
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-                  ),
-                  child: Slider(
-                    value: pitch.clamp(-12.0, 12.0),
-                    min: -12.0,
-                    max: 12.0,
-                    divisions: 48, // 0.5 st steps
-                    onChanged: (val) {
-                      AppHaptics.selectionClick();
-                      playerNotifier.setPitch(val, cents: cents);
-                      settingsNotifier.setPitchSemitones(val);
-                    },
-                  ),
+                const SizedBox(height: 6),
+                M3ESlider(
+                  value: pitch.clamp(-12.0, 12.0),
+                  min: -12.0,
+                  max: 12.0,
+                  divisions: 48, // 0.5 st steps
+                  onChanged: (val) {
+                    AppHaptics.selectionClick();
+                    playerNotifier.setPitch(val, cents: cents);
+                    settingsNotifier.setPitchSemitones(val);
+                  },
                 ),
+                const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -351,41 +340,47 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedLink01,
-                      size: 16,
-                      color: isLinked ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'LINK SPEED & PITCH',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.onSurface,
-                          ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedLink01,
+                        size: 16,
+                        color: isLinked ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'LINK SPEED & PITCH',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            Text(
+                              isLinked
+                                  ? 'Pitch shifts with speed (Tape / Vinyl style)'
+                                  : 'Independent pitch preserving time-stretch',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        Text(
-                          isLinked
-                              ? 'Pitch shifts with speed (Tape / Vinyl speed style)'
-                              : 'Independent pitch preserving time-stretch',
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
-                Switch(
+                const SizedBox(width: 8),
+                M3ESwitch(
                   value: isLinked,
-                  activeThumbColor: primary,
                   onChanged: (val) {
                     AppHaptics.lightImpact();
                     playerNotifier.toggleLinkSpeedAndPitch();

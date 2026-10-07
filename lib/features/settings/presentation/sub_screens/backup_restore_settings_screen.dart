@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
@@ -204,24 +205,18 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
 
                   SizedBox(
                     width: double.infinity,
-                    child: FilledButton(
+                    child: M3EButton.filled(
                       onPressed: validation?.isValid == true
                           ? () async {
                               Navigator.of(ctx).pop();
                               await _performRestore(textController.text);
                             }
                           : null,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: Text(
+                      label: const Text(
                         'Apply & Restore Configuration',
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.onPrimary,
                         ),
                       ),
                     ),
@@ -268,7 +263,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('BACKUP & RESTORE'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -351,32 +346,18 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: M3EButton.outlined(
                   onPressed: _copyBackupJson,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 14, color: primary),
                   label: Text('Copy JSON', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: primary)),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: isSolid
-                          ? StudioSurfaceTheme.subtleOutline(context, isSolid: true)
-                          : primary.withValues(alpha: 0.5),
-                    ),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: FilledButton.icon(
+                child: M3EButton.filled(
                   onPressed: _exportBackupFile,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedCloudDownload, size: 14, color: theme.colorScheme.onPrimary),
                   label: Text('Save .bayhifi File', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: theme.colorScheme.onPrimary)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
                 ),
               ),
             ],
@@ -485,9 +466,8 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
             ],
           ),
         ),
-        Switch(
+        M3ESwitch(
           value: value,
-          activeThumbColor: primary,
           onChanged: (val) {
             AppHaptics.lightImpact();
             onChanged(val);

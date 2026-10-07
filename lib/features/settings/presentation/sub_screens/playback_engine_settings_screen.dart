@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -92,7 +93,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // ─── 7. RESET TO DEFAULTS ───────────────────────────────────────
-          OutlinedButton.icon(
+          M3EButton.outlined(
             onPressed: () {
               AppHaptics.mediumImpact();
               _showResetConfirmation(context, notifier, isSolid);
@@ -109,16 +110,6 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.5,
                 color: theme.colorScheme.error,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              side: BorderSide(
-                color: theme.colorScheme.error.withValues(alpha: 0.4),
-                width: 1.0,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
@@ -352,9 +343,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              Switch(
+              M3ESwitch(
                 value: settings.enableSmoothFade,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   notifier.toggleSmoothFade(val);
@@ -387,12 +377,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.fadeInDurationMs.toDouble().clamp(100.0, 1500.0),
               min: 100.0,
               max: 1500.0,
               divisions: 28,
-              activeColor: primary,
               onChanged: (val) {
                 notifier.setFadeInDurationMs(val.toInt());
               },
@@ -421,12 +411,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.fadeOutDurationMs.toDouble().clamp(100.0, 1500.0),
               min: 100.0,
               max: 1500.0,
               divisions: 28,
-              activeColor: primary,
               onChanged: (val) {
                 notifier.setFadeOutDurationMs(val.toInt());
               },
@@ -482,9 +472,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: settings.pauseOnHeadphoneUnplug,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   notifier.togglePauseOnHeadphoneUnplug(val);
@@ -520,9 +509,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: settings.resumeOnHeadphonePlug,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   notifier.toggleResumeOnHeadphonePlug(val);
@@ -555,12 +543,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.headphoneReconnectTimeoutSec.toDouble().clamp(3.0, 60.0),
               min: 3.0,
               max: 60.0,
               divisions: 19,
-              activeColor: primary,
               onChanged: (val) {
                 notifier.setHeadphoneReconnectTimeoutSec(val.toInt());
               },
@@ -595,9 +583,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: settings.pauseOnZeroVolume,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   notifier.togglePauseOnZeroVolume(val);
@@ -651,12 +638,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          Slider(
+          const SizedBox(height: 4),
+          M3ESlider(
             value: settings.playbackSpeed.clamp(0.25, 3.0),
             min: 0.25,
             max: 3.0,
             divisions: 55,
-            activeColor: primary,
             onChanged: (val) => notifier.setPlaybackSpeed(val),
           ),
           const SizedBox(height: 6),
@@ -683,12 +670,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          Slider(
+          const SizedBox(height: 4),
+          M3ESlider(
             value: settings.pitchSemitones.clamp(-12.0, 12.0),
             min: -12.0,
             max: 12.0,
             divisions: 48,
-            activeColor: theme.colorScheme.secondary,
             onChanged: (val) => notifier.setPitchSemitones(val),
           ),
 
@@ -721,9 +708,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: settings.linkSpeedAndPitch,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   notifier.toggleLinkSpeedAndPitch(val);
@@ -814,12 +800,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          Slider(
+          const SizedBox(height: 4),
+          M3ESlider(
             value: settings.replayGainPreampDb.clamp(-12.0, 12.0),
             min: -12.0,
             max: 12.0,
             divisions: 48,
-            activeColor: primary,
             onChanged: (val) => notifier.setReplayGainPreampDb(val),
           ),
 
@@ -849,9 +835,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: settings.replayGainPreventClipping,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   notifier.toggleReplayGainPreventClipping(val);
@@ -888,9 +873,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: settings.enableSkipSilence,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   notifier.toggleEnableSkipSilence(val);
@@ -932,12 +916,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.silenceThresholdDb.clamp(-70.0, -40.0),
               min: -70.0,
               max: -40.0,
               divisions: 30,
-              activeColor: primary,
               onChanged: (val) => notifier.setSilenceThresholdDb(val),
             ),
           ],
@@ -1022,12 +1006,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.seekStepSeconds.toDouble().clamp(5.0, 60.0),
               min: 5.0,
               max: 60.0,
               divisions: 11,
-              activeColor: primary,
               onChanged: (val) => notifier.setSeekStepSeconds(val.toInt()),
             ),
           ] else ...[
@@ -1062,12 +1046,12 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Slider(
+            const SizedBox(height: 4),
+            M3ESlider(
               value: settings.seekStepPercent.clamp(0.01, 0.20),
               min: 0.01,
               max: 0.20,
               divisions: 19,
-              activeColor: primary,
               onChanged: (val) => notifier.setSeekStepPercent(val),
             ),
           ],
@@ -1212,11 +1196,11 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           'Are you sure you want to reset all playback transitions, interruption policies, ReplayGain settings, and speed/pitch parameters to factory studio defaults?',
         ),
         actions: [
-          TextButton(
+          M3EButton.text(
             onPressed: () => Navigator.of(dialogCtx).pop(),
             child: const Text('CANCEL'),
           ),
-          FilledButton(
+          M3EButton.filled(
             onPressed: () {
               notifier.resetToDefaults();
               Navigator.of(dialogCtx).pop();
@@ -1227,7 +1211,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                 ),
               );
             },
-            child: const Text('RESET ALL'),
+            label: const Text('RESET ALL'),
           ),
         ],
       ),

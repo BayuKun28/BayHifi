@@ -909,20 +909,11 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           ),
           SizedBox(
             width: isLandscape ? 80 : 60,
-            child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                trackHeight: 3,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-              ),
-              child: Slider(
-                value: playback.volume,
-                min: 0.0,
-                max: 1.0,
-                activeColor: primary,
-                inactiveColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                onChanged: (v) => playerNotifier.setVolume(v),
-              ),
+            child: M3ESlider(
+              value: playback.volume.clamp(0.0, 1.0),
+              min: 0.0,
+              max: 1.0,
+              onChanged: (v) => playerNotifier.setVolume(v),
             ),
           ),
         ],

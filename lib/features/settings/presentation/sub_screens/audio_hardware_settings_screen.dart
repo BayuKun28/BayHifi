@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -38,7 +39,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('AUDIO HARDWARE & DAC ENGINE'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -316,12 +317,12 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
               ),
             ],
           ),
-          Slider(
+          const SizedBox(height: 4),
+          M3ESlider(
             value: _bufferLatency,
             min: 20.0,
             max: 200.0,
             divisions: 18,
-            activeColor: primary,
             onChanged: (val) {
               setState(() => _bufferLatency = val);
               storage.saveSetting('buffer_latency', val);
@@ -347,9 +348,8 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                   ],
                 ),
               ),
-              Switch(
+              M3ESwitch(
                 value: _bitPerfect,
-                activeThumbColor: primary,
                 onChanged: (val) {
                   AppHaptics.lightImpact();
                   setState(() => _bitPerfect = val);

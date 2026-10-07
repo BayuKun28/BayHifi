@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
@@ -72,7 +73,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('THEMING & COLOR PALETTES'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -302,12 +303,9 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                SliderTheme(
-                  data: theme.sliderTheme,
-                  child: Slider(
-                    value: 0.65,
-                    onChanged: (_) {},
-                  ),
+                M3ESlider(
+                  value: 0.65,
+                  onChanged: (_) {},
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -513,70 +511,90 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
     return Column(
       children: [
         // Monet Dynamic Album Art Card
-        Material(
-          color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-          shape: RoundedRectangleBorder(
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
+            border: Border.all(
               color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
               width: 1.0,
             ),
           ),
-          child: SwitchListTile(
-            value: state.dynamicAlbumArtEnabled,
-            onChanged: (val) {
-              AppHaptics.lightImpact();
-              final currentTrack = ref.read(playerControllerProvider).currentTrack;
-              notifier.toggleDynamicAlbumArt(val, currentTrack);
-            },
-            secondary: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: state.dynamicAlbumArtEnabled
-                    ? primary.withValues(alpha: 0.18)
-                    : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedSparkles,
-                  size: 20,
-                  color: state.dynamicAlbumArtEnabled ? primary : theme.colorScheme.onSurfaceVariant,
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: state.dynamicAlbumArtEnabled
+                      ? primary.withValues(alpha: 0.18)
+                      : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ),
-            ),
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Flexible(
-                  child: Text(
-                    'Dynamic Album Art Palette',
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
+                child: Center(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedSparkles,
+                    size: 20,
+                    color: state.dynamicAlbumArtEnabled ? primary : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(width: 8),
-                if (state.dynamicAlbumArtEnabled)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(4),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Dynamic Album Art Palette',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (state.dynamicAlbumArtEnabled) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: primary.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'ACTIVE',
+                              style: TextStyle(color: primary, fontSize: 8.5, fontWeight: FontWeight.w900),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    child: Text(
-                      'ACTIVE',
-                      style: TextStyle(color: primary, fontSize: 8.5, fontWeight: FontWeight.w900),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Dynamically extract safe, high-contrast studio palettes from currently playing cover artwork',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-              ],
-            ),
-            subtitle: const Text(
-              'Dynamically extract safe, high-contrast studio palettes from currently playing cover artwork',
-              style: TextStyle(fontSize: 10.5),
-            ),
-            activeThumbColor: primary,
-            activeTrackColor: primary.withValues(alpha: 0.45),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              M3ESwitch(
+                value: state.dynamicAlbumArtEnabled,
+                onChanged: (val) {
+                  AppHaptics.lightImpact();
+                  final currentTrack = ref.read(playerControllerProvider).currentTrack;
+                  notifier.toggleDynamicAlbumArt(val, currentTrack);
+                },
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),

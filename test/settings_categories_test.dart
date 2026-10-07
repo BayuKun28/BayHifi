@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/features/settings/presentation/settings_screen.dart';
 import 'package:baydev_hifi/features/settings/presentation/sub_screens/theming_settings_screen.dart';
 import 'package:baydev_hifi/features/settings/presentation/sub_screens/visualizer_settings_screen.dart';
@@ -37,7 +38,7 @@ void main() {
     expect(find.text('STUDIO COLOR PALETTES'), findsOneWidget);
 
     // Navigate back to Hub
-    await tester.tap(find.byType(IconButton).first);
+    await tester.tap(find.byType(M3EIconButton).first);
     await tester.pumpAndSettle();
 
     // 3. Test Navigating to Visualizer Sub-screen
@@ -49,7 +50,7 @@ void main() {
     expect(find.text('RTA SPECTRUM VISUALIZER'), findsOneWidget);
 
     // Navigate back
-    await tester.tap(find.byType(IconButton).first);
+    await tester.tap(find.byType(M3EIconButton).first);
     await tester.pumpAndSettle();
 
     // 4. Test Navigating to Gestures Sub-screen
@@ -60,7 +61,7 @@ void main() {
     expect(find.text('NOW PLAYING ARTWORK GESTURES'), findsOneWidget);
 
     // Navigate back
-    await tester.tap(find.byType(IconButton).first);
+    await tester.tap(find.byType(M3EIconButton).first);
     await tester.pumpAndSettle();
 
     // 5. Test Navigating to Docking Sub-screen
@@ -71,7 +72,7 @@ void main() {
     expect(find.text('LAUNCH STUDIO DOCKING MODE'), findsOneWidget);
 
     // Navigate back
-    await tester.tap(find.byType(IconButton).first);
+    await tester.tap(find.byType(M3EIconButton).first);
     await tester.pumpAndSettle();
 
     // 6. Test Navigating to Audio Hardware Sub-screen
@@ -82,7 +83,7 @@ void main() {
     expect(find.text('Output Audio Device'), findsOneWidget);
 
     // Navigate back
-    await tester.tap(find.byType(IconButton).first);
+    await tester.tap(find.byType(M3EIconButton).first);
     await tester.pumpAndSettle();
 
     // 7. Test Navigating to Library Scanner Sub-screen

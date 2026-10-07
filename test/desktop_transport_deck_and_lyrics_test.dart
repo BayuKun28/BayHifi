@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/core/desktop/desktop_bottom_master_transport_deck.dart';
 import 'package:baydev_hifi/core/desktop/desktop_lyrics_dialog.dart';
@@ -114,8 +115,11 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Find the volume Slider widget (max == 1.0)
-      final volumeSliderFinder = find.byWidgetPredicate((w) => w is Slider && w.max == 1.0);
+      // Find the volume Slider widget (M3ESlider or Slider) inside the 120px SizedBox
+      final volumeSliderFinder = find.descendant(
+        of: find.byWidgetPredicate((w) => w is SizedBox && w.width == 120.0),
+        matching: find.byWidgetPredicate((w) => w is M3ESlider || w is Slider),
+      );
       expect(volumeSliderFinder, findsOneWidget);
 
       // Check that the container around the volume slider is 120px wide

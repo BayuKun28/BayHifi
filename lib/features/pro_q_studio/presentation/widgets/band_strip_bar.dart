@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/eq_band.dart';
 import '../controllers/eq_controller.dart';
@@ -338,7 +339,7 @@ class BandStripBar extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      IconButton(
+                      M3EIconButton(
                         onPressed: () => Navigator.pop(sheetContext),
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
@@ -393,24 +394,14 @@ class BandStripBar extends ConsumerWidget {
                   const SizedBox(height: 16),
 
                   // Slider
-                  SliderTheme(
-                    data: SliderThemeData(
-                      activeTrackColor: const Color(0xFFEF5350),
-                      inactiveTrackColor: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
-                      thumbColor: const Color(0xFFEF5350),
-                      overlayColor: const Color(0xFFEF5350).withValues(alpha: 0.2),
-                      trackHeight: 3.5,
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-                    ),
-                    child: Slider(
-                      value: state.safePreampDb.clamp(-24.0, 12.0),
-                      min: -24.0,
-                      max: 12.0,
-                      divisions: 72,
-                      onChanged: (val) {
-                        notifier.setPreamp(val, isAuto: false);
-                      },
-                    ),
+                  M3ESlider(
+                    value: state.safePreampDb.clamp(-24.0, 12.0),
+                    min: -24.0,
+                    max: 12.0,
+                    divisions: 72,
+                    onChanged: (val) {
+                      notifier.setPreamp(val, isAuto: false);
+                    },
                   ),
                   const SizedBox(height: 8),
 
@@ -471,9 +462,8 @@ class BandStripBar extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          Switch(
+                          M3ESwitch(
                             value: state.autoPreampEnabled,
-                            activeThumbColor: const Color(0xFF00E676),
                             onChanged: (_) => notifier.toggleAutoPreamp(),
                           ),
                         ],

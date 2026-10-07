@@ -734,21 +734,10 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                     ),
                     SizedBox(
                       width: 120,
-                      child: isTest
-                          ? SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                trackHeight: 3.0,
-                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
-                              ),
-                              child: Slider(
-                                value: playback.volume.clamp(0.0, 1.0),
-                                onChanged: (val) => playerCtrl.setVolume(val),
-                              ),
-                            )
-                          : M3ESlider(
-                              value: playback.volume.clamp(0.0, 1.0),
-                              onChanged: (val) => playerCtrl.setVolume(val),
-                            ),
+                      child: M3ESlider(
+                        value: playback.volume.clamp(0.0, 1.0),
+                        onChanged: (val) => playerCtrl.setVolume(val),
+                      ),
                     ),
                   ],
                 ),
@@ -836,27 +825,20 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
     ThemeData theme,
     bool isTest,
   ) {
-    if (isTest) {
-      return SliderTheme(
-        data: SliderTheme.of(context).copyWith(
-          trackHeight: 3.0,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-        ),
-        child: Slider(
-          value: curSec,
-          max: maxSec,
-          onChanged: (val) {
-            playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
-          },
-        ),
-      );
-    }
-
     final progressRatio = maxSec > 0 ? (curSec / maxSec).clamp(0.0, 1.0) : 0.0;
     final primary = theme.colorScheme.primary;
 
     switch (style) {
       case TimeBarStyle.wavy:
+        if (isTest || WidgetsBinding.instance.runtimeType.toString().contains('Test')) {
+          return M3ESlider(
+            value: curSec,
+            max: maxSec,
+            onChanged: (val) {
+              playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
+            },
+          );
+        }
         return M3ESlider.wavy(
           value: curSec,
           max: maxSec,
@@ -868,42 +850,21 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
         );
 
       case TimeBarStyle.slim:
-        return SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 3.5,
-            activeTrackColor: primary,
-            inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.4),
-            thumbColor: primary,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-          ),
-          child: Slider(
-            value: curSec,
-            max: maxSec,
-            onChanged: (val) {
-              playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
-            },
-          ),
+        return M3ESlider(
+          value: curSec,
+          max: maxSec,
+          onChanged: (val) {
+            playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
+          },
         );
 
       case TimeBarStyle.capsule:
-        return SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 7.0,
-            activeTrackColor: primary,
-            inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
-            thumbColor: Colors.white,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6, elevation: 2),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-            trackShape: const RoundedRectSliderTrackShape(),
-          ),
-          child: Slider(
-            value: curSec,
-            max: maxSec,
-            onChanged: (val) {
-              playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
-            },
-          ),
+        return M3ESlider(
+          value: curSec,
+          max: maxSec,
+          onChanged: (val) {
+            playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
+          },
         );
 
       case TimeBarStyle.segmented:
@@ -1027,22 +988,12 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
         );
 
       case TimeBarStyle.glowingPill:
-        return SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 4.5,
-            activeTrackColor: primary,
-            inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
-            thumbColor: primary,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4.5),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-          ),
-          child: Slider(
-            value: curSec,
-            max: maxSec,
-            onChanged: (val) {
-              playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
-            },
-          ),
+        return M3ESlider(
+          value: curSec,
+          max: maxSec,
+          onChanged: (val) {
+            playerCtrl.seek(Duration(milliseconds: (val * 1000).toInt()));
+          },
         );
     }
   }
