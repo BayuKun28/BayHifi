@@ -210,6 +210,15 @@ class StudioWrappedCalculator {
       topGenres: topGenres,
     );
 
+    // 9. Calculate Harmonic Resonance & Acoustic Energy Profile
+    final resonanceProfile = _calculateHarmonicResonanceProfile(
+      logs: filteredLogs,
+      topGenres: topGenres,
+      flacPercentage: flacPct,
+      hiResPercentage: hiResPct,
+      dspActiveCount: dspActiveCount,
+    );
+
     final uniqueArtists = artistMap.length;
     final uniqueAlbums = trackMap.values.map((t) => t.album).toSet().length;
 
@@ -231,7 +240,88 @@ class StudioWrappedCalculator {
       favoriteDacName: favDac,
       hardwareDacHours: dacHours,
       persona: persona,
+      resonanceProfile: resonanceProfile,
       generatedAt: now,
+    );
+  }
+
+  HarmonicResonanceProfile _calculateHarmonicResonanceProfile({
+    required List<PlaybackLogEntry> logs,
+    required List<GenreBreakdown> topGenres,
+    required double flacPercentage,
+    required double hiResPercentage,
+    required int dspActiveCount,
+  }) {
+    if (logs.isEmpty) {
+      return const HarmonicResonanceProfile(
+        energyScore: 84,
+        timbralSignature: 'Warm Harmonic Analog',
+        dynamicRangeDb: 16.8,
+        peakTimeWindow: 'Late Night (22:00 - 02:00)',
+        waveSeedAmplitudes: [0.45, 0.88, 0.62, 0.94, 0.50, 0.82],
+      );
+    }
+
+    final hourBuckets = List<int>.filled(24, 0);
+    for (final l in logs) {
+      hourBuckets[l.timestamp.hour]++;
+    }
+    int peakHour = 0;
+    int maxHourCount = 0;
+    for (int h = 0; h < 24; h++) {
+      if (hourBuckets[h] > maxHourCount) {
+        maxHourCount = hourBuckets[h];
+        peakHour = h;
+      }
+    }
+
+    String timeWindow;
+    if (peakHour >= 22 || peakHour < 4) {
+      timeWindow = 'Late Night (22:00 - 04:00)';
+    } else if (peakHour >= 4 && peakHour < 12) {
+      timeWindow = 'Morning Studio (04:00 - 12:00)';
+    } else if (peakHour >= 12 && peakHour < 18) {
+      timeWindow = 'Afternoon Focus (12:00 - 18:00)';
+    } else {
+      timeWindow = 'Evening Immersion (18:00 - 22:00)';
+    }
+
+    double energy = 60.0;
+    final topGenreStr = topGenres.isNotEmpty ? topGenres.first.genre.toLowerCase() : '';
+    if (topGenreStr.contains('rock') || topGenreStr.contains('metal') || topGenreStr.contains('electronic')) {
+      energy += 25.0;
+    } else if (topGenreStr.contains('classical') || topGenreStr.contains('acoustic') || topGenreStr.contains('ambient')) {
+      energy -= 15.0;
+    }
+    energy += (hiResPercentage * 0.15);
+    final energyScore = energy.clamp(20.0, 99.0).round();
+
+    String timbral;
+    if (dspActiveCount >= 10) {
+      timbral = 'Warm Harmonic Analog (Tube Drive)';
+    } else if (hiResPercentage >= 60.0) {
+      timbral = 'Pure Bit-Perfect Transparent';
+    } else if (topGenreStr.contains('electronic') || topGenreStr.contains('dance')) {
+      timbral = 'Visceral Sub-Bass Impact';
+    } else {
+      timbral = 'Studio Reference Linear';
+    }
+
+    final dynamicRange = (14.0 + (hiResPercentage * 0.05) + (flacPercentage * 0.02)).clamp(12.0, 22.0);
+
+    final a0 = (0.35 + (logs.length % 7) * 0.08).clamp(0.2, 0.95);
+    final a1 = (0.50 + (energyScore / 200.0)).clamp(0.3, 0.98);
+    final a2 = (0.30 + (flacPercentage / 200.0)).clamp(0.25, 0.90);
+    final a3 = (0.60 + (hiResPercentage / 250.0)).clamp(0.4, 0.99);
+    final a4 = (0.40 + (peakHour / 50.0)).clamp(0.25, 0.88);
+    final a5 = (0.55 + (dspActiveCount / 30.0)).clamp(0.35, 0.95);
+
+    return HarmonicResonanceProfile(
+      energyScore: energyScore,
+      timbralSignature: timbral,
+      dynamicRangeDb: double.parse(dynamicRange.toStringAsFixed(1)),
+      peakTimeWindow: timeWindow,
+      waveSeedAmplitudes: [a0, a1, a2, a3, a4, a5],
     );
   }
 

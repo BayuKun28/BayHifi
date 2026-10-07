@@ -9,10 +9,14 @@ import 'package:baydev_hifi/features/analytics/domain/studio_wrapped_calculator.
 import 'package:baydev_hifi/features/analytics/domain/studio_wrapped_data.dart';
 import 'package:baydev_hifi/features/analytics/presentation/story/studio_wrapped_story_screen.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/studio_wrapped_export_hub.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/abstract_aura_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/bento_studio_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/cassette_jcard_view.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/concert_ticket_view.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/cyber_spec_card_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/sticker_collage_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/thermal_receipt_view.dart';
+import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/vinyl_gatefold_view.dart';
 import 'package:baydev_hifi/features/dashboard/presentation/widgets/studio_wrapped_bento_banner.dart';
 
 void main() {
@@ -157,8 +161,8 @@ void main() {
     });
   });
 
-  group('StudioWrappedCalculator Tests', () {
-    test('Calculates aggregated metrics correctly from raw logs', () {
+  group('StudioWrappedCalculator & Harmonic Resonance Tests', () {
+    test('Calculates aggregated metrics & resonance profile correctly from raw logs', () {
       final now = DateTime(2026, 6, 15, 14, 0);
       final logs = [
         PlaybackLogEntry(
@@ -233,6 +237,12 @@ void main() {
       expect(data.favoriteDacDevice, 'Fiio KA13');
       expect(data.audioPurityReport.losslessFlacRatio, greaterThan(0.5));
       expect(data.audioPurityReport.highestSampleRate, '192 kHz / 24-bit');
+
+      // Harmonic Resonance Profile verifications
+      expect(data.resonanceProfile.energyScore, inInclusiveRange(0, 100));
+      expect(data.resonanceProfile.dynamicRangeDb, inInclusiveRange(10.0, 30.0));
+      expect(data.resonanceProfile.waveSeedAmplitudes.length, 6);
+      expect(data.resonanceProfile.peakTimeWindow, isNotEmpty);
     });
 
     test('Propagates artworkUrl to TopTrackRank, TopArtistRank, and supports libraryFallback', () {
@@ -270,10 +280,11 @@ void main() {
       expect(fallbackData.topArtists, isNotEmpty);
       expect(fallbackData.topGenres, isNotEmpty);
       expect(fallbackData.persona, isNotNull);
+      expect(fallbackData.resonanceProfile.waveSeedAmplitudes, isNotEmpty);
     });
   });
 
-  group('Studio Wrapped Recap Visual Templates Widget Tests', () {
+  group('Studio Wrapped Visual Templates Widget Tests (All 8 Styles)', () {
     const calculator = StudioWrappedCalculator();
     final sampleData = calculator.calculate(rawLogs: [], timeFilter: RecapTimeFilter.year2026);
 
@@ -367,6 +378,81 @@ void main() {
       expect(find.text('2026 MASTER TAPE REEL'), findsOneWidget);
       expect(find.text(sampleData.persona.title.toUpperCase()), findsWidgets);
     });
+
+    testWidgets('Renders AbstractSoundwaveAuraView (Template 5) with aura & resonance HUD', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: AbstractSoundwaveAuraView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('SONIC RESONANCE 2026'), findsOneWidget);
+      expect(find.text('TIMBRAL SIGNATURE'), findsOneWidget);
+      expect(find.text(sampleData.persona.title.toUpperCase()), findsWidgets);
+    });
+
+    testWidgets('Renders VinylGatefoldView (Template 6) with 12" LP disc & master tracklist', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: VinylGatefoldView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('ORIGINAL MASTER RECORDING'), findsOneWidget);
+      expect(find.text('33⅓ RPM • STEREO'), findsOneWidget);
+      expect(find.text('SIDE A • MASTER CUTS'), findsOneWidget);
+      expect(find.text('FEATURED ARTIST'), findsOneWidget);
+    });
+
+    testWidgets('Renders ConcertTicketView (Template 7) with VIP stub & admission bar', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ConcertTicketView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('BAYDEV HI-FI TOUR • 2026'), findsOneWidget);
+      expect(find.text('VIP ALL-ACCESS'), findsOneWidget);
+      expect(find.text('OFFICIAL SETLIST'), findsOneWidget);
+      expect(find.text('VERIFIED HI-FI'), findsOneWidget);
+    });
+
+    testWidgets('Renders CyberSpecCardView (Template 8) with Tokyo hardware HUD', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: CyberSpecCardView(data: sampleData),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('SYSTEM DIAGNOSTIC // 2026'), findsOneWidget);
+      expect(find.text('0x7F:SOLOUD-DSP'), findsOneWidget);
+      expect(find.text('CORE MASTER ASSET'), findsOneWidget);
+      expect(find.text('TELEMETRY MATRIX [TOP 4]'), findsOneWidget);
+    });
   });
 
   group('Studio Wrapped Interactive Story & Hub Integration Tests', () {
@@ -378,7 +464,6 @@ void main() {
           ),
         ),
       );
-      // Pump single frame to initialize
       await tester.pump(const Duration(milliseconds: 100));
 
       // Slide 1: Welcome
@@ -417,7 +502,7 @@ void main() {
       expect(find.text('EXPORT & SHARE RECAP CARDS'), findsOneWidget);
     });
 
-    testWidgets('StudioWrappedExportHub switches templates smoothly', (tester) async {
+    testWidgets('StudioWrappedExportHub switches between all 8 templates smoothly', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -444,6 +529,34 @@ void main() {
       await tester.tap(find.text('CASSETTE'));
       await tester.pumpAndSettle();
       expect(find.text('2026 MASTER TAPE REEL'), findsOneWidget);
+
+      // Switch to Aura Wave Template
+      await tester.tap(find.text('AURA WAVE'));
+      await tester.pumpAndSettle();
+      expect(find.text('SONIC RESONANCE 2026'), findsOneWidget);
+
+      // Switch to Vinyl LP Template
+      await tester.tap(find.text('VINYL LP'));
+      await tester.pumpAndSettle();
+      expect(find.text('ORIGINAL MASTER RECORDING'), findsOneWidget);
+
+      // Scroll template bar to the right
+      await tester.drag(find.text('AURA WAVE'), const Offset(-350, 0));
+      await tester.pumpAndSettle();
+
+      // Switch to VIP Ticket Template
+      await tester.tap(find.text('VIP TICKET'));
+      await tester.pumpAndSettle();
+      expect(find.text('BAYDEV HI-FI TOUR • 2026'), findsOneWidget);
+
+      // Scroll further to the end
+      await tester.drag(find.text('VIP TICKET'), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+
+      // Switch to Cyber HUD Template
+      await tester.tap(find.text('CYBER HUD'));
+      await tester.pumpAndSettle();
+      expect(find.text('SYSTEM DIAGNOSTIC // 2026'), findsOneWidget);
     });
 
     testWidgets('StudioWrappedBentoBanner renders properly in dashboard flow', (tester) async {

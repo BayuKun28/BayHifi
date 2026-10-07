@@ -209,6 +209,40 @@ class AudioPurityReport {
 }
 
 @immutable
+class HarmonicResonanceProfile {
+  final int energyScore; // 0 - 100
+  final String timbralSignature; // 'Warm Analog', 'Neutral Reference', 'Holographic Air', 'Visceral Sub-Bass'
+  final double dynamicRangeDb; // e.g. 16.8
+  final String peakTimeWindow; // e.g. 'Late Night (22:00 - 02:00)'
+  final List<double> waveSeedAmplitudes; // 6 normalized bezier amplitudes [0.0 - 1.0]
+
+  const HarmonicResonanceProfile({
+    required this.energyScore,
+    required this.timbralSignature,
+    required this.dynamicRangeDb,
+    required this.peakTimeWindow,
+    required this.waveSeedAmplitudes,
+  });
+
+  Map<String, dynamic> toMap() => {
+    'energyScore': energyScore,
+    'timbralSignature': timbralSignature,
+    'dynamicRangeDb': dynamicRangeDb,
+    'peakTimeWindow': peakTimeWindow,
+    'waveSeedAmplitudes': waveSeedAmplitudes,
+  };
+
+  factory HarmonicResonanceProfile.fromMap(Map<String, dynamic> map) => HarmonicResonanceProfile(
+    energyScore: (map['energyScore'] as num?)?.toInt() ?? 82,
+    timbralSignature: map['timbralSignature'] as String? ?? 'Warm Harmonic Analog',
+    dynamicRangeDb: (map['dynamicRangeDb'] as num?)?.toDouble() ?? 16.4,
+    peakTimeWindow: map['peakTimeWindow'] as String? ?? 'Late Night (22:00 - 02:00)',
+    waveSeedAmplitudes: (map['waveSeedAmplitudes'] as List?)?.map((e) => (e as num).toDouble()).toList() ??
+        const [0.4, 0.85, 0.55, 0.92, 0.45, 0.78],
+  );
+}
+
+@immutable
 class StudioWrappedData {
   final RecapTimeFilter timeFilter;
   final int totalMinutes;
@@ -227,6 +261,7 @@ class StudioWrappedData {
   final String? favoriteDacName;
   final int hardwareDacHours;
   final AudiophilePersona persona;
+  final HarmonicResonanceProfile resonanceProfile;
   final DateTime generatedAt;
   final int activeListeningDays;
 
@@ -248,6 +283,13 @@ class StudioWrappedData {
     this.favoriteDacName,
     required this.hardwareDacHours,
     required this.persona,
+    this.resonanceProfile = const HarmonicResonanceProfile(
+      energyScore: 82,
+      timbralSignature: 'Warm Harmonic Analog',
+      dynamicRangeDb: 16.4,
+      peakTimeWindow: 'Late Night (22:00 - 02:00)',
+      waveSeedAmplitudes: [0.4, 0.85, 0.55, 0.92, 0.45, 0.78],
+    ),
     required this.generatedAt,
     this.activeListeningDays = 180,
   });
@@ -285,6 +327,7 @@ class StudioWrappedData {
     'favoriteDacName': favoriteDacName,
     'hardwareDacHours': hardwareDacHours,
     'persona': persona.type.name,
+    'resonanceProfile': resonanceProfile.toMap(),
     'generatedAt': generatedAt.toIso8601String(),
     'activeListeningDays': activeListeningDays,
   };
@@ -301,6 +344,17 @@ class StudioWrappedData {
       (p) => p.name == personaName,
       orElse: () => AudiophilePersonaType.tubeConnoisseur,
     );
+
+    final resProfileMap = map['resonanceProfile'] as Map<String, dynamic>?;
+    final resonanceProfile = resProfileMap != null
+        ? HarmonicResonanceProfile.fromMap(resProfileMap)
+        : const HarmonicResonanceProfile(
+            energyScore: 82,
+            timbralSignature: 'Warm Harmonic Analog',
+            dynamicRangeDb: 16.4,
+            peakTimeWindow: 'Late Night (22:00 - 02:00)',
+            waveSeedAmplitudes: [0.4, 0.85, 0.55, 0.92, 0.45, 0.78],
+          );
 
     return StudioWrappedData(
       timeFilter: timeFilter,
@@ -343,6 +397,7 @@ class StudioWrappedData {
       favoriteDacName: map['favoriteDacName'] as String?,
       hardwareDacHours: (map['hardwareDacHours'] as num?)?.toInt() ?? 0,
       persona: AudiophilePersona.fromType(personaType),
+      resonanceProfile: resonanceProfile,
       generatedAt: DateTime.tryParse(map['generatedAt'] as String? ?? '') ?? DateTime.now(),
       activeListeningDays: (map['activeListeningDays'] as num?)?.toInt() ?? 180,
     );

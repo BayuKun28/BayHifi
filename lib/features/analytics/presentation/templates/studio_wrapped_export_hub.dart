@@ -5,16 +5,24 @@ import '../../../../app/theme/studio_surface_theme.dart';
 import '../../data/playback_analytics_service.dart';
 import '../../data/wrapped_image_exporter.dart';
 import '../../domain/studio_wrapped_data.dart';
+import 'widgets/abstract_aura_view.dart';
 import 'widgets/bento_studio_view.dart';
 import 'widgets/cassette_jcard_view.dart';
+import 'widgets/concert_ticket_view.dart';
+import 'widgets/cyber_spec_card_view.dart';
 import 'widgets/sticker_collage_view.dart';
 import 'widgets/thermal_receipt_view.dart';
+import 'widgets/vinyl_gatefold_view.dart';
 
 enum WrappedTemplateStyle {
   receipt,
   stickers,
   bento,
   cassette,
+  abstractAura,
+  vinylGatefold,
+  concertTicket,
+  cyberSpec,
 }
 
 extension WrappedTemplateStyleExt on WrappedTemplateStyle {
@@ -28,6 +36,14 @@ extension WrappedTemplateStyleExt on WrappedTemplateStyle {
         return 'Bento';
       case WrappedTemplateStyle.cassette:
         return 'Cassette';
+      case WrappedTemplateStyle.abstractAura:
+        return 'Aura Wave';
+      case WrappedTemplateStyle.vinylGatefold:
+        return 'Vinyl LP';
+      case WrappedTemplateStyle.concertTicket:
+        return 'VIP Ticket';
+      case WrappedTemplateStyle.cyberSpec:
+        return 'Cyber HUD';
     }
   }
 
@@ -41,6 +57,14 @@ extension WrappedTemplateStyleExt on WrappedTemplateStyle {
         return HugeIcons.strokeRoundedGrid;
       case WrappedTemplateStyle.cassette:
         return HugeIcons.strokeRoundedDisc;
+      case WrappedTemplateStyle.abstractAura:
+        return HugeIcons.strokeRoundedAudioWave01;
+      case WrappedTemplateStyle.vinylGatefold:
+        return HugeIcons.strokeRoundedRecord;
+      case WrappedTemplateStyle.concertTicket:
+        return HugeIcons.strokeRoundedTicket01;
+      case WrappedTemplateStyle.cyberSpec:
+        return HugeIcons.strokeRoundedCpu;
     }
   }
 }
@@ -277,6 +301,14 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
         return BentoStudioView(data: data);
       case WrappedTemplateStyle.cassette:
         return CassetteJCardView(data: data);
+      case WrappedTemplateStyle.abstractAura:
+        return AbstractSoundwaveAuraView(data: data);
+      case WrappedTemplateStyle.vinylGatefold:
+        return VinylGatefoldView(data: data);
+      case WrappedTemplateStyle.concertTicket:
+        return ConcertTicketView(data: data);
+      case WrappedTemplateStyle.cyberSpec:
+        return CyberSpecCardView(data: data);
     }
   }
 
