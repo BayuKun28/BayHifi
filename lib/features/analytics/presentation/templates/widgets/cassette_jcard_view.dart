@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
+import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
 /// 📼 Template 4: Vintage Cassette Tape / Reel J-Card Edition
@@ -86,23 +88,41 @@ class CassetteJCardView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 1. Tape Title & Metadata
+                // 1. Tape Title & Metadata with Album Art Thumbnail
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '2026 MASTER TAPE REEL',
-                          style: monoStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w900, color: inkColor, letterSpacing: 1.0),
-                        ),
-                        Text(
-                          'HI-RES CASSETTE ARCHIVE // ${data.totalMinutes} MINS',
-                          style: monoStyle.copyWith(fontSize: 8.0, fontWeight: FontWeight.w700, color: mutedInk),
-                        ),
-                      ],
+                    StudioArtworkWidget(
+                      url: data.topTrack?.albumArtUri,
+                      width: 42,
+                      height: 42,
+                      borderRadius: BorderRadius.circular(4),
+                      fallbackIcon: HugeIcons.strokeRoundedAlbum01,
+                      fallbackIconSize: 20,
+                      backgroundColor: const Color(0xFFCBD5E1),
                     ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '2026 MASTER TAPE REEL',
+                            style: monoStyle.copyWith(fontSize: 11, fontWeight: FontWeight.w900, color: inkColor, letterSpacing: 0.8),
+                          ),
+                          Text(
+                            'TOP: ${data.topTrack?.title.toUpperCase() ?? "DIRECT MASTER"}',
+                            style: monoStyle.copyWith(fontSize: 8.0, fontWeight: FontWeight.w800, color: accentColor),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'HI-RES CASSETTE // ${data.totalMinutes} MINS',
+                            style: monoStyle.copyWith(fontSize: 7.5, fontWeight: FontWeight.w700, color: mutedInk),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -144,6 +164,16 @@ class CassetteJCardView extends StatelessWidget {
                           'A${track.rank}. ',
                           style: monoStyle.copyWith(fontSize: 9.5, fontWeight: FontWeight.w900, color: accentColor),
                         ),
+                        StudioArtworkWidget(
+                          url: track.albumArtUri,
+                          width: 16,
+                          height: 16,
+                          borderRadius: BorderRadius.circular(3),
+                          fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                          fallbackIconSize: 10,
+                          backgroundColor: const Color(0xFFCBD5E1),
+                        ),
+                        const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             '${track.title} - ${track.artist}',

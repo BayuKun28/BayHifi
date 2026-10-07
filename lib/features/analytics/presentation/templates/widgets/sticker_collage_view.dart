@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/audiophile_persona.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -220,26 +221,46 @@ class StickerCollageView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            artist?.artist ?? 'Pink Floyd',
-            style: const TextStyle(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: -0.2,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '${artist?.totalMinutes ?? 1420} mins',
-            style: const TextStyle(
-              fontSize: 9.0,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFFCE7F3),
-            ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              StudioArtworkWidget(
+                url: artist?.artworkUrl,
+                width: 28,
+                height: 28,
+                borderRadius: BorderRadius.circular(14),
+                fallbackIcon: HugeIcons.strokeRoundedUser,
+                fallbackIconSize: 14,
+                backgroundColor: Colors.white24,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      artist?.artist ?? 'Pink Floyd',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${artist?.totalMinutes ?? 1420} mins',
+                      style: const TextStyle(
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFFCE7F3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -274,28 +295,48 @@ class StickerCollageView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            track?.title ?? 'Time (2023 Remaster)',
-            style: const TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: -0.2,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '${track?.playCount ?? 84} plays • ${track?.format.toUpperCase() ?? "FLAC"}',
-            style: const TextStyle(
-              fontSize: 8.5,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFE0F2FE),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              StudioArtworkWidget(
+                url: track?.albumArtUri,
+                width: 30,
+                height: 30,
+                borderRadius: BorderRadius.circular(6),
+                fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                fallbackIconSize: 16,
+                backgroundColor: Colors.white24,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      track?.title ?? 'Time (2023 Remaster)',
+                      style: const TextStyle(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${track?.playCount ?? 84} plays • ${track?.format.toUpperCase() ?? "FLAC"}',
+                      style: const TextStyle(
+                        fontSize: 8.0,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFE0F2FE),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

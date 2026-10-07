@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
 /// 🍱 Template 3: Modern Bento Studio (Material 3 Expressive Edition)
@@ -122,17 +123,38 @@ class BentoStudioView extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        topTrack?.title ?? 'Comfortably Numb',
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900, color: textPrimary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        topTrack?.artist ?? 'Pink Floyd',
-                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: textSecondary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          StudioArtworkWidget(
+                            url: topTrack?.albumArtUri,
+                            width: 36,
+                            height: 36,
+                            borderRadius: BorderRadius.circular(8),
+                            fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                            fallbackIconSize: 18,
+                            backgroundColor: const Color(0xFF27272A),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  topTrack?.title ?? 'Comfortably Numb',
+                                  style: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.w900, color: textPrimary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  topTrack?.artist ?? 'Pink Floyd',
+                                  style: const TextStyle(fontSize: 9.0, fontWeight: FontWeight.w600, color: textSecondary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 6),
                       Container(
@@ -224,15 +246,36 @@ class BentoStudioView extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        topArtist?.artist ?? 'Pink Floyd',
-                        style: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.w900, color: textPrimary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        '${topArtist?.percentage.toStringAsFixed(1) ?? "38.5"}% Listening Share',
-                        style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w600, color: textSecondary),
+                      Row(
+                        children: [
+                          StudioArtworkWidget(
+                            url: topArtist?.artworkUrl,
+                            width: 30,
+                            height: 30,
+                            borderRadius: BorderRadius.circular(15),
+                            fallbackIcon: HugeIcons.strokeRoundedUser,
+                            fallbackIconSize: 16,
+                            backgroundColor: const Color(0xFF27272A),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  topArtist?.artist ?? 'Pink Floyd',
+                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900, color: textPrimary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${topArtist?.percentage.toStringAsFixed(1) ?? "38.5"}% Share',
+                                  style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w600, color: textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -322,6 +365,16 @@ class BentoStudioView extends StatelessWidget {
                             style: const TextStyle(fontSize: 9.0, fontWeight: FontWeight.w900, color: accentColor),
                           ),
                         ),
+                        StudioArtworkWidget(
+                          url: track.albumArtUri,
+                          width: 18,
+                          height: 18,
+                          borderRadius: BorderRadius.circular(4),
+                          fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                          fallbackIconSize: 10,
+                          backgroundColor: const Color(0xFF27272A),
+                        ),
+                        const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             '${track.title} • ${track.artist}',

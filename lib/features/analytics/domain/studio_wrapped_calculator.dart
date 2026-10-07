@@ -46,6 +46,7 @@ class StudioWrappedCalculator {
           format: log.format,
           sampleRate: log.sampleRate,
           bitDepth: log.bitDepth,
+          artworkUrl: log.artworkUrl,
         ),
       );
       agg.playCount++;
@@ -68,6 +69,7 @@ class StudioWrappedCalculator {
         bitDepth: agg.bitDepth,
         playCount: agg.playCount,
         totalMinutes: math.max(1, (agg.totalDurationMs / 60000).round()),
+        albumArtUri: agg.artworkUrl,
       );
     }).toList();
 
@@ -75,7 +77,13 @@ class StudioWrappedCalculator {
     final artistMap = <String, _ArtistAggregator>{};
     for (final log in filteredLogs) {
       final artistName = log.artist.trim().isNotEmpty ? log.artist.trim() : 'Unknown Artist';
-      final agg = artistMap.putIfAbsent(artistName, () => _ArtistAggregator(artist: artistName));
+      final agg = artistMap.putIfAbsent(
+        artistName,
+        () => _ArtistAggregator(artist: artistName, artworkUrl: log.artworkUrl),
+      );
+      if (agg.artworkUrl == null && log.artworkUrl != null) {
+        agg.artworkUrl = log.artworkUrl;
+      }
       agg.playCount++;
       agg.totalDurationMs += log.durationPlayedMs > 0 ? log.durationPlayedMs : log.trackDurationMs;
     }
@@ -98,6 +106,7 @@ class StudioWrappedCalculator {
         playCount: agg.playCount,
         totalMinutes: math.max(1, (agg.totalDurationMs / 60000).round()),
         percentage: (pct * 10).round() / 10.0,
+        artworkUrl: agg.artworkUrl,
       );
     }).toList();
 
@@ -261,76 +270,114 @@ class StudioWrappedCalculator {
   }) {
     final now = DateTime.now();
 
-    final sampleTracks = <TopTrackRank>[
-      const TopTrackRank(
-        rank: 1,
-        trackId: 'rec_1',
-        title: 'Comfortably Numb',
-        artist: 'Pink Floyd',
-        album: 'The Wall (Lossless Remaster)',
-        format: 'flac',
-        sampleRate: 96000,
-        bitDepth: 24,
-        playCount: 142,
-        totalMinutes: 852,
-      ),
-      const TopTrackRank(
-        rank: 2,
-        trackId: 'rec_2',
-        title: 'Time',
-        artist: 'Pink Floyd',
-        album: 'The Dark Side of the Moon',
-        format: 'flac',
-        sampleRate: 96000,
-        bitDepth: 24,
-        playCount: 98,
-        totalMinutes: 686,
-      ),
-      const TopTrackRank(
-        rank: 3,
-        trackId: 'rec_3',
-        title: 'Bohemian Rhapsody',
-        artist: 'Queen',
-        album: 'A Night at the Opera',
-        format: 'flac',
-        sampleRate: 44100,
-        bitDepth: 16,
-        playCount: 76,
-        totalMinutes: 456,
-      ),
-      const TopTrackRank(
-        rank: 4,
-        trackId: 'rec_4',
-        title: 'Hotel California',
-        artist: 'Eagles',
-        album: 'Hotel California (High-Res 192k)',
-        format: 'flac',
-        sampleRate: 192000,
-        bitDepth: 24,
-        playCount: 64,
-        totalMinutes: 416,
-      ),
-      const TopTrackRank(
-        rank: 5,
-        trackId: 'rec_5',
-        title: 'Starboy',
-        artist: 'The Weeknd',
-        album: 'Starboy',
-        format: 'flac',
-        sampleRate: 44100,
-        bitDepth: 16,
-        playCount: 52,
-        totalMinutes: 208,
-      ),
-    ];
+    List<TopTrackRank> sampleTracks;
+    List<TopArtistRank> sampleArtists;
 
-    final sampleArtists = <TopArtistRank>[
-      const TopArtistRank(rank: 1, artist: 'Pink Floyd', playCount: 240, totalMinutes: 1538, percentage: 38.5),
-      const TopArtistRank(rank: 2, artist: 'Queen', playCount: 120, totalMinutes: 640, percentage: 16.0),
-      const TopArtistRank(rank: 3, artist: 'Eagles', playCount: 95, totalMinutes: 520, percentage: 13.0),
-      const TopArtistRank(rank: 4, artist: 'The Weeknd', playCount: 80, totalMinutes: 380, percentage: 9.5),
-      const TopArtistRank(rank: 5, artist: 'Daft Punk', playCount: 65, totalMinutes: 310, percentage: 7.8),
-    ];
+    if (libraryTracks != null && libraryTracks.isNotEmpty) {
+      sampleTracks = libraryTracks.take(5).toList().asMap().entries.map((e) {
+        final t = e.value;
+        return TopTrackRank(
+          rank: e.key + 1,
+          trackId: t.id,
+          title: t.title,
+          artist: t.artist,
+          album: t.album,
+          format: t.format.name,
+          sampleRate: t.sampleRate ?? 44100,
+          bitDepth: t.bitDepth ?? 16,
+          playCount: 120 - (e.key * 15),
+          totalMinutes: math.max(15, 600 - (e.key * 80)),
+          albumArtUri: t.albumArtUrl,
+        );
+      }).toList();
+
+      final distinctArtists = <String, String?>{};
+      for (final t in libraryTracks) {
+        distinctArtists.putIfAbsent(t.artist, () => t.albumArtUrl);
+      }
+
+      sampleArtists = distinctArtists.entries.take(5).toList().asMap().entries.map((e) {
+        return TopArtistRank(
+          rank: e.key + 1,
+          artist: e.value.key,
+          playCount: 180 - (e.key * 25),
+          totalMinutes: math.max(30, 900 - (e.key * 120)),
+          percentage: double.parse((35.0 - (e.key * 6.0)).clamp(5.0, 45.0).toStringAsFixed(1)),
+          artworkUrl: e.value.value,
+        );
+      }).toList();
+    } else {
+      sampleTracks = const <TopTrackRank>[
+        TopTrackRank(
+          rank: 1,
+          trackId: 'rec_1',
+          title: 'Comfortably Numb',
+          artist: 'Pink Floyd',
+          album: 'The Wall (Lossless Remaster)',
+          format: 'flac',
+          sampleRate: 96000,
+          bitDepth: 24,
+          playCount: 142,
+          totalMinutes: 852,
+        ),
+        TopTrackRank(
+          rank: 2,
+          trackId: 'rec_2',
+          title: 'Time',
+          artist: 'Pink Floyd',
+          album: 'The Dark Side of the Moon',
+          format: 'flac',
+          sampleRate: 96000,
+          bitDepth: 24,
+          playCount: 98,
+          totalMinutes: 686,
+        ),
+        TopTrackRank(
+          rank: 3,
+          trackId: 'rec_3',
+          title: 'Bohemian Rhapsody',
+          artist: 'Queen',
+          album: 'A Night at the Opera',
+          format: 'flac',
+          sampleRate: 44100,
+          bitDepth: 16,
+          playCount: 76,
+          totalMinutes: 456,
+        ),
+        TopTrackRank(
+          rank: 4,
+          trackId: 'rec_4',
+          title: 'Hotel California',
+          artist: 'Eagles',
+          album: 'Hotel California (High-Res 192k)',
+          format: 'flac',
+          sampleRate: 192000,
+          bitDepth: 24,
+          playCount: 64,
+          totalMinutes: 416,
+        ),
+        TopTrackRank(
+          rank: 5,
+          trackId: 'rec_5',
+          title: 'Starboy',
+          artist: 'The Weeknd',
+          album: 'Starboy',
+          format: 'flac',
+          sampleRate: 44100,
+          bitDepth: 16,
+          playCount: 52,
+          totalMinutes: 208,
+        ),
+      ];
+
+      sampleArtists = const <TopArtistRank>[
+        TopArtistRank(rank: 1, artist: 'Pink Floyd', playCount: 240, totalMinutes: 1538, percentage: 38.5),
+        TopArtistRank(rank: 2, artist: 'Queen', playCount: 120, totalMinutes: 640, percentage: 16.0),
+        TopArtistRank(rank: 3, artist: 'Eagles', playCount: 95, totalMinutes: 520, percentage: 13.0),
+        TopArtistRank(rank: 4, artist: 'The Weeknd', playCount: 80, totalMinutes: 380, percentage: 9.5),
+        TopArtistRank(rank: 5, artist: 'Daft Punk', playCount: 65, totalMinutes: 310, percentage: 7.8),
+      ];
+    }
 
     final sampleGenres = <GenreBreakdown>[
       const GenreBreakdown(genre: 'Progressive Rock', playCount: 260, percentage: 42.0),
@@ -354,8 +401,8 @@ class StudioWrappedCalculator {
       timeFilter: timeFilter,
       totalMinutes: 14280,
       totalTracksPlayed: 625,
-      uniqueArtistsCount: 48,
-      uniqueAlbumsCount: 86,
+      uniqueArtistsCount: math.max(sampleArtists.length, 48),
+      uniqueAlbumsCount: math.max(sampleTracks.length, 86),
       topTracks: sampleTracks,
       topArtists: sampleArtists,
       topGenres: sampleGenres,
@@ -381,6 +428,7 @@ class _TrackAggregator {
   final String format;
   final int sampleRate;
   final int bitDepth;
+  final String? artworkUrl;
   int playCount = 0;
   int totalDurationMs = 0;
 
@@ -392,13 +440,18 @@ class _TrackAggregator {
     required this.format,
     required this.sampleRate,
     required this.bitDepth,
+    this.artworkUrl,
   });
 }
 
 class _ArtistAggregator {
   final String artist;
+  String? artworkUrl;
   int playCount = 0;
   int totalDurationMs = 0;
 
-  _ArtistAggregator({required this.artist});
+  _ArtistAggregator({
+    required this.artist,
+    this.artworkUrl,
+  });
 }

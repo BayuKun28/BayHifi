@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../audio_engine/virtual_dsp_service.dart';
 import '../../../core/database/local_persistence_service.dart';
 import '../../hardware_dac/presentation/controllers/dac_bridge_controller.dart';
+import '../../library/presentation/controllers/library_controller.dart';
 import '../../player/domain/track.dart';
 import '../../pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../domain/playback_log_entry.dart';
@@ -71,6 +72,7 @@ class PlaybackAnalyticsService {
         isAutoEqActive: eqState.isAutoEqActive,
         activeDspCount: activeDsp,
         dacDeviceName: dacState.isConnected ? dacState.device?.productName : null,
+        artworkUrl: track.albumArtUrl,
       );
 
       await LocalPersistenceService.instance.logPlaybackSession(log.toMap());
@@ -85,7 +87,16 @@ class PlaybackAnalyticsService {
   }) {
     final rawList = LocalPersistenceService.instance.getPlaybackHistoryLogs();
     final logs = rawList.map(PlaybackLogEntry.fromMap).toList();
+    List<Track>? libraryTracks;
+    try {
+      libraryTracks = _ref.read(unifiedLibraryProvider).tracks;
+    } catch (_) {}
+
     const calculator = StudioWrappedCalculator();
-    return calculator.calculate(rawLogs: logs, timeFilter: timeFilter);
+    return calculator.calculate(
+      rawLogs: logs,
+      timeFilter: timeFilter,
+      libraryFallback: libraryTracks,
+    );
   }
 }

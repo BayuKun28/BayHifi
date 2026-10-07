@@ -20,6 +20,7 @@ class PlaybackLogEntry {
   final bool isAutoEqActive;
   final int activeDspCount;
   final String? dacDeviceName;
+  final String? artworkUrl;
 
   const PlaybackLogEntry({
     required this.id,
@@ -39,6 +40,7 @@ class PlaybackLogEntry {
     this.isAutoEqActive = false,
     this.activeDspCount = 0,
     this.dacDeviceName,
+    this.artworkUrl,
   });
 
   bool get isHiRes => bitDepth >= 24 || sampleRate >= 88200;
@@ -63,6 +65,7 @@ class PlaybackLogEntry {
       'isAutoEqActive': isAutoEqActive,
       'activeDspCount': activeDspCount,
       'dacDeviceName': dacDeviceName,
+      'artworkUrl': artworkUrl,
     };
   }
 
@@ -85,6 +88,7 @@ class PlaybackLogEntry {
       isAutoEqActive: map['isAutoEqActive'] as bool? ?? false,
       activeDspCount: (map['activeDspCount'] as num?)?.toInt() ?? 0,
       dacDeviceName: map['dacDeviceName'] as String?,
+      artworkUrl: map['artworkUrl'] as String?,
     );
   }
 }

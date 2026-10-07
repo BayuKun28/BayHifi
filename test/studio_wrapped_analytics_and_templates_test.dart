@@ -235,6 +235,32 @@ void main() {
       expect(data.audioPurityReport.highestSampleRate, '192 kHz / 24-bit');
     });
 
+    test('Propagates artworkUrl to TopTrackRank, TopArtistRank, and supports libraryFallback', () {
+      final now = DateTime(2026, 7, 1);
+      final logsWithArtwork = [
+        PlaybackLogEntry(
+          id: 'l_art_1',
+          trackId: 't_art_1',
+          title: 'Starboy',
+          artist: 'The Weeknd',
+          album: 'Starboy',
+          genre: 'R&B / Synthpop',
+          durationPlayedMs: 210000,
+          trackDurationMs: 230000,
+          format: 'flac',
+          sampleRate: 44100,
+          bitDepth: 16,
+          timestamp: now,
+          artworkUrl: 'https://example.com/starboy.jpg',
+        ),
+      ];
+
+      const calculator = StudioWrappedCalculator();
+      final data = calculator.calculate(rawLogs: logsWithArtwork, timeFilter: RecapTimeFilter.year2026);
+      expect(data.topTracks.first.albumArtUri, 'https://example.com/starboy.jpg');
+      expect(data.topArtists.first.artworkUrl, 'https://example.com/starboy.jpg');
+    });
+
     test('Generates high-fidelity demo sample data when logs are empty', () {
       const calculator = StudioWrappedCalculator();
       final fallbackData = calculator.calculate(rawLogs: [], timeFilter: RecapTimeFilter.year2026);

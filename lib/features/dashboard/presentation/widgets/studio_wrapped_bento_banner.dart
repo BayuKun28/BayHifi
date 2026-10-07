@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../analytics/data/playback_analytics_service.dart';
 import '../../../analytics/presentation/story/studio_wrapped_story_screen.dart';
 import '../../../analytics/presentation/templates/studio_wrapped_export_hub.dart';
@@ -94,27 +95,45 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Main Persona / Title Row
+                // Main Persona / Artwork Row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.5), width: 1.2),
-                      ),
-                      child: Center(
-                        child: HugeIcon(
-                          icon: persona.icon,
-                          size: 22,
-                          color: theme.colorScheme.primary,
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        StudioArtworkWidget(
+                          url: wrappedData.topTrack?.albumArtUri,
+                          width: 44,
+                          height: 44,
+                          borderRadius: BorderRadius.circular(10),
+                          fallbackIcon: HugeIcons.strokeRoundedDisc,
+                          fallbackIconSize: 22,
+                          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
                         ),
-                      ),
+                        Positioned(
+                          right: -4,
+                          bottom: -4,
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.black, width: 1.5),
+                            ),
+                            child: Center(
+                              child: HugeIcon(
+                                icon: persona.icon,
+                                size: 11,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,12 +149,16 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Your sound archetype, purity metrics & top tracks are ready.',
+                            wrappedData.topTrack != null
+                                ? 'Top Track: ${wrappedData.topTrack!.title} • ${wrappedData.topTrack!.artist}'
+                                : 'Your sound archetype, purity metrics & top tracks are ready.',
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w500,
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),

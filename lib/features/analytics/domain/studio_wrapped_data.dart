@@ -99,6 +99,7 @@ class TopArtistRank {
   final int playCount;
   final int totalMinutes;
   final double percentage;
+  final String? artworkUrl;
 
   const TopArtistRank({
     required this.rank,
@@ -106,6 +107,7 @@ class TopArtistRank {
     required this.playCount,
     required this.totalMinutes,
     required this.percentage,
+    this.artworkUrl,
   });
 
   int get minutesListened => totalMinutes;
@@ -116,6 +118,7 @@ class TopArtistRank {
     'playCount': playCount,
     'totalMinutes': totalMinutes,
     'percentage': percentage,
+    'artworkUrl': artworkUrl,
   };
 
   factory TopArtistRank.fromMap(Map<String, dynamic> map) => TopArtistRank(
@@ -124,6 +127,7 @@ class TopArtistRank {
     playCount: (map['playCount'] as num?)?.toInt() ?? 0,
     totalMinutes: (map['totalMinutes'] as num?)?.toInt() ?? 0,
     percentage: (map['percentage'] as num?)?.toDouble() ?? 0.0,
+    artworkUrl: map['artworkUrl'] as String?,
   );
 }
 

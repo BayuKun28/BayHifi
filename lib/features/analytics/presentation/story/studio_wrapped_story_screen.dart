@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../data/playback_analytics_service.dart';
 import '../../domain/studio_wrapped_data.dart';
 import '../templates/studio_wrapped_export_hub.dart';
@@ -430,6 +431,16 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         ),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    // Album Artwork
+                    StudioArtworkWidget(
+                      url: track.albumArtUri,
+                      width: isNumberOne ? 40 : 36,
+                      height: isNumberOne ? 40 : 36,
+                      borderRadius: BorderRadius.circular(isNumberOne ? 10 : 8),
+                      fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                      fallbackIconSize: 18,
+                    ),
                     const SizedBox(width: 12),
                     // Track Info
                     Expanded(
@@ -533,16 +544,14 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
             ),
             child: Row(
               children: [
-                Container(
+                StudioArtworkWidget(
+                  url: data.topArtists.first.artworkUrl,
                   width: 52,
                   height: 52,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 26, color: Colors.black),
-                  ),
+                  borderRadius: BorderRadius.circular(26),
+                  fallbackIcon: HugeIcons.strokeRoundedUser,
+                  fallbackIconSize: 24,
+                  backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -609,7 +618,17 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
+                    StudioArtworkWidget(
+                      url: artist.artworkUrl,
+                      width: 32,
+                      height: 32,
+                      borderRadius: BorderRadius.circular(16),
+                      fallbackIcon: HugeIcons.strokeRoundedUser,
+                      fallbackIconSize: 16,
+                      backgroundColor: Colors.white10,
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         artist.artist,
