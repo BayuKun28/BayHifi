@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🧬 Dedicated Focus Card 3: Genre & Sonic Spectrum Card
+/// Dedicated Focus Card 3: Genre & Sonic Spectrum Card
 /// Features studio frequency distribution, ranked genre breakdown with color bars, and timbral acoustic profile.
 class GenreSpectrumCardView extends StatelessWidget {
   final StudioWrappedData data;

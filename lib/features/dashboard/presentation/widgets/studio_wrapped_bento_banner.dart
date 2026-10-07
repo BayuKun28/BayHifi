@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -175,16 +176,7 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                       flex: 6,
                       child: SizedBox(
                         height: 38,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.primary,
-                            foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            elevation: 0,
-                          ),
+                        child: M3EButton.filled(
                           onPressed: () {
                             AppHaptics.mediumImpact();
                             Navigator.of(context).push(
@@ -198,6 +190,7 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                               fontSize: 10.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.5,
+                              color: Colors.black,
                             ),
                           ),
                         ),
@@ -210,17 +203,7 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                       flex: 5,
                       child: SizedBox(
                         height: 38,
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(
-                              color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                          ),
+                        child: M3EButton.outlined(
                           onPressed: () {
                             AppHaptics.lightImpact();
                             Navigator.of(context).push(

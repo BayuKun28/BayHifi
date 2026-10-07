@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/now_playing_queue_sheet.dart';
 
 void main() {
@@ -215,17 +216,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap Shuffle button in Queue Sheet
-      final shuffleButton = find.byTooltip('Shuffle Queue');
-      expect(shuffleButton, findsOneWidget);
+      final shuffleFinder = find.byWidgetPredicate(
+        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedShuffle,
+      );
+      expect(shuffleFinder, findsOneWidget);
 
-      await tester.tap(shuffleButton);
+      await tester.tap(shuffleFinder);
       await tester.pumpAndSettle();
 
       // Verify shuffle is now active
       expect(container.read(playerControllerProvider).isShuffle, isTrue);
 
       // Tap again to unshuffle
-      await tester.tap(shuffleButton);
+      await tester.tap(shuffleFinder);
       await tester.pumpAndSettle();
 
       // Verify shuffle is restored to false

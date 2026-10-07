@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 
@@ -61,7 +62,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
+              M3EIconButton(
                 onPressed: () {
                   AppHaptics.selectionClick();
                   onClose();
@@ -70,13 +71,6 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                   icon: HugeIcons.strokeRoundedCancel01,
                   size: 17,
                   color: theme.colorScheme.onSurfaceVariant,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-                visualDensity: VisualDensity.compact,
-                style: IconButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  minimumSize: const Size(30, 30),
                 ),
                 tooltip: 'Cancel Selection',
               ),
@@ -173,7 +167,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
     required Color primary,
     bool isActive = false,
   }) {
-    return IconButton(
+    return M3EIconButton(
       onPressed: () {
         AppHaptics.lightImpact();
         onTap();
@@ -183,18 +177,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
         size: 17,
         color: isActive ? primary : theme.colorScheme.onSurface,
       ),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
       tooltip: tooltip,
-      visualDensity: VisualDensity.compact,
-      style: IconButton.styleFrom(
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        minimumSize: const Size(32, 32),
-        backgroundColor: isActive
-            ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid)
-            : Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
     );
   }
 }

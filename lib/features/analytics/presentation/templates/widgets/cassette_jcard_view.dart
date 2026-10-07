@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 📼 Template 4: Vintage Cassette Tape / Reel J-Card Edition
+/// Template 4: Vintage Cassette Tape / Reel J-Card Edition
 /// Features analog tape typography, Chrome Type II badges, and nostalgic 80s/90s cassette insert aesthetics.
 class CassetteJCardView extends StatelessWidget {
   final StudioWrappedData data;

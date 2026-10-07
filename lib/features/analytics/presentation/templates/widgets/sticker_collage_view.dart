@@ -5,7 +5,7 @@ import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/audiophile_persona.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🏷️ Template 2: Studio Sticker Slap & Tape Collage (Y2K / Studio Aesthetic)
+/// Template 2: Studio Sticker Slap & Tape Collage (Y2K / Studio Aesthetic)
 /// Features tilted 3D stickers, tactile drop shadows, holographic stamps, and gold foil badges.
 class StickerCollageView extends StatelessWidget {
   final StudioWrappedData data;

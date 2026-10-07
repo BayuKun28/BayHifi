@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -54,11 +55,11 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
           ),
         ),
         actions: [
-          TextButton(
+          M3EButton.text(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
           ),
-          FilledButton(
+          M3EButton.filled(
             onPressed: () {
               ref.read(unifiedLibraryProvider.notifier).resetSmartPlaylistsToPresets();
               Navigator.of(ctx).pop();
@@ -66,7 +67,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                 const SnackBar(content: Text('Restored default smart presets.')),
               );
             },
-            child: const Text('Restore Presets', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text('Restore Presets', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -85,7 +86,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('DYNAMIC SMART PLAYLISTS'),
-        leading: IconButton(
+        leading: M3EIconButton(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 20,
@@ -94,7 +95,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
+          M3EIconButton(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedRefresh,
               size: 18,
@@ -103,7 +104,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
             tooltip: 'Restore Default Presets',
             onPressed: _restorePresets,
           ),
-          IconButton(
+          M3EIconButton(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedAddCircle,
               size: 20,
@@ -178,11 +179,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                       ],
                     ),
                   ),
-                  FilledButton.tonalIcon(
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
+                  M3EButton.tonal(
                     onPressed: () => CreateSmartPlaylistDialog.show(context),
                     icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 14, color: primary),
                     label: const Text('Add Rule', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
@@ -235,7 +232,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    FilledButton.tonalIcon(
+                    M3EButton.tonal(
                       onPressed: _restorePresets,
                       icon: HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 15, color: primary),
                       label: const Text('RESTORE PRESETS'),
@@ -323,7 +320,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
+                          M3EIconButton(
                             icon: HugeIcon(
                               icon: HugeIcons.strokeRoundedMoreVertical,
                               size: 18,

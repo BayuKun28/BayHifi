@@ -69,7 +69,7 @@ void main() {
 
     // Progress indicator should be rendered inside the Play/Pause button
     expect(find.byWidgetPredicate((w) => w is M3EProgressIndicator || w is CircularProgressIndicator || w.runtimeType.toString().contains('ProgressIndicator')), findsWidgets);
-    expect(find.byTooltip('Buffering...'), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Buffering...'), findsOneWidget);
   });
 
   testWidgets('NamidaExpandableMiniPlayer displays M3EProgressIndicator when loading/buffering', (tester) async {
@@ -137,6 +137,6 @@ void main() {
 
     // Progress indicator should be rendered inside the desk docking centerpiece
     expect(find.byWidgetPredicate((w) => w is M3EProgressIndicator || w is CircularProgressIndicator || w.runtimeType.toString().contains('ProgressIndicator')), findsWidgets);
-    expect(find.byTooltip('Buffering...'), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Buffering...'), findsOneWidget);
   });
 }

@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🌊 Template 5: Abstract Generative Soundwave & Acoustic Aura Edition
+/// Template 5: Abstract Generative Soundwave & Acoustic Aura Edition
 /// Features mathematical bezier fluid curves, radiant acoustic halos, and harmonic resonance metrics.
 class AbstractSoundwaveAuraView extends StatelessWidget {
   final StudioWrappedData data;

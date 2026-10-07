@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🎤 Dedicated Focus Card 2: Top Artists Festival Lineup Poster
+/// Dedicated Focus Card 2: Top Artists Festival Lineup Poster
 /// Features music festival poster hierarchy, Headliner spotlight, sub-headliners, and stage telemetry.
 class ArtistLineupPosterView extends StatelessWidget {
   final StudioWrappedData data;

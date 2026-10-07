@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/core/widgets/floating_rounded_dock.dart';
 import 'package:baydev_hifi/features/dashboard/presentation/dashboard_screen.dart';
@@ -60,7 +61,7 @@ void main() {
     expect(find.text('BAYDEV AUDIO ENGINE'), findsOneWidget);
 
     // Capture initial Y position of Play/Pause button
-    final playPauseFinder = find.byTooltip('Pause');
+    final playPauseFinder = find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Pause');
     expect(playPauseFinder, findsOneWidget);
     final initialPlayPauseOffset = tester.getTopLeft(playPauseFinder);
 

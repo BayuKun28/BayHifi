@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🧾 Template 1: Thermal Receipt (Receiptify Audiophile Edition)
+/// Template 1: Thermal Receipt (Receiptify Audiophile Edition)
 /// Features realistic paper texture, saw-tooth paper tear edges, monospaced tabular figures, and dynamic studio barcode.
 class ThermalReceiptView extends StatelessWidget {
   final StudioWrappedData data;

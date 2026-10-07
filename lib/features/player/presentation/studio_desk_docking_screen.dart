@@ -694,8 +694,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
+          child: M3EIconButton(
             onPressed: () {
               AppHaptics.selectionClick();
               playerNotifier.toggleShuffle();
@@ -717,8 +716,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
             color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
+          child: M3EIconButton(
             onPressed: () {
               AppHaptics.lightImpact();
               playerNotifier.skipPrevious();
@@ -748,8 +746,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               ),
             ],
           ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
+          child: M3EIconButton(
             onPressed: () {
               AppHaptics.mediumImpact();
               playerNotifier.togglePlayPause();
@@ -780,8 +777,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
             color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
+          child: M3EIconButton(
             onPressed: () {
               AppHaptics.lightImpact();
               playerNotifier.skipNext();
@@ -805,8 +801,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                 : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
+          child: M3EIconButton(
             onPressed: () {
               AppHaptics.selectionClick();
               playerNotifier.toggleRepeatMode();

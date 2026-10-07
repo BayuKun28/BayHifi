@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🍱 Template 3: Modern Bento Studio (Material 3 Expressive Edition)
+/// Template 3: Modern Bento Studio (Material 3 Expressive Edition)
 /// Features balanced squircle bento cards, restrained studio palette, and high information clarity.
 class BentoStudioView extends StatelessWidget {
   final StudioWrappedData data;

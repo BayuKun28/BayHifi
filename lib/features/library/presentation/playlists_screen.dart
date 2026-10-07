@@ -185,7 +185,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
           ],
         ),
         actions: [
-          IconButton(
+          M3EIconButton(
             icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 20, color: primary),
             tooltip: 'Create Playlist Options',
             onPressed: () => _showCreateOptionsSheet(context),
@@ -447,7 +447,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
+                          M3EIconButton(
                             icon: HugeIcon(
                               icon: HugeIcons.strokeRoundedMoreVertical,
                               size: 18,
@@ -568,7 +568,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
+            M3EIconButton(
               icon: HugeIcon(
                 icon: HugeIcons.strokeRoundedMoreVertical,
                 size: 18,

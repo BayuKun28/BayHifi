@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../domain/models/lyric_card_theme.dart';
 import '../../domain/models/lyric_share_config.dart';
@@ -219,7 +220,7 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                   child: Row(
                     children: [
                       // Close button
-                      IconButton(
+                      M3EIconButton(
                         onPressed: () {
                           AppHaptics.lightImpact();
                           Navigator.of(context).pop();
@@ -229,10 +230,7 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                           size: 20,
                           color: Colors.white.withValues(alpha: 0.9),
                         ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.black.withValues(alpha: 0.5),
-                          padding: const EdgeInsets.all(10),
-                        ),
+                        tooltip: 'Close Preview',
                       ),
                       const SizedBox(width: 12),
                       // Ratio & Template Pill
@@ -270,17 +268,13 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                       ),
                       const Spacer(),
                       // Reset Zoom Button
-                      IconButton(
+                      M3EIconButton(
                         tooltip: 'Reset Zoom (Double-Tap)',
                         onPressed: _resetZoom,
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedEye,
                           size: 18,
                           color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.black.withValues(alpha: 0.5),
-                          padding: const EdgeInsets.all(10),
                         ),
                       ),
                     ],
@@ -317,7 +311,7 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                               // Save Button
                               Expanded(
                                 flex: 2,
-                                child: OutlinedButton.icon(
+                                child: M3EButton.outlined(
                                   onPressed: _isRendering ? null : _handleSave,
                                   icon: HugeIcon(
                                     icon: HugeIcons.strokeRoundedDownload04,
@@ -325,30 +319,19 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                                     color: theme.colorScheme.primary,
                                   ),
                                   label: const Text('Save'),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    side: BorderSide(
-                                      color: theme.colorScheme.primary.withValues(alpha: 0.8),
-                                      width: 1.2,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               // Share Button
                               Expanded(
                                 flex: 3,
-                                child: FilledButton.icon(
+                                child: M3EButton.filled(
                                   onPressed: _isRendering || widget.config.selectedLines.isEmpty ? null : _handleShare,
                                   icon: _isRendering
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 16,
                                           height: 16,
-                                          child: CircularProgressIndicator(
+                                          child: M3EProgressIndicator.circular(
                                             strokeWidth: 2,
                                             color: Colors.white,
                                           ),
@@ -359,14 +342,6 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                                           color: theme.colorScheme.onPrimary,
                                         ),
                                   label: Text(_isRendering ? 'Rendering...' : 'Share Card'),
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: theme.colorScheme.primary,
-                                    foregroundColor: theme.colorScheme.onPrimary,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
                                 ),
                               ),
                             ],

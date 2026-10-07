@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/core/database/local_persistence_service.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/library/data/library_indexer_service.dart';
@@ -317,32 +318,32 @@ void main() {
       expect(find.text('5'), findsOneWidget);
 
       // Tap Play Next button
-      await tester.tap(find.byTooltip('Play Next'));
+      await tester.tap(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Play Next'));
       await tester.pump();
       expect(playNextCount, 1);
 
       // Tap Add to Queue
-      await tester.tap(find.byTooltip('Add to Queue'));
+      await tester.tap(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Add to Queue'));
       await tester.pump();
       expect(queueCount, 1);
 
       // Tap Add to Playlist
-      await tester.tap(find.byTooltip('Add to Playlist'));
+      await tester.tap(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Add to Playlist'));
       await tester.pump();
       expect(playlistCount, 1);
 
       // Tap Batch Edit Tags
-      await tester.tap(find.byTooltip('Batch Edit Tags'));
+      await tester.tap(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Batch Edit Tags'));
       await tester.pump();
       expect(editCount, 1);
 
       // Tap Select All
-      await tester.tap(find.byTooltip('Select All'));
+      await tester.tap(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Select All'));
       await tester.pump();
       expect(selectAllCount, 1);
 
       // Tap Close / Deselect
-      await tester.tap(find.byTooltip('Cancel Selection'));
+      await tester.tap(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Cancel Selection'));
       await tester.pump();
       expect(closeCount, 1);
     });

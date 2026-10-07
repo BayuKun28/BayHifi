@@ -154,7 +154,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         ),
                       ),
                       if (_searchController.text.isNotEmpty)
-                        IconButton(
+                        M3EIconButton(
                           icon: const HugeIcon(
                             icon: HugeIcons.strokeRoundedCancel01,
                             size: 16,
@@ -286,7 +286,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: Navigator.of(context).canPop()
-            ? IconButton(
+            ? M3EIconButton(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedArrowLeft01,
                   size: 20,
@@ -352,7 +352,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           ],
         ),
         actions: [
-          IconButton(
+          M3EIconButton(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedSlidersHorizontal,
               size: 20,
@@ -361,7 +361,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             tooltip: 'Open DSP Mastering Rack',
             onPressed: _openDspRack,
           ),
-          IconButton(
+          M3EIconButton(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedPlayList,
               size: 20,
@@ -842,7 +842,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     ),
                   ),
                 const SizedBox(width: 6),
-                IconButton(
+                M3EIconButton(
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedRefresh,
                     size: 16,
@@ -892,7 +892,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
+                  M3EButton.outlined(
                     onPressed: () {
                       AppHaptics.selectionClick();
                       ytController.fetchTrending(force: true);
@@ -1175,7 +1175,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               // Start Radio Button
-              IconButton(
+              M3EIconButton(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedRadio,
                   size: 18,
@@ -1194,7 +1194,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                 },
               ),
               // Unified Track Action Sheet
-              IconButton(
+              M3EIconButton(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedMoreVertical,
                   size: 18,

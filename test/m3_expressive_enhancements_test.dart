@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/app/theme/theme_mode_controller.dart';
 import 'package:baydev_hifi/features/dsp_rack/presentation/dsp_rack_screen.dart';
 import 'package:baydev_hifi/features/dsp_rack/presentation/widgets/rack_unit_card.dart';
@@ -150,9 +151,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check tooltips for playback controls
-      expect(find.byTooltip('Previous Track'), findsOneWidget);
-      expect(find.byTooltip('Next Track'), findsOneWidget);
-      expect(find.byTooltip('Shuffle Playback'), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Previous Track'), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Next Track'), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Shuffle Playback'), findsOneWidget);
     });
   });
 }

@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 💻 Template 8: Cyber Tech Spec & Hardware IC HUD Edition
+/// Template 8: Cyber Tech Spec & Hardware IC HUD Edition
 /// Features engineering datasheet aesthetics, hardware DSP telemetry, circuit grid reticles, and DAC signal matrix.
 class CyberSpecCardView extends StatelessWidget {
   final StudioWrappedData data;

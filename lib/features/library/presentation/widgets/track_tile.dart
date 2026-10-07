@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -305,7 +306,7 @@ class TrackTile extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (settings.trackShowDirectFav)
-                IconButton(
+                M3EIconButton(
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedFavourite,
                     color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface.withValues(alpha: 0.35),
@@ -317,7 +318,7 @@ class TrackTile extends ConsumerWidget {
                     ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
                   },
                 ),
-              IconButton(
+              M3EIconButton(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedMoreVertical,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),

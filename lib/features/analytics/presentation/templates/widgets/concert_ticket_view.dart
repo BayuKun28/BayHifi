@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🎟️ Template 7: VIP Concert Ticket Stub & Backstage Pass Edition
+/// Template 7: VIP Concert Ticket Stub & Backstage Pass Edition
 /// Features realistic perforated ticket notches, admission telemetry, holographic foil header, and live setlist.
 class ConcertTicketView extends StatelessWidget {
   final StudioWrappedData data;

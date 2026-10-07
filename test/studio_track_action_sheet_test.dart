@@ -6,6 +6,7 @@ import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -107,7 +108,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find 3 dots icon button
-      final moreButton = find.byTooltip('Track Options');
+      final moreButton = find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Track Options');
       expect(moreButton, findsOneWidget);
 
       await tester.tap(moreButton);

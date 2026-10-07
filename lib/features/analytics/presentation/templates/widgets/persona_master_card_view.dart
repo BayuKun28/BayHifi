@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🌟 Dedicated Focus Card 1: Audiophile Persona Master Card
+/// Dedicated Focus Card 1: Audiophile Persona Master Card
 /// Showcases the user's audiophile archetype, dynamic acoustic radar, signature sound tags, and hardware integration.
 class PersonaMasterCardView extends StatelessWidget {
   final StudioWrappedData data;

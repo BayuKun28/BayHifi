@@ -15,7 +15,7 @@ import '../controllers/player_controller.dart';
 
 /// Unified Studio Audio Signal Flow Chain Capsule for NowPlayingScreen.
 /// Displays an interconnected, 1-row compact 3-stage tactile pipeline with live signal flow animation:
-/// [ 🎧 AutoEQ ] ➔ ➔ ➔ [ 🎛️ DSP Rack ] ➔ ➔ ➔ [ ⚡ Hardware DAC ]
+/// [ AutoEQ ] -> [ DSP Rack ] -> [ Hardware DAC ]
 class StudioDspBentoCapsule extends ConsumerStatefulWidget {
   const StudioDspBentoCapsule({super.key});
 

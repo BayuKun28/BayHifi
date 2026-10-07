@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 💽 Template 6: 12" Vinyl Gatefold & LP Record Edition
+/// Template 6: 12" Vinyl Gatefold & LP Record Edition
 /// Features realistic vinyl grooves, anisotropic light reflection sheen, center spindle label, and vintage gatefold liner notes.
 class VinylGatefoldView extends StatelessWidget {
   final StudioWrappedData data;

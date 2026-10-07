@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/database/local_persistence_service.dart';
@@ -197,9 +198,9 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
             SizedBox(
               width: 24,
               height: 24,
-              child: CircularProgressIndicator(
+              child: M3EProgressIndicator.circular(
                 strokeWidth: 2.2,
-                valueColor: AlwaysStoppedAnimation<Color>(primary),
+                color: primary,
               ),
             ),
             const SizedBox(height: 14),
@@ -237,7 +238,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
             ),
             const SizedBox(height: 12),
             if (widget.onRefresh != null)
-              OutlinedButton.icon(
+              M3EButton.outlined(
                 onPressed: () {
                   AppHaptics.lightImpact();
                   widget.onRefresh!();
@@ -254,11 +255,6 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                     color: primary,
                     fontWeight: FontWeight.w700,
                   ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
               ),
           ],
@@ -744,16 +740,11 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                           ],
                         ),
                         if (_timingOffset != Duration.zero)
-                          TextButton(
+                          M3EButton.text(
                             onPressed: () {
                               _updateTimingOffset(Duration.zero);
                               setModalState(() {});
                             },
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
                             child: Text(
                               'RESET',
                               style: TextStyle(
@@ -818,25 +809,15 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                     const SizedBox(height: 16),
 
                     // Slider Fine Adjustment (-3000ms to +3000ms)
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: primary,
-                        inactiveTrackColor: StudioSurfaceTheme.surfaceContainerHigh(ctx, isSolid: isSolid),
-                        thumbColor: primary,
-                        overlayColor: primary.withValues(alpha: 0.15),
-                        trackHeight: 3,
-                      ),
-                      child: Slider(
-                        value: offsetMs.clamp(-3000, 3000).toDouble(),
-                        min: -3000,
-                        max: 3000,
-                        divisions: 60,
-                        label: '${offsetMs}ms',
-                        onChanged: (val) {
-                          _updateTimingOffset(Duration(milliseconds: val.round()));
-                          setModalState(() {});
-                        },
-                      ),
+                    M3ESlider(
+                      value: offsetMs.clamp(-3000, 3000).toDouble(),
+                      min: -3000,
+                      max: 3000,
+                      divisions: 60,
+                      onChanged: (val) {
+                        _updateTimingOffset(Duration(milliseconds: val.round()));
+                        setModalState(() {});
+                      },
                     ),
                     const SizedBox(height: 8),
 
@@ -866,17 +847,12 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     ThemeData theme,
     bool isSolid,
   ) {
-    return OutlinedButton(
+    return M3EButton.outlined(
       onPressed: () {
         final newMs = _timingOffset.inMilliseconds + deltaMs;
         _updateTimingOffset(Duration(milliseconds: newMs));
         setModalState(() {});
       },
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        side: BorderSide(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-      ),
       child: Text(
         label,
         style: TextStyle(

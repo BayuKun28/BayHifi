@@ -3,7 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
-/// 🏆 Dedicated Focus Card 4: Top 10 Master Tracks Chart
+/// Dedicated Focus Card 4: Top 10 Master Tracks Chart
 /// Showcases the user's top ranked tracks with album art, play counts, duration, and audiophile format badges.
 class TopTracksChartView extends StatelessWidget {
   final StudioWrappedData data;
