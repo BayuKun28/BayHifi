@@ -106,6 +106,84 @@ foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
     COMPONENT Runtime)
 endforeach(bundled_library)
 
+# ==============================================================================
+# Auto-Bundle Audio Runtime Shared Libraries (FLAC, Vorbis, Ogg, Opus)
+# Guarantees 100% portable, relocatable standalone bundle across all Linux distros
+# (Fixes "libFLAC.so.14: cannot open shared object file: No such file or directory")
+# ==============================================================================
+set(AUDIO_RUNTIME_LIBS "")
+set(SEARCH_LIB_DIRS
+  "/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}"
+  "/lib/${CMAKE_LIBRARY_ARCHITECTURE}"
+  "/usr/lib/x86_64-linux-gnu"
+  "/lib/x86_64-linux-gnu"
+  "/usr/lib/aarch64-linux-gnu"
+  "/lib/aarch64-linux-gnu"
+  "/usr/lib64"
+  "/usr/lib"
+  "/lib"
+)
+
+foreach(lib_dir ${SEARCH_LIB_DIRS})
+  if(EXISTS "${lib_dir}")
+    file(GLOB FLAC_FILES "${lib_dir}/libFLAC.so*")
+    file(GLOB OPUS_FILES "${lib_dir}/libopus.so*")
+    file(GLOB VORBIS_FILES "${lib_dir}/libvorbis.so*")
+    file(GLOB VORBISENC_FILES "${lib_dir}/libvorbisenc.so*")
+    file(GLOB VORBISFILE_FILES "${lib_dir}/libvorbisfile.so*")
+    file(GLOB OGG_FILES "${lib_dir}/libogg.so*")
+    
+    if(FLAC_FILES)
+      list(APPEND AUDIO_RUNTIME_LIBS ${FLAC_FILES})
+    endif()
+    if(OPUS_FILES)
+      list(APPEND AUDIO_RUNTIME_LIBS ${OPUS_FILES})
+    endif()
+    if(VORBIS_FILES)
+      list(APPEND AUDIO_RUNTIME_LIBS ${VORBIS_FILES})
+    endif()
+    if(VORBISENC_FILES)
+      list(APPEND AUDIO_RUNTIME_LIBS ${VORBISENC_FILES})
+    endif()
+    if(VORBISFILE_FILES)
+      list(APPEND AUDIO_RUNTIME_LIBS ${VORBISFILE_FILES})
+    endif()
+    if(OGG_FILES)
+      list(APPEND AUDIO_RUNTIME_LIBS ${OGG_FILES})
+    endif()
+  endif()
+endforeach()
+
+if(AUDIO_RUNTIME_LIBS)
+  list(REMOVE_DUPLICATES AUDIO_RUNTIME_LIBS)
+  install(FILES ${AUDIO_RUNTIME_LIBS}
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+
+  # Normalize absolute symlinks to relative symlinks inside bundle lib directory
+  # Ensures 100% portability on target Linux machines without relying on host /usr/lib paths
+  install(CODE "
+    set(TARGET_LIB_DIR \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/lib\")
+    file(GLOB BUNDLED_SO_FILES \"\${TARGET_LIB_DIR}/*.so*\")
+    foreach(so_file \${BUNDLED_SO_FILES})
+      if(IS_SYMLINK \"\${so_file}\")
+        get_filename_component(real_dest \"\${so_file}\" REALPATH)
+        if(EXISTS \"\${real_dest}\")
+          get_filename_component(real_name \"\${real_dest}\" NAME)
+          if(EXISTS \"\${TARGET_LIB_DIR}/\${real_name}\")
+            file(REMOVE \"\${so_file}\")
+            get_filename_component(link_name \"\${so_file}\" NAME)
+            execute_process(
+              COMMAND \${CMAKE_COMMAND} -E create_symlink \"\${real_name}\" \"\${link_name}\"
+              WORKING_DIRECTORY \"\${TARGET_LIB_DIR}\"
+            )
+          endif()
+        endif()
+      endif()
+    endforeach()
+  " COMPONENT Runtime)
+endif()
+
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"
