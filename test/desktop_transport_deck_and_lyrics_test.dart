@@ -573,5 +573,35 @@ void main() {
 
       expect(find.byTooltip('Spectrum: Liquid Wave'), findsOneWidget);
     });
+
+    testWidgets('Renders Desktop DSP Signal Chain capsule with AutoEQ, DSP Rack and DAC chips', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1300, 800));
+
+      final playerNotifier = PlayerController(SoLoudController.instance);
+      playerNotifier.state = PlaybackState(
+        currentTrack: testTrack,
+        status: PlaybackStatus.playing,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) => playerNotifier),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              bottomNavigationBar: DesktopBottomMasterTransportDeck(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      // Verify AutoEQ, DSP Rack, and DAC Bridge chips are rendered
+      expect(find.byWidgetPredicate((w) => w is Tooltip && (w.message?.contains('AutoEQ Target') ?? false)), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is Tooltip && (w.message?.contains('Mastering DSP Rack') ?? false)), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is Tooltip && (w.message?.contains('Hardware DAC') ?? false)), findsOneWidget);
+    });
   });
 }

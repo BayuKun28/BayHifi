@@ -46,9 +46,27 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   final ScrollController _artistsScrollController = ScrollController();
   final ScrollController _genresScrollController = ScrollController();
   final ScrollController _foldersScrollController = ScrollController();
+  bool _showStickyHeader = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tracksScrollController.addListener(_onTracksScroll);
+  }
+
+  void _onTracksScroll() {
+    if (!_tracksScrollController.hasClients) return;
+    final show = _tracksScrollController.offset > 140;
+    if (show != _showStickyHeader) {
+      setState(() {
+        _showStickyHeader = show;
+      });
+    }
+  }
 
   @override
   void dispose() {
+    _tracksScrollController.removeListener(_onTracksScroll);
     _searchController.dispose();
     _searchFocusNode.dispose();
     _tracksScrollController.dispose();
@@ -584,70 +602,72 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           const SizedBox(width: 6),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // ─── 0. CATEGORY TABS (TRACKS / ALBUMS / ARTISTS / GENRES / FOLDERS / YOUTUBE) ───
-          // Rendered on Tablet & Landscape/Desktop; on Android/Mobile Portrait FAB is used instead.
-          if (isExpandedLayout)
-            _buildCategoryTabsRow(context, libraryState, controller, primaryColor, theme, isSolid),
+          Column(
+            children: [
+              // ─── 0. CATEGORY TABS (TRACKS / ALBUMS / ARTISTS / GENRES / FOLDERS / YOUTUBE) ───
+              // Rendered on Tablet & Landscape/Desktop; on Android/Mobile Portrait FAB is used instead.
+              if (isExpandedLayout)
+                _buildCategoryTabsRow(context, libraryState, controller, primaryColor, theme, isSolid),
 
-          // ─── 1. SUB-HEADER UTILITY ROW (Item Count & Grid/List Layout Switcher) ───
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Summary pill
-                Expanded(
-                  child: Text(
-                    _getSubheaderSummary(libraryState),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              // ─── 1. SUB-HEADER UTILITY ROW (Item Count & Grid/List Layout Switcher) ───
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Summary pill
+                    Expanded(
+                      child: Text(
+                        _getSubheaderSummary(libraryState),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
+                    const SizedBox(width: 8),
 
-                // Layout Switcher (Only on Albums / Artists)
-                if (hasGridToggle)
-                  InkWell(
-                    onTap: () {
-                      AppHaptics.selectionClick();
-                      controller.toggleLayoutMode();
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
+                    // Layout Switcher (Only on Albums / Artists)
+                    if (hasGridToggle)
+                      InkWell(
+                        onTap: () {
+                          AppHaptics.selectionClick();
+                          controller.toggleLayoutMode();
+                        },
                         borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          HugeIcon(
-                            icon: libraryState.layoutMode == ViewLayoutMode.grid
-                                ? HugeIcons.strokeRoundedMenu01
-                                : HugeIcons.strokeRoundedDashboardSquare01,
-                            size: 14,
-                            color: primaryColor,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            libraryState.layoutMode == ViewLayoutMode.grid ? 'List' : 'Grid',
-                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: primaryColor),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              HugeIcon(
+                                icon: libraryState.layoutMode == ViewLayoutMode.grid
+                                    ? HugeIcons.strokeRoundedMenu01
+                                    : HugeIcons.strokeRoundedDashboardSquare01,
+                                size: 14,
+                                color: primaryColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                libraryState.layoutMode == ViewLayoutMode.grid ? 'List' : 'Grid',
+                                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: primaryColor),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
 
           // ─── 2. SOURCE FILTER CHIPS (ALL / OFFLINE / CLOUD LIBRARY / HI-RES) ───
           if (libraryState.currentTab != CollectionTab.youtube)
@@ -783,6 +803,17 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           ),
         ],
       ),
+
+      // ─── FLOATING STICKY STATUS PILL ───
+      if (_showStickyHeader && libraryState.currentTab == CollectionTab.tracks)
+        Positioned(
+          top: 10,
+          left: 16,
+          right: 16,
+          child: _buildStickyStatusPill(context, libraryState, theme, primaryColor, isSolid),
+        ),
+    ],
+  ),
       bottomNavigationBar: selectionState.isSelecting
           ? SafeArea(
               child: LibraryBatchActionsBar(
@@ -1271,6 +1302,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     final trackListContent = ListView.builder(
       controller: _tracksScrollController,
+      itemExtent: isUntaggedFilter ? null : 74.0,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.fromLTRB(14, 4, isAlphabetical ? 28 : 14, bottomPadding),
       itemCount: tracks.length + (isUntaggedFilter ? 1 : 0),
@@ -1472,6 +1504,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: ListView.builder(
           controller: _albumsScrollController,
+          itemExtent: 72.0,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: EdgeInsets.fromLTRB(14, 4, 28, bottomPadding),
           itemCount: albums.length,
@@ -1681,6 +1714,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: ListView.builder(
           controller: _artistsScrollController,
+          itemExtent: 72.0,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: EdgeInsets.fromLTRB(14, 4, 28, bottomPadding),
           itemCount: artists.length,
@@ -2259,6 +2293,92 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ─── STICKY HEADER PILL (Fast-scroll status capsule) ───────────────────────
+  Widget _buildStickyStatusPill(
+    BuildContext context,
+    UnifiedLibraryState libraryState,
+    ThemeData theme,
+    Color primaryColor,
+    bool isSolid,
+  ) {
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            AppHaptics.lightImpact();
+            _showSortBottomSheet(context);
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: isSolid
+                  ? theme.colorScheme.surfaceContainerHighest
+                  : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: primaryColor.withValues(alpha: 0.35),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                  size: 14,
+                  color: primaryColor,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${libraryState.currentTab.label.toUpperCase()} • ${libraryState.tracks.length} Tracks',
+                  style: TextStyle(
+                    fontFeatures: AppTypography.audioFigures,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    libraryState.sortField.label,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: primaryColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                HugeIcon(
+                  icon: libraryState.sortDirection == SortDirection.ascending
+                      ? HugeIcons.strokeRoundedArrowUp01
+                      : HugeIcons.strokeRoundedArrowDown01,
+                  size: 12,
+                  color: primaryColor,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

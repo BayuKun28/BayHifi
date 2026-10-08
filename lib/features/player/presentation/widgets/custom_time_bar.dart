@@ -5,7 +5,7 @@ import '../../../../app/theme/app_typography.dart';
 import '../../../settings/domain/player_customization_settings.dart';
 import '../../../settings/domain/player_playback_settings.dart';
 
-class CustomTimeBar extends StatelessWidget {
+class CustomTimeBar extends StatefulWidget {
   final Duration position;
   final Duration duration;
   final TimeBarStyle style;
@@ -25,28 +25,106 @@ class CustomTimeBar extends StatelessWidget {
     this.onToggleTimeDisplayMode,
   });
 
+  @override
+  State<CustomTimeBar> createState() => _CustomTimeBarState();
+}
+
+class _CustomTimeBarState extends State<CustomTimeBar> {
+  bool _isScrubbing = false;
+  double _scrubProgress = 0.0;
+
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 
+  void _handleTouch(BuildContext context, Offset localPosition) {
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box != null && box.hasSize && box.size.width > 0 && widget.duration.inMilliseconds > 0) {
+      final double ratio = (localPosition.dx / box.size.width).clamp(0.0, 1.0);
+      setState(() {
+        _isScrubbing = true;
+        _scrubProgress = ratio;
+      });
+      final int newMs = (ratio * widget.duration.inMilliseconds).toInt();
+      AppHaptics.selectionClick();
+      widget.onSeek(Duration(milliseconds: newMs));
+    }
+  }
+
+  void _handleTouchEnd() {
+    if (_isScrubbing) {
+      setState(() => _isScrubbing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final progress = duration.inMilliseconds > 0
-        ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+    final currentProgress = widget.duration.inMilliseconds > 0
+        ? (widget.position.inMilliseconds / widget.duration.inMilliseconds).clamp(0.0, 1.0)
         : 0.0;
+    final progress = _isScrubbing ? _scrubProgress : currentProgress;
 
-    final remaining = duration > position ? duration - position : Duration.zero;
-    final displayDurationText = timeDisplayMode == TimeDisplayMode.remaining
+    final remaining = widget.duration > widget.position ? widget.duration - widget.position : Duration.zero;
+    final displayDurationText = widget.timeDisplayMode == TimeDisplayMode.remaining
         ? '-${_formatDuration(remaining)}'
-        : _formatDuration(duration);
+        : _formatDuration(widget.duration);
+
+    final scrubbedDuration = Duration(
+      milliseconds: (_scrubProgress * widget.duration.inMilliseconds).toInt(),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildTrackBar(context, progress, theme),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                _buildTrackBar(context, progress, theme),
+
+                // Floating Precision Scrubbing Bubble Tooltip
+                if (_isScrubbing && widget.duration.inMilliseconds > 0)
+                  Positioned(
+                    left: (constraints.maxWidth * _scrubProgress - 26).clamp(4.0, constraints.maxWidth - 56.0),
+                    top: -24,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: widget.primaryColor.withValues(alpha: 0.7),
+                          width: 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        _formatDuration(scrubbedDuration),
+                        style: TextStyle(
+                          fontFeatures: AppTypography.audioFigures,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: widget.primaryColor,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
         const SizedBox(height: 2),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6.0),
@@ -54,7 +132,7 @@ class CustomTimeBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                _formatDuration(position),
+                _formatDuration(widget.position),
                 style: TextStyle(
                   fontFeatures: AppTypography.audioFigures,
                   fontSize: 11,
@@ -63,7 +141,7 @@ class CustomTimeBar extends StatelessWidget {
                 ),
               ),
               InkWell(
-                onTap: onToggleTimeDisplayMode,
+                onTap: widget.onToggleTimeDisplayMode,
                 borderRadius: BorderRadius.circular(4),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
@@ -86,57 +164,100 @@ class CustomTimeBar extends StatelessWidget {
   }
 
   Widget _buildTrackBar(BuildContext context, double progress, ThemeData theme) {
-    switch (style) {
+    switch (widget.style) {
       case TimeBarStyle.wavy:
         if (WidgetsBinding.instance.runtimeType.toString().contains('Test')) {
-          return M3ESlider(
-            value: progress,
-            onChanged: (val) {
-              final newMs = (val * duration.inMilliseconds).toInt();
-              onSeek(Duration(milliseconds: newMs));
-            },
+          return Listener(
+            onPointerDown: (_) => setState(() => _isScrubbing = true),
+            onPointerUp: (_) => setState(() => _isScrubbing = false),
+            onPointerCancel: (_) => setState(() => _isScrubbing = false),
+            child: M3ESlider(
+              value: progress,
+              onChanged: (val) {
+                setState(() {
+                  _isScrubbing = true;
+                  _scrubProgress = val;
+                });
+                final newMs = (val * widget.duration.inMilliseconds).toInt();
+                widget.onSeek(Duration(milliseconds: newMs));
+              },
+              onChangeEnd: (val) => setState(() => _isScrubbing = false),
+            ),
           );
         }
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: M3ESlider.wavy(
-            value: progress,
-            onChanged: (val) {
-              final newMs = (val * duration.inMilliseconds).toInt();
-              onSeek(Duration(milliseconds: newMs));
-            },
+          child: Listener(
+            onPointerDown: (_) => setState(() => _isScrubbing = true),
+            onPointerUp: (_) => setState(() => _isScrubbing = false),
+            onPointerCancel: (_) => setState(() => _isScrubbing = false),
+            child: M3ESlider.wavy(
+              value: progress,
+              onChanged: (val) {
+                setState(() {
+                  _isScrubbing = true;
+                  _scrubProgress = val;
+                });
+                final newMs = (val * widget.duration.inMilliseconds).toInt();
+                widget.onSeek(Duration(milliseconds: newMs));
+              },
+              onChangeEnd: (val) => setState(() => _isScrubbing = false),
+            ),
           ),
         );
 
       case TimeBarStyle.slim:
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: M3ESlider(
-            value: progress,
-            onChanged: (val) {
-              final newMs = (val * duration.inMilliseconds).toInt();
-              onSeek(Duration(milliseconds: newMs));
-            },
+          child: Listener(
+            onPointerDown: (_) => setState(() => _isScrubbing = true),
+            onPointerUp: (_) => setState(() => _isScrubbing = false),
+            onPointerCancel: (_) => setState(() => _isScrubbing = false),
+            child: M3ESlider(
+              value: progress,
+              onChanged: (val) {
+                setState(() {
+                  _isScrubbing = true;
+                  _scrubProgress = val;
+                });
+                final newMs = (val * widget.duration.inMilliseconds).toInt();
+                widget.onSeek(Duration(milliseconds: newMs));
+              },
+              onChangeEnd: (val) => setState(() => _isScrubbing = false),
+            ),
           ),
         );
 
       case TimeBarStyle.capsule:
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: M3ESlider(
-            value: progress,
-            onChanged: (val) {
-              final newMs = (val * duration.inMilliseconds).toInt();
-              onSeek(Duration(milliseconds: newMs));
-            },
+          child: Listener(
+            onPointerDown: (_) => setState(() => _isScrubbing = true),
+            onPointerUp: (_) => setState(() => _isScrubbing = false),
+            onPointerCancel: (_) => setState(() => _isScrubbing = false),
+            child: M3ESlider(
+              value: progress,
+              onChanged: (val) {
+                setState(() {
+                  _isScrubbing = true;
+                  _scrubProgress = val;
+                });
+                final newMs = (val * widget.duration.inMilliseconds).toInt();
+                widget.onSeek(Duration(milliseconds: newMs));
+              },
+              onChangeEnd: (val) => setState(() => _isScrubbing = false),
+            ),
           ),
         );
 
       case TimeBarStyle.segmented:
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
+          onHorizontalDragStart: (details) => _handleTouch(context, details.localPosition),
           onHorizontalDragUpdate: (details) => _handleTouch(context, details.localPosition),
+          onHorizontalDragEnd: (_) => _handleTouchEnd(),
           onTapDown: (details) => _handleTouch(context, details.localPosition),
+          onTapUp: (_) => _handleTouchEnd(),
           child: Container(
             height: 28,
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -154,7 +275,7 @@ class CustomTimeBar extends StatelessWidget {
                           color: isActive
                               ? (i > segments * 0.8
                                   ? const Color(0xFFFF9F0A)
-                                  : primaryColor)
+                                  : widget.primaryColor)
                               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(2),
                         ),
@@ -170,8 +291,11 @@ class CustomTimeBar extends StatelessWidget {
       case TimeBarStyle.waveform:
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
+          onHorizontalDragStart: (details) => _handleTouch(context, details.localPosition),
           onHorizontalDragUpdate: (details) => _handleTouch(context, details.localPosition),
+          onHorizontalDragEnd: (_) => _handleTouchEnd(),
           onTapDown: (details) => _handleTouch(context, details.localPosition),
+          onTapUp: (_) => _handleTouchEnd(),
           child: Container(
             height: 28,
             padding: const EdgeInsets.symmetric(vertical: 4),
@@ -192,7 +316,7 @@ class CustomTimeBar extends StatelessWidget {
                           margin: const EdgeInsets.symmetric(horizontal: 1),
                           decoration: BoxDecoration(
                             color: isActive
-                                ? primaryColor
+                                ? widget.primaryColor
                                 : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
                             borderRadius: BorderRadius.circular(2),
                           ),
@@ -209,8 +333,11 @@ class CustomTimeBar extends StatelessWidget {
       case TimeBarStyle.ruler:
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
+          onHorizontalDragStart: (details) => _handleTouch(context, details.localPosition),
           onHorizontalDragUpdate: (details) => _handleTouch(context, details.localPosition),
+          onHorizontalDragEnd: (_) => _handleTouchEnd(),
           onTapDown: (details) => _handleTouch(context, details.localPosition),
+          onTapUp: (_) => _handleTouchEnd(),
           child: Container(
             height: 28,
             padding: const EdgeInsets.symmetric(vertical: 4),
@@ -248,7 +375,7 @@ class CustomTimeBar extends StatelessWidget {
                               width: isMajor ? 1.5 : 1.0,
                               height: tickHeight,
                               color: isActive
-                                  ? primaryColor
+                                  ? widget.primaryColor
                                   : theme.colorScheme.outlineVariant,
                             ),
                           ),
@@ -264,7 +391,7 @@ class CustomTimeBar extends StatelessWidget {
                         width: 8,
                         height: 20,
                         decoration: BoxDecoration(
-                          color: primaryColor,
+                          color: widget.primaryColor,
                           borderRadius: BorderRadius.circular(2),
                           boxShadow: [
                             BoxShadow(
@@ -285,24 +412,24 @@ class CustomTimeBar extends StatelessWidget {
       case TimeBarStyle.glowingPill:
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: M3ESlider(
-            value: progress,
-            onChanged: (val) {
-              final newMs = (val * duration.inMilliseconds).toInt();
-              onSeek(Duration(milliseconds: newMs));
-            },
+          child: Listener(
+            onPointerDown: (_) => setState(() => _isScrubbing = true),
+            onPointerUp: (_) => setState(() => _isScrubbing = false),
+            onPointerCancel: (_) => setState(() => _isScrubbing = false),
+            child: M3ESlider(
+              value: progress,
+              onChanged: (val) {
+                setState(() {
+                  _isScrubbing = true;
+                  _scrubProgress = val;
+                });
+                final newMs = (val * widget.duration.inMilliseconds).toInt();
+                widget.onSeek(Duration(milliseconds: newMs));
+              },
+              onChangeEnd: (val) => setState(() => _isScrubbing = false),
+            ),
           ),
         );
-    }
-  }
-
-  void _handleTouch(BuildContext context, Offset localPosition) {
-    final RenderBox? box = context.findRenderObject() as RenderBox?;
-    if (box != null && box.hasSize && box.size.width > 0) {
-      final double ratio = (localPosition.dx / box.size.width).clamp(0.0, 1.0);
-      final int newMs = (ratio * duration.inMilliseconds).toInt();
-      AppHaptics.selectionClick();
-      onSeek(Duration(milliseconds: newMs));
     }
   }
 }

@@ -14,6 +14,7 @@ class PlayerCustomizationNotifier extends StateNotifier<PlayerCustomizationSetti
 
   void _loadSettings() {
     final storage = LocalPersistenceService.instance;
+    final backdropStr = storage.getSetting<String>('player_backdrop_mode');
     final artStyleStr = storage.getSetting<String>('player_album_art_style');
     final specStyleStr = storage.getSetting<String>('player_spectrum_style');
     final timeStyleStr = storage.getSetting<String>('player_timebar_style');
@@ -41,6 +42,7 @@ class PlayerCustomizationNotifier extends StateNotifier<PlayerCustomizationSetti
     final swipeRightStr = storage.getSetting<String>('track_tile_swipe_right');
 
     state = PlayerCustomizationSettings(
+      backdropMode: NowPlayingBackdropMode.fromString(backdropStr),
       albumArtStyle: AlbumArtStyle.fromString(artStyleStr),
       spectrumStyle: SpectrumStyle.fromString(specStyleStr),
       timeBarStyle: TimeBarStyle.fromString(timeStyleStr),
@@ -64,6 +66,11 @@ class PlayerCustomizationNotifier extends StateNotifier<PlayerCustomizationSetti
       trackSwipeLeft: TrackTileSwipeAction.fromString(swipeLeftStr, TrackTileSwipeAction.addToQueue),
       trackSwipeRight: TrackTileSwipeAction.fromString(swipeRightStr, TrackTileSwipeAction.toggleFavorite),
     );
+  }
+
+  Future<void> setBackdropMode(NowPlayingBackdropMode mode) async {
+    state = state.copyWith(backdropMode: mode);
+    await LocalPersistenceService.instance.saveSetting('player_backdrop_mode', mode.name);
   }
 
   Future<void> setAlbumArtStyle(AlbumArtStyle style) async {

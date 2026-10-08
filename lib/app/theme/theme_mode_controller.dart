@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -31,6 +32,184 @@ enum SurfaceFillStyle {
   final String description;
   final dynamic icon;
   const SurfaceFillStyle(this.label, this.description, this.icon);
+}
+
+/// Scope for wallpaper background rendering
+enum WallpaperScope {
+  appWide('App-Wide Ground', 'Wallpaper applied across all screens and tabs', HugeIcons.strokeRoundedLayers01),
+  dashboardAndPlayer('Dashboard & Player Only', 'Wallpaper applied only to main screen and player', HugeIcons.strokeRoundedPlaySquare);
+
+  final String label;
+  final String description;
+  final dynamic icon;
+  const WallpaperScope(this.label, this.description, this.icon);
+}
+
+/// Custom Wallpaper & Dynamic Backdrop Settings
+@immutable
+class WallpaperSettings {
+  final bool enabled;
+  final String? imagePath;
+  final double blurRadius;
+  final double dimOpacity;
+  final bool syncPalette;
+  final WallpaperScope scope;
+  final Color? extractedPrimary;
+  final Color? extractedSecondary;
+  final Color? extractedTertiary;
+
+  const WallpaperSettings({
+    this.enabled = false,
+    this.imagePath,
+    this.blurRadius = 16.0,
+    this.dimOpacity = 0.45,
+    this.syncPalette = true,
+    this.scope = WallpaperScope.appWide,
+    this.extractedPrimary,
+    this.extractedSecondary,
+    this.extractedTertiary,
+  });
+
+  WallpaperSettings copyWith({
+    bool? enabled,
+    String? imagePath,
+    double? blurRadius,
+    double? dimOpacity,
+    bool? syncPalette,
+    WallpaperScope? scope,
+    Color? extractedPrimary,
+    Color? extractedSecondary,
+    Color? extractedTertiary,
+  }) {
+    return WallpaperSettings(
+      enabled: enabled ?? this.enabled,
+      imagePath: imagePath ?? this.imagePath,
+      blurRadius: blurRadius ?? this.blurRadius,
+      dimOpacity: dimOpacity ?? this.dimOpacity,
+      syncPalette: syncPalette ?? this.syncPalette,
+      scope: scope ?? this.scope,
+      extractedPrimary: extractedPrimary ?? this.extractedPrimary,
+      extractedSecondary: extractedSecondary ?? this.extractedSecondary,
+      extractedTertiary: extractedTertiary ?? this.extractedTertiary,
+    );
+  }
+
+  bool get isAsset => imagePath != null && imagePath!.startsWith('assets/');
+  bool get hasWallpaper => imagePath != null && imagePath!.isNotEmpty;
+
+  Map<String, dynamic> toJson() => {
+    'enabled': enabled,
+    'image_path': imagePath,
+    'blur_radius': blurRadius,
+    'dim_opacity': dimOpacity,
+    'sync_palette': syncPalette,
+    'scope': scope.name,
+    'extracted_primary': extractedPrimary?.toARGB32(),
+    'extracted_secondary': extractedSecondary?.toARGB32(),
+    'extracted_tertiary': extractedTertiary?.toARGB32(),
+  };
+
+  factory WallpaperSettings.fromJson(Map<String, dynamic> json) {
+    final scopeStr = json['scope'] as String? ?? 'appWide';
+    final scope = WallpaperScope.values.firstWhere(
+      (s) => s.name == scopeStr,
+      orElse: () => WallpaperScope.appWide,
+    );
+    final extPrim = json['extracted_primary'] as int?;
+    final extSec = json['extracted_secondary'] as int?;
+    final extTert = json['extracted_tertiary'] as int?;
+
+    return WallpaperSettings(
+      enabled: json['enabled'] as bool? ?? false,
+      imagePath: json['image_path'] as String?,
+      blurRadius: (json['blur_radius'] as num?)?.toDouble() ?? 16.0,
+      dimOpacity: (json['dim_opacity'] as num?)?.toDouble() ?? 0.45,
+      syncPalette: json['sync_palette'] as bool? ?? true,
+      scope: scope,
+      extractedPrimary: extPrim != null ? Color(extPrim) : null,
+      extractedSecondary: extSec != null ? Color(extSec) : null,
+      extractedTertiary: extTert != null ? Color(extTert) : null,
+    );
+  }
+}
+
+/// Predefined Studio Wallpaper Preset
+@immutable
+class StudioWallpaperPreset {
+  final String id;
+  final String title;
+  final String subtitle;
+  final String assetPath;
+  final Color primaryColor;
+  final Color secondaryColor;
+  final Color tertiaryColor;
+
+  const StudioWallpaperPreset({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.assetPath,
+    required this.primaryColor,
+    required this.secondaryColor,
+    required this.tertiaryColor,
+  });
+
+  static const List<StudioWallpaperPreset> presets = [
+    StudioWallpaperPreset(
+      id: 'obsidian_soundwaves',
+      title: 'Obsidian Soundwaves',
+      subtitle: 'Cyan & violet DSP audio waveforms in deep obsidian void',
+      assetPath: 'assets/images/wallpapers/obsidian_soundwaves.jpg',
+      primaryColor: Color(0xFF00E5FF),
+      secondaryColor: Color(0xFF7C4DFF),
+      tertiaryColor: Color(0xFF00B0FF),
+    ),
+    StudioWallpaperPreset(
+      id: 'warm_tube_analog',
+      title: 'Warm Tube Analog',
+      subtitle: 'Glowing vacuum tube filament & golden acoustic warmth',
+      assetPath: 'assets/images/wallpapers/warm_tube_analog.jpg',
+      primaryColor: Color(0xFFFF9100),
+      secondaryColor: Color(0xFFFFAB40),
+      tertiaryColor: Color(0xFFFFD180),
+    ),
+    StudioWallpaperPreset(
+      id: 'mastering_console',
+      title: 'Mastering Console',
+      subtitle: 'Illuminated analog VU meters & precision mastering console',
+      assetPath: 'assets/images/wallpapers/mastering_console.jpg',
+      primaryColor: Color(0xFF00E676),
+      secondaryColor: Color(0xFFFFC400),
+      tertiaryColor: Color(0xFF2979FF),
+    ),
+    StudioWallpaperPreset(
+      id: 'cyber_spectrum',
+      title: 'Cyber Spectrum',
+      subtitle: 'Futuristic parametric EQ curves & geometric RTA analyzer',
+      assetPath: 'assets/images/wallpapers/cyber_spectrum.jpg',
+      primaryColor: Color(0xFFE040FB),
+      secondaryColor: Color(0xFF00E5FF),
+      tertiaryColor: Color(0xFF651FFF),
+    ),
+    StudioWallpaperPreset(
+      id: 'dark_tech',
+      title: 'Dark Tech Studio',
+      subtitle: 'Discrete DSP microchips & neon circuit traces on matte carbon',
+      assetPath: 'assets/images/wallpapers/dark_tech.jpg',
+      primaryColor: Color(0xFF00E5FF),
+      secondaryColor: Color(0xFF7C4DFF),
+      tertiaryColor: Color(0xFF00E676),
+    ),
+    StudioWallpaperPreset(
+      id: 'vinyl_resonance',
+      title: 'Vinyl Resonance',
+      subtitle: 'Audiophile turntable tonearm & microgroove sheen',
+      assetPath: 'assets/images/wallpapers/vinyl_resonance.jpg',
+      primaryColor: Color(0xFFE0E0E0),
+      secondaryColor: Color(0xFFFFD54F),
+      tertiaryColor: Color(0xFF90A4AE),
+    ),
+  ];
 }
 
 /// Audiophile Studio Custom Palette Model
@@ -421,6 +600,7 @@ class ThemeSettingsState {
   final Color customAccentColor;
   final bool dynamicAlbumArtEnabled;
   final SurfaceFillStyle? surfaceFillStyle;
+  final WallpaperSettings wallpaperSettings;
 
   SurfaceFillStyle get effectiveSurfaceFillStyle => surfaceFillStyle ?? SurfaceFillStyle.solid;
   bool get isSolidStyle => effectiveSurfaceFillStyle == SurfaceFillStyle.solid;
@@ -431,6 +611,7 @@ class ThemeSettingsState {
     this.customAccentColor = const Color(0xFF38BDF8),
     this.dynamicAlbumArtEnabled = false,
     this.surfaceFillStyle = SurfaceFillStyle.solid,
+    this.wallpaperSettings = const WallpaperSettings(),
   });
 
   ThemeSettingsState copyWith({
@@ -439,6 +620,7 @@ class ThemeSettingsState {
     Color? customAccentColor,
     bool? dynamicAlbumArtEnabled,
     SurfaceFillStyle? surfaceFillStyle,
+    WallpaperSettings? wallpaperSettings,
   }) {
     return ThemeSettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -446,6 +628,7 @@ class ThemeSettingsState {
       customAccentColor: customAccentColor ?? this.customAccentColor,
       dynamicAlbumArtEnabled: dynamicAlbumArtEnabled ?? this.dynamicAlbumArtEnabled,
       surfaceFillStyle: surfaceFillStyle ?? (this.surfaceFillStyle ?? SurfaceFillStyle.solid),
+      wallpaperSettings: wallpaperSettings ?? this.wallpaperSettings,
     );
   }
 }
@@ -462,6 +645,9 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       final accentVal = saved['custom_accent'] as int? ?? 0xFF38BDF8;
       final dynamicArt = saved['dynamic_album_art'] as bool? ?? false;
       final fillStyleStr = saved['surface_fill_style'] as String? ?? 'translucent';
+
+      final wallpaperJson = LocalPersistenceService.instance.getWallpaperSettings();
+      final wallpaperSettings = WallpaperSettings.fromJson(wallpaperJson);
 
       final themeMode = (modeIndex >= 0 && modeIndex < AppThemeMode.values.length)
           ? AppThemeMode.values[modeIndex]
@@ -504,6 +690,36 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
           customAccentColor: vibrant,
           dynamicAlbumArtEnabled: true,
           surfaceFillStyle: fillStyle,
+          wallpaperSettings: wallpaperSettings,
+        );
+      }
+
+      if (paletteId == 'custom_wallpaper' && wallpaperSettings.extractedPrimary != null) {
+        final prim = wallpaperSettings.extractedPrimary!;
+        final sec = wallpaperSettings.extractedSecondary ?? const Color(0xFF64748B);
+        final tert = wallpaperSettings.extractedTertiary ?? prim;
+        final wallpaperPalette = AppPalette(
+          id: 'custom_wallpaper',
+          name: 'Wallpaper Studio',
+          description: 'Ekstraksi 3 warna dinamis dari gambar latar belakang',
+          primary: prim,
+          secondary: sec,
+          accent: tert,
+          backgroundDark: Color.alphaBlend(prim.withValues(alpha: 0.04), const Color(0xFF0A0C10)),
+          backgroundLight: Color.alphaBlend(prim.withValues(alpha: 0.03), const Color(0xFFF8FAFC)),
+          surfaceDark: Color.alphaBlend(prim.withValues(alpha: 0.08), const Color(0xFF101318)),
+          surfaceLight: const Color(0xFFFFFFFF),
+          surfaceContainerDark: Color.alphaBlend(prim.withValues(alpha: 0.16), const Color(0xFF141822)),
+          surfaceContainerLight: Color.alphaBlend(prim.withValues(alpha: 0.10), const Color(0xFFF0F4F8)),
+          isDynamic: true,
+        );
+        return ThemeSettingsState(
+          themeMode: themeMode,
+          currentPalette: wallpaperPalette,
+          customAccentColor: prim,
+          dynamicAlbumArtEnabled: false,
+          surfaceFillStyle: fillStyle,
+          wallpaperSettings: wallpaperSettings,
         );
       }
 
@@ -513,6 +729,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
         customAccentColor: customColor,
         dynamicAlbumArtEnabled: false,
         surfaceFillStyle: fillStyle,
+        wallpaperSettings: wallpaperSettings,
       );
     } catch (e) {
       debugPrint('[ThemeController] Error loading initial theme state: $e');
@@ -522,7 +739,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
 
   void _persist() {
     try {
-      final paletteId = state.currentPalette.isDynamic ? 'dynamic_album_art' : state.currentPalette.id;
+      final paletteId = state.currentPalette.isDynamic ? (state.dynamicAlbumArtEnabled ? 'dynamic_album_art' : state.currentPalette.id) : state.currentPalette.id;
       final accentValue = state.customAccentColor.toARGB32();
       final fillStyle = state.surfaceFillStyle ?? SurfaceFillStyle.solid;
       final dynamicDominant = state.currentPalette.isDynamic ? state.currentPalette.secondary.toARGB32() : null;
@@ -535,6 +752,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
         surfaceFillStyle: fillStyle.name,
         dynamicDominantValue: dynamicDominant,
         dynamicVibrantValue: dynamicVibrant,
+        wallpaperSettings: state.wallpaperSettings.toJson(),
       );
     } catch (e) {
       debugPrint('[ThemeController] Error persisting theme settings: $e');
@@ -652,6 +870,226 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       updateDynamicPaletteFromTrack(currentTrack);
     }
   }
+
+  // ─── CUSTOM WALLPAPER & DYNAMIC PALETTE ENGINE ───────────────────────────
+
+  Future<void> setCustomWallpaperFromFile(File sourceFile, {bool? syncPalette}) async {
+    try {
+      final savedPath = await LocalPersistenceService.instance.saveCustomWallpaperFile(sourceFile);
+      final willSync = syncPalette ?? state.wallpaperSettings.syncPalette;
+      
+      state = state.copyWith(
+        wallpaperSettings: state.wallpaperSettings.copyWith(
+          enabled: true,
+          imagePath: savedPath,
+          syncPalette: willSync,
+        ),
+      );
+
+      if (willSync) {
+        await extractPaletteFromImageFile(File(savedPath));
+      } else {
+        _persist();
+      }
+    } catch (e) {
+      debugPrint('[ThemeController] Error setting custom wallpaper: $e');
+    }
+  }
+
+  Future<void> extractPaletteFromImageFile(File imageFile) async {
+    if (!await imageFile.exists()) return;
+
+    try {
+      final provider = FileImage(imageFile);
+      final generator = await PaletteGenerator.fromImageProvider(
+        ResizeImage(provider, width: 128, height: 128),
+        maximumColorCount: 16,
+      ).timeout(const Duration(seconds: 4));
+
+      final isDark = state.themeMode != AppThemeMode.light;
+
+      // 1. Primary Vibrant Accent
+      final rawPrimary = generator.vibrantColor?.color ??
+          generator.dominantColor?.color ??
+          generator.lightVibrantColor?.color ??
+          generator.mutedColor?.color ??
+          const Color(0xFF38BDF8);
+      final primary = StudioColorHarmonizer.harmonizeAccent(rawPrimary, isDark: isDark);
+
+      // 2. Secondary Tone
+      final rawSecondary = generator.dominantColor?.color ??
+          generator.darkVibrantColor?.color ??
+          generator.mutedColor?.color ??
+          const Color(0xFF0284C7);
+      final secondary = StudioColorHarmonizer.harmonizeSecondary(rawSecondary, isDark: isDark);
+
+      // 3. Tertiary / Ambient Tone
+      final rawTertiary = generator.lightVibrantColor?.color ??
+          generator.darkMutedColor?.color ??
+          generator.lightMutedColor?.color ??
+          primary;
+      final tertiary = StudioColorHarmonizer.harmonizeAccent(rawTertiary, isDark: isDark);
+
+      final dynamicWallpaperPalette = AppPalette(
+        id: 'custom_wallpaper',
+        name: 'Wallpaper Studio',
+        description: 'Ekstraksi 3 warna dinamis dari gambar latar belakang',
+        primary: primary,
+        secondary: secondary,
+        accent: tertiary,
+        backgroundDark: Color.alphaBlend(primary.withValues(alpha: 0.04), const Color(0xFF0A0C10)),
+        backgroundLight: Color.alphaBlend(primary.withValues(alpha: 0.03), const Color(0xFFF8FAFC)),
+        surfaceDark: Color.alphaBlend(primary.withValues(alpha: 0.08), const Color(0xFF101318)),
+        surfaceLight: const Color(0xFFFFFFFF),
+        surfaceContainerDark: Color.alphaBlend(primary.withValues(alpha: 0.16), const Color(0xFF141822)),
+        surfaceContainerLight: Color.alphaBlend(primary.withValues(alpha: 0.10), const Color(0xFFF0F4F8)),
+        isDynamic: true,
+      );
+
+      state = state.copyWith(
+        currentPalette: dynamicWallpaperPalette,
+        customAccentColor: primary,
+        dynamicAlbumArtEnabled: false,
+        wallpaperSettings: state.wallpaperSettings.copyWith(
+          extractedPrimary: primary,
+          extractedSecondary: secondary,
+          extractedTertiary: tertiary,
+        ),
+      );
+
+      _persist();
+    } catch (e) {
+      debugPrint('[ThemeController] Notice extracting wallpaper palette: $e');
+    }
+  }
+
+  Future<void> setWallpaperPreset(StudioWallpaperPreset preset, {bool? syncPalette}) async {
+    final oldPath = state.wallpaperSettings.imagePath;
+    if (oldPath != null && !oldPath.startsWith('assets/')) {
+      LocalPersistenceService.instance.deleteCustomWallpaperFile(oldPath);
+    }
+
+    final willSync = syncPalette ?? state.wallpaperSettings.syncPalette;
+    final isDark = state.themeMode != AppThemeMode.light;
+    final primary = StudioColorHarmonizer.harmonizeAccent(preset.primaryColor, isDark: isDark);
+    final secondary = StudioColorHarmonizer.harmonizeSecondary(preset.secondaryColor, isDark: isDark);
+    final tertiary = StudioColorHarmonizer.harmonizeAccent(preset.tertiaryColor, isDark: isDark);
+
+    final updatedWallpaper = state.wallpaperSettings.copyWith(
+      enabled: true,
+      imagePath: preset.assetPath,
+      syncPalette: willSync,
+      extractedPrimary: primary,
+      extractedSecondary: secondary,
+      extractedTertiary: tertiary,
+    );
+
+    if (willSync) {
+      final dynamicWallpaperPalette = AppPalette(
+        id: 'custom_wallpaper',
+        name: '${preset.title} Studio',
+        description: 'Harmonious studio 3-color theme extracted from ${preset.title}',
+        primary: primary,
+        secondary: secondary,
+        accent: tertiary,
+        backgroundDark: Color.alphaBlend(primary.withValues(alpha: 0.04), const Color(0xFF0A0C10)),
+        backgroundLight: Color.alphaBlend(primary.withValues(alpha: 0.03), const Color(0xFFF8FAFC)),
+        surfaceDark: Color.alphaBlend(primary.withValues(alpha: 0.08), const Color(0xFF101318)),
+        surfaceLight: const Color(0xFFFFFFFF),
+        surfaceContainerDark: Color.alphaBlend(primary.withValues(alpha: 0.16), const Color(0xFF141822)),
+        surfaceContainerLight: Color.alphaBlend(primary.withValues(alpha: 0.10), const Color(0xFFF0F4F8)),
+        isDynamic: true,
+      );
+
+      state = state.copyWith(
+        currentPalette: dynamicWallpaperPalette,
+        customAccentColor: primary,
+        dynamicAlbumArtEnabled: false,
+        wallpaperSettings: updatedWallpaper,
+      );
+    } else {
+      state = state.copyWith(
+        wallpaperSettings: updatedWallpaper,
+      );
+    }
+
+    _persist();
+  }
+
+  void removeWallpaper() {
+    final oldPath = state.wallpaperSettings.imagePath;
+    if (oldPath != null && !oldPath.startsWith('assets/')) {
+      LocalPersistenceService.instance.deleteCustomWallpaperFile(oldPath);
+    }
+
+    final fallbackPalette = state.currentPalette.id == 'custom_wallpaper'
+        ? AppPalette.namidaCyan
+        : state.currentPalette;
+
+    state = state.copyWith(
+      currentPalette: fallbackPalette,
+      customAccentColor: fallbackPalette.primary,
+      wallpaperSettings: state.wallpaperSettings.copyWith(
+        enabled: false,
+        imagePath: null,
+        extractedPrimary: null,
+        extractedSecondary: null,
+        extractedTertiary: null,
+      ),
+    );
+    _persist();
+  }
+
+  void setWallpaperDim(double dim) {
+    state = state.copyWith(
+      wallpaperSettings: state.wallpaperSettings.copyWith(
+        dimOpacity: dim.clamp(0.0, 0.85),
+      ),
+    );
+    _persist();
+  }
+
+  void setWallpaperBlur(double blur) {
+    state = state.copyWith(
+      wallpaperSettings: state.wallpaperSettings.copyWith(
+        blurRadius: blur.clamp(0.0, 40.0),
+      ),
+    );
+    _persist();
+  }
+
+  Future<void> setWallpaperSyncPalette(bool sync) async {
+    state = state.copyWith(
+      wallpaperSettings: state.wallpaperSettings.copyWith(syncPalette: sync),
+    );
+    _persist();
+
+    if (sync && state.wallpaperSettings.imagePath != null) {
+      if (state.wallpaperSettings.isAsset) {
+        final matchingPreset = StudioWallpaperPreset.presets.firstWhere(
+          (p) => p.assetPath == state.wallpaperSettings.imagePath,
+          orElse: () => StudioWallpaperPreset.presets.first,
+        );
+        await setWallpaperPreset(matchingPreset, syncPalette: true);
+      } else {
+        await extractPaletteFromImageFile(File(state.wallpaperSettings.imagePath!));
+      }
+    }
+  }
+
+  void toggleWallpaperEnabled(bool enabled) {
+    state = state.copyWith(
+      wallpaperSettings: state.wallpaperSettings.copyWith(enabled: enabled),
+    );
+    _persist();
+  }
+
+  void setWallpaperScope(WallpaperScope scope) {
+    state = state.copyWith(
+      wallpaperSettings: state.wallpaperSettings.copyWith(scope: scope),
+    );
+    _persist();
+  }
 }
 
 final themeControllerProvider =
@@ -723,8 +1161,10 @@ class StudioColorHarmonizer {
 
 /// Generator ThemeData untuk Dark Mode dan Light Mode
 class AppThemeBuilder {
-  static ThemeData buildTheme(AppPalette palette, {required bool isDark}) {
-    final bg = isDark ? palette.backgroundDark : palette.backgroundLight;
+  static ThemeData buildTheme(AppPalette palette, {required bool isDark, bool isWallpaperActive = false}) {
+    final bg = isWallpaperActive
+        ? Colors.transparent
+        : (isDark ? palette.backgroundDark : palette.backgroundLight);
     final surface = isDark ? palette.surfaceDark : palette.surfaceLight;
     final surfaceContainer = isDark ? palette.surfaceContainerDark : palette.surfaceContainerLight;
     final textPrimary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
@@ -859,8 +1299,10 @@ class AppThemeBuilder {
   }
 
   /// Generator M3EThemeData resmi dari material_3_expressive
-  static M3EThemeData buildM3ETheme(AppPalette palette, {required bool isDark}) {
-    final bg = isDark ? palette.backgroundDark : palette.backgroundLight;
+  static M3EThemeData buildM3ETheme(AppPalette palette, {required bool isDark, bool isWallpaperActive = false}) {
+    final bg = isWallpaperActive
+        ? Colors.transparent
+        : (isDark ? palette.backgroundDark : palette.backgroundLight);
     final surface = isDark ? palette.surfaceDark : palette.surfaceLight;
     final surfaceContainer = isDark ? palette.surfaceContainerDark : palette.surfaceContainerLight;
     final textPrimary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);

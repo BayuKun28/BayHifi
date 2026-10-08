@@ -377,6 +377,17 @@ class EqCurvePainter extends CustomPainter {
         ),
         _rtaBarPaint,
       );
+
+      // Peak Hold cap line (Pro-Q ballistic peak marker)
+      final capPaint = Paint()
+        ..color = const Color(0xFF00E5FF).withValues(alpha: 0.75)
+        ..strokeWidth = 1.5
+        ..strokeCap = StrokeCap.round;
+      canvas.drawLine(
+        Offset(x + barWidth * 0.1, y),
+        Offset(x + barWidth * 0.9, y),
+        capPaint,
+      );
     }
   }
 

@@ -7,6 +7,7 @@ import '../core/desktop/desktop_drag_drop_zone.dart';
 import '../core/desktop/desktop_shortcuts_dispatcher.dart';
 import '../core/desktop/desktop_studio_sidebar.dart';
 import '../core/widgets/floating_rounded_dock.dart';
+import '../core/widgets/studio_wallpaper_backdrop.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dsp_rack/presentation/dsp_rack_screen.dart';
 import '../features/library/presentation/controllers/library_selection_controller.dart';
@@ -57,8 +58,20 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
     final isDark = themeState.themeMode == AppThemeMode.dark ||
         (themeState.themeMode == AppThemeMode.system &&
             WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
-    final themeData = AppThemeBuilder.buildTheme(themeState.currentPalette, isDark: isDark);
-    final m3eThemeData = AppThemeBuilder.buildM3ETheme(themeState.currentPalette, isDark: isDark);
+    final isWallpaperActive = themeState.wallpaperSettings.enabled &&
+        themeState.wallpaperSettings.imagePath != null &&
+        themeState.wallpaperSettings.imagePath!.isNotEmpty;
+
+    final themeData = AppThemeBuilder.buildTheme(
+      themeState.currentPalette,
+      isDark: isDark,
+      isWallpaperActive: isWallpaperActive,
+    );
+    final m3eThemeData = AppThemeBuilder.buildM3ETheme(
+      themeState.currentPalette,
+      isDark: isDark,
+      isWallpaperActive: isWallpaperActive,
+    );
 
     return Theme(
       data: themeData,
@@ -76,7 +89,8 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
           child: DesktopShortcutsDispatcher(
             onSearchRequested: () => setState(() => _selectedNavIndex = 2),
             child: DesktopDragDropZone(
-              child: LayoutBuilder(
+              child: StudioWallpaperBackdrop(
+                child: LayoutBuilder(
                 builder: (context, constraints) {
                   final theme = Theme.of(context);
                   final isDesktop = constraints.maxWidth >= 960;
@@ -264,6 +278,7 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

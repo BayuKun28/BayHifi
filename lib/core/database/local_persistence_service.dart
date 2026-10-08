@@ -167,6 +167,7 @@ class LocalPersistenceService {
     String surfaceFillStyle = 'translucent',
     int? dynamicDominantValue,
     int? dynamicVibrantValue,
+    Map<String, dynamic>? wallpaperSettings,
   }) async {
     _cache['theme_settings'] = {
       'palette_id': paletteId,
@@ -176,8 +177,75 @@ class LocalPersistenceService {
       'surface_fill_style': surfaceFillStyle,
       'dynamic_dominant': ?dynamicDominantValue,
       'dynamic_vibrant': ?dynamicVibrantValue,
+      'wallpaper_settings': ?wallpaperSettings,
     };
     await _save();
+  }
+
+  Map<String, dynamic> getWallpaperSettings() {
+    final themeSettings = getThemeSettings();
+    final nested = themeSettings['wallpaper_settings'];
+    if (nested is Map) {
+      return Map<String, dynamic>.from(nested);
+    }
+    final data = _cache['wallpaper_settings'];
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return {
+      'enabled': false,
+      'image_path': null,
+      'blur_radius': 16.0,
+      'dim_opacity': 0.45,
+      'sync_palette': true,
+      'scope': 'appWide',
+    };
+  }
+
+  Future<void> saveWallpaperSettings({
+    required bool enabled,
+    String? imagePath,
+    double blurRadius = 16.0,
+    double dimOpacity = 0.45,
+    bool syncPalette = true,
+    String scope = 'appWide',
+  }) async {
+    final map = {
+      'enabled': enabled,
+      'image_path': imagePath,
+      'blur_radius': blurRadius,
+      'dim_opacity': dimOpacity,
+      'sync_palette': syncPalette,
+      'scope': scope,
+    };
+    _cache['wallpaper_settings'] = map;
+    final themeSettings = Map<String, dynamic>.from(getThemeSettings());
+    themeSettings['wallpaper_settings'] = map;
+    _cache['theme_settings'] = themeSettings;
+    await _save();
+  }
+
+  Future<String> saveCustomWallpaperFile(File sourceFile) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final wallpaperDir = Directory('${dir.path}/wallpapers');
+    if (!await wallpaperDir.exists()) {
+      await wallpaperDir.create(recursive: true);
+    }
+    final ext = sourceFile.path.contains('.') ? sourceFile.path.split('.').last : 'jpg';
+    final targetPath = '${wallpaperDir.path}/custom_wallpaper_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final targetFile = await sourceFile.copy(targetPath);
+    return targetFile.path;
+  }
+
+  Future<void> deleteCustomWallpaperFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      debugPrint('[LocalPersistence] Notice deleting wallpaper file: $e');
+    }
   }
 
   // ─── 4. PLAYBACK HISTORY & AUDIOPHILE LISTENING STATS ─────────────────────

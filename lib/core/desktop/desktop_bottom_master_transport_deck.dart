@@ -10,7 +10,10 @@ import '../../app/theme/studio_surface_theme.dart';
 import '../../audio_engine/fft_processor.dart';
 import '../../core/widgets/studio_artwork_lightbox.dart';
 import '../../core/widgets/studio_artwork_widget.dart';
+import '../../features/dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import '../../features/dsp_rack/presentation/dsp_rack_screen.dart';
+import '../../features/hardware_dac/presentation/controllers/dac_bridge_controller.dart';
+import '../../features/hardware_dac/presentation/screens/hardware_dac_studio_screen.dart';
 import '../../features/library/presentation/controllers/library_controller.dart';
 import '../../features/player/domain/playback_state.dart';
 import '../../features/player/domain/track.dart';
@@ -18,7 +21,10 @@ import '../../features/player/presentation/controllers/player_controller.dart';
 import '../../features/player/presentation/controllers/player_expansion_controller.dart';
 import '../../features/player/presentation/widgets/audio_file_inspector_sheet.dart';
 import '../../features/player/presentation/widgets/now_playing_queue_sheet.dart';
+import '../../features/player/presentation/widgets/studio_dsp_bento_capsule.dart';
+import '../../features/pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../../features/pro_q_studio/presentation/pro_q_studio_screen.dart';
+import '../../features/pro_q_studio/presentation/widgets/auto_eq_modal_dialog.dart';
 import '../../features/settings/domain/player_customization_settings.dart';
 import '../../features/settings/domain/player_playback_settings.dart';
 import '../../features/settings/presentation/controllers/playback_settings_controller.dart';
@@ -138,32 +144,39 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
     final firstText = settings.trackTitleFirst ? titleText : artistText;
     final secondText = settings.trackTitleFirst ? artistText : titleText;
 
-    return Container(
-      height: 94,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-        border: Border(
-          top: BorderSide(
-            color: theme.dividerColor.withValues(alpha: 0.7),
-            width: 1.0,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        final isUltraWide = totalWidth >= 1100;
+        final leftWidth = totalWidth < 900 ? 180.0 : 250.0;
+        final volSliderWidth = totalWidth < 850 ? 70.0 : 120.0;
+
+        return Container(
+          height: 94,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+            border: Border(
+              top: BorderSide(
+                color: theme.dividerColor.withValues(alpha: 0.7),
+                width: 1.0,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 16,
+                offset: const Offset(0, -4),
+              ),
+            ],
           ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // ─── 1. LEFT: Track Info, Dynamic Artwork & Badges ──────
-          SizedBox(
-            width: 250,
-            child: Row(
-              children: [
+          child: Row(
+            children: [
+              // ─── 1. LEFT: Track Info, Dynamic Artwork & Badges ──────
+              SizedBox(
+                width: leftWidth,
+                child: Row(
+                  children: [
                 // Dynamic Styled Album Art with Gestures
                 GestureDetector(
                   onTap: () => _handleArtworkGesture(
@@ -332,9 +345,11 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Transport Buttons Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                     // Shuffle Button with High-Visibility Active Pill & Micro Indicator
                     Tooltip(
                       message: playback.isShuffle ? 'Shuffle: ON' : 'Shuffle: OFF',
@@ -537,8 +552,9 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
 
-                // Timestamps & Dynamic Seekbar Row
+              // Timestamps & Dynamic Seekbar Row
                 Row(
                   children: [
                     Text(
@@ -597,163 +613,180 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
           const SizedBox(width: 12),
 
           // ─── 3. RIGHT: Live Dynamic RTA, Specs, Lyrics, Queue, Volume ─
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Live Dynamic Spectrum Visualizer (RTA)
-              Tooltip(
-                message: 'Spectrum: ${settings.spectrumStyle.label}',
-                child: InkWell(
-                  onTap: () {
-                    AppHaptics.selectionClick();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const VisualizerSettingsScreen()),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    width: 38,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid)
-                          .withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: theme.dividerColor.withValues(alpha: 0.3),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: _DesktopDynamicRtaVisualizer(
-                        style: settings.spectrumStyle,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-
-              // Audio Specs Inspector
-              Tooltip(
-                message: 'Audio Specs Inspector',
-                child: M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedInformationCircle,
-                    color: theme.colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    if (track != null) {
-                      AppHaptics.selectionClick();
-                      AudioFileInspectorSheet.show(context, track);
-                    }
-                  },
-                ),
-              ),
-
-              // Synchronized Lyrics
-              Tooltip(
-                message: 'Synchronized Lyrics',
-                child: M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedMusicNote01,
-                    color: theme.colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    AppHaptics.selectionClick();
-                    DesktopLyricsDialog.show(context, track);
-                  },
-                ),
-              ),
-
-              // Up Next Queue
-              Tooltip(
-                message: 'Up Next Queue',
-                child: M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedQueue01,
-                    color: theme.colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    AppHaptics.selectionClick();
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => const NowPlayingQueueSheet(),
-                    );
-                  },
-                ),
-              ),
-
-              // Pro-Q Studio Shortcut
-              Tooltip(
-                message: 'Pro-Q Studio Parametric EQ',
-                child: M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedSlidersVertical,
-                    color: theme.colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    AppHaptics.selectionClick();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ProQStudioScreen()),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(width: 4),
-
-              // Volume Control with Expanded Precision Slider
-              Tooltip(
-                message: 'Volume: ${(playback.volume * 100).round()}%',
+          Flexible(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    M3EIconButton(
-                      variant: M3EIconButtonVariant.standard,
-                      icon: HugeIcon(
-                        icon: playback.volume == 0.0
-                            ? HugeIcons.strokeRoundedVolumeOff
-                            : (playback.volume < 0.5
-                                ? HugeIcons.strokeRoundedVolumeLow
-                                : HugeIcons.strokeRoundedVolumeHigh),
-                        color: theme.colorScheme.onSurfaceVariant,
-                        size: 20,
+                    // Studio Signal Flow Chain Capsule (AutoEQ -> DSP -> DAC)
+                    if (isUltraWide) ...[
+                      const _DesktopDspSignalCapsule(),
+                      const SizedBox(width: 8),
+                    ],
+
+                    // Live Dynamic Spectrum Visualizer (RTA)
+                    Tooltip(
+                      message: 'Spectrum: ${settings.spectrumStyle.label}',
+                      child: InkWell(
+                        onTap: () {
+                          AppHaptics.selectionClick();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const VisualizerSettingsScreen()),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          width: 38,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid)
+                                .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: theme.dividerColor.withValues(alpha: 0.3),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: _DesktopDynamicRtaVisualizer(
+                              style: settings.spectrumStyle,
+                            ),
+                          ),
+                        ),
                       ),
-                      onPressed: () {
-                        AppHaptics.selectionClick();
-                        if (playback.volume > 0.0) {
-                          playerCtrl.setVolume(0.0);
-                        } else {
-                          playerCtrl.setVolume(1.0);
-                        }
-                      },
                     ),
-                    SizedBox(
-                      width: 120,
-                      child: M3ESlider(
-                        value: playback.volume.clamp(0.0, 1.0),
-                        onChanged: (val) => playerCtrl.setVolume(val),
+                    const SizedBox(width: 4),
+
+                    // Audio Specs Inspector
+                    Tooltip(
+                      message: 'Audio Specs Inspector',
+                      child: M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
+                        icon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedInformationCircle,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          if (track != null) {
+                            AppHaptics.selectionClick();
+                            AudioFileInspectorSheet.show(context, track);
+                          }
+                        },
+                      ),
+                    ),
+
+                    // Synchronized Lyrics
+                    Tooltip(
+                      message: 'Synchronized Lyrics',
+                      child: M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
+                        icon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedMusicNote01,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          AppHaptics.selectionClick();
+                          DesktopLyricsDialog.show(context, track);
+                        },
+                      ),
+                    ),
+
+                    // Up Next Queue
+                    Tooltip(
+                      message: 'Up Next Queue',
+                      child: M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
+                        icon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedQueue01,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          AppHaptics.selectionClick();
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (_) => const NowPlayingQueueSheet(),
+                          );
+                        },
+                      ),
+                    ),
+
+                    // Pro-Q Studio Shortcut
+                    Tooltip(
+                      message: 'Pro-Q Studio Parametric EQ',
+                      child: M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
+                        icon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedSlidersVertical,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          AppHaptics.selectionClick();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const ProQStudioScreen()),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(width: 4),
+
+                    // Volume Control with Expanded Precision Slider
+                    Tooltip(
+                      message: 'Volume: ${(playback.volume * 100).round()}%',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          M3EIconButton(
+                            variant: M3EIconButtonVariant.standard,
+                            icon: HugeIcon(
+                              icon: playback.volume == 0.0
+                                  ? HugeIcons.strokeRoundedVolumeOff
+                                  : (playback.volume < 0.5
+                                      ? HugeIcons.strokeRoundedVolumeLow
+                                      : HugeIcons.strokeRoundedVolumeHigh),
+                              color: theme.colorScheme.onSurfaceVariant,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              AppHaptics.selectionClick();
+                              if (playback.volume > 0.0) {
+                                playerCtrl.setVolume(0.0);
+                              } else {
+                                playerCtrl.setVolume(1.0);
+                              }
+                            },
+                          ),
+                          SizedBox(
+                            width: volSliderWidth,
+                            child: M3ESlider(
+                              value: playback.volume.clamp(0.0, 1.0),
+                              onChanged: (val) => playerCtrl.setVolume(val),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
+  },
+);
   }
 
   // ─── Dynamic Artwork Container Helper ───────────────────────
@@ -1334,5 +1367,254 @@ class _DesktopMiniRtaPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DesktopMiniRtaPainter oldDelegate) => true;
+}
+
+/// Desktop Master Transport Deck Studio Signal Flow Chain Capsule
+/// Provides instant 1-tap desktop access to [ AutoEQ ] -> [ DSP Rack ] -> [ Hardware DAC ]
+class _DesktopDspSignalCapsule extends ConsumerWidget {
+  const _DesktopDspSignalCapsule();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final eqState = ref.watch(eqControllerProvider);
+    final dspState = ref.watch(dspRackControllerProvider);
+    final dacState = ref.watch(dacBridgeControllerProvider);
+
+    // 1. AutoEQ State
+    final rawDriver = eqState.driverFr?.name;
+    final isAutoActive = eqState.isAutoEqActive && rawDriver != null && rawDriver.isNotEmpty;
+    final autoEqLabel = isAutoActive ? StudioDspBentoCapsule.formatAutoEqLabel(rawDriver) : 'AutoEQ';
+
+    // 2. DSP Rack State
+    int activeDspCount = 0;
+    if (!dspState.isBypassed) {
+      if (dspState.tubeExciterEnabled) activeDspCount++;
+      if (dspState.bassBoostEnabled) activeDspCount++;
+      if (dspState.compressorEnabled) activeDspCount++;
+      if (dspState.stereoWidthEnabled) activeDspCount++;
+      if (dspState.crossfeedEnabled) activeDspCount++;
+      if (dspState.reverbEnabled) activeDspCount++;
+      if (dspState.pitchShiftEnabled) activeDspCount++;
+      if (dspState.limiterEnabled) activeDspCount++;
+    }
+    final isDspActive = !dspState.isBypassed && activeDspCount > 0;
+    final dspLabel = isDspActive ? 'DSP ($activeDspCount)' : 'DSP';
+
+    // 3. Hardware DAC State
+    final isDacConnected = dacState.isConnected && dacState.device != null;
+    final dacLabel = isDacConnected ? StudioDspBentoCapsule.formatDacLabel(dacState.device) : 'DAC';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.20),
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 1. AutoEQ Chip
+          Tooltip(
+            message: 'AutoEQ Target: ${rawDriver ?? 'Direct'} (Click to adjust)',
+            child: InkWell(
+              onTap: () {
+                AppHaptics.lightImpact();
+                AutoEqModalDialog.show(context);
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isAutoActive
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          theme.colorScheme.primary,
+                          isSolid: true,
+                          solidBlendAlpha: 0.25,
+                        )
+                      : theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isAutoActive
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                      color: isAutoActive
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                      size: 13,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      autoEqLabel,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: isAutoActive ? FontWeight.w800 : FontWeight.w700,
+                        color: isAutoActive
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Inter-stage divider
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Icon(
+              Icons.chevron_right_rounded,
+              size: 12,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
+            ),
+          ),
+
+          // 2. DSP Rack Chip
+          Tooltip(
+            message: 'Mastering DSP Rack (${isDspActive ? '$activeDspCount active' : 'Bypassed'})',
+            child: InkWell(
+              onTap: () {
+                AppHaptics.lightImpact();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DspRackScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDspActive
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          theme.colorScheme.tertiary,
+                          isSolid: true,
+                          solidBlendAlpha: 0.25,
+                        )
+                      : theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDspActive
+                        ? theme.colorScheme.tertiary
+                        : theme.colorScheme.outline.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                      color: isDspActive
+                          ? theme.colorScheme.tertiary
+                          : theme.colorScheme.onSurfaceVariant,
+                      size: 13,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      dspLabel,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: isDspActive ? FontWeight.w800 : FontWeight.w700,
+                        color: isDspActive
+                            ? theme.colorScheme.tertiary
+                            : theme.colorScheme.onSurface,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Inter-stage divider
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Icon(
+              Icons.chevron_right_rounded,
+              size: 12,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
+            ),
+          ),
+
+          // 3. Hardware DAC Chip
+          Tooltip(
+            message: 'Hardware DAC (${isDacConnected ? dacState.device?.productName : 'Direct'})',
+            child: InkWell(
+              onTap: () {
+                AppHaptics.lightImpact();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const HardwareDacStudioScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDacConnected
+                      ? StudioSurfaceTheme.tintedContainer(
+                          context,
+                          const Color(0xFF10B981),
+                          isSolid: true,
+                          solidBlendAlpha: 0.25,
+                        )
+                      : theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDacConnected
+                        ? const Color(0xFF10B981)
+                        : theme.colorScheme.outline.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedUsb,
+                      color: isDacConnected
+                          ? const Color(0xFF10B981)
+                          : theme.colorScheme.onSurfaceVariant,
+                      size: 13,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      dacLabel,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: isDacConnected ? FontWeight.w800 : FontWeight.w700,
+                        color: isDacConnected
+                            ? const Color(0xFF10B981)
+                            : theme.colorScheme.onSurface,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 

@@ -63,6 +63,7 @@ class DesktopWindowService with WindowListener {
         if (wasMaximized) {
           await windowManager.maximize();
         }
+        await windowManager.setPreventClose(true);
         await windowManager.show();
         await windowManager.focus();
       });
@@ -71,6 +72,25 @@ class DesktopWindowService with WindowListener {
       debugPrint('[DesktopWindowService] Initialized with size: $targetSize');
     } catch (e) {
       debugPrint('[DesktopWindowService] Initialization bypassed or failed: $e');
+    }
+  }
+
+  @override
+  void onWindowClose() async {
+    if (!_isInitialized) return;
+    try {
+      final closeToTray = LocalPersistenceService.instance.getSetting<bool>(
+        'desktop_close_to_tray',
+        true,
+      ) ?? true;
+
+      if (closeToTray) {
+        await windowManager.hide();
+      } else {
+        await windowManager.destroy();
+      }
+    } catch (e) {
+      debugPrint('[DesktopWindowService] Error in onWindowClose: $e');
     }
   }
 

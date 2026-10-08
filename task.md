@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 65 Fase (Fase 1–65 Selesai • 100% Passed • 589/589 Passed)
+- **Total Fase**: 69 Fase (Fase 1–69 Selesai • 100% Passed • 607/607 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 65: 100% Pure Material 3 Expressive UI Migration (v2) — Zero Legacy Flutter Material Widgets, 100% M3E* Component Tree, Zero Emoji Policy Compliance, 100% Clean Flutter Analyze (0 errors, 0 warnings • 589/589 Passed)_
+- **Status Proyek**: _Phase 69: Linux Desktop System Tray Quick Menu, Close-to-Tray Background Playback, StatusNotifierItem D-Bus Quick Actions & Docking Settings Integration (607/607 Passed • 0 errors, 0 warnings)_
 
 ---
 
@@ -1800,6 +1800,113 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
     - [x] Updated all widget test finders to accurately match `M3EIconButton` tooltips and `M3E*` component hierarchies.
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (Clean!).
     - [x] `flutter test`: **100% pass rate (589/589 tests passing)**.
+
+- [x] **Phase 66 — Custom Studio Wallpaper & 3-Color Dynamic Palette Generation (Completed)**:
+  - [x] **66.1 Domain Models & Storage Persistence (`WallpaperSettings`, `WallpaperScope`, `LocalPersistenceService`)**:
+    - [x] Created immutable `WallpaperSettings` data model with `enabled`, `imagePath`, `blurRadius`, `dimOpacity`, `syncPalette`, `scope`, and extracted 3-color parameters (`extractedPrimary`, `extractedSecondary`, `extractedTertiary`).
+    - [x] Added persistent storage getters, setters, and safe image copying in `LocalPersistenceService` (`saveCustomWallpaperFile`, `deleteCustomWallpaperFile`).
+  - [x] **66.2 Dynamic 3-Color Studio Extraction & Harmonization Engine (`ThemeController`)**:
+    - [x] Integrated 128x128 downsampled bitmap extraction via `PaletteGenerator` to extract Primary Vibrant, Secondary Dominant, and Tertiary/Ambient tones.
+    - [x] Implemented `StudioColorHarmonizer` contrast hardening (WCAG AA) to guarantee readable surfaces without garish neon saturation.
+    - [x] Created `setCustomWallpaperFromFile`, `extractPaletteFromImageFile`, `removeWallpaper`, `setWallpaperDim`, `setWallpaperBlur`, and `setWallpaperSyncPalette`.
+  - [x] **66.3 High-Performance Global Backdrop Layer (`StudioWallpaperBackdrop`, `BaydevHiFiApp`)**:
+    - [x] Built GPU-accelerated `StudioWallpaperBackdrop` widget with `RepaintBoundary` and `ImageFiltered` blur + dimming overlay.
+    - [x] Updated `AppThemeBuilder.buildTheme` and `buildM3ETheme` with `isWallpaperActive` support to render seamless transparent backdrops across all application screens.
+  - [x] **66.4 Material 3 Expressive Theming Settings Cockpit (`ThemingSettingsScreen`)**:
+    - [x] Added dedicated **"CUSTOM STUDIO WALLPAPER & BACKDROP"** section in `ThemingSettingsScreen`.
+    - [x] Integrated squircle live wallpaper thumbnail, 3 extracted color swatch badges with HEX figures, `M3EButton.elevated` storage image picker, `M3EIconButton.tonal` remove button, `M3ESwitch` auto-sync toggle, and `M3ESlider` dimming & blur radius controls.
+  - [x] **66.5 Quality Gate & Comprehensive Test Verification (`test/wallpaper_theming_test.dart`)**:
+    - [x] Added 14 unit and widget test cases verifying model serialization, state clamping, backdrop rendering, preset selection, and settings UI controls.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
+    - [x] `flutter test`: **100% pass rate (603/603 tests passing)**.
+  - [x] **66.6 Built-in Studio Wallpaper Presets & Instant 3-Color Harmonization (`StudioWallpaperPreset`)**:
+    - [x] Curated and integrated 6 audiophile studio wallpapers tailored for DSP & mastering:
+      1. **Obsidian Soundwaves** (`assets/images/wallpapers/obsidian_soundwaves.jpg`): Deep cyan & violet DSP waveforms in obsidian space void.
+      2. **Warm Tube Analog** (`assets/images/wallpapers/warm_tube_analog.jpg`): Glowing vacuum tube filament with golden acoustic warmth.
+      3. **Mastering Console** (`assets/images/wallpapers/mastering_console.jpg`): Illuminated dual analog VU meters & mastering potentiometers.
+      4. **Cyber Spectrum** (`assets/images/wallpapers/cyber_spectrum.jpg`): Parametric EQ curves & neon geometric RTA analyzer.
+      5. **Dark Tech Studio** (`assets/images/wallpapers/dark_tech.jpg`): Discrete DSP microchips, neon circuit traces & holographic matrix on matte carbon.
+      6. **Vinyl Resonance** (`assets/images/wallpapers/vinyl_resonance.jpg`): Audiophile turntable tonearm & microgroove vinyl sheen.
+    - [x] Added `StudioWallpaperPreset` model with instant 3-color studio tuples (*Primary*, *Secondary*, *Tertiary*).
+    - [x] Added horizontal preset selector carousel in `ThemingSettingsScreen` (`_buildPresetWallpapersRow`) with thumbnail previews, 3-dot color previews, and active badges.
+    - [x] Updated `StudioWallpaperBackdrop` to seamlessly support both `Image.asset` (presets) and `Image.file` (custom storage images).
+    - [x] Implemented `setWallpaperPreset` in `ThemeController` with automatic studio palette synchronization.
+    - [x] Verified with full quality gate: `flutter analyze` (**0 errors, 0 warnings**) & `flutter test` (**603/603 passed**).
+  - [x] **66.7 Settings Screen Sub-Menu Icon & Text Solid Surface Visibility Refactor (`SettingsScreen`)**:
+    - [x] Eliminated murky low-alpha pseudo-transparent icon containers (`0.14` - `0.16` opacity) and migrated to 100% solid Material 3 Expressive surfaces (`surfaceContainerHighest` / `tintedContainer(isSolid: true, solidBlendAlpha: 0.22)`).
+    - [x] Refactored text and badge typography across all sub-menu cards to strictly use `theme.colorScheme.onSurface` (high-contrast white/black text) and `onSurfaceVariant` for subtitles, avoiding low-contrast text matching saturated icon colors.
+    - [x] Upgraded telemetry chips in `_buildStudioOverviewHero` with solid high-contrast framing, distinct neutral labels, and bold onSurface telemetry values.
+    - [x] Upgraded AppBar palette indicator badge to solid surface styling with crisp primary icon and onSurface text.
+- [x] **Phase 67 — Library Alphabetical Fast-Scroller 60/120 FPS Optimization (Completed)**:
+  - [x] **67.1 Diagnostic & Root-Cause Elimination**:
+    - [x] Identified layout thrashing caused by dynamic item measurement during rapid `jumpTo()` calls in unmeasured `ListView.builder`s.
+    - [x] Removed high-frequency `setState()` invocations from `_handleRailTouch`, `_onScroll`, and drag lifecycle listeners in `StudioAlphabeticalScroller`.
+    - [x] Eliminated unthrottled synchronous `jumpTo()` calls by implementing frame-coalesced scheduling.
+  - [x] **67.2 State Decoupling & Reactive ValueNotifiers (`StudioAlphabeticalScroller`)**:
+    - [x] Introduced `ValueNotifier<bool> _isDraggingNotifier` and `ValueNotifier<String?> _activeLetterNotifier` to isolate rapid touch feedback.
+    - [x] Rebuilt Alphabet Rail with `ValueListenableBuilder<String?>` to re-render only the 27 rail text items on active letter change without rebuilding the underlying scrollable list.
+    - [x] Rebuilt Floating Studio Letter Bubble Indicator with nested `ValueListenableBuilder` and `IgnorePointer` to prevent gesture interception.
+    - [x] Wrapped `widget.child` in `RepaintBoundary` to isolate list tile rendering from touch layer rasterization.
+  - [x] **67.3 Frame-Coalesced Jump Scheduling (`_scheduleJumpTo`)**:
+    - [x] Implemented frame-coalesced jump scheduling via `WidgetsBinding.instance.addPostFrameCallback`, executing at most 1 jump per vsync frame interval (0-16ms) during sweeps.
+  - [x] **67.4 Fixed Extent Optimization Across Library Views (`UnifiedLibraryScreen`)**:
+    - [x] Set explicit `itemExtent: isUntaggedFilter ? null : 74.0` on `ListView.builder` for Tracks.
+    - [x] Set explicit `itemExtent: 72.0` on `ListView.builder` for Albums (list layout).
+    - [x] Set explicit `itemExtent: 72.0` on `ListView.builder` for Artists (list layout).
+  - [x] **67.5 Quality Gate & Comprehensive Test Verification (`test/queue_and_library_scrollers_test.dart`)**:
+    - [x] Added automated drag and floating indicator widget tests in `test/queue_and_library_scrollers_test.dart`.
+- [x] **Phase 68 — Comprehensive Studio UI/UX Refinements (Completed)**:
+  - [x] **68.1 Desktop MiniPlayer Signal Flow Capsule & AutoEQ Shortcut (`DesktopBottomMasterTransportDeck`)**:
+    - Integrated `_DesktopDspSignalCapsule` displaying 3 tactile studio chips: AutoEQ modal launcher (`AutoEqModalDialog`), Mastering DSP Rack launcher (`DspRackScreen`), and Hardware DAC Bridge launcher (`HardwareDacStudioScreen`).
+    - Implemented responsive layout adaptation via `LayoutBuilder`, `isUltraWide` (>= 1100px), and `FittedBox` on center transport controls to prevent viewport overflow.
+  - [x] **68.2 Precision Floating Timestamp Seekbar Bubble (`CustomTimeBar`)**:
+    - Converted `CustomTimeBar` to stateful widget with dynamic `_isScrubbing` and `_scrubFraction` tracking.
+    - Added floating squircle timecode bubble displaying live scrub targets with `FontFeature.tabularFigures()`.
+  - [x] **68.3 Now Playing Backdrop Mode Switcher & Pure Black OLED Optimization (`NowPlayingBackdropMode`, `NowPlayingScreen`, `VisualizerSettingsScreen`)**:
+    - Created `NowPlayingBackdropMode` enum (`albumArtGlow`, `studioWallpaper`, `pureBlackOled`) in `PlayerCustomizationSettings`.
+    - Added dropdown picker in `VisualizerSettingsScreen` and implemented adaptive background stack in `NowPlayingScreen`.
+  - [x] **68.4 Settings Hub Real-Time Instant Search Bar (`SettingsScreen`)**:
+    - Implemented live instant search bar with keyword indexing across all 9 settings sub-categories.
+    - Added empty state fallback with suggested queries and smooth navigation to matching settings screens.
+  - [x] **68.5 Library Dynamic Sticky Status Header on Scroll (`UnifiedLibraryScreen`)**:
+    - Added scroll listener to fade in `_buildStickyStatusPill` with track telemetry and quick sort sheet launcher when scrolling past top banner.
+  - [x] **68.6 Pro-Q Studio RTA Peak Hold Caps & Ballistics (`EqCurvePainter`)**:
+    - Added ballistic peak-hold cap lines above RTA spectrum frequency bars.
+  - [x] **68.7 Quality Gate & Comprehensive Test Verification (`test/phase_68_comprehensive_ui_ux_test.dart`)**:
+    - Created unit and widget test suite covering Settings instant search, CustomTimeBar scrubbing, NowPlaying backdrop modes, and RTA peak-hold painter.
+    - `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
+    - `flutter test`: **100% pass rate across entire test suite**.
+
+- [x] **Phase 69 — Linux Desktop System Tray Quick Menu & Close-to-Tray Background Playback (Completed)**:
+  - [x] **69.1 Desktop System Tray Service Architecture (`DesktopTrayService`)**:
+    - [x] Created `DesktopTrayService` implementing `TrayListener` with strict cross-platform guards (`if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS))`).
+    - [x] Configured native tray icon initialization and hover tooltip (`Baydev HiFi (Playing)\n<Title> — <Artist>`) with `FontFeature.tabularFigures()` precision.
+    - [x] Implemented dynamic context menu generation:
+      - **Header**: `Baydev HiFi Studio`
+      - **Track Telemetry**: Track Title, Artist, and Hi-Res Specs (`FLAC • 96.0kHz • 24-bit`)
+      - **Transport Controls**: `Play / Pause Audio`, `Next Track`, `Previous Track`
+      - **Volume & Mute**: `Mute Audio (Vol: 85%)` / `Unmute Audio`
+      - **Studio DSP & AutoEQ Telemetry**: Live active DSP preset and AutoEQ target indicators
+      - **Window Lifecycle**: `Show / Hide Window`, `Quit Baydev HiFi`
+    - [x] Configured left-click toggle (`onTrayIconMouseDown`) for rapid focus/minimize and right-click pop-up menu (`popUpContextMenu`).
+  - [x] **69.2 Desktop Close-to-Tray Lifecycle Management (`DesktopWindowService`)**:
+    - [x] Added `windowManager.setPreventClose(true)` in `DesktopWindowService.init()`.
+    - [x] Overrode `onWindowClose()`: Reads `desktop_close_to_tray` setting; when enabled, calls `windowManager.hide()` to maintain uninterrupted background playback; when disabled, cleanly exits with `windowManager.destroy()`.
+  - [x] **69.3 Player Controller & Audio Engine Bidirectional Synchronization (`PlayerController`)**:
+    - [x] Connected tray callbacks (`onPlay`, `onPause`, `onPlayPause`, `onNext`, `onPrevious`, `onToggleMute`, `onSetVolume`, `onQuit`) in `PlayerController._initAudioServiceCallbacks()`.
+    - [x] Added `toggleMute()` method with volume level caching.
+    - [x] Integrated `_syncAudioHandler()` to update `DesktopTrayService` state on every track change, pause/resume, and volume adjustment.
+  - [x] **69.4 Material 3 Expressive Workstation & Docking Settings UI (`DockingSettingsScreen`)**:
+    - [x] Upgraded `DockingSettingsScreen` to `ConsumerStatefulWidget`.
+    - [x] Added **"DESKTOP & SYSTEM TRAY INTEGRATION"** section with `M3ESwitch` controls:
+      - *"Minimize to Tray on Close (Keep music playing in background)"* (`desktop_close_to_tray`).
+      - *"System Tray Track Telemetry Tooltip"* (`desktop_tray_tooltip_enabled`).
+    - [x] Guaranteed strict isolation on Android/iOS (bypasses tray controls, showing mobile desk stand features).
+  - [x] **69.5 Quality Gate & Comprehensive Test Verification (`test/desktop_tray_and_window_test.dart`)**:
+    - [x] Created unit and widget tests for tray callbacks, telemetry state updates, window geometry persistence, and settings switch interactions.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
+    - [x] `flutter test`: **100% pass rate across entire test suite (607/607 tests passing)**.
+
 
 
 

@@ -8,6 +8,7 @@ import 'audio_engine/audio_cache_service.dart';
 import 'audio_engine/soloud_controller.dart';
 import 'core/audio_service/baydev_audio_handler.dart';
 import 'core/database/local_persistence_service.dart';
+import 'core/desktop/desktop_tray_service.dart';
 import 'core/desktop/desktop_window_service.dart';
 import 'core/desktop/linux_mpris_service.dart';
 
@@ -27,6 +28,12 @@ void main() async {
       await DesktopWindowService.instance.init();
     } catch (e) {
       debugPrint('Peringatan: Inisialisasi DesktopWindowService ditunda/mock: $e');
+    }
+
+    try {
+      await DesktopTrayService.instance.init();
+    } catch (e) {
+      debugPrint('Peringatan: Inisialisasi DesktopTrayService ditunda/mock: $e');
     }
   }
 

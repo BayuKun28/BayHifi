@@ -40,7 +40,27 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildStatusHero(context, theme, primary, settings, isSolid),
           const SizedBox(height: 18),
 
-          // ─── 2. ALBUM ART & COVER DISPLAY (COMBOBOX) ────────────────────────
+          // ─── 2. NOW PLAYING BACKDROP MODE (COMBOBOX) ───────────────────────
+          _buildBentoDropdownSelector<NowPlayingBackdropMode>(
+            context: context,
+            sectionTitle: 'NOW PLAYING BACKDROP PRESENTATION',
+            sectionIcon: HugeIcons.strokeRoundedLayers01,
+            currentValue: settings.backdropMode,
+            items: NowPlayingBackdropMode.values,
+            itemLabel: (b) => b.label,
+            itemDescription: (b) => b.description,
+            itemIcon: _getBackdropModeIcon,
+            onChanged: (val) {
+              if (val != null) {
+                AppHaptics.selectionClick();
+                controller.setBackdropMode(val);
+              }
+            },
+            isSolid: isSolid,
+          ),
+          const SizedBox(height: 14),
+
+          // ─── 3. ALBUM ART & COVER DISPLAY (COMBOBOX) ────────────────────────
           _buildBentoDropdownSelector<AlbumArtStyle>(
             context: context,
             sectionTitle: 'ALBUM ART & COVER STYLE',
@@ -821,6 +841,17 @@ class VisualizerSettingsScreen extends ConsumerWidget {
         return HugeIcons.strokeRoundedDashboardSpeed01;
       case SpectrumStyle.circular:
         return HugeIcons.strokeRoundedCompass01;
+    }
+  }
+
+  dynamic _getBackdropModeIcon(NowPlayingBackdropMode mode) {
+    switch (mode) {
+      case NowPlayingBackdropMode.albumArtGlow:
+        return HugeIcons.strokeRoundedSparkles;
+      case NowPlayingBackdropMode.studioWallpaper:
+        return HugeIcons.strokeRoundedImage01;
+      case NowPlayingBackdropMode.pureBlackOled:
+        return HugeIcons.strokeRoundedMoon02;
     }
   }
 

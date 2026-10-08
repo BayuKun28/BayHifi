@@ -87,7 +87,6 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isSolid = ref.isSolidStyle;
 
     final eqState = ref.watch(eqControllerProvider);
     final dspState = ref.watch(dspRackControllerProvider);
@@ -155,34 +154,41 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                     decoration: BoxDecoration(
                       color: isAutoActive
-                          ? StudioCategoryColors.autoEq.withValues(alpha: isSolid ? 0.18 : 0.14)
-                          : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.35),
+                          ? StudioSurfaceTheme.tintedContainer(
+                              context,
+                              StudioCategoryColors.autoEq,
+                              isSolid: true,
+                              solidBlendAlpha: 0.25,
+                            )
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isAutoActive
-                            ? StudioCategoryColors.autoEq.withValues(alpha: 0.45)
-                            : colorScheme.outlineVariant.withValues(alpha: 0.3),
-                        width: 0.8,
+                            ? StudioCategoryColors.autoEq
+                            : colorScheme.outline.withValues(alpha: 0.20),
+                        width: isAutoActive ? 1.0 : 0.8,
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const HugeIcon(
+                        HugeIcon(
                           icon: HugeIcons.strokeRoundedHeadphones,
                           size: 11.5,
-                          color: StudioCategoryColors.autoEq,
+                          color: isAutoActive
+                              ? StudioCategoryColors.autoEq
+                              : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           autoEqLabel,
                           style: TextStyle(
                             fontSize: 9.0,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: isAutoActive ? FontWeight.w800 : FontWeight.w700,
                             letterSpacing: 0.2,
                             color: isAutoActive
                                 ? StudioCategoryColors.autoEq
-                                : colorScheme.onSurface.withValues(alpha: 0.85),
+                                : colorScheme.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -221,14 +227,19 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                     decoration: BoxDecoration(
                       color: isDspActive
-                          ? StudioCategoryColors.dspMastering.withValues(alpha: isSolid ? 0.18 : 0.14)
-                          : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.35),
+                          ? StudioSurfaceTheme.tintedContainer(
+                              context,
+                              StudioCategoryColors.dspMastering,
+                              isSolid: true,
+                              solidBlendAlpha: 0.25,
+                            )
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isDspActive
-                            ? StudioCategoryColors.dspMastering.withValues(alpha: 0.45)
-                            : colorScheme.outlineVariant.withValues(alpha: 0.3),
-                        width: 0.8,
+                            ? StudioCategoryColors.dspMastering
+                            : colorScheme.outline.withValues(alpha: 0.20),
+                        width: isDspActive ? 1.0 : 0.8,
                       ),
                     ),
                     child: Row(
@@ -244,11 +255,11 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                           dspLabel,
                           style: TextStyle(
                             fontSize: 9.0,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: isDspActive ? FontWeight.w800 : FontWeight.w700,
                             letterSpacing: 0.2,
                             color: isDspActive
                                 ? StudioCategoryColors.dspMastering
-                                : colorScheme.onSurface.withValues(alpha: 0.85),
+                                : colorScheme.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -289,13 +300,18 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                     decoration: BoxDecoration(
                       color: isDacConnected
-                          ? mintColor.withValues(alpha: isSolid ? 0.20 : 0.15)
-                          : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.35),
+                          ? StudioSurfaceTheme.tintedContainer(
+                              context,
+                              mintColor,
+                              isSolid: true,
+                              solidBlendAlpha: 0.25,
+                            )
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isDacConnected
-                            ? mintColor.withValues(alpha: 0.5)
-                            : colorScheme.outlineVariant.withValues(alpha: 0.3),
+                            ? mintColor
+                            : colorScheme.outline.withValues(alpha: 0.20),
                         width: isDacConnected ? 1.0 : 0.8,
                       ),
                     ),
@@ -328,7 +344,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                             letterSpacing: 0.2,
                             color: isDacConnected
                                 ? mintColor
-                                : colorScheme.onSurface.withValues(alpha: 0.85),
+                                : colorScheme.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

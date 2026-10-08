@@ -262,43 +262,68 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       });
     }
 
+    final isOled = displaySettings.backdropMode == NowPlayingBackdropMode.pureBlackOled;
+    final isGlow = displaySettings.backdropMode == NowPlayingBackdropMode.albumArtGlow;
+    final scaffoldBg = isOled ? const Color(0xFF000000) : theme.scaffoldBackgroundColor;
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isLandscape = constraints.maxWidth >= 720 || constraints.maxWidth > constraints.maxHeight;
+      backgroundColor: scaffoldBg,
+      body: Stack(
+        children: [
+          if (isGlow && track != null)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: const Alignment(0, -0.35),
+                      radius: 0.85,
+                      colors: [
+                        primary.withValues(alpha: 0.15 * displaySettings.ambientGlowIntensity),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isLandscape = constraints.maxWidth >= 720 || constraints.maxWidth > constraints.maxHeight;
 
-            if (isLandscape) {
-              return _buildLandscapeDualPaneLayout(
-                context,
-                playback,
-                sleepTimer,
-                track,
-                theme,
-                primary,
-                isFav,
-                libraryController,
-                displaySettings,
-                eqState,
-              );
-            }
+                if (isLandscape) {
+                  return _buildLandscapeDualPaneLayout(
+                    context,
+                    playback,
+                    sleepTimer,
+                    track,
+                    theme,
+                    primary,
+                    isFav,
+                    libraryController,
+                    displaySettings,
+                    eqState,
+                  );
+                }
 
-            return _buildPortraitLayout(
-              context,
-              playback,
-              sleepTimer,
-              track,
-              theme,
-              primary,
-              isFav,
-              libraryController,
-              displaySettings,
-              eqState,
-              constraints,
-            );
-          },
-        ),
+                return _buildPortraitLayout(
+                  context,
+                  playback,
+                  sleepTimer,
+                  track,
+                  theme,
+                  primary,
+                  isFav,
+                  libraryController,
+                  displaySettings,
+                  eqState,
+                  constraints,
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

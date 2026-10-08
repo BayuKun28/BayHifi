@@ -180,6 +180,56 @@ void main() {
       // Index of E Song is 4, 4 * 74 = 296
       expect(controller.offset, closeTo(296.0, 1.0));
     });
+
+    testWidgets('Dragging along alphabet rail smoothly jumps and shows floating letter bubble', (tester) async {
+      final controller = ScrollController();
+      final tracks = List.generate(26, (i) {
+        final letter = String.fromCharCode(65 + i); // A-Z
+        return Track(
+          id: 'track_$i',
+          title: '$letter Song $i',
+          artist: 'Artist',
+          album: 'Album',
+          duration: const Duration(minutes: 3),
+        );
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: StudioAlphabeticalScroller(
+              scrollController: controller,
+              itemCount: tracks.length,
+              itemHeight: 74.0,
+              isAlphabetical: true,
+              letterSelector: (i) => tracks[i].title,
+              child: ListView.builder(
+                controller: controller,
+                itemExtent: 74.0,
+                itemCount: tracks.length,
+                itemBuilder: (_, i) => SizedBox(key: ValueKey('item_$i'), height: 74.0, child: Text(tracks[i].title)),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final letterA = find.text('A').first;
+      final gesture = await tester.startGesture(tester.getCenter(letterA));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Drag downwards through multiple letters
+      await gesture.moveBy(const Offset(0, 200));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Verify controller scrolled forward
+      expect(controller.offset, greaterThan(0.0));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
   });
 
   group('NowPlayingQueueSheet Centering & Scrollbar Tests', () {

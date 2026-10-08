@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -104,7 +106,13 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
           _buildEnginesRow(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 24),
 
-          // ─── 4. CURATED STUDIO PALETTES ────────────────────────────────
+          // ─── 4. CUSTOM STUDIO WALLPAPER & BACKDROP ─────────────────────
+          _buildSectionHeader(context, 'CUSTOM STUDIO WALLPAPER & BACKDROP', HugeIcons.strokeRoundedImage01),
+          const SizedBox(height: 8),
+          _buildWallpaperSection(context, themeState, themeNotifier, isSolid),
+          const SizedBox(height: 24),
+
+          // ─── 5. CURATED STUDIO PALETTES ────────────────────────────────
           _buildSectionHeader(context, 'STUDIO COLOR PALETTES', HugeIcons.strokeRoundedLayers01),
           const SizedBox(height: 8),
           _buildPaletteCategoryFilterBar(context, isSolid),
@@ -112,7 +120,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
           _buildPalettesGrid(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 24),
 
-          // ─── 5. CUSTOM STUDIO ACCENT COLOR ─────────────────────────────
+          // ─── 6. CUSTOM STUDIO ACCENT COLOR ─────────────────────────────
           _buildSectionHeader(context, 'CUSTOM STUDIO ACCENT COLOR', HugeIcons.strokeRoundedColorPicker),
           const SizedBox(height: 8),
           _buildAccentPicker(context, themeState, themeNotifier, isSolid),
@@ -944,6 +952,609 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildWallpaperSection(
+    BuildContext context,
+    ThemeSettingsState state,
+    ThemeController notifier,
+    bool isSolid,
+  ) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final wallpaper = state.wallpaperSettings;
+    final hasImage = wallpaper.imagePath != null &&
+        wallpaper.imagePath!.isNotEmpty &&
+        File(wallpaper.imagePath!).existsSync();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: StudioSurfaceTheme.cardDecoration(
+        context: context,
+        isSolid: isSolid,
+        radius: 18,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row with Status Tag and Enable Switch
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: wallpaper.enabled
+                      ? primary.withValues(alpha: 0.18)
+                      : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedImage01,
+                    size: 20,
+                    color: wallpaper.enabled ? primary : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Custom Background Wallpaper',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (wallpaper.enabled && hasImage) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: primary.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'ACTIVE',
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 8.5,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Personalize background ground with custom wallpaper & dynamic 3-color palette',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              M3ESwitch(
+                value: wallpaper.enabled,
+                onChanged: hasImage
+                    ? (val) {
+                        AppHaptics.lightImpact();
+                        notifier.toggleWallpaperEnabled(val);
+                      }
+                    : null,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Studio Presets Carousel (5 Preloaded)
+          _buildPresetWallpapersRow(context, state, isSolid),
+          const SizedBox(height: 16),
+
+          // Live Wallpaper Preview & Extracted 3 Swatches
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                // Thumbnail
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: primary.withValues(alpha: 0.25),
+                      width: 1.0,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: hasImage
+                      ? (wallpaper.isAsset
+                          ? Image.asset(
+                              wallpaper.imagePath!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Center(
+                                child: HugeIcon(
+                                  icon: HugeIcons.strokeRoundedImage01,
+                                  size: 24,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : Image.file(
+                              File(wallpaper.imagePath!),
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Center(
+                                child: HugeIcon(
+                                  icon: HugeIcons.strokeRoundedImage01,
+                                  size: 24,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ))
+                      : Center(
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedImage01,
+                            size: 24,
+                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 14),
+
+                // Extracted Swatches & Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasImage
+                            ? (wallpaper.isAsset
+                                ? 'Studio Preset Palette'
+                                : 'Dynamic 3-Color Studio Extraction')
+                            : 'No Wallpaper Selected',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      if (hasImage && wallpaper.extractedPrimary != null) ...[
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            _buildColorDotBadge(
+                              context,
+                              wallpaper.extractedPrimary!,
+                              'Primary',
+                            ),
+                            if (wallpaper.extractedSecondary != null)
+                              _buildColorDotBadge(
+                                context,
+                                wallpaper.extractedSecondary!,
+                                'Secondary',
+                              ),
+                            if (wallpaper.extractedTertiary != null)
+                              _buildColorDotBadge(
+                                context,
+                                wallpaper.extractedTertiary!,
+                                'Accent',
+                              ),
+                          ],
+                        ),
+                      ] else ...[
+                        Text(
+                          'Choose a studio preset above or pick an image from device storage',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Action Buttons: Pick Image & Remove
+          Row(
+            children: [
+              Expanded(
+                child: M3EButton.elevated(
+                  label: Text(hasImage && !wallpaper.isAsset ? 'CHANGE CUSTOM IMAGE' : 'CUSTOM IMAGE FROM DEVICE'),
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedFolder01,
+                    size: 18,
+                    color: primary,
+                  ),
+                  onPressed: () async {
+                    AppHaptics.selectionClick();
+                    final files = await FilePicker.pickFiles(
+                      type: FileType.image,
+                    );
+                    if (files.isNotEmpty) {
+                      final path = files.first.path;
+                      if (path != null) {
+                        final selectedFile = File(path);
+                        await notifier.setCustomWallpaperFromFile(selectedFile);
+                      }
+                    }
+                  },
+                ),
+              ),
+              if (hasImage) ...[
+                const SizedBox(width: 10),
+                M3EIconButton(
+                  variant: M3EIconButtonVariant.tonal,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedDelete02,
+                    size: 18,
+                    color: theme.colorScheme.error,
+                  ),
+                  onPressed: () {
+                    AppHaptics.mediumImpact();
+                    notifier.removeWallpaper();
+                  },
+                ),
+              ],
+            ],
+          ),
+
+          if (hasImage) ...[
+            const SizedBox(height: 18),
+            // Auto-Sync Palette Switch
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedSparkles,
+                    size: 18,
+                    color: wallpaper.syncPalette ? primary : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Auto-Sync Theme Palette',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          'Keep theme palette in sync with wallpaper colors',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  M3ESwitch(
+                    value: wallpaper.syncPalette,
+                    onChanged: (val) {
+                      AppHaptics.lightImpact();
+                      notifier.setWallpaperSyncPalette(val);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Dimming Slider
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'WALLPAPER DARKNESS / DIM',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  '${(wallpaper.dimOpacity * 100).toInt()}%',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: primary,
+                    fontFeatures: AppTypography.audioFigures,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            M3ESlider(
+              value: wallpaper.dimOpacity,
+              min: 0.0,
+              max: 0.85,
+              onChanged: (val) {
+                notifier.setWallpaperDim(val);
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // Backdrop Blur Slider
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'BACKDROP BLUR RADIUS',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  '${wallpaper.blurRadius.toInt()} px',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: primary,
+                    fontFeatures: AppTypography.audioFigures,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            M3ESlider(
+              value: wallpaper.blurRadius,
+              min: 0.0,
+              max: 40.0,
+              onChanged: (val) {
+                notifier.setWallpaperBlur(val);
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPresetWallpapersRow(
+    BuildContext context,
+    ThemeSettingsState state,
+    bool isSolid,
+  ) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final currentPath = state.wallpaperSettings.imagePath;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedPaintBoard,
+              size: 14,
+              color: primary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'STUDIO PRESETS (${StudioWallpaperPreset.presets.length} PRELOADED)',
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.5,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 135,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: StudioWallpaperPreset.presets.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final preset = StudioWallpaperPreset.presets[index];
+              final isSelected = currentPath == preset.assetPath;
+
+              return InkWell(
+                onTap: () {
+                  AppHaptics.selectionClick();
+                  ref.read(themeControllerProvider.notifier).setWallpaperPreset(preset);
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: 110,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected
+                          ? primary
+                          : StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                      width: isSelected ? 2.0 : 1.0,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Preset Wallpaper Image
+                      Image.asset(
+                        preset.assetPath,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                          child: const Center(
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedImage01,
+                              size: 24,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Gradient Bottom Overlay for Typography Contrast
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: 58,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withValues(alpha: 0.88),
+                                Colors.black.withValues(alpha: 0.0),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Bottom Info: Title & 3 Swatch Dots
+                      Positioned(
+                        left: 8,
+                        right: 8,
+                        bottom: 8,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              preset.title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                height: 1.15,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                _buildMiniColorDot(preset.primaryColor),
+                                const SizedBox(width: 4),
+                                _buildMiniColorDot(preset.secondaryColor),
+                                const SizedBox(width: 4),
+                                _buildMiniColorDot(preset.tertiaryColor),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Selected Badge
+                      if (isSelected)
+                        Positioned(
+                          top: 6,
+                          right: 6,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                              size: 13,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMiniColorDot(Color color) {
+    return Container(
+      width: 7,
+      height: 7,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 0.5),
+      ),
+    );
+  }
+
+  Widget _buildColorDotBadge(BuildContext context, Color color, String label) {
+    final hex = '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.35), width: 1.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            hex,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: color,
+              fontFeatures: AppTypography.audioFigures,
+            ),
+          ),
+        ],
       ),
     );
   }

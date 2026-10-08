@@ -124,8 +124,26 @@ enum TrackTileSwipeAction {
   }
 }
 
+enum NowPlayingBackdropMode {
+  albumArtGlow('Album Art Ambient Glow', 'Dynamic soft blurred halo matching album artwork palette'),
+  studioWallpaper('Custom Studio Wallpaper', 'App-configured studio wallpaper texture with restrained opacity'),
+  pureBlackOled('Pure OLED Solid Ground', '100% pitch-black OLED background with zero glow for ultimate contrast');
+
+  final String label;
+  final String description;
+  const NowPlayingBackdropMode(this.label, this.description);
+
+  static NowPlayingBackdropMode fromString(String? val) {
+    for (final b in NowPlayingBackdropMode.values) {
+      if (b.name == val) return b;
+    }
+    return NowPlayingBackdropMode.albumArtGlow;
+  }
+}
+
 @immutable
 class PlayerCustomizationSettings {
+  final NowPlayingBackdropMode backdropMode;
   final AlbumArtStyle albumArtStyle;
   final SpectrumStyle spectrumStyle;
   final TimeBarStyle timeBarStyle;
@@ -156,6 +174,7 @@ class PlayerCustomizationSettings {
   final TrackTileSwipeAction trackSwipeRight;
 
   const PlayerCustomizationSettings({
+    this.backdropMode = NowPlayingBackdropMode.albumArtGlow,
     this.albumArtStyle = AlbumArtStyle.cdJewel,
     this.spectrumStyle = SpectrumStyle.m3Expressive,
     this.timeBarStyle = TimeBarStyle.wavy,
@@ -181,6 +200,7 @@ class PlayerCustomizationSettings {
   });
 
   PlayerCustomizationSettings copyWith({
+    NowPlayingBackdropMode? backdropMode,
     AlbumArtStyle? albumArtStyle,
     SpectrumStyle? spectrumStyle,
     TimeBarStyle? timeBarStyle,
@@ -205,6 +225,7 @@ class PlayerCustomizationSettings {
     TrackTileSwipeAction? trackSwipeRight,
   }) {
     return PlayerCustomizationSettings(
+      backdropMode: backdropMode ?? this.backdropMode,
       albumArtStyle: albumArtStyle ?? this.albumArtStyle,
       spectrumStyle: spectrumStyle ?? this.spectrumStyle,
       timeBarStyle: timeBarStyle ?? this.timeBarStyle,

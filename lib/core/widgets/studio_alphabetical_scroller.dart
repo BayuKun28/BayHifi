@@ -77,9 +77,12 @@ class StudioAlphabeticalScroller extends StatefulWidget {
 
 class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller> {
   final GlobalKey _railKey = GlobalKey();
-  bool _isDragging = false;
-  String? _activeLetter;
+  final ValueNotifier<bool> _isDraggingNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String?> _activeLetterNotifier = ValueNotifier<String?>(null);
   final Map<String, int> _letterMap = {};
+
+  double? _pendingJumpOffset;
+  bool _jumpScheduled = false;
 
   @override
   void initState() {
@@ -104,6 +107,8 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
   @override
   void dispose() {
     widget.scrollController.removeListener(_onScroll);
+    _isDraggingNotifier.dispose();
+    _activeLetterNotifier.dispose();
     super.dispose();
   }
 
@@ -122,7 +127,7 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
   }
 
   void _onScroll() {
-    if (_isDragging || !widget.isAlphabetical || widget.itemCount == 0) return;
+    if (_isDraggingNotifier.value || !widget.isAlphabetical || widget.itemCount == 0) return;
     if (!widget.scrollController.hasClients) return;
 
     final offset = widget.scrollController.offset;
@@ -131,10 +136,8 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
       widget.letterSelector(index),
     );
 
-    if (_activeLetter != letter) {
-      setState(() {
-        _activeLetter = letter;
-      });
+    if (_activeLetterNotifier.value != letter) {
+      _activeLetterNotifier.value = letter;
     }
   }
 
@@ -148,11 +151,9 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
     final letterIndex = (ratio * alphabet.length).floor().clamp(0, alphabet.length - 1);
     final letter = alphabet[letterIndex];
 
-    if (_activeLetter != letter) {
+    if (_activeLetterNotifier.value != letter) {
       AppHaptics.selectionClick();
-      setState(() {
-        _activeLetter = letter;
-      });
+      _activeLetterNotifier.value = letter;
       _scrollToLetter(letter);
     }
   }
@@ -183,8 +184,25 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
     if (targetIndex != null) {
       final maxScroll = widget.scrollController.position.maxScrollExtent;
       final targetOffset = (targetIndex * widget.itemHeight).clamp(0.0, maxScroll);
-      widget.scrollController.jumpTo(targetOffset);
+      _scheduleJumpTo(targetOffset);
     }
+  }
+
+  void _scheduleJumpTo(double targetOffset) {
+    _pendingJumpOffset = targetOffset;
+    if (_jumpScheduled) return;
+    _jumpScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _jumpScheduled = false;
+      if (!mounted || !widget.scrollController.hasClients) return;
+      final offset = _pendingJumpOffset;
+      if (offset != null) {
+        _pendingJumpOffset = null;
+        if ((widget.scrollController.offset - offset).abs() > 0.5) {
+          widget.scrollController.jumpTo(offset);
+        }
+      }
+    });
   }
 
   @override
@@ -217,8 +235,10 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
       builder: (context, constraints) {
         return Stack(
           children: [
-            // ─── 1. MAIN SCROLLABLE CONTENT ─────────────────────────────────
-            widget.child,
+            // ─── 1. ISOLATED SCROLLABLE CONTENT ─────────────────────────────
+            RepaintBoundary(
+              child: widget.child,
+            ),
 
             // ─── 2. ALPHABET RAIL (RIGHT EDGE) ──────────────────────────────
             Positioned(
@@ -230,29 +250,29 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
                 key: _railKey,
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragStart: (details) {
-                  setState(() => _isDragging = true);
+                  _isDraggingNotifier.value = true;
                   _handleRailTouch(details.localPosition);
                 },
                 onVerticalDragUpdate: (details) {
                   _handleRailTouch(details.localPosition);
                 },
                 onVerticalDragEnd: (_) {
-                  setState(() => _isDragging = false);
+                  _isDraggingNotifier.value = false;
                 },
                 onVerticalDragCancel: () {
-                  setState(() => _isDragging = false);
+                  _isDraggingNotifier.value = false;
                 },
                 onTapDown: (details) {
-                  setState(() => _isDragging = true);
+                  _isDraggingNotifier.value = true;
                   _handleRailTouch(details.localPosition);
                 },
                 onTapUp: (_) {
                   Future.delayed(const Duration(milliseconds: 300), () {
-                    if (mounted) setState(() => _isDragging = false);
+                    if (mounted) _isDraggingNotifier.value = false;
                   });
                 },
                 onTapCancel: () {
-                  setState(() => _isDragging = false);
+                  _isDraggingNotifier.value = false;
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -260,70 +280,92 @@ class _StudioAlphabeticalScrollerState extends State<StudioAlphabeticalScroller>
                     borderRadius: BorderRadius.circular(11),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: StudioAlphabeticalScroller.defaultAlphabet.map((letter) {
-                      final hasTracks = _letterMap.containsKey(letter);
-                      final isSelected = _activeLetter == letter;
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: _activeLetterNotifier,
+                    builder: (context, activeLetter, _) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: StudioAlphabeticalScroller.defaultAlphabet.map((letter) {
+                          final hasTracks = _letterMap.containsKey(letter);
+                          final isSelected = activeLetter == letter;
 
-                      return Expanded(
-                        child: Center(
-                          child: Text(
-                            letter,
-                            style: TextStyle(
-                              fontSize: 9.0,
-                              fontWeight: isSelected
-                                  ? FontWeight.w900
-                                  : (hasTracks ? FontWeight.w700 : FontWeight.w500),
-                              color: isSelected
-                                  ? primary
-                                  : (hasTracks
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF475569).withValues(alpha: 0.5)),
-                              height: 1.0,
-                              fontFeatures: const [FontFeature.tabularFigures()],
+                          return Expanded(
+                            child: Center(
+                              child: Text(
+                                letter,
+                                style: TextStyle(
+                                  fontSize: 9.0,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w900
+                                      : (hasTracks ? FontWeight.w700 : FontWeight.w500),
+                                  color: isSelected
+                                      ? primary
+                                      : (hasTracks
+                                          ? const Color(0xFF94A3B8)
+                                          : const Color(0xFF475569).withValues(alpha: 0.5)),
+                                  height: 1.0,
+                                  fontFeatures: const [FontFeature.tabularFigures()],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
               ),
             ),
 
             // ─── 3. FLOATING STUDIO LETTER BUBBLE INDICATOR ─────────────────
-            if (_isDragging && _activeLetter != null)
-              Positioned(
-                right: 38,
-                top: (constraints.maxHeight / 2) - 30,
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        blurRadius: 18,
-                        offset: const Offset(0, 4),
+            ValueListenableBuilder<bool>(
+              valueListenable: _isDraggingNotifier,
+              builder: (context, isDragging, _) {
+                if (!isDragging) return const SizedBox.shrink();
+                return ValueListenableBuilder<String?>(
+                  valueListenable: _activeLetterNotifier,
+                  builder: (context, activeLetter, _) {
+                    if (activeLetter == null) return const SizedBox.shrink();
+                    return Positioned(
+                      right: 38,
+                      top: (constraints.maxHeight / 2) - 30,
+                      child: IgnorePointer(
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: theme.colorScheme.outline.withValues(alpha: 0.15),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                blurRadius: 18,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Text(
+                              activeLetter,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: primary,
+                                fontFeatures: const [FontFeature.tabularFigures()],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      _activeLetter!,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: primary,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+                    );
+                  },
+                );
+              },
+            ),
           ],
         );
       },

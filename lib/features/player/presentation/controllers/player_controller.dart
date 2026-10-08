@@ -10,6 +10,7 @@ import '../../../../core/audio_engine/audio_interruption_manager.dart';
 import '../../../../core/audio_engine/replay_gain_service.dart';
 import '../../../../core/audio_service/baydev_audio_handler.dart';
 import '../../../../core/database/local_persistence_service.dart';
+import '../../../../core/desktop/desktop_tray_service.dart';
 import '../../../../core/desktop/linux_mpris_service.dart';
 import '../../../settings/domain/player_playback_settings.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
@@ -107,6 +108,18 @@ class PlayerController extends StateNotifier<PlaybackState> {
         mpris.onSeek = (pos) => seek(pos);
         mpris.onSetVolume = (vol) => setVolume(vol);
       }
+
+      if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
+        final tray = DesktopTrayService.instance;
+        tray.onPlay = () => resume();
+        tray.onPause = () => pause();
+        tray.onPlayPause = () => togglePlayPause();
+        tray.onNext = () => skipNext();
+        tray.onPrevious = () => skipPrevious();
+        tray.onToggleMute = () => toggleMute();
+        tray.onSetVolume = (vol) => setVolume(vol);
+        tray.onQuit = () => stop();
+      }
     } catch (e) {
       debugPrint('[PlayerController] AudioHandler callback init error: $e');
     }
@@ -130,6 +143,15 @@ class PlayerController extends StateNotifier<PlaybackState> {
           position: state.position,
           duration: state.duration,
           volume: state.volume,
+        );
+      }
+
+      if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
+        DesktopTrayService.instance.updatePlaybackState(
+          currentTrack: state.currentTrack,
+          isPlaying: state.isPlaying,
+          volume: state.volume,
+          isMuted: state.isMuted,
         );
       }
     } catch (e) {
@@ -207,7 +229,8 @@ class PlayerController extends StateNotifier<PlaybackState> {
               .whereType<Map<String, dynamic>>()
               .map(Track.fromMap)
               .toList();
-        } else if (queue.isNotEmpty) {
+        }
+        if (originalQueue.isEmpty && queue.isNotEmpty) {
           originalQueue = List<Track>.from(queue);
         }
 
@@ -228,7 +251,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
         state = state.copyWith(
           currentTrack: track ?? (queue.isNotEmpty ? queue[queueIdx.clamp(0, queue.length - 1)] : null),
           queue: queue,
-          originalQueue: originalQueue.isNotEmpty ? originalQueue : queue,
+          originalQueue: originalQueue,
           queueIndex: queue.isNotEmpty ? queueIdx.clamp(0, queue.length - 1) : 0,
           volume: vol,
           preAmpDb: preAmp,
@@ -901,8 +924,21 @@ class PlayerController extends StateNotifier<PlaybackState> {
 
   void setVolume(double volume) {
     _audioEngine.setVolume(volume);
-    state = state.copyWith(volume: volume);
+    state = state.copyWith(volume: volume, isMuted: volume <= 0.0);
     _saveSession();
+    _syncAudioHandler();
+  }
+
+  /// Toggle mute state preserving previous volume level
+  void toggleMute() {
+    final nextMuted = !state.isMuted;
+    if (nextMuted) {
+      _audioEngine.setVolume(0.0);
+    } else {
+      _audioEngine.setVolume(state.volume > 0.0 ? state.volume : 1.0);
+    }
+    state = state.copyWith(isMuted: nextMuted);
+    _syncAudioHandler();
   }
 
   void setPreamp(double preampDb) {
