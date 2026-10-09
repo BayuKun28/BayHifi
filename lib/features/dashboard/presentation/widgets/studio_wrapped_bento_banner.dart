@@ -121,13 +121,13 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: theme.colorScheme.primary,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.black, width: 1.5),
+                              border: Border.all(color: theme.colorScheme.surface, width: 1.5),
                             ),
                             child: Center(
                               child: HugeIcon(
                                 icon: persona.icon,
                                 size: 11,
-                                color: Colors.black,
+                                color: theme.colorScheme.onPrimary,
                               ),
                             ),
                           ),
@@ -141,10 +141,10 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                         children: [
                           Text(
                             persona.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w900,
-                              color: Colors.white,
+                              color: theme.colorScheme.onSurface,
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -183,14 +183,18 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
                               MaterialPageRoute(builder: (_) => const StudioWrappedStoryScreen()),
                             );
                           },
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 14, color: Colors.black),
-                          label: const Text(
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedPlay,
+                            size: 14,
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                          label: Text(
                             'PLAY RECAP STORY',
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.5,
-                              color: Colors.black,
+                              color: theme.colorScheme.onPrimary,
                             ),
                           ),
                         ),

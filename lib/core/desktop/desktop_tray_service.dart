@@ -6,6 +6,7 @@ import 'package:tray_manager/legacy.dart';
 import 'package:window_manager/window_manager.dart';
 import '../database/local_persistence_service.dart';
 import '../../features/player/domain/track.dart';
+import 'linux_tray_dbus_service.dart';
 
 /// Service manajemen System Tray Quick Menu (StatusNotifierItem) untuk desktop (Linux/macOS/Windows).
 /// Menyediakan menu kontrol cepat, telemetri trek, dan integrasi dengan window_manager.
@@ -47,24 +48,26 @@ class DesktopTrayService with TrayListener {
     if (_isInitialized) return;
 
     try {
-      trayManager.addListener(this);
+      if (Platform.isLinux) {
+        // Pada Linux, gunakan pure D-Bus StatusNotifierItem & DBusMenu implementation
+        await LinuxTrayDbusService.instance.init(trayService: this);
+      } else {
+        trayManager.addListener(this);
+        await _applyTrayIcon();
 
-      // Icon tray default (menggunakan asset yang terdaftar)
-      await _applyTrayIcon();
+        final isTooltipEnabled = LocalPersistenceService.instance.getSetting<bool>(
+          'desktop_tray_tooltip_enabled',
+          true,
+        ) ?? true;
 
-      final isTooltipEnabled = LocalPersistenceService.instance.getSetting<bool>(
-        'desktop_tray_tooltip_enabled',
-        true,
-      ) ?? true;
-
-      if (isTooltipEnabled) {
-        await trayManager.setToolTip('Baydev HiFi — Studio Audiophile Player');
+        if (isTooltipEnabled) {
+          await trayManager.setToolTip('Baydev HiFi — Studio Audiophile Player');
+        }
       }
 
-      await updateTrayMenu();
-
       _isInitialized = true;
-      debugPrint('[DesktopTrayService] Initialized successfully');
+      await updateTrayMenu();
+      debugPrint('[DesktopTrayService] Initialized successfully (Platform: ${Platform.operatingSystem})');
     } catch (e) {
       debugPrint('[DesktopTrayService] Initialization bypassed or failed: $e');
     }
@@ -72,12 +75,7 @@ class DesktopTrayService with TrayListener {
 
   Future<void> _applyTrayIcon() async {
     try {
-      // Pada Linux & desktop, icon asset dimuat dari bundle
-      if (Platform.isLinux) {
-        await trayManager.setIcon('assets/images/baydev_logo.png');
-      } else if (Platform.isWindows) {
-        await trayManager.setIcon('assets/images/baydev_logo.png');
-      } else if (Platform.isMacOS) {
+      if (Platform.isWindows || Platform.isMacOS) {
         await trayManager.setIcon('assets/images/baydev_logo.png');
       }
     } catch (e) {
@@ -95,6 +93,13 @@ class DesktopTrayService with TrayListener {
     String? autoEqTarget,
     bool isDspActive = false,
   }) async {
+    final trackChanged = _lastTrack?.id != currentTrack?.id;
+    final playStateChanged = _lastIsPlaying != isPlaying;
+    final muteChanged = _lastIsMuted != isMuted;
+    final dspChanged = _lastDspPreset != dspPresetName || _lastIsDspActive != isDspActive;
+    final autoEqChanged = _lastAutoEqTarget != autoEqTarget;
+    final volumeChanged = (_lastVolume - volume).abs() > 0.05;
+
     _lastTrack = currentTrack;
     _lastIsPlaying = isPlaying;
     _lastVolume = volume;
@@ -105,27 +110,33 @@ class DesktopTrayService with TrayListener {
 
     if (!_isInitialized) return;
 
-    try {
-      // Perbarui tooltip
-      final isTooltipEnabled = LocalPersistenceService.instance.getSetting<bool>(
-        'desktop_tray_tooltip_enabled',
-        true,
-      ) ?? true;
+    final needsMenuRebuild = trackChanged || playStateChanged || muteChanged || dspChanged || autoEqChanged || volumeChanged;
 
-      if (isTooltipEnabled) {
-        if (currentTrack != null) {
+    if (needsMenuRebuild) {
+      try {
+        final isTooltipEnabled = LocalPersistenceService.instance.getSetting<bool>(
+          'desktop_tray_tooltip_enabled',
+          true,
+        ) ?? true;
+
+        if (isTooltipEnabled) {
           final status = isPlaying ? 'Playing' : 'Paused';
-          await trayManager.setToolTip(
-            'Baydev HiFi ($status)\n${currentTrack.title} — ${currentTrack.artist}',
-          );
-        } else {
-          await trayManager.setToolTip('Baydev HiFi — Studio Audiophile Player');
-        }
-      }
+          final trackLine = currentTrack != null ? '${currentTrack.title} — ${currentTrack.artist}' : 'Studio Audiophile Player';
 
-      await updateTrayMenu();
-    } catch (e) {
-      debugPrint('[DesktopTrayService] Error updating playback state: $e');
+          if (Platform.isLinux) {
+            LinuxTrayDbusService.instance.updateTooltip(
+              title: 'Baydev HiFi ($status)',
+              body: trackLine,
+            );
+          } else {
+            await trayManager.setToolTip('Baydev HiFi ($status)\n$trackLine');
+          }
+        }
+
+        await updateTrayMenu();
+      } catch (e) {
+        debugPrint('[DesktopTrayService] Error updating playback state: $e');
+      }
     }
   }
 
@@ -247,8 +258,13 @@ class DesktopTrayService with TrayListener {
         ),
       );
 
-      final menu = Menu(items: items);
-      await trayManager.setContextMenu(menu);
+      if (Platform.isLinux) {
+        await LinuxTrayDbusService.instance.updateMenu(items);
+      } else {
+        final menu = Menu(items: items);
+        await trayManager.setContextMenu(menu);
+      }
+      debugPrint('[DesktopTrayService] Context menu registered (${items.length} items)');
     } catch (e) {
       debugPrint('[DesktopTrayService] Error building context menu: $e');
     }
@@ -258,46 +274,71 @@ class DesktopTrayService with TrayListener {
 
   @override
   void onTrayIconMouseDown() {
-    // Klik kiri pada icon tray: Toggle visibilitas window
+    debugPrint('[DesktopTrayService] >>> EVENT: onTrayIconMouseDown (Left-Click Detected) <<<');
     toggleWindowVisibility();
   }
 
   @override
+  void onTrayIconMouseUp() {
+    debugPrint('[DesktopTrayService] >>> EVENT: onTrayIconMouseUp <<<');
+  }
+
+  @override
   void onTrayIconRightMouseDown() {
-    // Klik kanan pada icon tray: Pop-up context menu instan
-    try {
-      trayManager.popUpContextMenu();
-    } catch (e) {
-      debugPrint('[DesktopTrayService] Error popping up context menu: $e');
+    debugPrint('[DesktopTrayService] >>> EVENT: onTrayIconRightMouseDown (Right-Click Detected) <<<');
+    if (!Platform.isLinux) {
+      try {
+        debugPrint('[DesktopTrayService] Calling trayManager.popUpContextMenu()...');
+        trayManager.popUpContextMenu();
+      } catch (e) {
+        debugPrint('[DesktopTrayService] Error popping up context menu: $e');
+      }
     }
   }
 
   @override
+  void onTrayIconRightMouseUp() {
+    debugPrint('[DesktopTrayService] >>> EVENT: onTrayIconRightMouseUp <<<');
+  }
+
+  @override
   void onTrayMenuItemClick(MenuItem menuItem) {
+    debugPrint('[DesktopTrayService] >>> MENU ITEM CLICKED: "${menuItem.label}" (key: ${menuItem.key}) <<<');
     switch (menuItem.key) {
       case 'play_pause':
+        debugPrint('[DesktopTrayService] Executing: Play/Pause');
         onPlayPause?.call();
         break;
       case 'next_track':
+        debugPrint('[DesktopTrayService] Executing: Next Track');
         onNext?.call();
         break;
       case 'previous_track':
+        debugPrint('[DesktopTrayService] Executing: Previous Track');
         onPrevious?.call();
         break;
       case 'toggle_mute':
+        debugPrint('[DesktopTrayService] Executing: Toggle Mute');
         onToggleMute?.call();
         break;
       case 'dsp_status':
+        debugPrint('[DesktopTrayService] Executing: Toggle DSP Rack');
         onToggleDspRack?.call();
         break;
       case 'autoeq_status':
+        debugPrint('[DesktopTrayService] Executing: Open AutoEQ');
         onOpenAutoEq?.call();
         break;
       case 'toggle_window':
+        debugPrint('[DesktopTrayService] Executing: Show/Hide Window');
         toggleWindowVisibility();
         break;
       case 'quit_app':
+        debugPrint('[DesktopTrayService] Executing: Quit App');
         quitApplication();
+        break;
+      default:
+        debugPrint('[DesktopTrayService] Unhandled menu key: ${menuItem.key}');
         break;
     }
   }
@@ -307,14 +348,28 @@ class DesktopTrayService with TrayListener {
     if (kIsWeb || (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS)) return;
     try {
       final isVisible = await windowManager.isVisible();
+      debugPrint('[DesktopTrayService] toggleWindowVisibility: isVisible=$isVisible');
       if (isVisible) {
-        final isFocused = await windowManager.isFocused();
-        if (isFocused) {
-          await windowManager.hide();
-        } else {
+        final isMinimized = await windowManager.isMinimized();
+        if (isMinimized) {
+          debugPrint('[DesktopTrayService] Window is minimized -> Restoring & focusing');
+          await windowManager.restore();
+          await windowManager.show();
           await windowManager.focus();
+        } else {
+          final isFocused = await windowManager.isFocused();
+          debugPrint('[DesktopTrayService] Window isVisible, isFocused=$isFocused');
+          if (isFocused) {
+            debugPrint('[DesktopTrayService] Window is focused -> Hiding window');
+            await windowManager.hide();
+          } else {
+            debugPrint('[DesktopTrayService] Window is not focused -> Showing & focusing window');
+            await windowManager.show();
+            await windowManager.focus();
+          }
         }
       } else {
+        debugPrint('[DesktopTrayService] Window is hidden -> Showing & focusing');
         await windowManager.show();
         await windowManager.focus();
       }
@@ -341,7 +396,11 @@ class DesktopTrayService with TrayListener {
   Future<void> dispose() async {
     if (!_isInitialized) return;
     try {
-      trayManager.removeListener(this);
+      if (Platform.isLinux) {
+        await LinuxTrayDbusService.instance.dispose();
+      } else {
+        trayManager.removeListener(this);
+      }
       _isInitialized = false;
     } catch (e) {
       debugPrint('[DesktopTrayService] Error disposing tray service: $e');

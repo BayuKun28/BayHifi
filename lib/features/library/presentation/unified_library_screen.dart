@@ -5,6 +5,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
+import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/widgets/studio_alphabetical_scroller.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
 import '../../player/domain/track.dart';
@@ -46,27 +47,8 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   final ScrollController _artistsScrollController = ScrollController();
   final ScrollController _genresScrollController = ScrollController();
   final ScrollController _foldersScrollController = ScrollController();
-  bool _showStickyHeader = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _tracksScrollController.addListener(_onTracksScroll);
-  }
-
-  void _onTracksScroll() {
-    if (!_tracksScrollController.hasClients) return;
-    final show = _tracksScrollController.offset > 140;
-    if (show != _showStickyHeader) {
-      setState(() {
-        _showStickyHeader = show;
-      });
-    }
-  }
-
   @override
   void dispose() {
-    _tracksScrollController.removeListener(_onTracksScroll);
     _searchController.dispose();
     _searchFocusNode.dispose();
     _tracksScrollController.dispose();
@@ -80,6 +62,8 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   void _showSortBottomSheet(BuildContext context) {
     final controller = ref.read(unifiedLibraryProvider.notifier);
     final theme = Theme.of(context);
+    final fillStyle = ref.watch(themeControllerProvider.select((s) => s.surfaceFillStyle ?? SurfaceFillStyle.solid));
+    final isSolid = fillStyle == SurfaceFillStyle.solid;
 
     showModalBottomSheet(
       context: context,
@@ -144,6 +128,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                       children: SortField.values.map((field) {
                         final isSelected = curState.sortField == field;
                         return ChoiceChip(
+                          showCheckmark: false,
                           label: Text(field.label),
                           selected: isSelected,
                           onSelected: (val) {
@@ -153,12 +138,22 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                               setModalState(() {});
                             }
                           },
-                          selectedColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+                          selectedColor: theme.colorScheme.primary.withValues(alpha: 0.18),
+                          backgroundColor: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
+                          side: BorderSide(
+                            color: isSelected
+                                ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                            width: 1,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           labelStyle: TextStyle(
                             color: isSelected
                                 ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                                : theme.colorScheme.onSurfaceVariant,
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                             fontSize: 12,
                           ),
                         );
@@ -602,9 +597,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           const SizedBox(width: 6),
         ],
       ),
-      body: Stack(
-        children: [
-          Column(
+      body: Column(
             children: [
               // ─── 0. CATEGORY TABS (TRACKS / ALBUMS / ARTISTS / GENRES / FOLDERS / YOUTUBE) ───
               // Rendered on Tablet & Landscape/Desktop; on Android/Mobile Portrait FAB is used instead.
@@ -803,17 +796,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           ),
         ],
       ),
-
-      // ─── FLOATING STICKY STATUS PILL ───
-      if (_showStickyHeader && libraryState.currentTab == CollectionTab.tracks)
-        Positioned(
-          top: 10,
-          left: 16,
-          right: 16,
-          child: _buildStickyStatusPill(context, libraryState, theme, primaryColor, isSolid),
-        ),
-    ],
-  ),
       bottomNavigationBar: selectionState.isSelecting
           ? SafeArea(
               child: LibraryBatchActionsBar(
@@ -915,7 +897,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 border: Border.all(
                   color: isSelected
                       ? (isSolid ? theme.colorScheme.outline : accent.withValues(alpha: 0.6))
-                      : theme.dividerColor.withValues(alpha: 0.2),
+                      : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                   width: isSelected ? 1.4 : 0.8,
                 ),
               ),
@@ -1187,7 +1169,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
           border: Border.all(
             color: isSelected
                 ? accentColor.withValues(alpha: 0.5)
-                : theme.colorScheme.outline.withValues(alpha: 0.25),
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
             width: 1,
           ),
         ),
@@ -2293,92 +2275,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // ─── STICKY HEADER PILL (Fast-scroll status capsule) ───────────────────────
-  Widget _buildStickyStatusPill(
-    BuildContext context,
-    UnifiedLibraryState libraryState,
-    ThemeData theme,
-    Color primaryColor,
-    bool isSolid,
-  ) {
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            AppHaptics.lightImpact();
-            _showSortBottomSheet(context);
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-            decoration: BoxDecoration(
-              color: isSolid
-                  ? theme.colorScheme.surfaceContainerHighest
-                  : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: primaryColor.withValues(alpha: 0.35),
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedSlidersHorizontal,
-                  size: 14,
-                  color: primaryColor,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${libraryState.currentTab.label.toUpperCase()} • ${libraryState.tracks.length} Tracks',
-                  style: TextStyle(
-                    fontFeatures: AppTypography.audioFigures,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    libraryState.sortField.label,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: primaryColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                HugeIcon(
-                  icon: libraryState.sortDirection == SortDirection.ascending
-                      ? HugeIcons.strokeRoundedArrowUp01
-                      : HugeIcons.strokeRoundedArrowDown01,
-                  size: 12,
-                  color: primaryColor,
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

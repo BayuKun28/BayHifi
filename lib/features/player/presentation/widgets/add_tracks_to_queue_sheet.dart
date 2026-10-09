@@ -149,10 +149,15 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 1.0,
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.35 : 0.08,
+            ),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: SafeArea(
         child: Padding(

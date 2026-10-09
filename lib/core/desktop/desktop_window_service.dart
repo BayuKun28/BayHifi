@@ -15,6 +15,9 @@ class DesktopWindowService with WindowListener {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
+  final ValueNotifier<bool> isMaximizedNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isFullScreenNotifier = ValueNotifier<bool>(false);
+
   /// Inisialisasi Window Manager pada platform Desktop
   Future<void> init() async {
     if (kIsWeb) return;
@@ -53,7 +56,7 @@ class DesktopWindowService with WindowListener {
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
         title: 'Baydev HiFi — Studio Audiophile Player',
-        titleBarStyle: TitleBarStyle.normal,
+        titleBarStyle: TitleBarStyle.hidden,
       );
 
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -62,6 +65,7 @@ class DesktopWindowService with WindowListener {
         }
         if (wasMaximized) {
           await windowManager.maximize();
+          isMaximizedNotifier.value = true;
         }
         await windowManager.setPreventClose(true);
         await windowManager.show();
@@ -69,7 +73,7 @@ class DesktopWindowService with WindowListener {
       });
 
       _isInitialized = true;
-      debugPrint('[DesktopWindowService] Initialized with size: $targetSize');
+      debugPrint('[DesktopWindowService] Initialized with frameless TitleBarStyle.hidden, size: $targetSize');
     } catch (e) {
       debugPrint('[DesktopWindowService] Initialization bypassed or failed: $e');
     }
@@ -106,12 +110,24 @@ class DesktopWindowService with WindowListener {
 
   @override
   void onWindowMaximize() {
+    isMaximizedNotifier.value = true;
     _saveCurrentGeometry(maximized: true);
   }
 
   @override
   void onWindowUnmaximize() {
+    isMaximizedNotifier.value = false;
     _saveCurrentGeometry(maximized: false);
+  }
+
+  @override
+  void onWindowEnterFullScreen() {
+    isFullScreenNotifier.value = true;
+  }
+
+  @override
+  void onWindowLeaveFullScreen() {
+    isFullScreenNotifier.value = false;
   }
 
   Future<void> _saveCurrentGeometry({bool? maximized}) async {
@@ -143,12 +159,46 @@ class DesktopWindowService with WindowListener {
     }
   }
 
+  /// Minimize desktop window
+  Future<void> minimize() async {
+    if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
+    try {
+      await windowManager.minimize();
+    } catch (e) {
+      debugPrint('[DesktopWindowService] Error minimizing window: $e');
+    }
+  }
+
+  /// Toggle Maximize / Restore desktop window
+  Future<void> toggleMaximize() async {
+    if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
+    try {
+      final isMax = await windowManager.isMaximized();
+      if (isMax) {
+        await windowManager.unmaximize();
+        isMaximizedNotifier.value = false;
+      } else {
+        await windowManager.maximize();
+        isMaximizedNotifier.value = true;
+      }
+    } catch (e) {
+      debugPrint('[DesktopWindowService] Error toggling maximize: $e');
+    }
+  }
+
+  /// Close desktop window (honors close-to-tray preference)
+  Future<void> close() async {
+    if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
+    onWindowClose();
+  }
+
   /// Toggle Fullscreen Desktop Mode (e.g. for Studio Desk Docking)
   Future<void> toggleFullScreen() async {
     if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
     try {
       final isFull = await windowManager.isFullScreen();
       await windowManager.setFullScreen(!isFull);
+      isFullScreenNotifier.value = !isFull;
     } catch (e) {
       debugPrint('[DesktopWindowService] Error toggling fullscreen: $e');
     }

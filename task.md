@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 69 Fase (Fase 1–69 Selesai • 100% Passed • 607/607 Passed)
+- **Total Fase**: 70 Fase (Fase 1–70 Selesai • 100% Passed • 631/631 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 69: Linux Desktop System Tray Quick Menu, Close-to-Tray Background Playback, StatusNotifierItem D-Bus Quick Actions & Docking Settings Integration (607/607 Passed • 0 errors, 0 warnings)_
+- **Status Proyek**: _Phase 70: Custom Studio Frameless Titlebar, Linux MPRIS v2 Native Notification Center & Quick Settings Integration, Linux D-Bus StatusNotifierItem Tray Service & YouTube Explode Fix (631/631 Passed • 0 errors, 0 warnings)_
 
 ---
 
@@ -1906,6 +1906,31 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
     - [x] Created unit and widget tests for tray callbacks, telemetry state updates, window geometry persistence, and settings switch interactions.
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
     - [x] `flutter test`: **100% pass rate across entire test suite (607/607 tests passing)**.
+
+- [x] **Phase 70 — Custom Studio Frameless Titlebar, Linux MPRIS v2 Quick Settings Media Player & Linux D-Bus Tray Service (Completed)**:
+  - [x] **70.1 Custom Studio Frameless Titlebar (`StudioDesktopTitleBar`)**:
+    - [x] Implemented streamlined frameless titlebar with 3 standard window action buttons (`Minimize`, `Maximize/Restore`, `Close`), eliminating redundant fullscreen options.
+    - [x] Integrated window dragging with `GestureDetector(onPanStart: ... windowManager.startDragging())` and double-click to toggle maximize.
+    - [x] Added dynamic center track title/artist marquee text on playback.
+    - [x] Ensured strict platform isolation (`if (Platform.isLinux || Platform.isWindows || Platform.isMacOS)` and viewport width `>= 960px`) to prevent mobile/tablet layout regressions.
+  - [x] **70.2 Linux MPRIS v2 Native Media Notification & Quick Settings Integration (`LinuxMprisService`)**:
+    - [x] Registered native MPRIS v2 interface (`org.mpris.MediaPlayer2.baydev_hifi`) on Linux D-Bus session bus with desktop entry identity (`DesktopEntry: 'baydev_hifi'`).
+    - [x] Generated and installed system desktop launcher file `~/.local/share/applications/baydev_hifi.desktop` for system media notification center integration.
+    - [x] Implemented synchronous position tracking and seek handling with `SetPosition` and `Seek` methods, emitting `Seeked` signal to ensure real-time seekbar scrubbing in the GNOME Notification Center and Quick Settings without drift or lag.
+    - [x] Connected `Raise` method to `DesktopTrayService.instance.toggleWindowVisibility()` for 1-click window restore from the system media player widget.
+  - [x] **70.3 Native Linux D-Bus StatusNotifierItem & DBusMenu Service (`LinuxTrayDbusService`)**:
+    - [x] Implemented native `org.kde.StatusNotifierItem` and `com.canonical.dbusmenu` via `package:dbus` across dual object paths (`/StatusNotifierItem/Menu` and `/MenuBar`).
+    - [x] Replaced broken C++ `cnativeapi` tray bindings that previously dropped Linux D-Bus events.
+    - [x] Added debounced dirty-checking in `DesktopTrayService.updatePlaybackState` (only re-rendering menu items on genuine state changes such as track switch, play/pause toggle, mute, >5% volume change, or DSP preset shift), eliminating `LayoutUpdated` D-Bus log spam during playback.
+  - [x] **70.4 Catatan Status Tray Linux Desktop**:
+    - [x] **Catatan Evaluasi Tray**: *Tray pada Linux Desktop (khususnya GNOME Shell) belum bekerja 100% optimal karena karakteristik arsitektur extension AppIndicator di GNOME Shell yang memprioritaskan penampilan context menu dropdown pada single left-click dan mendelegasikan aksi Activate window ke double-click. Context menu tray tetap berfungsi penuh untuk kontrol Show/Hide Window, Play/Pause, Next, Previous, Mute, dan Quit.*
+  - [x] **70.5 YouTube Explode Reverse-Engineering Search Parser Fix**:
+    - [x] Fixed `NoSuchMethodError: Class '_Map<String, dynamic>' has no instance method 'getT'` in `packages/youtube_explode_dart/lib/src/reverse_engineering/pages/search_page.dart` by safely handling dynamic JSON maps.
+  - [x] **70.6 Quality Gate & Comprehensive Test Verification (`test/linux_mpris_and_tray_service_test.dart`, `test/desktop_custom_title_bar_test.dart`)**:
+    - [x] Added comprehensive unit tests for `LinuxMprisService`, `LinuxTrayDbusService`, and `StudioDesktopTitleBar`.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
+    - [x] `flutter test`: **100% pass rate across entire test suite (631/631 tests passing)**.
+
 
 
 

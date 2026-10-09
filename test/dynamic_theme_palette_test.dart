@@ -30,8 +30,8 @@ void main() {
       );
 
       expect(controller.state.currentPalette.isDynamic, isTrue);
-      expect(controller.state.currentPalette.primary, equals(const Color(0xFF38BDF8)));
-      expect(controller.state.currentPalette.secondary, equals(const Color(0xFF1E293B)));
+      expect(controller.state.currentPalette.primary, equals(StudioColorHarmonizer.harmonizeAccent(const Color(0xFF38BDF8), isDark: true)));
+      expect(controller.state.currentPalette.secondary, equals(StudioColorHarmonizer.harmonizeSecondary(const Color(0xFF1E293B), isDark: true)));
 
       // Switching to a preset palette disables dynamic mode
       controller.setPalette(AppPalette.amberTube);

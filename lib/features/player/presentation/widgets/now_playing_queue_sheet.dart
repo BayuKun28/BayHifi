@@ -111,9 +111,11 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isSolid ? 0.7 : 0.5),
-            blurRadius: 32,
-            offset: const Offset(0, -6),
+            color: Colors.black.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.35 : 0.08,
+            ),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
@@ -126,7 +128,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
               width: 38,
               height: 4.5,
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -163,9 +165,9 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                       playback.queue.isNotEmpty
                           ? '${playback.queueIndex + 1} of ${playback.queue.length} Tracks'
                           : 'Queue Empty',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF94A3B8),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -243,7 +245,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
           ),
 
           const SizedBox(height: 8),
-          const Divider(color: Color(0xFF1E2636), height: 1),
+          Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4), height: 1),
 
           // ─── 2. REORDERABLE QUEUE LIST WITH SCROLLBAR & AUTO-CENTERING ────
           Expanded(
@@ -293,6 +295,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                       thumbVisibility: true,
                       interactive: true,
                       child: ReorderableListView.builder(
+                        buildDefaultDragHandles: false,
                         scrollController: _scrollController,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
@@ -453,7 +456,7 @@ class _QueueTrackTile extends StatelessWidget {
                 child: Text(
                   track.title,
                   style: TextStyle(
-                    color: isCurrent ? primaryColor : Colors.white,
+                    color: isCurrent ? primaryColor : theme.colorScheme.onSurface,
                     fontSize: 13,
                     fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
                   ),
@@ -490,8 +493,8 @@ class _QueueTrackTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   '${track.artist} • ${track.album}',
-                  style: const TextStyle(
-                    color: Color(0xFF8E9EB2),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 11,
                   ),
                   maxLines: 1,
@@ -501,11 +504,11 @@ class _QueueTrackTile extends StatelessWidget {
               if (track.duration > Duration.zero)
                 Text(
                   _formatDuration(track.duration),
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 10.5,
                     fontWeight: FontWeight.w600,
-                    fontFeatures: [FontFeature.tabularFigures()],
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
             ],
@@ -525,10 +528,31 @@ class _QueueTrackTile extends StatelessWidget {
               ),
               ReorderableDragStartListener(
                 index: index,
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDragDropVertical,
-                  size: 20,
-                  color: theme.colorScheme.onSurfaceVariant,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 15,
+                        height: 2,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                      const SizedBox(height: 3.5),
+                      Container(
+                        width: 15,
+                        height: 2,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

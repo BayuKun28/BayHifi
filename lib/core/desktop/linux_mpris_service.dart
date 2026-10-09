@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import '../../features/player/domain/track.dart';
 
 /// Service integrasi Linux Desktop MPRIS v2 D-Bus (`org.mpris.MediaPlayer2`).
-/// Memungkinkan kontrol pemutaran dari GNOME Shell, KDE Plasma, Waybar, Polybar,
-/// dan hardware media keys pada keyboard PC.
+/// Memungkinkan kontrol pemutaran dari GNOME Shell (Notification Panel / Media Message),
+/// KDE Plasma, ChromeOS Linux, Waybar, Polybar, lock screen, dan hardware media keys.
 class LinuxMprisService {
   static LinuxMprisService? _instance;
   static LinuxMprisService get instance => _instance ??= LinuxMprisService._();
@@ -25,6 +25,7 @@ class LinuxMprisService {
   VoidCallback? onNext;
   VoidCallback? onPrevious;
   VoidCallback? onStop;
+  VoidCallback? onRaise;
   void Function(Duration position)? onSeek;
   void Function(double volume)? onSetVolume;
 
@@ -116,6 +117,12 @@ class _BaydevMprisObject extends DBusObject {
       'org.mpris.MediaPlayer2.Player',
       changedProperties: {
         'Metadata': _buildMetadataVariant(),
+        'CanPlay': const DBusBoolean(true),
+        'CanPause': const DBusBoolean(true),
+        'CanGoNext': const DBusBoolean(true),
+        'CanGoPrevious': const DBusBoolean(true),
+        'CanControl': const DBusBoolean(true),
+        'CanSeek': const DBusBoolean(true),
       },
     );
   }
@@ -126,7 +133,7 @@ class _BaydevMprisObject extends DBusObject {
     required Duration duration,
     required double volume,
   }) {
-    final newStatus = isPlaying ? 'Playing' : 'Paused';
+    final newStatus = isPlaying ? 'Playing' : (_currentTrack != null ? 'Paused' : 'Stopped');
     final statusChanged = _playbackStatus != newStatus;
     final volumeChanged = (_volume - volume).abs() > 0.01;
 
@@ -158,25 +165,46 @@ class _BaydevMprisObject extends DBusObject {
       map[const DBusString('mpris:trackid')] = DBusVariant(
         DBusObjectPath('/org/mpris/MediaPlayer2/Track/$safeId'),
       );
-      map[const DBusString('xesam:title')] = DBusVariant(DBusString(_currentTrack!.title));
+      map[const DBusString('xesam:title')] = DBusVariant(
+        DBusString(_currentTrack!.title.isNotEmpty ? _currentTrack!.title : 'Unknown Title'),
+      );
       map[const DBusString('xesam:artist')] = DBusVariant(
-        DBusArray.string([_currentTrack!.artist]),
+        DBusArray.string([_currentTrack!.artist.isNotEmpty ? _currentTrack!.artist : 'Unknown Artist']),
       );
       if (_currentTrack!.album.isNotEmpty) {
         map[const DBusString('xesam:album')] = DBusVariant(DBusString(_currentTrack!.album));
       }
+      
+      // Format album artwork URL dengan protocol yang didukung GNOME Shell (file:// atau https://)
       if (_currentTrack!.albumArtUrl != null && _currentTrack!.albumArtUrl!.isNotEmpty) {
-        map[const DBusString('mpris:artUrl')] = DBusVariant(DBusString(_currentTrack!.albumArtUrl!));
+        var art = _currentTrack!.albumArtUrl!;
+        if (!art.startsWith('http://') && !art.startsWith('https://') && !art.startsWith('file://')) {
+          if (art.startsWith('/')) {
+            art = 'file://$art';
+          }
+        }
+        map[const DBusString('mpris:artUrl')] = DBusVariant(DBusString(art));
       }
-      map[const DBusString('mpris:length')] = DBusVariant(
-        DBusInt64(_duration.inMicroseconds > 0 ? _duration.inMicroseconds : _currentTrack!.duration.inMicroseconds),
-      );
+
+      final durationUs = _duration.inMicroseconds > 0 ? _duration.inMicroseconds : _currentTrack!.duration.inMicroseconds;
+      if (durationUs > 0) {
+        map[const DBusString('mpris:length')] = DBusVariant(DBusInt64(durationUs));
+      }
+
+      if (_currentTrack!.filePath != null && _currentTrack!.filePath!.isNotEmpty) {
+        final path = _currentTrack!.filePath!;
+        map[const DBusString('xesam:url')] = DBusVariant(
+          DBusString(path.startsWith('file://') ? path : 'file://$path'),
+        );
+      } else if (_currentTrack!.remoteUrl != null && _currentTrack!.remoteUrl!.isNotEmpty) {
+        map[const DBusString('xesam:url')] = DBusVariant(DBusString(_currentTrack!.remoteUrl!));
+      }
     } else {
       map[const DBusString('mpris:trackid')] = DBusVariant(
         DBusObjectPath('/org/mpris/MediaPlayer2/Track/none'),
       );
-      map[const DBusString('xesam:title')] = const DBusVariant(DBusString('No Track Loaded'));
-      map[const DBusString('xesam:artist')] = DBusVariant(DBusArray.string(['Baydev HiFi']));
+      map[const DBusString('xesam:title')] = const DBusVariant(DBusString('Baydev HiFi Studio'));
+      map[const DBusString('xesam:artist')] = DBusVariant(DBusArray.string(['Audiophile Player']));
     }
 
     return DBusDict(DBusSignature('s'), DBusSignature('v'), map);
@@ -196,6 +224,7 @@ class _BaydevMprisObject extends DBusObject {
           DBusIntrospectProperty('CanRaise', DBusSignature('b'), access: DBusPropertyAccess.read),
           DBusIntrospectProperty('HasTrackList', DBusSignature('b'), access: DBusPropertyAccess.read),
           DBusIntrospectProperty('Identity', DBusSignature('s'), access: DBusPropertyAccess.read),
+          DBusIntrospectProperty('DesktopEntry', DBusSignature('s'), access: DBusPropertyAccess.read),
           DBusIntrospectProperty('SupportedUriSchemes', DBusSignature('as'), access: DBusPropertyAccess.read),
           DBusIntrospectProperty('SupportedMimeTypes', DBusSignature('as'), access: DBusPropertyAccess.read),
         ],
@@ -229,6 +258,14 @@ class _BaydevMprisObject extends DBusObject {
             ],
           ),
         ],
+        signals: [
+          DBusIntrospectSignal(
+            'Seeked',
+            args: [
+              DBusIntrospectArgument(DBusSignature('x'), DBusArgumentDirection.out, name: 'Position'),
+            ],
+          ),
+        ],
         properties: [
           DBusIntrospectProperty('PlaybackStatus', DBusSignature('s'), access: DBusPropertyAccess.read),
           DBusIntrospectProperty('LoopStatus', DBusSignature('s'), access: DBusPropertyAccess.readwrite),
@@ -252,8 +289,10 @@ class _BaydevMprisObject extends DBusObject {
 
   @override
   Future<DBusMethodResponse> handleMethodCall(DBusMethodCall methodCall) async {
+    debugPrint('[LinuxMprisService] Received Method Call: ${methodCall.interface}.${methodCall.name}');
     if (methodCall.interface == 'org.mpris.MediaPlayer2') {
       if (methodCall.name == 'Raise') {
+        _service.onRaise?.call();
         return DBusMethodSuccessResponse();
       } else if (methodCall.name == 'Quit') {
         exit(0);
@@ -278,13 +317,43 @@ class _BaydevMprisObject extends DBusObject {
         _service.onStop?.call();
         return DBusMethodSuccessResponse();
       } else if (methodCall.name == 'Seek') {
-        final offsetUs = (methodCall.values.first as DBusInt64).value;
-        final target = _position + Duration(microseconds: offsetUs);
-        _service.onSeek?.call(target < Duration.zero ? Duration.zero : target);
+        if (methodCall.values.isNotEmpty) {
+          final offsetVal = methodCall.values.first;
+          int offsetUs = 0;
+          if (offsetVal is DBusInt64) {
+            offsetUs = offsetVal.value;
+          } else if (offsetVal is DBusInt32) {
+            offsetUs = offsetVal.value;
+          } else if (offsetVal is DBusUint64) {
+            offsetUs = offsetVal.value;
+          } else if (offsetVal is DBusUint32) {
+            offsetUs = offsetVal.value;
+          }
+          final target = _position + Duration(microseconds: offsetUs);
+          final safeTarget = target < Duration.zero ? Duration.zero : target;
+          _position = safeTarget;
+          _service.onSeek?.call(safeTarget);
+          emitSignal('org.mpris.MediaPlayer2.Player', 'Seeked', [DBusInt64(safeTarget.inMicroseconds)]);
+        }
         return DBusMethodSuccessResponse();
       } else if (methodCall.name == 'SetPosition') {
-        final posUs = (methodCall.values[1] as DBusInt64).value;
-        _service.onSeek?.call(Duration(microseconds: posUs));
+        if (methodCall.values.length >= 2) {
+          final posVal = methodCall.values[1];
+          int posUs = 0;
+          if (posVal is DBusInt64) {
+            posUs = posVal.value;
+          } else if (posVal is DBusInt32) {
+            posUs = posVal.value;
+          } else if (posVal is DBusUint64) {
+            posUs = posVal.value;
+          } else if (posVal is DBusUint32) {
+            posUs = posVal.value;
+          }
+          final target = Duration(microseconds: posUs);
+          _position = target;
+          _service.onSeek?.call(target);
+          emitSignal('org.mpris.MediaPlayer2.Player', 'Seeked', [DBusInt64(target.inMicroseconds)]);
+        }
         return DBusMethodSuccessResponse();
       }
     }
@@ -303,6 +372,8 @@ class _BaydevMprisObject extends DBusObject {
           return DBusMethodSuccessResponse([const DBusBoolean(false)]);
         case 'Identity':
           return DBusMethodSuccessResponse([const DBusString('Baydev HiFi')]);
+        case 'DesktopEntry':
+          return DBusMethodSuccessResponse([const DBusString('baydev_hifi')]);
         case 'SupportedUriSchemes':
           return DBusMethodSuccessResponse([
             DBusArray.string(['file', 'http', 'https']),

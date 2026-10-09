@@ -105,6 +105,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
         mpris.onNext = () => skipNext();
         mpris.onPrevious = () => skipPrevious();
         mpris.onStop = () => stop();
+        mpris.onRaise = () => DesktopTrayService.instance.toggleWindowVisibility();
         mpris.onSeek = (pos) => seek(pos);
         mpris.onSetVolume = (vol) => setVolume(vol);
       }

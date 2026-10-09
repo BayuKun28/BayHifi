@@ -148,6 +148,36 @@ void main() {
       expect(find.text('OPUS'), findsOneWidget);
       expect(find.text('Play All'), findsOneWidget);
     });
+
+    testWidgets('YouTubeDiscoveryScreen quick filter chips have showCheckmark set to false',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            youtubeMusicControllerProvider.overrideWith(
+              (ref) => _MockYouTubeMusicController(
+                const YouTubeMusicState(trendingTracks: []),
+                ref,
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            home: YouTubeDiscoveryScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final chips = tester.widgetList<ChoiceChip>(find.byType(ChoiceChip));
+      expect(chips, isNotEmpty);
+      for (final chip in chips) {
+        expect(chip.showCheckmark, isFalse, reason: 'Chip ${chip.label} should not display a checkmark');
+      }
+    });
   });
 }
 

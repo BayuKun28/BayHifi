@@ -87,7 +87,9 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
+              color: Colors.black.withValues(
+                alpha: theme.brightness == Brightness.dark ? 0.35 : 0.08,
+              ),
               blurRadius: 28,
               offset: const Offset(0, 10),
             ),
@@ -203,7 +205,7 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                 ],
               ),
             ),
-            Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.5)),
+            Divider(height: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25)),
             // Body
             Expanded(
               child: ClipRRect(

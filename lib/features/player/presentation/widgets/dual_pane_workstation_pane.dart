@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -8,6 +9,7 @@ import '../../../dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../data/lyrics_service.dart';
 import '../../domain/playback_state.dart';
 import '../controllers/player_controller.dart';
+import 'add_tracks_to_queue_sheet.dart';
 import 'synchronized_lyrics_view.dart';
 
 enum WorkstationTab {
@@ -61,7 +63,7 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
         children: [
           // ─── 1. WORKSTATION TOP TAB BAR ──────────────────────────────────
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
@@ -72,94 +74,150 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                 ),
               ),
             ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ...WorkstationTab.values.map((tab) {
-                    final isSel = _activeTab == tab;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 6.0),
-                      child: InkWell(
-                        onTap: () {
-                          AppHaptics.selectionClick();
-                          setState(() => _activeTab = tab);
-                        },
-                        borderRadius: BorderRadius.circular(10),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isSel
-                                ? StudioSurfaceTheme.tintedContainer(
-                                    context,
-                                    primary,
-                                    isSolid: isSolid,
-                                    translucentAlpha: 0.18,
-                                    solidBlendAlpha: 0.2,
-                                  )
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSel
-                                  ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.6))
-                                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              HugeIcon(
-                                icon: tab.icon,
-                                size: 13,
-                                color: isSel ? primary : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                tab.label,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: isSel ? FontWeight.w900 : FontWeight.w600,
-                                  color: isSel ? primary : theme.colorScheme.onSurfaceVariant,
-                                  letterSpacing: 0.4,
+            child: Row(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ...WorkstationTab.values.map((tab) {
+                          final isSel = _activeTab == tab;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6.0),
+                            child: InkWell(
+                              onTap: () {
+                                AppHaptics.selectionClick();
+                                setState(() => _activeTab = tab);
+                              },
+                              borderRadius: BorderRadius.circular(10),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+                                decoration: BoxDecoration(
+                                  color: isSel
+                                      ? StudioSurfaceTheme.tintedContainer(
+                                          context,
+                                          primary,
+                                          isSolid: isSolid,
+                                          translucentAlpha: 0.18,
+                                          solidBlendAlpha: 0.2,
+                                        )
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isSel
+                                        ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.6))
+                                        : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    HugeIcon(
+                                      icon: tab.icon,
+                                      size: 13,
+                                      color: isSel ? primary : theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      tab.label,
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: isSel ? FontWeight.w900 : FontWeight.w600,
+                                        color: isSel ? primary : theme.colorScheme.onSurfaceVariant,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+                if (_activeTab == WorkstationTab.queue) ...[
+                  const SizedBox(width: 4),
+                  // Track Count Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: StudioSurfaceTheme.tintedContainer(
+                        context,
+                        primary,
+                        isSolid: isSolid,
+                        translucentAlpha: 0.15,
                       ),
-                    );
-                  }),
-                  const SizedBox(width: 8),
-                  if (_activeTab == WorkstationTab.queue)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: StudioSurfaceTheme.tintedContainer(
-                          context,
-                          primary,
-                          isSolid: isSolid,
-                          translucentAlpha: 0.15,
-                        ),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.3),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Text(
-                        '${playback.queue.length} Tracks',
-                        style: TextStyle(
-                          fontFeatures: AppTypography.audioFigures,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: primary,
-                        ),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.3),
+                        width: 0.8,
                       ),
                     ),
+                    child: Text(
+                      '${playback.queue.length} Tracks',
+                      style: TextStyle(
+                        fontFeatures: AppTypography.audioFigures,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  // Add Tracks to Queue / Instant Mix Button (Namida Style)
+                  M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
+                    onPressed: () {
+                      AppHaptics.lightImpact();
+                      AddTracksToQueueSheet.show(context);
+                    },
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlayList,
+                      size: 18,
+                      color: primary,
+                    ),
+                    tooltip: 'Add Tracks to Queue / Instant Mix',
+                  ),
+                  // Shuffle Toggle Button
+                  M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
+                    onPressed: () {
+                      AppHaptics.selectionClick();
+                      playerNotifier.toggleShuffle();
+                    },
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedShuffle,
+                      size: 18,
+                      color: playback.isShuffle ? primary : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    tooltip: 'Shuffle Queue',
+                  ),
+                  // Repeat Mode Button
+                  M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
+                    onPressed: () {
+                      AppHaptics.selectionClick();
+                      playerNotifier.toggleRepeatMode();
+                    },
+                    icon: HugeIcon(
+                      icon: playback.repeatMode == PlaybackRepeatMode.one
+                          ? HugeIcons.strokeRoundedRepeatOne01
+                          : HugeIcons.strokeRoundedRepeat,
+                      size: 18,
+                      color: playback.repeatMode != PlaybackRepeatMode.off
+                          ? primary
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    tooltip: 'Repeat Mode',
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
 
@@ -191,34 +249,60 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
         if (playback.queue.isEmpty) {
           return Center(
             key: const ValueKey('tab_queue_empty'),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlaylist01,
-                  size: 40,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'No tracks currently queued',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlaylist01,
+                    size: 40,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  Text(
+                    'No tracks currently queued',
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  M3EButton.filled(
+                    onPressed: () {
+                      AppHaptics.lightImpact();
+                      AddTracksToQueueSheet.show(context);
+                    },
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlayList,
+                      size: 15,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                    label: Text(
+                      'ADD TRACKS / INSTANT MIX',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
 
         return ReorderableListView.builder(
           key: const ValueKey('tab_queue_list'),
+          buildDefaultDragHandles: false,
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           itemCount: playback.queue.length,
           // ignore: deprecated_member_use
           onReorder: (oldIdx, newIdx) {
+            AppHaptics.selectionClick();
             playerNotifier.reorderQueue(oldIdx, newIdx);
           },
           itemBuilder: (context, idx) {
@@ -315,11 +399,35 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // Drag Handle
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedDrag01,
-                          size: 16,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        // Single, crisp 2-bar drag handle with ReorderableDragStartListener
+                        ReorderableDragStartListener(
+                          index: idx,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 15,
+                                  height: 2,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+                                    borderRadius: BorderRadius.circular(1),
+                                  ),
+                                ),
+                                const SizedBox(height: 3.5),
+                                Container(
+                                  width: 15,
+                                  height: 2,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+                                    borderRadius: BorderRadius.circular(1),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),

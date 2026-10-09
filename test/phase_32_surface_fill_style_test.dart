@@ -145,10 +145,12 @@ void main() {
               final subOutTranslucent = StudioSurfaceTheme.subtleOutline(context, isSolid: false);
               final subOutSolid = StudioSurfaceTheme.subtleOutline(context, isSolid: true);
 
-              expect(outSolid, Colors.transparent);
-              expect(outTranslucent, Colors.transparent);
-              expect(subOutTranslucent, Colors.transparent);
-              expect(subOutSolid, Colors.transparent);
+              final scheme = Theme.of(context).colorScheme;
+
+              expect(outSolid, scheme.outlineVariant);
+              expect(outTranslucent, scheme.outlineVariant.withValues(alpha: 0.5));
+              expect(subOutSolid, scheme.outlineVariant.withValues(alpha: 0.6));
+              expect(subOutTranslucent, scheme.outlineVariant.withValues(alpha: 0.35));
 
               return const SizedBox.shrink();
             },

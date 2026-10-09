@@ -648,11 +648,21 @@ void main() {
       expect(find.text('OFFICIAL RANKING'), findsOneWidget);
     });
 
-    testWidgets('StudioWrappedBentoBanner renders properly in dashboard flow', (tester) async {
+    testWidgets('StudioWrappedBentoBanner renders properly in dashboard flow and respects light/dark theme contrast', (tester) async {
+      // 1. Test in Light Mode
+      final lightTheme = ThemeData.light().copyWith(
+        colorScheme: const ColorScheme.light(
+          onSurface: Color(0xFF0F172A),
+          primary: Color(0xFF06B6D4),
+          onPrimary: Color(0xFFFFFFFF),
+        ),
+      );
+
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
-            home: Scaffold(
+            theme: lightTheme,
+            home: const Scaffold(
               body: StudioWrappedBentoBanner(),
             ),
           ),
@@ -663,6 +673,39 @@ void main() {
       expect(find.text('STUDIO WRAPPED 2026'), findsOneWidget);
       expect(find.text('PLAY RECAP STORY'), findsOneWidget);
       expect(find.text('TEMPLATES'), findsOneWidget);
+
+      // Verify persona title text widget is found and its color is onSurface (not white)
+      final titleFinder = find.byWidgetPredicate(
+        (widget) => widget is Text && widget.style?.fontSize == 15 && widget.style?.fontWeight == FontWeight.w900,
+      );
+      expect(titleFinder, findsOneWidget);
+      final lightTitleWidget = tester.widget<Text>(titleFinder);
+      expect(lightTitleWidget.style?.color, equals(const Color(0xFF0F172A)));
+      expect(lightTitleWidget.style?.color, isNot(equals(Colors.white)));
+
+      // 2. Test in Dark Mode
+      final darkTheme = ThemeData.dark().copyWith(
+        colorScheme: const ColorScheme.dark(
+          onSurface: Color(0xFFF1F5F9),
+          primary: Color(0xFF06B6D4),
+          onPrimary: Color(0xFF0C0E12),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: darkTheme,
+            home: const Scaffold(
+              body: StudioWrappedBentoBanner(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final darkTitleWidget = tester.widget<Text>(titleFinder);
+      expect(darkTitleWidget.style?.color, equals(const Color(0xFFF1F5F9)));
     });
   });
 

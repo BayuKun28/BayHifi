@@ -57,7 +57,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 14),
                   decoration: BoxDecoration(
-                    color: theme.dividerColor.withValues(alpha: 0.5),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -322,7 +322,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     HugeIcon(
                       icon: HugeIcons.strokeRoundedPlaylist01,
                       size: 36,
-                      color: theme.dividerColor,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 12),
                     const Text(

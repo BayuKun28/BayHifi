@@ -9,6 +9,7 @@ import '../../features/player/presentation/controllers/player_controller.dart';
 import '../../features/player/presentation/widgets/now_playing_queue_sheet.dart';
 import '../../features/pro_q_studio/presentation/pro_q_studio_screen.dart';
 import 'desktop_lyrics_dialog.dart';
+import 'desktop_studio_sidebar.dart';
 import 'desktop_window_service.dart';
 
 /// Widget pembungkus tingkat atas untuk menangkap pintasan keyboard studio pada platform Desktop.
@@ -181,13 +182,19 @@ class _DesktopShortcutsDispatcherState extends ConsumerState<DesktopShortcutsDis
       return KeyEventResult.handled;
     }
 
-    // 13. F11: Toggle Fullscreen
+    // 13. CTRL + B: Toggle Sidebar Collapse / Expand
+    if (isCtrl && key == LogicalKeyboardKey.keyB) {
+      ref.read(desktopSidebarCollapsedProvider.notifier).update((state) => !state);
+      return KeyEventResult.handled;
+    }
+
+    // 14. F11: Toggle Fullscreen
     if (key == LogicalKeyboardKey.f11) {
       DesktopWindowService.instance.toggleFullScreen();
       return KeyEventResult.handled;
     }
 
-    // 14. QUESTION MARK / CTRL + SLASH: Cheatsheet Dialog
+    // 15. QUESTION MARK / CTRL + SLASH: Cheatsheet Dialog
     if (key == LogicalKeyboardKey.question || (isCtrl && key == LogicalKeyboardKey.slash)) {
       showDesktopShortcutsCheatsheet(context);
       return KeyEventResult.handled;
@@ -216,6 +223,7 @@ void showDesktopShortcutsCheatsheet(BuildContext context) {
     {'keys': '← / →', 'desc': 'Seek -5s / +5s (Shift for 15s)'},
     {'keys': 'Ctrl + ← / →', 'desc': 'Previous / Next Track'},
     {'keys': '↑ / ↓', 'desc': 'Volume Up / Down (+5% / -5%)'},
+    {'keys': 'Ctrl + B', 'desc': 'Toggle Sidebar (Expand / Collapse)'},
     {'keys': 'M', 'desc': 'Mute / Unmute Audio'},
     {'keys': 'L', 'desc': 'Open Synchronized Lyrics Modal'},
     {'keys': 'Q', 'desc': 'Open Up Next Queue Modal'},

@@ -75,25 +75,31 @@ class StudioSurfaceTheme {
     );
   }
 
-  /// Resolves border outline color (transparent for pure borderless studio design).
+  /// Resolves border outline color (soft studio card boundary).
   static Color outline(
     BuildContext context, {
     bool isSolid = false,
-    double translucentAlpha = 0.0,
+    double translucentAlpha = 0.5,
   }) {
-    return Colors.transparent;
+    final theme = Theme.of(context);
+    return isSolid
+        ? theme.colorScheme.outlineVariant
+        : theme.colorScheme.outlineVariant.withValues(alpha: translucentAlpha);
   }
 
-  /// Resolves subtle border outline color for nested containers (transparent).
+  /// Resolves subtle border outline color for nested containers.
   static Color subtleOutline(
     BuildContext context, {
     bool isSolid = false,
-    double translucentAlpha = 0.0,
+    double translucentAlpha = 0.35,
   }) {
-    return Colors.transparent;
+    final theme = Theme.of(context);
+    return isSolid
+        ? theme.colorScheme.outlineVariant.withValues(alpha: 0.6)
+        : theme.colorScheme.outlineVariant.withValues(alpha: translucentAlpha);
   }
 
-  /// Standard card box decoration helper conforming to M3 Expressive Studio Bento layout (borderless by default).
+  /// Standard card box decoration helper conforming to M3 Expressive Studio Bento layout.
   static BoxDecoration cardDecoration({
     required BuildContext context,
     bool isSolid = false,
@@ -103,6 +109,7 @@ class StudioSurfaceTheme {
     double borderWidth = 1.0,
     List<BoxShadow>? shadows,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return BoxDecoration(
       color: backgroundColor ?? surfaceContainer(context, isSolid: isSolid),
       borderRadius: BorderRadius.circular(radius),
@@ -113,9 +120,9 @@ class StudioSurfaceTheme {
           (isSolid
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.14),
+                    color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.04),
                     blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    offset: const Offset(0, 3),
                   )
                 ]
               : null),

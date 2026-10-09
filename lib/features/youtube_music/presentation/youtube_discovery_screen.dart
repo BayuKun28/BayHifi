@@ -217,17 +217,18 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               final isSelected = _selectedFilter == filter.label;
               final ytColor = StudioCategoryColors.youtubeMusic;
               return ChoiceChip(
+                showCheckmark: false,
                 avatar: HugeIcon(
                   icon: filter.icon,
                   size: 14,
-                  color: isSelected ? ytColor : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: isSelected ? ytColor : theme.colorScheme.onSurfaceVariant,
                 ),
                 label: Text(
                   filter.label,
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? ytColor : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                    color: isSelected ? ytColor : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 selected: isSelected,

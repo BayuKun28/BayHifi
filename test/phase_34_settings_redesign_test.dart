@@ -159,6 +159,11 @@ void main() {
     });
 
     testWidgets('AudioHardwareSettingsScreen renders Bento dropdown and buffer slider', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -212,6 +217,11 @@ void main() {
     });
 
     testWidgets('DockingSettingsScreen renders desk docking action and feature overview', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -227,7 +237,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('STUDIO WORKSTATION & CAR DOCK'), findsOneWidget);
+      expect(find.text('STUDIO WORKSTATION & DOCKING'), findsOneWidget);
       expect(find.text('LAUNCH STUDIO DOCKING MODE'), findsOneWidget);
       expect(find.text('High-Contrast Studio Clock'), findsOneWidget);
       expect(find.text('Dual Analog VU Meters'), findsOneWidget);

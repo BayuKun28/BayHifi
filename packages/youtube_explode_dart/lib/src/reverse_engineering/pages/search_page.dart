@@ -176,10 +176,7 @@ class _InitialData extends InitialData {
                     .getJson<String>('viewCountText/simpleText')
                     ?.stripNonDigits()
                     .nullIfWhitespace ??
-                renderer
-                    .getJson<List<dynamic>>('viewCountText/runs')
-                    ?.firstOrNull
-                    ?.getT<String>('text')
+                ((renderer.getJson<List<dynamic>>('viewCountText/runs')?.firstOrNull as Map?)?['text']?.toString())
                     ?.stripNonDigits()
                     .nullIfWhitespace ??
                 '0',
@@ -194,10 +191,7 @@ class _InitialData extends InitialData {
               )
               .toList(),
           renderer.getJson<String>('publishedTimeText/simpleText'),
-          renderer
-                  .getJson<List<dynamic>>('viewCountText/runs')
-                  ?.elementAtSafe(1)
-                  ?.getT<String>('text')
+          ((renderer.getJson<List<dynamic>>('viewCountText/runs')?.elementAtSafe(1) as Map?)?['text']?.toString())
                   ?.trim() ==
               'watching',
           _getChannelId(renderer));
@@ -240,11 +234,8 @@ class _InitialData extends InitialData {
                 ?.cast<Map<dynamic, dynamic>>()
                 .parseRuns() ??
             '',
-        renderer
-                .getJson<List<dynamic>>('videoCountText/runs')
-                ?.first
-                .getT<String>('text')
-                .parseInt() ??
+        ((renderer.getJson<List<dynamic>>('videoCountText/runs')?.firstOrNull as Map?)?['text']?.toString())
+                ?.parseInt() ??
             -1,
         (renderer.getJson<List<dynamic>>('thumbnail/thumbnails') ?? const [])
             .map((e) => Thumbnail(Uri.parse('https:${(e as Map)['url']}'),

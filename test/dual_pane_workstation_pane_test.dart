@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:baydev_hifi/features/player/data/lyrics_service.dart';
 import 'package:baydev_hifi/features/player/domain/playback_state.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/dual_pane_workstation_pane.dart';
 
@@ -66,10 +68,20 @@ void main() {
     expect(find.text('DSP RACK'), findsOneWidget);
     expect(find.text('PRO-Q EQ'), findsNothing); // Pro-Q removed from cramped tabs
 
-    // 2. Verify Up Next Tab displays queued tracks without NoSuchMethodError
+    // 2. Verify Up Next Tab displays queued tracks, track count, and action buttons
     expect(find.text('2 Tracks'), findsOneWidget);
     expect(find.text('A Little Piece of Heaven'), findsOneWidget);
     expect(find.text('Afterlife'), findsOneWidget);
+
+    // Verify Add Tracks to Queue / Instant Mix button exists
+    expect(find.byType(M3EIconButton), findsNWidgets(3));
+    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedPlayList), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedShuffle), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedRepeat), findsOneWidget);
+
+    // Verify drag handles (exactly 1 per track tile, not duplicated)
+    final dragListeners = find.byType(ReorderableDragStartListener);
+    expect(dragListeners, findsNWidgets(2));
 
     // 3. Switch to LYRICS Tab
     await tester.tap(find.text('LYRICS'));
@@ -79,6 +91,42 @@ void main() {
     await tester.tap(find.text('DSP RACK'));
     await tester.pumpAndSettle();
     expect(find.textContaining('DSP'), findsWidgets);
+  });
+
+  testWidgets('DualPaneWorkstationPane displays empty state CTA with ADD TRACKS button when queue is empty', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    final container = ProviderContainer(
+      overrides: [
+        playerControllerProvider.overrideWith((ref) => FakePlayerController(
+          const PlaybackState(
+            currentTrack: null,
+            queue: [],
+            queueIndex: 0,
+            status: PlaybackStatus.stopped,
+          ),
+        )),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: Scaffold(
+            body: DualPaneWorkstationPane(
+              lyricsResult: LyricsResult.empty(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('No tracks currently queued'), findsOneWidget);
+    expect(find.text('ADD TRACKS / INSTANT MIX'), findsOneWidget);
   });
 }
 

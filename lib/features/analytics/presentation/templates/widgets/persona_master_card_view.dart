@@ -288,7 +288,7 @@ class PersonaMasterCardView extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      const Divider(color: Color(0xFF1E2433), height: 1),
+                      Divider(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3), height: 1),
                       const SizedBox(height: 10),
                       Row(
                         children: [

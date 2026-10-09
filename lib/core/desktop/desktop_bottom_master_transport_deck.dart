@@ -158,15 +158,17 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
             color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
             border: Border(
               top: BorderSide(
-                color: theme.dividerColor.withValues(alpha: 0.7),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
                 width: 1.0,
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
-                blurRadius: 16,
-                offset: const Offset(0, -4),
+                color: Colors.black.withValues(
+                  alpha: theme.brightness == Brightness.dark ? 0.20 : 0.04,
+                ),
+                blurRadius: 12,
+                offset: const Offset(0, -3),
               ),
             ],
           ),
@@ -647,7 +649,7 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                                 .withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: theme.dividerColor.withValues(alpha: 0.3),
+                              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
                               width: 0.8,
                             ),
                           ),

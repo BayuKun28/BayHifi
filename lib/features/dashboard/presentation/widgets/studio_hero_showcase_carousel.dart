@@ -326,7 +326,9 @@ class _StudioHeroShowcaseCarouselState
               width: isSelected ? 18 : 6,
               height: 5,
               decoration: BoxDecoration(
-                color: isSelected ? primary : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                color: isSelected
+                    ? primary
+                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.25),
                 borderRadius: BorderRadius.circular(4),
               ),
             );
@@ -355,6 +357,9 @@ class _StudioHeroShowcaseCarouselState
                     : (mix.id == 'bass_heavy_mix'
                         ? StudioCategoryColors.dspTubeWarmth
                         : primary))));
+    final onMixColor = mixColor.computeLuminance() > 0.45
+        ? const Color(0xFF0C0E12)
+        : const Color(0xFFFFFFFF);
 
     return InkWell(
       onTap: () => _openMixDetailSheet(context, mix),
@@ -567,22 +572,22 @@ class _StudioHeroShowcaseCarouselState
                                           color: mixColor,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             HugeIcon(
                                               icon: HugeIcons.strokeRoundedPlayList,
                                               size: 12,
-                                              color: Colors.black,
+                                              color: onMixColor,
                                             ),
-                                            SizedBox(width: 4),
+                                            const SizedBox(width: 4),
                                             Text(
                                               'DISCOVER',
                                               style: TextStyle(
                                                 fontSize: 9.5,
                                                 fontWeight: FontWeight.w900,
                                                 letterSpacing: 0.4,
-                                                color: Colors.black,
+                                                color: onMixColor,
                                               ),
                                             ),
                                           ],
@@ -632,21 +637,21 @@ class _StudioHeroShowcaseCarouselState
                                           color: mixColor,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             HugeIcon(
                                               icon: HugeIcons.strokeRoundedPlay,
                                               size: 12,
-                                              color: Colors.black,
+                                              color: onMixColor,
                                             ),
-                                            SizedBox(width: 3),
+                                            const SizedBox(width: 3),
                                             Text(
                                               'Play',
                                               style: TextStyle(
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w900,
-                                                color: Colors.black,
+                                                color: onMixColor,
                                               ),
                                             ),
                                           ],
@@ -808,17 +813,17 @@ class _StudioMixDetailSheet extends StatelessWidget {
                 Expanded(
                   child: M3EButton.filled(
                     onPressed: onPlayAll,
-                    icon: const HugeIcon(
+                    icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedPlay,
                       size: 16,
-                      color: Colors.black,
+                      color: theme.colorScheme.onPrimary,
                     ),
-                    label: const Text(
+                    label: Text(
                       'Play All',
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 12.5,
-                        color: Colors.black,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     ),
                   ),

@@ -352,6 +352,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                       children: [
                         Expanded(
                           child: ChoiceChip(
+                            showCheckmark: false,
                             label: const Center(
                               child: Text('Match ALL (AND)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                             ),
@@ -364,6 +365,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                         const SizedBox(width: 10),
                         Expanded(
                           child: ChoiceChip(
+                            showCheckmark: false,
                             label: const Center(
                               child: Text('Match ANY (OR)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                             ),

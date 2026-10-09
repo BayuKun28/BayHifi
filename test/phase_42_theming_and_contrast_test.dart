@@ -78,7 +78,7 @@ void main() {
       // Test Light Mode Safety
       const blindingWhite = Color(0xFFFFFFFF);
       final harmonizedLight = StudioColorHarmonizer.harmonizeAccent(blindingWhite, isDark: false);
-      expect(harmonizedLight, equals(const Color(0xFF334155)));
+      expect(harmonizedLight, equals(const Color(0xFF1E293B)));
     });
 
     test('3. LyricCardColors.fromDynamicColor guards against pitch black cover art', () {

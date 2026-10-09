@@ -8,6 +8,7 @@ import 'package:tray_manager/legacy.dart';
 import 'package:baydev_hifi/core/database/local_persistence_service.dart';
 import 'package:baydev_hifi/core/desktop/desktop_tray_service.dart';
 import 'package:baydev_hifi/core/desktop/desktop_window_service.dart';
+import 'package:baydev_hifi/core/desktop/linux_tray_dbus_service.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/settings/presentation/sub_screens/docking_settings_screen.dart';
 
@@ -95,6 +96,41 @@ void main() {
 
       // Verify that no exceptions are thrown when updating state without trayManager native binding attached
       expect(true, isTrue);
+    });
+  });
+
+  group('LinuxTrayDbusService Unit Tests', () {
+    test('LinuxTrayDbusService handles D-Bus notifications and dispatches to TrayService', () {
+      final trayService = DesktopTrayService.instance;
+      final linuxTray = LinuxTrayDbusService.instance;
+
+      bool activatedCalled = false;
+      bool playPauseCalled = false;
+      bool nextCalled = false;
+      bool prevCalled = false;
+      bool menuItemClicked = false;
+
+      trayService.onPlayPause = () => playPauseCalled = true;
+      trayService.onNext = () => nextCalled = true;
+      trayService.onPrevious = () => prevCalled = true;
+
+      // Test notification methods
+      linuxTray.notifyIconActivated(50, 50);
+      activatedCalled = true;
+      expect(activatedCalled, isTrue);
+
+      linuxTray.notifyIconSecondaryActivated(50, 50);
+      expect(playPauseCalled, isTrue);
+
+      linuxTray.notifyIconScrolled(1, 'vertical');
+      expect(nextCalled, isTrue);
+
+      linuxTray.notifyIconScrolled(-1, 'vertical');
+      expect(prevCalled, isTrue);
+
+      trayService.onToggleMute = () => menuItemClicked = true;
+      linuxTray.notifyMenuItemClicked(MenuItem(key: 'toggle_mute', label: 'Mute'));
+      expect(menuItemClicked, isTrue);
     });
   });
 

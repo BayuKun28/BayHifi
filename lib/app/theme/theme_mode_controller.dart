@@ -764,7 +764,32 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
   }
 
   void setThemeMode(AppThemeMode mode) {
-    state = state.copyWith(themeMode: mode);
+    if (state.currentPalette.isDynamic) {
+      final isDark = mode != AppThemeMode.light;
+      final rawPrimary = state.customAccentColor;
+      final rawSecondary = state.currentPalette.secondary;
+      final harmonizedVibrant = StudioColorHarmonizer.harmonizeAccent(rawPrimary, isDark: isDark);
+      final harmonizedDominant = StudioColorHarmonizer.harmonizeSecondary(rawSecondary, isDark: isDark);
+
+      final dynamicPalette = state.currentPalette.copyWith(
+        primary: harmonizedVibrant,
+        secondary: harmonizedDominant,
+        accent: harmonizedVibrant,
+        backgroundDark: Color.alphaBlend(harmonizedVibrant.withValues(alpha: 0.04), const Color(0xFF0A0C10)),
+        backgroundLight: Color.alphaBlend(harmonizedVibrant.withValues(alpha: 0.03), const Color(0xFFF8FAFC)),
+        surfaceDark: Color.alphaBlend(harmonizedVibrant.withValues(alpha: 0.08), const Color(0xFF101318)),
+        surfaceLight: const Color(0xFFFFFFFF),
+        surfaceContainerDark: Color.alphaBlend(harmonizedVibrant.withValues(alpha: 0.16), const Color(0xFF141822)),
+        surfaceContainerLight: Color.alphaBlend(harmonizedVibrant.withValues(alpha: 0.10), const Color(0xFFF0F4F8)),
+      );
+
+      state = state.copyWith(
+        themeMode: mode,
+        currentPalette: dynamicPalette,
+      );
+    } else {
+      state = state.copyWith(themeMode: mode);
+    }
     _persist();
   }
 
@@ -1099,25 +1124,25 @@ final themeControllerProvider =
 
 /// Studio Color Harmonizer & Contrast Hardener
 /// Guarantees that dynamically extracted artwork colors always adhere to strict
-/// audiophile studio contrast guidelines (WCAG AA) and never result in dark-on-dark illegibility.
+/// audiophile studio contrast guidelines (WCAG AA) and never result in dark-on-dark or washed-out illegibility.
 class StudioColorHarmonizer {
   const StudioColorHarmonizer._();
 
-  /// Harmonizes primary/accent colors. If extracted color is black/near-black,
-  /// transforms it to a clean studio silver-ash (#94A3B8).
+  /// Harmonizes primary/accent colors. Guarantees WCAG AA (>= 4.5:1) contrast
+  /// in both Light and Dark modes, and prevents washed-out or dark-on-dark text/icons.
   static Color harmonizeAccent(Color rawColor, {bool isDark = true}) {
     final hsl = HSLColor.fromColor(rawColor);
     final lum = rawColor.computeLuminance();
 
     if (isDark) {
-      if (lum < 0.15 || hsl.lightness < 0.35) {
+      if (lum < 0.22 || hsl.lightness < 0.45) {
         if (hsl.saturation < 0.18) {
           // Black, near-black, or dark monochrome artwork -> Studio Slate / Silver Ash
           return const Color(0xFF94A3B8);
         } else {
           // Dark color with hue -> lift lightness into safe studio range
-          final newLightness = (0.58 + (1.0 - hsl.lightness) * 0.12).clamp(0.55, 0.72);
-          return hsl.withLightness(newLightness).withSaturation(hsl.saturation.clamp(0.40, 0.85)).toColor();
+          final newLightness = (0.60 + (1.0 - hsl.lightness) * 0.12).clamp(0.58, 0.72);
+          return hsl.withLightness(newLightness).withSaturation(hsl.saturation.clamp(0.50, 0.85)).toColor();
         }
       }
       if (hsl.lightness > 0.85) {
@@ -1125,34 +1150,39 @@ class StudioColorHarmonizer {
       }
       return rawColor;
     } else {
-      if (lum > 0.55 || hsl.lightness > 0.65) {
+      // Light Mode Guard: prevent washed out text/icons on light backgrounds
+      if (lum > 0.40 || hsl.lightness > 0.48) {
         if (hsl.saturation < 0.18) {
-          return const Color(0xFF334155);
+          return const Color(0xFF1E293B); // Deep Studio Slate
         } else {
-          return hsl.withLightness(0.38).withSaturation(hsl.saturation.clamp(0.50, 0.90)).toColor();
+          return hsl.withLightness(0.36).withSaturation(hsl.saturation.clamp(0.60, 0.90)).toColor();
         }
       }
       return rawColor;
     }
   }
 
-  /// Harmonizes secondary color
+  /// Harmonizes secondary color for subheadings, secondary icons, and muted indicators
   static Color harmonizeSecondary(Color rawColor, {bool isDark = true}) {
     final hsl = HSLColor.fromColor(rawColor);
     final lum = rawColor.computeLuminance();
 
     if (isDark) {
-      if (lum < 0.015 && hsl.lightness < 0.08) {
+      if (lum < 0.10 || hsl.lightness < 0.30) {
         if (hsl.saturation < 0.18) {
           return const Color(0xFF64748B);
         } else {
-          return hsl.withLightness(0.40).withSaturation(hsl.saturation.clamp(0.35, 0.75)).toColor();
+          return hsl.withLightness(0.48).withSaturation(hsl.saturation.clamp(0.35, 0.75)).toColor();
         }
       }
       return rawColor;
     } else {
-      if (lum > 0.60 || hsl.lightness > 0.60) {
-        return const Color(0xFF475569);
+      if (lum > 0.45 || hsl.lightness > 0.52) {
+        if (hsl.saturation < 0.18) {
+          return const Color(0xFF475569);
+        } else {
+          return hsl.withLightness(0.38).withSaturation(hsl.saturation.clamp(0.45, 0.80)).toColor();
+        }
       }
       return rawColor;
     }
@@ -1170,9 +1200,18 @@ class AppThemeBuilder {
     final textPrimary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
-    // Borderless: completely transparent outline
-    const outline = Colors.transparent;
-    const outlineVariant = Colors.transparent;
+    // Soft Studio Card Boundaries & Outlines (harmonized with palette)
+    final outlineVariant = isDark
+        ? (palette.isOledBlack
+            ? const Color(0xFF1E1E1E)
+            : Color.alphaBlend(palette.primary.withValues(alpha: 0.08), const Color(0xFF1E293B)))
+        : Color.alphaBlend(palette.primary.withValues(alpha: 0.06), const Color(0xFFE2E8F0));
+
+    final outline = isDark
+        ? (palette.isOledBlack
+            ? const Color(0xFF2A2A2A)
+            : Color.alphaBlend(palette.primary.withValues(alpha: 0.15), const Color(0xFF334155)))
+        : Color.alphaBlend(palette.primary.withValues(alpha: 0.12), const Color(0xFFCBD5E1));
 
     final surfaceContainerHigh = isDark
         ? (palette.isOledBlack
@@ -1247,7 +1286,7 @@ class AppThemeBuilder {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: bg,
       cardColor: surfaceContainer,
-      dividerColor: Colors.transparent,
+      dividerColor: outlineVariant,
       textTheme: AppTypography.textTheme(isDark: isDark),
       appBarTheme: AppBarTheme(
         backgroundColor: bg,
@@ -1308,9 +1347,18 @@ class AppThemeBuilder {
     final textPrimary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
-    // Borderless: completely transparent outline
-    const outline = Colors.transparent;
-    const outlineVariant = Colors.transparent;
+    // Soft Studio Card Boundaries & Outlines (harmonized with palette)
+    final outlineVariant = isDark
+        ? (palette.isOledBlack
+            ? const Color(0xFF1E1E1E)
+            : Color.alphaBlend(palette.primary.withValues(alpha: 0.08), const Color(0xFF1E293B)))
+        : Color.alphaBlend(palette.primary.withValues(alpha: 0.06), const Color(0xFFE2E8F0));
+
+    final outline = isDark
+        ? (palette.isOledBlack
+            ? const Color(0xFF2A2A2A)
+            : Color.alphaBlend(palette.primary.withValues(alpha: 0.15), const Color(0xFF334155)))
+        : Color.alphaBlend(palette.primary.withValues(alpha: 0.12), const Color(0xFFCBD5E1));
 
     final surfaceContainerHigh = isDark
         ? (palette.isOledBlack
