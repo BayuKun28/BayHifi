@@ -8,6 +8,7 @@ import '../../app/theme/app_haptics.dart';
 import '../../app/theme/app_typography.dart';
 import '../../app/theme/studio_surface_theme.dart';
 import '../../audio_engine/fft_processor.dart';
+import '../../audio_engine/soloud_controller.dart';
 import '../../core/widgets/studio_artwork_lightbox.dart';
 import '../../core/widgets/studio_artwork_widget.dart';
 import '../../features/dsp_rack/presentation/controllers/dsp_rack_controller.dart';
@@ -1063,13 +1064,33 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
 }
 
 // ─── Dynamic Live Mini RTA Visualizer ─────────────────────────
-class _DesktopDynamicRtaVisualizer extends ConsumerWidget {
+class _DesktopDynamicRtaVisualizer extends ConsumerStatefulWidget {
   final SpectrumStyle style;
 
   const _DesktopDynamicRtaVisualizer({required this.style});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DesktopDynamicRtaVisualizer> createState() => _DesktopDynamicRtaVisualizerState();
+}
+
+class _DesktopDynamicRtaVisualizerState extends ConsumerState<_DesktopDynamicRtaVisualizer> {
+  late final String _demandKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _demandKey = '_DesktopDynamicRtaVisualizer_${identityHashCode(this)}';
+    SoLoudController.instance.acquireVisualizationDemand(_demandKey);
+  }
+
+  @override
+  void dispose() {
+    SoLoudController.instance.releaseVisualizationDemand(_demandKey);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isPlaying = ref.watch(playerControllerProvider.select((s) => s.isPlaying));
     final rtaAsync = ref.watch(rtaSpectrumProvider);
@@ -1081,7 +1102,7 @@ class _DesktopDynamicRtaVisualizer extends ConsumerWidget {
           painter: _DesktopMiniRtaPainter(
             fft: rawFft,
             color: theme.colorScheme.primary,
-            style: style,
+            style: widget.style,
           ),
         );
       },

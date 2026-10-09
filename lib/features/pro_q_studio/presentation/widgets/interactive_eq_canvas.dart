@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../audio_engine/fft_processor.dart';
+import '../../../../audio_engine/soloud_controller.dart';
 import '../../domain/eq_band.dart';
 import '../controllers/eq_controller.dart';
 import 'eq_curve_painter.dart';
@@ -22,6 +23,21 @@ class _InteractiveEqCanvasState extends ConsumerState<InteractiveEqCanvas> {
   static const double _topMargin = 32.0;
   static const double _bottomMargin = 28.0;
   static const double _hitRadius = 36.0;
+
+  late final String _demandKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _demandKey = 'InteractiveEqCanvas_${identityHashCode(this)}';
+    SoLoudController.instance.acquireVisualizationDemand(_demandKey);
+  }
+
+  @override
+  void dispose() {
+    SoLoudController.instance.releaseVisualizationDemand(_demandKey);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

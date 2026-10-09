@@ -22,6 +22,7 @@ import '../features/player/presentation/now_playing_screen.dart';
 import '../features/player/presentation/widgets/namida_expandable_miniplayer.dart';
 import '../features/pro_q_studio/presentation/pro_q_studio_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../audio_engine/soloud_controller.dart';
 import '../features/youtube_music/presentation/youtube_discovery_screen.dart';
 
 class BaydevHiFiApp extends ConsumerStatefulWidget {
@@ -31,12 +32,13 @@ class BaydevHiFiApp extends ConsumerStatefulWidget {
   ConsumerState<BaydevHiFiApp> createState() => _BaydevHiFiAppState();
 }
 
-class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
+class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> with WidgetsBindingObserver {
   int _selectedNavIndex = 0; // Default: Dashboard (Index 0)
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final current = ref.read(playerControllerProvider).currentTrack;
@@ -44,6 +46,18 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> {
         ref.read(themeControllerProvider.notifier).updateDynamicPaletteFromTrack(current);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final isForeground = state == AppLifecycleState.resumed;
+    SoLoudController.instance.setAppForegroundState(isForeground);
   }
 
   @override

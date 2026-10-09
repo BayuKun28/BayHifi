@@ -96,7 +96,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/wallpapers/
-    - assets/audio/
+    # - assets/audio/
     - assets/samples/drivers/
     - assets/samples/targets/
 

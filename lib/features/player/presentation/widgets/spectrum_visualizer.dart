@@ -6,8 +6,10 @@ import '../../../../audio_engine/fft_processor.dart';
 import '../../../settings/domain/player_customization_settings.dart';
 import '../../../settings/presentation/controllers/player_customization_controller.dart';
 
+import '../../../../audio_engine/soloud_controller.dart';
+
 /// Widget visualizer spektrum FFT (RTA bars / Wave / Dots / Beam / Mirror Wave / VU Meter / Circular) real-time.
-class SpectrumVisualizer extends ConsumerWidget {
+class SpectrumVisualizer extends ConsumerStatefulWidget {
   final double height;
   final Color? barColor;
   final bool showPeakHold;
@@ -20,22 +22,42 @@ class SpectrumVisualizer extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SpectrumVisualizer> createState() => _SpectrumVisualizerState();
+}
+
+class _SpectrumVisualizerState extends ConsumerState<SpectrumVisualizer> {
+  late final String _demandKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _demandKey = 'SpectrumVisualizer_${identityHashCode(this)}';
+    SoLoudController.instance.acquireVisualizationDemand(_demandKey);
+  }
+
+  @override
+  void dispose() {
+    SoLoudController.instance.releaseVisualizationDemand(_demandKey);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final rtaAsync = ref.watch(rtaSpectrumProvider);
     final settings = ref.watch(playerCustomizationProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final activeColor = barColor ?? primary;
+    final activeColor = widget.barColor ?? primary;
 
     return RepaintBoundary(
       child: SizedBox(
-        height: height,
+        height: widget.height,
         width: double.infinity,
         child: rtaAsync.when(
           data: (magnitudes) => CustomPaint(
             painter: _RtaCustomPainter(
               magnitudes: magnitudes,
               barColor: activeColor,
-              showPeakHold: showPeakHold,
+              showPeakHold: widget.showPeakHold,
               style: settings.spectrumStyle,
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../audio_engine/fft_processor.dart';
+import '../../../../audio_engine/soloud_controller.dart';
 import '../../../settings/domain/player_customization_settings.dart';
 import '../../../settings/presentation/controllers/player_customization_controller.dart';
 import '../../domain/track.dart';
@@ -41,13 +42,21 @@ class _ParallaxArtworkCardState extends ConsumerState<ParallaxArtworkCard>
   Offset _targetOffset = Offset.zero;
   Offset _currentOffset = Offset.zero;
 
-  // Audio-reactive bass pulse smoothing
+  // Audio-reactive bass pulse smoothing via ValueNotifier (Zero widget rebuilds)
+  final ValueNotifier<double> _pulseScaleNotifier = ValueNotifier<double>(1.0);
   double _bassEnergy = 0.0;
   DateTime _lastDoubleTapCheck = DateTime.fromMillisecondsSinceEpoch(0);
+
+  late final String _demandKey;
 
   @override
   void initState() {
     super.initState();
+    _demandKey = 'ParallaxArtworkCard_${identityHashCode(this)}';
+    if (widget.isPlaying) {
+      SoLoudController.instance.acquireVisualizationDemand(_demandKey);
+    }
+
     _springController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 320),
@@ -59,7 +68,22 @@ class _ParallaxArtworkCardState extends ConsumerState<ParallaxArtworkCard>
   }
 
   @override
+  void didUpdateWidget(ParallaxArtworkCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPlaying != oldWidget.isPlaying) {
+      if (widget.isPlaying) {
+        SoLoudController.instance.acquireVisualizationDemand(_demandKey);
+      } else {
+        SoLoudController.instance.releaseVisualizationDemand(_demandKey);
+        _pulseScaleNotifier.value = 1.0;
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    SoLoudController.instance.releaseVisualizationDemand(_demandKey);
+    _pulseScaleNotifier.dispose();
     _springController.dispose();
     super.dispose();
   }
@@ -131,6 +155,36 @@ class _ParallaxArtworkCardState extends ConsumerState<ParallaxArtworkCard>
     final settings = ref.watch(playerCustomizationProvider);
     final size = widget.size;
 
+    // Listen to FFT spectrum data reactively without rebuilding the main tree
+    ref.listen<AsyncValue<List<double>>>(rtaSpectrumProvider, (prev, next) {
+      if (!settings.enableBreathingPulse ||
+          !widget.isPlaying ||
+          settings.performanceMode == PerformanceMode.batterySaver) {
+        if (_pulseScaleNotifier.value != 1.0) {
+          _pulseScaleNotifier.value = 1.0;
+        }
+        return;
+      }
+
+      final magnitudes = next.value ?? const [];
+      if (magnitudes.isEmpty) {
+        if (_pulseScaleNotifier.value != 1.0) {
+          _pulseScaleNotifier.value = 1.0;
+        }
+        return;
+      }
+
+      double lowSum = 0.0;
+      final count = math.min(6, magnitudes.length);
+      for (int i = 0; i < count; i++) {
+        lowSum += magnitudes[i];
+      }
+      final rawEnergy = count > 0 ? (lowSum / count) : 0.0;
+      _bassEnergy = _bassEnergy * 0.82 + rawEnergy * 0.18;
+      final newScale = 1.0 + (_bassEnergy.clamp(0.0, 1.0) * 0.032);
+      _pulseScaleNotifier.value = newScale;
+    });
+
     // 3D Rotation Matrix Calculation
     final enabled = settings.enableParallax && settings.performanceMode != PerformanceMode.batterySaver;
     final intensity = settings.parallaxIntensity;
@@ -143,41 +197,17 @@ class _ParallaxArtworkCardState extends ConsumerState<ParallaxArtworkCard>
       ..rotateX(rotX)
       ..rotateY(rotY);
 
-    // Base album art
-    Widget content = CustomAlbumArtView(
-      track: widget.track,
-      isPlaying: widget.isPlaying,
-      style: settings.albumArtStyle,
-      ambientGlow: settings.ambientGlow,
-      primaryColor: widget.primaryColor,
-      size: size,
+    // Base album art wrapped in RepaintBoundary to cache GPU rasterization
+    final Widget staticContent = RepaintBoundary(
+      child: CustomAlbumArtView(
+        track: widget.track,
+        isPlaying: widget.isPlaying,
+        style: settings.albumArtStyle,
+        ambientGlow: settings.ambientGlow,
+        primaryColor: widget.primaryColor,
+        size: size,
+      ),
     );
-
-    // Audio-reactive pulse from Riverpod rtaSpectrumProvider if enabled
-    if (settings.enableBreathingPulse &&
-        widget.isPlaying &&
-        settings.performanceMode != PerformanceMode.batterySaver) {
-      final rtaAsync = ref.watch(rtaSpectrumProvider);
-      final pulseScale = rtaAsync.maybeWhen(
-        data: (magnitudes) {
-          if (magnitudes.isEmpty) return 1.0;
-          double lowSum = 0.0;
-          final count = math.min(6, magnitudes.length);
-          for (int i = 0; i < count; i++) {
-            lowSum += magnitudes[i];
-          }
-          final rawEnergy = count > 0 ? (lowSum / count) : 0.0;
-          _bassEnergy = _bassEnergy * 0.82 + rawEnergy * 0.18;
-          return 1.0 + (_bassEnergy.clamp(0.0, 1.0) * 0.032);
-        },
-        orElse: () => 1.0,
-      );
-
-      content = Transform.scale(
-        scale: pulseScale,
-        child: content,
-      );
-    }
 
     return MouseRegion(
       onHover: (e) => _onPointerHover(e, Size(size, size)),
@@ -196,7 +226,18 @@ class _ParallaxArtworkCardState extends ConsumerState<ParallaxArtworkCard>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              content,
+              // GPU-Isolated Scale Transform (0 widget rebuilds on audio ticks)
+              ValueListenableBuilder<double>(
+                valueListenable: _pulseScaleNotifier,
+                builder: (context, scale, cachedChild) {
+                  return Transform.scale(
+                    scale: scale,
+                    child: cachedChild,
+                  );
+                },
+                child: staticContent,
+              ),
+
               // Dynamic sheen glare overlay when tilted
               if (enabled && (_currentOffset.dx.abs() > 0.05 || _currentOffset.dy.abs() > 0.05))
                 Positioned.fill(

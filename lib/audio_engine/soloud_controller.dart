@@ -58,17 +58,10 @@ class SoLoudController {
       // Pastikan master volume engine pada level 1.0 penuh
       SoLoud.instance.setGlobalVolume(1.0);
 
-      // Aktifkan stream FFT & Waveform secara default untuk RTA Visualizer
-      SoLoud.instance.setVisualizationEnabled(
-        true,
-        windowSize: 512,
-        kind: VisualizationKind.waveAndFft,
-        channel: VisualizationChannel.merged,
-      );
-      SoLoud.instance.setFftSmoothing(0.75);
-
+      // Inisialisasi status visualisasi (hanya diaktifkan jika ada consumer aktif)
       _isInitialized = true;
       _startPositionTracking();
+      _updateVisualizationState();
 
       // Inisialisasi rantai DSP tunggal
       VirtualDspService.instance.init();
@@ -437,6 +430,72 @@ class SoLoudController {
   Stream<AudioVisualizationData> get visualizationEvents =>
       SoLoud.instance.audioVisualizationEvents;
 
+  final Set<String> _visualizationDemands = <String>{};
+  bool _isVisualizationActive = false;
+  bool _isAppInForeground = true;
+
+  /// Status apakah kalkulasi FFT C++ sedang aktif
+  bool get isVisualizationActive => _isVisualizationActive;
+
+  /// Jumlah consumer/widget aktif yang membutuhkan visualisasi FFT
+  int get visualizationDemandCount => _visualizationDemands.length;
+
+  /// Memperbarui status foreground/background aplikasi
+  void setAppForegroundState(bool isForeground) {
+    if (_isAppInForeground == isForeground) return;
+    _isAppInForeground = isForeground;
+    _updateVisualizationState();
+  }
+
+  /// Mendaftarkan kebutuhan visualisasi FFT oleh suatu widget/layar
+  void acquireVisualizationDemand(String consumerId) {
+    _visualizationDemands.add(consumerId);
+    _updateVisualizationState();
+  }
+
+  /// Melepaskan kebutuhan visualisasi FFT saat widget didispose/tidak terlihat
+  void releaseVisualizationDemand(String consumerId) {
+    _visualizationDemands.remove(consumerId);
+    _updateVisualizationState();
+  }
+
+  /// Override manual untuk testing atau mode tertentu
+  void setVisualizationEnabledManually(bool enabled) {
+    if (enabled) {
+      _visualizationDemands.add('manual_override');
+    } else {
+      _visualizationDemands.remove('manual_override');
+    }
+    _updateVisualizationState();
+  }
+
+  /// Sinkronisasi status aktivasi C++ FFT dengan status demand dan foreground
+  void _updateVisualizationState() {
+    if (!_isInitialized) return;
+
+    final bool shouldBeActive = _isAppInForeground && _visualizationDemands.isNotEmpty;
+    if (shouldBeActive == _isVisualizationActive) return;
+
+    _isVisualizationActive = shouldBeActive;
+    try {
+      if (shouldBeActive) {
+        SoLoud.instance.setVisualizationEnabled(
+          true,
+          windowSize: 512,
+          kind: VisualizationKind.waveAndFft,
+          channel: VisualizationChannel.merged,
+        );
+        SoLoud.instance.setFftSmoothing(0.75);
+        debugPrint('[SoLoudController] FFT Visualization Engine ACTIVATED (Active Consumers: ${_visualizationDemands.length})');
+      } else {
+        SoLoud.instance.setVisualizationEnabled(false);
+        debugPrint('[SoLoudController] FFT Visualization Engine SUSPENDED (0 consumers or in background)');
+      }
+    } catch (e) {
+      debugPrint('[SoLoudController] Error updating visualization state: $e');
+    }
+  }
+
   void _startPositionTracking() {
     _positionTimer?.cancel();
     _positionTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
@@ -451,6 +510,8 @@ class SoLoudController {
     _positionTimer?.cancel();
     _sourceFinishedSub?.cancel();
     _sourceFinishedSub = null;
+    _visualizationDemands.clear();
+    _isVisualizationActive = false;
     await stop();
     if (_isInitialized) {
       SoLoud.instance.deinit();

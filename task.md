@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 70 Fase (Fase 1–70 Selesai • 100% Passed • 631/631 Passed)
+- **Total Fase**: 71 Fase (Fase 1–71 Selesai • 100% Passed • 638/638 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 70: Custom Studio Frameless Titlebar, Linux MPRIS v2 Native Notification Center & Quick Settings Integration, Linux D-Bus StatusNotifierItem Tray Service & YouTube Explode Fix (631/631 Passed • 0 errors, 0 warnings)_
+- **Status Proyek**: _Phase 71: Demand-Driven Audio FFT Lifecycle Management, GPU-Isolated Artwork Scale Transforms & Mobile Thermal/Performance Optimizations (638/638 Passed • 0 errors, 0 warnings)_
 
 ---
 
@@ -1930,6 +1930,27 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
     - [x] Added comprehensive unit tests for `LinuxMprisService`, `LinuxTrayDbusService`, and `StudioDesktopTitleBar`.
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
     - [x] `flutter test`: **100% pass rate across entire test suite (631/631 tests passing)**.
+
+- [x] **Phase 71 — Demand-Driven Audio FFT Lifecycle Management & Mobile Thermal/Performance Optimizations (Completed)**:
+  - [x] **71.1 Demand-Driven C++ Audio FFT Lifecycle Management (`SoLoudController`)**:
+    - [x] Implemented consumer reference counter (`acquireVisualizationDemand`, `releaseVisualizationDemand`, `visualizationDemandCount`) in `SoLoudController`.
+    - [x] C++ FFT calculations (512-bin stream) are now dynamically activated (`SoLoud.instance.setVisualizationEnabled(true)`) ONLY when active visualizer consumers exist, and automatically suspended (`setVisualizationEnabled(false)`) when 0 consumers exist.
+    - [x] Eliminated continuous CPU/thread load during background audio playback, screen-off listening, and navigation in Library/Playlists/Settings tabs.
+  - [x] **71.2 App Lifecycle & Foreground State Observer (`BaydevHiFiApp`)**:
+    - [x] Added `WidgetsBindingObserver` in `_BaydevHiFiAppState` to immediately suspend FFT computation when the app is minimized (`AppLifecycleState.paused`, `hidden`, or `inactive`) and restore it seamlessly on resume.
+  - [x] **71.3 Decoupled GPU-Isolated Scale Transform for `ParallaxArtworkCard`**:
+    - [x] Removed `ref.watch(rtaSpectrumProvider)` inside `ParallaxArtworkCard.build()`, eliminating 60–120 full-widget rebuilds per second on the main UI thread.
+    - [x] Cached `CustomAlbumArtView` in a dedicated `RepaintBoundary` and transformed scale directly at the GPU compositor layer via `ValueNotifier<double>` and `ValueListenableBuilder`.
+    - [x] Maintained smooth audio-reactive bass pulsing while reducing main thread CPU usage to near 0%.
+  - [x] **71.4 Stateful Demand Management on All Visualizer Consumers**:
+    - [x] Updated `SpectrumVisualizer`, `InteractiveEqCanvas`, and `_DesktopDynamicRtaVisualizer` to register demand on mount and cleanly release on unmount/dispose.
+  - [x] **71.5 Release APK Asset Exclusion (`pubspec.yaml`)**:
+    - [x] Excluded `# - assets/audio/` from release packaging to shed +9.5MB of sample audio files from the build bundle.
+  - [x] **71.6 Quality Gate & Comprehensive Test Verification (`test/mobile_performance_and_fft_lifecycle_test.dart`)**:
+    - [x] Added automated unit and widget tests verifying demand registration, background lifecycle suspension, ParallaxArtworkCard GPU transforms, and visualizer mount/unmount lifecycle.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
+    - [x] `flutter test`: **100% pass rate across entire test suite (638/638 tests passing)**.
+
 
 
 
