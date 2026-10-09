@@ -1951,6 +1951,19 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
     - [x] `flutter test`: **100% pass rate across entire test suite (638/638 tests passing)**.
 
+- [x] **Phase 72 — Full-Screen Lyric Studio Share Modal & Ergonomic Queue Hold-to-Drag Reordering (Completed)**:
+  - [x] **72.1 Full-Screen Lyric Studio Share Modal Architecture (`LyricShareSheet`)**:
+    - [x] Upgraded `LyricShareSheet.show` with `useRootNavigator: true`, `isScrollControlled: true`, `useSafeArea: false`, and `barrierColor: Colors.black87` to eliminate clipping and prevent underlying Now Playing workstation dock bleeding.
+    - [x] Switched `LyricShareSheet` to 100% full-viewport `Scaffold` with solid studio surface color (`theme.colorScheme.surface`), top header with `M3EIconButton` dismiss, and bottom `SafeArea` wrapping *Save* and *Share to Socials* action buttons.
+  - [x] **72.2 Queue Hold-to-Drag Reordering & Generous Drag Targets (`NowPlayingQueueSheet`, `DualPaneWorkstationPane`)**:
+    - [x] Wrapped all queue track tiles in `ReorderableDelayedDragStartListener` across mobile and dual-pane workstation views, allowing users to press and hold anywhere on a song title/card to effortlessly drag and reorder the queue with tactile haptics.
+    - [x] Enlarged dedicated trailing drag handle touch target to $\ge 44\times 44\text{ px}$ with `HugeIcons.strokeRoundedDragDropVertical` for effortless instant 1-tap dragging.
+  - [x] **72.3 Quality Gate & Test Verification (`test/lyric_share_fullscreen_and_queue_drag_test.dart`)**:
+    - [x] Created unit and widget tests verifying fullscreen modal rendering, solid surface backgrounds, `ReorderableDelayedDragStartListener`, and drag handle icons.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
+    - [x] `flutter test`: **100% pass rate across entire test suite (641/641 tests passing)**.
+
+
 
 
 

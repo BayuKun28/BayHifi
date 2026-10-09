@@ -309,127 +309,117 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
             final track = playback.queue[idx];
             final isCur = idx == playback.queueIndex || (playback.currentTrack != null && track.id == playback.currentTrack!.id);
 
-            return Dismissible(
-              key: ValueKey('${track.id}_$idx'),
-              direction: DismissDirection.endToStart,
-              onDismissed: (_) {
-                playerNotifier.removeFromQueue(idx);
-              },
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                color: theme.colorScheme.error.withValues(alpha: 0.2),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  size: 18,
-                  color: theme.colorScheme.error,
+            return ReorderableDelayedDragStartListener(
+              key: ValueKey('dual_pane_queue_${track.id}_$idx'),
+              index: idx,
+              child: Dismissible(
+                key: ValueKey('${track.id}_$idx'),
+                direction: DismissDirection.endToStart,
+                onDismissed: (_) {
+                  playerNotifier.removeFromQueue(idx);
+                },
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  color: theme.colorScheme.error.withValues(alpha: 0.2),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedDelete02,
+                    size: 18,
+                    color: theme.colorScheme.error,
+                  ),
                 ),
-              ),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 6),
-                child: InkWell(
-                  onTap: () {
-                    AppHaptics.selectionClick();
-                    playerNotifier.skipToQueueIndex(idx);
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isCur
-                          ? StudioSurfaceTheme.tintedContainer(
-                              context,
-                              primary,
-                              isSolid: isSolid,
-                              translucentAlpha: 0.12,
-                            )
-                          : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  child: InkWell(
+                    onTap: () {
+                      AppHaptics.selectionClick();
+                      playerNotifier.skipToQueueIndex(idx);
+                    },
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
                         color: isCur
-                            ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5))
-                            : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                        width: isCur ? 1.2 : 0.8,
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                primary,
+                                isSolid: isSolid,
+                                translucentAlpha: 0.12,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isCur
+                              ? (isSolid ? theme.colorScheme.outline : primary.withValues(alpha: 0.5))
+                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                          width: isCur ? 1.2 : 0.8,
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        // Play indicator or Index
-                        Container(
-                          width: 24,
-                          alignment: Alignment.center,
-                          child: isCur
-                              ? HugeIcon(icon: HugeIcons.strokeRoundedVolumeHigh, size: 14, color: primary)
-                              : Text(
-                                  '${idx + 1}',
+                      child: Row(
+                        children: [
+                          // Play indicator or Index
+                          Container(
+                            width: 24,
+                            alignment: Alignment.center,
+                            child: isCur
+                                ? HugeIcon(icon: HugeIcons.strokeRoundedVolumeHigh, size: 14, color: primary)
+                                : Text(
+                                    '${idx + 1}',
+                                    style: TextStyle(
+                                      fontFeatures: AppTypography.audioFigures,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  track.title,
                                   style: TextStyle(
-                                    fontFeatures: AppTypography.audioFigures,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.5,
+                                    fontWeight: isCur ? FontWeight.bold : FontWeight.w600,
+                                    color: isCur ? primary : theme.colorScheme.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${track.artist} • ${track.format.name.toUpperCase()}',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
-                                ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                track.title,
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: isCur ? FontWeight.bold : FontWeight.w600,
-                                  color: isCur ? primary : theme.colorScheme.onSurface,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${track.artist} • ${track.format.name.toUpperCase()}',
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Single, crisp 2-bar drag handle with ReorderableDragStartListener
-                        ReorderableDragStartListener(
-                          index: idx,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 15,
-                                  height: 2,
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                ),
-                                const SizedBox(height: 3.5),
-                                Container(
-                                  width: 15,
-                                  height: 2,
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          // Crisp drag handle with ReorderableDragStartListener and generous hit area
+                          ReorderableDragStartListener(
+                            index: idx,
+                            child: Container(
+                              color: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                              child: Center(
+                                child: HugeIcon(
+                                  icon: HugeIcons.strokeRoundedDragDropVertical,
+                                  size: 18,
+                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

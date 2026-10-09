@@ -371,191 +371,180 @@ class _QueueTrackTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 3.5),
-      decoration: BoxDecoration(
-        color: isCurrent
-            ? StudioSurfaceTheme.tintedContainer(
-                context,
-                primaryColor,
-                isSolid: isSolid,
-              )
-            : StudioSurfaceTheme.surfaceContainerLow(
-                context,
-                isSolid: isSolid,
-              ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
+    return ReorderableDelayedDragStartListener(
+      index: index,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 3.5),
+        decoration: BoxDecoration(
           color: isCurrent
-              ? primaryColor.withValues(alpha: isSolid ? 0.8 : 0.5)
-              : StudioSurfaceTheme.subtleOutline(
+              ? StudioSurfaceTheme.tintedContainer(
+                  context,
+                  primaryColor,
+                  isSolid: isSolid,
+                )
+              : StudioSurfaceTheme.surfaceContainerLow(
                   context,
                   isSolid: isSolid,
                 ),
-          width: isCurrent ? 1.2 : 0.8,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isCurrent
+                ? primaryColor.withValues(alpha: isSolid ? 0.8 : 0.5)
+                : StudioSurfaceTheme.subtleOutline(
+                    context,
+                    isSolid: isSolid,
+                  ),
+            width: isCurrent ? 1.2 : 0.8,
+          ),
         ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-          onTap: onTap,
-          leading: Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: isCurrent
-                  ? (isSolid
-                      ? primaryColor.withValues(alpha: 0.25)
-                      : primaryColor.withValues(alpha: 0.2))
-                  : StudioSurfaceTheme.surfaceContainer(
-                      context,
-                      isSolid: isSolid,
-                    ),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
+        child: Material(
+          color: Colors.transparent,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+            onTap: onTap,
+            leading: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
                 color: isCurrent
-                    ? primaryColor.withValues(alpha: isSolid ? 0.7 : 0.6)
-                    : StudioSurfaceTheme.outline(
+                    ? (isSolid
+                        ? primaryColor.withValues(alpha: 0.25)
+                        : primaryColor.withValues(alpha: 0.2))
+                    : StudioSurfaceTheme.surfaceContainer(
                         context,
                         isSolid: isSolid,
                       ),
-                width: 0.8,
-              ),
-            ),
-            child: Center(
-              child: isBuffering
-                  ? SizedBox(
-                      width: 15,
-                      height: 15,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 1.8,
-                        valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                      ),
-                    )
-                  : (isCurrent
-                      ? HugeIcon(
-                          icon: HugeIcons.strokeRoundedAudioWaveform,
-                          size: 16,
-                          color: primaryColor,
-                        )
-                      : Text(
-                          (index + 1).toString().padLeft(2, '0'),
-                          style: const TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF64748B),
-                            fontFeatures: [FontFeature.tabularFigures()],
-                          ),
-                        )),
-            ),
-          ),
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  track.title,
-                  style: TextStyle(
-                    color: isCurrent ? primaryColor : theme.colorScheme.onSurface,
-                    fontSize: 13,
-                    fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isCurrent
+                      ? primaryColor.withValues(alpha: isSolid ? 0.7 : 0.6)
+                      : StudioSurfaceTheme.outline(
+                          context,
+                          isSolid: isSolid,
+                        ),
+                  width: 0.8,
                 ),
               ),
-              if (track.isHiRes) ...[
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF9F0A).withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: const Color(0xFFFF9F0A).withValues(alpha: 0.6),
-                      width: 0.6,
+              child: Center(
+                child: isBuffering
+                    ? SizedBox(
+                        width: 15,
+                        height: 15,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.8,
+                          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                        ),
+                      )
+                    : (isCurrent
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedAudioWaveform,
+                            size: 16,
+                            color: primaryColor,
+                          )
+                        : Text(
+                            (index + 1).toString().padLeft(2, '0'),
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF64748B),
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          )),
+              ),
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    track.title,
+                    style: TextStyle(
+                      color: isCurrent ? primaryColor : theme.colorScheme.onSurface,
+                      fontSize: 13,
+                      fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (track.isHiRes) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF9F0A).withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: const Color(0xFFFF9F0A).withValues(alpha: 0.6),
+                        width: 0.6,
+                      ),
+                    ),
+                    child: const Text(
+                      'Hi-Res',
+                      style: TextStyle(
+                        color: Color(0xFFFF9F0A),
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'Hi-Res',
+                ],
+              ],
+            ),
+            subtitle: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${track.artist} • ${track.album}',
                     style: TextStyle(
-                      color: Color(0xFFFF9F0A),
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.w900,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (track.duration > Duration.zero)
+                  Text(
+                    _formatDuration(track.duration),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+              ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedCancel01,
+                    size: 20,
+                    color: Color(0xFFFF3B30),
+                  ),
+                  onPressed: onRemove,
+                  tooltip: 'Remove from Queue',
+                ),
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Container(
+                    color: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                    child: Center(
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedDragDropVertical,
+                        size: 20,
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      ),
                     ),
                   ),
                 ),
               ],
-            ],
-          ),
-          subtitle: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '${track.artist} • ${track.album}',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 11,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (track.duration > Duration.zero)
-                Text(
-                  _formatDuration(track.duration),
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-            ],
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedCancel01,
-                  size: 20,
-                  color: Color(0xFFFF3B30),
-                ),
-                onPressed: onRemove,
-                tooltip: 'Remove from Queue',
-              ),
-              ReorderableDragStartListener(
-                index: index,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 15,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(height: 3.5),
-                      Container(
-                        width: 15,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

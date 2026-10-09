@@ -13,6 +13,8 @@ import '../controllers/lyric_share_controller.dart';
 import 'lyric_card_fullscreen_lightbox.dart';
 import 'lyric_card_widget.dart';
 
+import 'package:material_3_expressive/material_3_expressive.dart';
+
 /// Studio Modal bottom sheet for customizing, previewing, and sharing lyric cards
 class LyricShareSheet extends ConsumerStatefulWidget {
   final Track track;
@@ -46,7 +48,7 @@ class LyricShareSheet extends ConsumerStatefulWidget {
     this.initialShowQrCode = false,
   });
 
-  /// Helper to display the sheet in modern Material 3 bottom modal
+  /// Helper to display the sheet in modern Material 3 full screen modal
   static Future<void> show(
     BuildContext context, {
     required Track track,
@@ -65,8 +67,12 @@ class LyricShareSheet extends ConsumerStatefulWidget {
   }) {
     return showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
+      useSafeArea: false,
+      enableDrag: false,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.85),
       builder: (ctx) => ScaffoldMessenger(
         child: Center(
           child: ConstrainedBox(
@@ -151,41 +157,35 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
     final state = ref.watch(_provider);
     final controller = ref.read(_provider.notifier);
 
-    final maxSheetHeight = MediaQuery.of(context).size.height * 0.92;
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: SafeArea(
+        top: true,
+        bottom: false,
+        child: Column(
+          children: [
+            // Top Drag Handle & Title Bar
+            _buildHeader(context, theme, state),
 
-    return ScaffoldMessenger(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Container(
-          height: maxSheetHeight,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              children: [
-                // Top Drag Handle & Title Bar
-                _buildHeader(context, theme, state),
+            // 4-Tab Studio Navigation Pill Bar
+            _buildTabSelector(theme, state),
 
-                // 4-Tab Studio Navigation Pill Bar
-                _buildTabSelector(theme, state),
+            const Divider(height: 1, thickness: 0.8),
 
-                const Divider(height: 1, thickness: 0.8),
-
-                // Tab Content
-                Expanded(
-                  child: _buildActiveTabContent(context, theme, state, controller),
-                ),
-
-                const Divider(height: 1, thickness: 0.8),
-
-                // Bottom Actions Bar (Save & Share)
-                _buildBottomActionBar(context, theme, state, controller),
-              ],
+            // Tab Content
+            Expanded(
+              child: _buildActiveTabContent(context, theme, state, controller),
             ),
-          ),
+
+            const Divider(height: 1, thickness: 0.8),
+
+            // Bottom Actions Bar (Save & Share)
+            SafeArea(
+              top: false,
+              bottom: true,
+              child: _buildBottomActionBar(context, theme, state, controller),
+            ),
+          ],
         ),
       ),
     );
@@ -193,68 +193,55 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
   Widget _buildHeader(BuildContext context, ThemeData theme, LyricShareState state) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 16, 8),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(20, 10, 16, 8),
+      child: Row(
         children: [
-          // Drag Handle
           Container(
-            width: 40,
-            height: 4,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
+              color: theme.colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedShare08,
+              size: 20,
+              color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Lyric Studio Share',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedShare08,
-                  size: 20,
-                  color: theme.colorScheme.primary,
+                Text(
+                  widget.track.title.isNotEmpty ? widget.track.title : 'Track',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Lyric Studio Share',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    Text(
-                      widget.track.title.isNotEmpty ? widget.track.title : 'Track',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedCancel01,
-                  size: 20,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                ),
-              ),
-            ],
+              ],
+            ),
+          ),
+          M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
+            onPressed: () {
+              AppHaptics.lightImpact();
+              Navigator.of(context).pop();
+            },
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedCancel01,
+              size: 20,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
