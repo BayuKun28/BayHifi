@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 71 Fase (Fase 1–71 Selesai • 100% Passed • 638/638 Passed)
+- **Total Fase**: 73 Fase (Fase 1–73 Selesai • 100% Passed • 646/646 Passed)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 71: Demand-Driven Audio FFT Lifecycle Management, GPU-Isolated Artwork Scale Transforms & Mobile Thermal/Performance Optimizations (638/638 Passed • 0 errors, 0 warnings)_
+- **Status Proyek**: _Phase 73: Audio Specs Inspector Quick Action Metadata Tag Editing & Background Wallpaper Toggle Lockout Fix (646/646 Passed • 0 errors, 0 warnings)_
 
 ---
 
@@ -1961,7 +1961,25 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
   - [x] **72.3 Quality Gate & Test Verification (`test/lyric_share_fullscreen_and_queue_drag_test.dart`)**:
     - [x] Created unit and widget tests verifying fullscreen modal rendering, solid surface backgrounds, `ReorderableDelayedDragStartListener`, and drag handle icons.
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
-    - [x] `flutter test`: **100% pass rate across entire test suite (641/641 tests passing)**.
+- [x] **Phase 73 — Audio Specs Inspector Quick Action Metadata Tag Editing & Background Wallpaper Toggle Lockout Fix (Completed)**:
+  - [x] **73.1 Dedicated Metadata Quick Action in Audio Specs Modal (`AudioFileInspectorSheet`)**:
+    - [x] Added `M3EIconButton` with `HugeIcons.strokeRoundedEdit02` and tooltip `'Edit Metadata Tags'` in the top-right of the header beside the Hi-Res badge.
+    - [x] Added `M3EButton.tonal` `'EDIT TAGS'` action button inside the Track Summary Card at the top of the body.
+    - [x] Tapping the button smoothly dismisses the specs sheet and opens `MetadataTagEditorSheet.show(context, track)`.
+    - [x] Maintained outer UI cleanliness: mobile Now Playing bottom action strip and Desktop Miniplayer transport deck remain 100% clean without extra clutter.
+  - [x] **73.2 Background Wallpaper Toggle Lockout Root Cause Fix (`ThemingSettingsScreen`)**:
+    - [x] Fixed `hasImage` evaluation to include `wallpaper.isAsset`: `(wallpaper.isAsset || File(wallpaper.imagePath!).existsSync())`.
+    - [x] Prevented switch lockout by ensuring `M3ESwitch.onChanged` is active whenever `(hasImage || wallpaper.enabled)`.
+    - [x] Restored visibility of all wallpaper controls (preset thumbnails, ACTIVE status tag, remove button, auto-sync switch, dim/blur sliders).
+    - [x] Added `key: const ValueKey('wallpaper_toggle_switch')` for reliable widget automation.
+  - [x] **73.3 Color Palette Manual Selection Decoupling (`ThemeController`)**:
+    - [x] Updated `setPalette` to set `syncPalette: false` when a user explicitly chooses a palette from the studio grid.
+  - [x] **73.4 Responsive Tag Editor Header Layout (`MetadataTagEditorSheet`)**:
+    - [x] Made header title row flexible to prevent horizontal overflow on narrow mobile viewports.
+  - [x] **73.5 Quality Gate & Automated Test Verification (`test/audio_specs_edit_and_wallpaper_toggle_test.dart`)**:
+    - [x] Created comprehensive unit and widget tests for specs modal edit buttons, preset wallpaper `hasImage` evaluation, toggle switch interactivity, and palette decoupling.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
+    - [x] `flutter test`: **100% pass rate across entire test suite (646/646 tests passing)**.
 
 
 

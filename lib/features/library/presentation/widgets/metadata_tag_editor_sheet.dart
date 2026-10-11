@@ -330,21 +330,29 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedEdit02,
-                          size: 20,
-                          color: primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'STUDIO TAG EDITOR',
-                          style: AppTypography.badge(color: primary),
-                        ),
-                      ],
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedEdit02,
+                            size: 20,
+                            color: primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'STUDIO TAG EDITOR',
+                              style: AppTypography.badge(color: primary),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // Auto-Fetch Header Action Button
                         InkWell(

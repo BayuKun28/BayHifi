@@ -967,7 +967,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
     final wallpaper = state.wallpaperSettings;
     final hasImage = wallpaper.imagePath != null &&
         wallpaper.imagePath!.isNotEmpty &&
-        File(wallpaper.imagePath!).existsSync();
+        (wallpaper.isAsset || File(wallpaper.imagePath!).existsSync());
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1050,8 +1050,9 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
               ),
               const SizedBox(width: 8),
               M3ESwitch(
+                key: const ValueKey('wallpaper_toggle_switch'),
                 value: wallpaper.enabled,
-                onChanged: hasImage
+                onChanged: (hasImage || wallpaper.enabled)
                     ? (val) {
                         AppHaptics.lightImpact();
                         notifier.toggleWallpaperEnabled(val);

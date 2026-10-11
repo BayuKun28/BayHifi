@@ -7,6 +7,7 @@ import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/utils/audio_file_inspector.dart';
+import '../../../library/presentation/widgets/metadata_tag_editor_sheet.dart';
 import '../../domain/track.dart';
 
 class AudioFileInspectorSheet extends ConsumerWidget {
@@ -82,36 +83,58 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: track.isHiRes
-                        ? StudioSurfaceTheme.tintedContainer(
-                            context,
-                            const Color(0xFFFF9F0A),
-                            isSolid: isSolid,
-                            translucentAlpha: 0.15,
-                            solidBlendAlpha: 0.18,
-                          )
-                        : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: track.isHiRes
-                          ? (isSolid ? theme.colorScheme.outline : const Color(0xFFFF9F0A).withValues(alpha: 0.6))
-                          : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                      width: 0.8,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: track.isHiRes
+                            ? StudioSurfaceTheme.tintedContainer(
+                                context,
+                                const Color(0xFFFF9F0A),
+                                isSolid: isSolid,
+                                translucentAlpha: 0.15,
+                                solidBlendAlpha: 0.18,
+                              )
+                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: track.isHiRes
+                              ? (isSolid ? theme.colorScheme.outline : const Color(0xFFFF9F0A).withValues(alpha: 0.6))
+                              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        track.hiResBadgeText,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                          color: track.isHiRes
+                              ? const Color(0xFFFF9F0A)
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    track.hiResBadgeText,
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w900,
-                      color: track.isHiRes
-                          ? const Color(0xFFFF9F0A)
-                          : theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(width: 6),
+                    Tooltip(
+                      message: 'Edit Metadata Tags',
+                      child: M3EIconButton(
+                        variant: M3EIconButtonVariant.tonal,
+                        icon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedEdit02,
+                          size: 16,
+                          color: primary,
+                        ),
+                        onPressed: () {
+                          AppHaptics.selectionClick();
+                          Navigator.of(context).pop();
+                          MetadataTagEditorSheet.show(context, track);
+                        },
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -127,28 +150,55 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid), width: 0.8),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    track.title,
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          track.title,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${track.artist} • ${track.album}',
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontSize: 11.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${track.artist} • ${track.album}',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 11.5,
+                  const SizedBox(width: 8),
+                  M3EButton.tonal(
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedEdit02,
+                      size: 14,
+                      color: primary,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    label: const Text(
+                      'EDIT TAGS',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                    onPressed: () {
+                      AppHaptics.selectionClick();
+                      Navigator.of(context).pop();
+                      MetadataTagEditorSheet.show(context, track);
+                    },
                   ),
                 ],
               ),

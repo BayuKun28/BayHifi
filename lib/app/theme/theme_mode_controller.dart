@@ -803,6 +803,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       currentPalette: palette,
       customAccentColor: palette.primary,
       dynamicAlbumArtEnabled: false,
+      wallpaperSettings: state.wallpaperSettings.copyWith(syncPalette: false),
     );
     _persist();
   }
