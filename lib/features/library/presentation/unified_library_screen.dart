@@ -313,7 +313,11 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     final mediaQuery = MediaQuery.of(context);
     final isExpandedLayout = mediaQuery.size.width >= 600 || mediaQuery.orientation == Orientation.landscape;
+    final isDesktopLayout = mediaQuery.size.width >= 960;
     final selectionState = ref.watch(librarySelectionProvider);
+    final showDesktopShuffleFab = isDesktopLayout &&
+        libraryState.currentTab == CollectionTab.tracks &&
+        !selectionState.isSelecting;
 
     return PopScope(
       canPop: !selectionState.isSelecting,
@@ -839,6 +843,66 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               ),
             )
           : null,
+      floatingActionButton: showDesktopShuffleFab
+          ? _buildDesktopShuffleFab(context, libraryState, theme)
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      ),
+    );
+  }
+
+  Widget _buildDesktopShuffleFab(
+    BuildContext context,
+    UnifiedLibraryState libraryState,
+    ThemeData theme,
+  ) {
+    return Tooltip(
+      message: 'Shuffle All Tracks',
+      child: M3EExtendedFab(
+        key: const ValueKey('desktop_shuffle_fab'),
+        icon: HugeIcon(
+          icon: HugeIcons.strokeRoundedShuffle,
+          size: 20,
+          color: theme.colorScheme.onPrimaryContainer,
+        ),
+        label: 'Shuffle All',
+        size: M3EExtendedFabSize.small,
+        color: M3EFabColor.primary,
+        onPressed: () => _handleShuffleAllTracks(context, libraryState),
+      ),
+    );
+  }
+
+  void _handleShuffleAllTracks(
+    BuildContext context,
+    UnifiedLibraryState libraryState,
+  ) {
+    final tracks = libraryState.filteredTracks.isNotEmpty
+        ? libraryState.filteredTracks
+        : libraryState.tracks;
+
+    if (tracks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No tracks to shuffle.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    AppHaptics.lightImpact();
+    final shuffled = List<Track>.from(tracks)..shuffle();
+    ref.read(playerControllerProvider.notifier).setQueue(
+          shuffled,
+          initialIndex: 0,
+        );
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Shuffled ${shuffled.length} tracks into queue'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
