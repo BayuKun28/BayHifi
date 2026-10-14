@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -501,34 +502,36 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 }
               },
               itemBuilder: (ctx) => [
-                PopupMenuItem(
-                  value: 'pick_folder',
-                  child: Row(
-                    children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedFolder01,
-                        size: 18,
-                        color: StudioCategoryColors.libraryScanner,
-                      ),
-                      const SizedBox(width: 10),
-                      const Text('Pick & Scan Music Folder', style: TextStyle(fontSize: 12.5)),
-                    ],
+                if (!kIsWeb) ...[
+                  PopupMenuItem(
+                    value: 'pick_folder',
+                    child: Row(
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedFolder01,
+                          size: 18,
+                          color: StudioCategoryColors.libraryScanner,
+                        ),
+                        const SizedBox(width: 10),
+                        const Text('Pick & Scan Music Folder', style: TextStyle(fontSize: 12.5)),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'pick_files',
-                  child: Row(
-                    children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedMusicNote01,
-                        size: 18,
-                        color: StudioCategoryColors.storageIndigo,
-                      ),
-                      const SizedBox(width: 10),
-                      const Text('Pick Audio Files', style: TextStyle(fontSize: 12.5)),
-                    ],
+                  PopupMenuItem(
+                    value: 'pick_files',
+                    child: Row(
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedMusicNote01,
+                          size: 18,
+                          color: StudioCategoryColors.storageIndigo,
+                        ),
+                        const SizedBox(width: 10),
+                        const Text('Pick Audio Files', style: TextStyle(fontSize: 12.5)),
+                      ],
+                    ),
                   ),
-                ),
+                ],
                 PopupMenuItem(
                   value: 'rescan',
                   child: Row(
@@ -539,7 +542,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                         color: StudioCategoryColors.bitPerfect,
                       ),
                       const SizedBox(width: 10),
-                      const Text('Rescan Music Folders', style: TextStyle(fontSize: 12.5)),
+                      Text(kIsWeb ? 'Sync Server Music' : 'Rescan Music Folders', style: const TextStyle(fontSize: 12.5)),
                     ],
                   ),
                 ),
@@ -2244,7 +2247,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Select your local music folder or pick audio files (FLAC, WAV, DSD, ALAC, MP3) to build your bit-perfect studio library.',
+                  kIsWeb
+                      ? 'Stream your lossless audio library (FLAC, WAV, DSD, ALAC, MP3) directly from the BayHifi home server.'
+                      : 'Select your local music folder or pick audio files (FLAC, WAV, DSD, ALAC, MP3) to build your bit-perfect studio library.',
                   style: TextStyle(
                     fontSize: 12,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -2253,30 +2258,45 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: M3EButton.filled(
-                    onPressed: () => controller.pickAndScanDirectory(),
-                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01, size: 18, color: Colors.black),
-                    label: const Text(
-                      'SELECT MUSIC FOLDER',
-                      style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                if (kIsWeb) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: M3EButton.filled(
+                      onPressed: () => controller.syncFromServer(),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, size: 18, color: Colors.black),
+                      label: const Text(
+                        'LOAD SERVER MUSIC LIBRARY',
+                        style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: M3EButton.tonal(
-                    onPressed: () => controller.pickAudioFiles(),
-                    icon: HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, size: 18, color: primary),
-                    label: const Text(
-                      'PICK AUDIO FILES',
-                      style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  const SizedBox(height: 10),
+                ] else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: M3EButton.filled(
+                      onPressed: () => controller.pickAndScanDirectory(),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01, size: 18, color: Colors.black),
+                      label: const Text(
+                        'SELECT MUSIC FOLDER',
+                        style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: M3EButton.tonal(
+                      onPressed: () => controller.pickAudioFiles(),
+                      icon: HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, size: 18, color: primary),
+                      label: const Text(
+                        'PICK AUDIO FILES',
+                        style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 SizedBox(
                   width: double.infinity,
                   child: M3EButton.outlined(

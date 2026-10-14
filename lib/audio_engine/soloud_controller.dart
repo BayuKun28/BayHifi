@@ -63,8 +63,10 @@ class SoLoudController {
       _startPositionTracking();
       _updateVisualizationState();
 
-      // Inisialisasi rantai DSP tunggal
-      VirtualDspService.instance.init();
+      // Inisialisasi rantai DSP tunggal (native only)
+      if (!kIsWeb) {
+        VirtualDspService.instance.init();
+      }
 
       debugPrint('[SoLoudController] Audio engine initialized @ $sampleRate Hz');
     } catch (e, stack) {

@@ -447,6 +447,7 @@ class VirtualDspService extends ChangeNotifier {
   // ─── LOW-LEVEL SOLOUD C++ FILTER SEQUENCING (RYNLABS_HIFI FLOW) ────────────
 
   void _deactivateAllFilters() {
+    if (kIsWeb) return;
     try {
       if (!SoLoud.instance.isInitialized) return;
       _deactivateEq();
@@ -466,6 +467,7 @@ class VirtualDspService extends ChangeNotifier {
   /// Rebuilds the C++ filter chain completely in strict mastering order:
   /// Max 8 concurrent active filters enforced by SoLoud C++ engine.
   void _rebuildChain(DspProfile profile) {
+    if (kIsWeb) return;
     if (!SoLoud.instance.isInitialized) return;
     _deactivateAllFilters();
 

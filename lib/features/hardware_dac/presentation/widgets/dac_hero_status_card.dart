@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -16,6 +17,7 @@ class DacHeroStatusCard extends StatelessWidget {
     required this.onToggleEq,
     required this.onRefresh,
     this.onDisconnect,
+    this.onConnectWebHid,
   });
 
   final DacDevice? device;
@@ -25,6 +27,7 @@ class DacHeroStatusCard extends StatelessWidget {
   final ValueChanged<bool> onToggleEq;
   final VoidCallback onRefresh;
   final VoidCallback? onDisconnect;
+  final VoidCallback? onConnectWebHid;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +121,18 @@ class DacHeroStatusCard extends StatelessWidget {
                 ),
               ],
             ),
+
+            if (kIsWeb && !isConnected) ...[
+              const SizedBox(height: 14),
+              M3EButton.filled(
+                icon: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedUsb,
+                  size: 18,
+                ),
+                label: const Text('PAIR PHYSICAL USB DAC (WEBHID)'),
+                onPressed: onConnectWebHid,
+              ),
+            ],
 
             const SizedBox(height: 16),
 

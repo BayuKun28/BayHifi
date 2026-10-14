@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
+import '../../cloud_sync/presentation/widgets/dashboard_profile_button.dart';
 import 'widgets/engine_telemetry_bento_card.dart';
 import 'widgets/listening_statistics_card.dart';
 import 'widgets/recent_sessions_bento_carousel.dart';
@@ -104,12 +105,14 @@ class DashboardScreen extends ConsumerWidget {
         Expanded(
           child: Row(
             children: [
+              const DashboardProfileButton(),
+              const SizedBox(width: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: Image.asset(
                   'assets/images/baydev_logo.png',
-                  width: 22,
-                  height: 22,
+                  width: 20,
+                  height: 20,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -118,7 +121,7 @@ class DashboardScreen extends ConsumerWidget {
                 child: Text(
                   'BAYDEV HIFI STUDIO',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.8,
                     color: theme.colorScheme.onSurface,

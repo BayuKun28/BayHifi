@@ -5,6 +5,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/database/local_persistence_service.dart';
+import '../../cloud_sync/presentation/widgets/settings_account_card.dart';
 import 'sub_screens/audio_hardware_settings_screen.dart';
 import 'sub_screens/backup_restore_settings_screen.dart';
 import 'sub_screens/docking_settings_screen.dart';
@@ -91,6 +92,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 120), // Extra bottom padding for floating dock & miniplayer
               children: [
+                // ─── 0. CLOUD ACCOUNT & PROFILE CARD ────────────────────────
+                if (_searchQuery.isEmpty)
+                  const SettingsAccountCard(),
+
                 // ─── 1. INTERACTIVE STUDIO COCKPIT TELEMETRY HERO ────────────
                 if (_searchQuery.isEmpty) ...[
                   _buildStudioOverviewHero(context, themeState, isSolid),

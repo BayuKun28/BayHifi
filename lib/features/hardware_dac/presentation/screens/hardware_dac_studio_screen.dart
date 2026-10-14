@@ -117,6 +117,7 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
                   onToggleEq: (enabled) => controller.toggleHardwareEq(enabled),
                   onRefresh: () => controller.refreshFromHardware(),
                   onDisconnect: () => controller.disconnect(),
+                  onConnectWebHid: () => controller.requestAndConnectWebHid(),
                 ),
 
                 const SizedBox(height: 16),

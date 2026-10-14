@@ -68,3 +68,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Docker Local Data & Host Secrets
+docker_data/
+.env
+

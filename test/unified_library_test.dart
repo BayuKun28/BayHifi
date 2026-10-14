@@ -322,5 +322,30 @@ void main() {
       expect(controller.state.navidromeConnectionStatus, NavidromeConnectionStatus.disconnected);
       expect(controller.state.navidromeTracksCount, 0);
     });
+
+    test('serializes and filters server streaming tracks correctly', () {
+      const serverTrack = Track(
+        id: 'track-uuid-999',
+        title: 'Server Masterpiece',
+        artist: 'Studio Artist',
+        album: 'Audiophile Vol 1',
+        duration: Duration(minutes: 5),
+        remoteUrl: '/api/library/stream/track-uuid-999',
+        albumArtUrl: '/api/library/cover/track-uuid-999',
+        format: AudioFormat.flac,
+        sampleRate: 96000,
+        bitDepth: 24,
+      );
+
+      final map = serverTrack.toMap();
+      expect(map['remoteUrl'], '/api/library/stream/track-uuid-999');
+      expect(map['albumArtUrl'], '/api/library/cover/track-uuid-999');
+
+      final fromMap = Track.fromMap(map);
+      expect(fromMap.remoteUrl, '/api/library/stream/track-uuid-999');
+      expect(fromMap.albumArtUrl, '/api/library/cover/track-uuid-999');
+      expect(fromMap.isHiRes, isTrue);
+    });
   });
 }
+

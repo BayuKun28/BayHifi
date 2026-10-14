@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:dbus/dbus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tray_manager/legacy.dart';
-import 'desktop_tray_service.dart';
+import 'desktop_tray_service_io.dart';
 
 /// Linux D-Bus StatusNotifierItem & DBusMenu Native Implementation.
 /// Mengimplementasikan spesifikasi FreeDesktop / KDE `org.kde.StatusNotifierItem`

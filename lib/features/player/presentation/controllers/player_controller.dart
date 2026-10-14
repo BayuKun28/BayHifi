@@ -594,7 +594,8 @@ class PlayerController extends StateNotifier<PlaybackState> {
       final enableFade = _playbackSettings.enableSmoothFade;
       final fadeDuration = Duration(milliseconds: _playbackSettings.fadeInDurationMs);
 
-      final localFileExists = targetTrack.filePath != null &&
+      final localFileExists = !kIsWeb &&
+          targetTrack.filePath != null &&
           targetTrack.filePath!.isNotEmpty &&
           File(targetTrack.filePath!).existsSync();
 
@@ -608,7 +609,8 @@ class PlayerController extends StateNotifier<PlaybackState> {
       } else {
         // Check if track was persisted or downloaded locally in persistence
         final persisted = LocalPersistenceService.instance.getTrack(targetTrack.id);
-        if (persisted?.filePath != null &&
+        if (!kIsWeb &&
+            persisted?.filePath != null &&
             persisted!.filePath!.isNotEmpty &&
             File(persisted.filePath!).existsSync()) {
           debugPrint('[PlayerController] Playing from downloaded local file: ${persisted.filePath}');
@@ -640,28 +642,53 @@ class PlayerController extends StateNotifier<PlaybackState> {
               debugPrint('[PlayerController] Matched Spotify track to $resolvedYtId ("${matched.videoTitle}") with score ${matched.matchScore}');
             }
 
-            // Fetch full unthrottled audio into disk cache for 100% complete playback and zero 403 halts
-            debugPrint('[PlayerController] Caching track for 100% full-duration playback: "${targetTrack.title}" ($resolvedYtId)...');
-            final downloadedPath = await AudioCacheService.instance
-                .cacheTrack(targetTrack)
-                .timeout(const Duration(seconds: 30), onTimeout: () => null);
-
-            if (downloadedPath != null) {
-              debugPrint('[PlayerController] Playback ready from disk cache: $downloadedPath');
-              await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+            if (kIsWeb) {
+              final videoId = resolvedYtId.replaceFirst('yt_', '');
+              debugPrint('[PlayerController] Resolving YouTube stream URL on web for $videoId...');
+              final streamUrl = await YouTubeMusicService.instance.getAudioStreamUrl(videoId);
+              if (streamUrl != null && streamUrl.isNotEmpty) {
+                final proxiedStream = Uri.base.resolve('/api/proxy?url=${Uri.encodeComponent(streamUrl)}').toString();
+                debugPrint('[PlayerController] Streaming YouTube audio on web via proxy: $proxiedStream');
+                await _audioEngine.playUrl(proxiedStream, fadeIn: enableFade, fadeDuration: fadeDuration);
+              } else {
+                throw ArgumentError('Unable to resolve YouTube audio stream on web: $resolvedYtId');
+              }
             } else {
-              throw ArgumentError('Unable to cache or play track: "${targetTrack.title}" (${targetTrack.id})');
+              // Fetch full unthrottled audio into disk cache for 100% complete playback and zero 403 halts
+              debugPrint('[PlayerController] Caching track for 100% full-duration playback: "${targetTrack.title}" ($resolvedYtId)...');
+              final downloadedPath = await AudioCacheService.instance
+                  .cacheTrack(targetTrack)
+                  .timeout(const Duration(seconds: 30), onTimeout: () => null);
+
+              if (downloadedPath != null) {
+                debugPrint('[PlayerController] Playback ready from disk cache: $downloadedPath');
+                await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+              } else {
+                throw ArgumentError('Unable to cache or play track: "${targetTrack.title}" (${targetTrack.id})');
+              }
             }
           } else {
-            // Subsonic / generic remote HTTP: download-to-cache then play
-            debugPrint('[PlayerController] Caching remote track: ${targetTrack.id}...');
-            final downloadedPath = await AudioCacheService.instance.cacheTrack(targetTrack);
-            if (downloadedPath != null) {
-              await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+            // Subsonic / generic remote HTTP / Docker Backend Streamer
+            String? effectiveUrl = targetTrack.streamUrl ?? targetTrack.remoteUrl;
+            if (effectiveUrl != null && effectiveUrl.isNotEmpty && !effectiveUrl.startsWith('http')) {
+              effectiveUrl = kIsWeb
+                  ? Uri.base.resolve(effectiveUrl).toString()
+                  : 'http://localhost:8111$effectiveUrl';
+            }
+
+            if (kIsWeb) {
+              if (effectiveUrl != null && effectiveUrl.isNotEmpty) {
+                await _audioEngine.playUrl(effectiveUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
+              } else {
+                throw ArgumentError('Unable to stream track on web: ${targetTrack.id}');
+              }
             } else {
-              final streamUrl = targetTrack.streamUrl ?? targetTrack.remoteUrl;
-              if (streamUrl != null && streamUrl.isNotEmpty && streamUrl.startsWith('http')) {
-                await _audioEngine.playUrl(streamUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
+              debugPrint('[PlayerController] Caching remote track: ${targetTrack.id}...');
+              final downloadedPath = await AudioCacheService.instance.cacheTrack(targetTrack);
+              if (downloadedPath != null) {
+                await _audioEngine.playFile(downloadedPath, fadeIn: enableFade, fadeDuration: fadeDuration);
+              } else if (effectiveUrl != null && effectiveUrl.isNotEmpty && effectiveUrl.startsWith('http')) {
+                await _audioEngine.playUrl(effectiveUrl, fadeIn: enableFade, fadeDuration: fadeDuration);
               } else {
                 throw ArgumentError('Unable to stream or cache track: ${targetTrack.id}');
               }

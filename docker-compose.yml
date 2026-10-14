@@ -1,0 +1,38 @@
+services:
+  # 1. Backend Web Service (Go + Embedded SQLite WAL)
+  bayhifi-service:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: bayhifi-service
+    restart: unless-stopped
+    volumes:
+      # Host music folder mounted read-only
+      - ${MUSIC_HOST_DIR}:/music:ro
+      # Host data directory for persistent SQLite database
+      - ${DATA_HOST_DIR}:/data
+    environment:
+      - PORT=8081
+      - MUSIC_DIR=/music
+      - DB_PATH=/data/bayhifi.db
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - hifi-internal
+
+  # 2. Frontend Web App & Reverse Proxy (Nginx Alpine)
+  bayhifi-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: bayhifi-web
+    restart: unless-stopped
+    ports:
+      - "${PORT_WEB}:80"
+    depends_on:
+      - bayhifi-service
+    networks:
+      - hifi-internal
+
+networks:
+  hifi-internal:
+    driver: bridge

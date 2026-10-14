@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 73 Fase (Fase 1–73 Selesai • 100% Passed • 646/646 Passed)
+- **Total Fase**: 74 Fase (Fase 1–73 Selesai • Fase 74 In Progress)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 73: Audio Specs Inspector Quick Action Metadata Tag Editing & Background Wallpaper Toggle Lockout Fix (646/646 Passed • 0 errors, 0 warnings)_
+- **Status Proyek**: _Phase 74: BayHifi Web & Docker Backend Service (User Auth, Offline-First Studio Wrapped Sync, AutoEQ Cloud & Directory Audio Streamer)_
 
 ---
 
@@ -1980,6 +1980,39 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
     - [x] Created comprehensive unit and widget tests for specs modal edit buttons, preset wallpaper `hasImage` evaluation, toggle switch interactivity, and palette decoupling.
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints** (100% Clean!).
     - [x] `flutter test`: **100% pass rate across entire test suite (646/646 tests passing)**.
+
+- [x] **Phase 74 — BayHifi Web & Docker Backend Service (User Auth, Offline-First Studio Wrapped Sync, AutoEQ Cloud & Directory Audio Streamer) (Completed)**:
+  - [x] **74.1 Backend Service Implementation (`server/`)**:
+    - [x] Setup Go project (`server/go.mod`, `server/main.go`, `server/Dockerfile` with multi-stage build, final image ~18.9MB).
+    - [x] Implement SQLite schema with WAL mode (`server/database/db.go`).
+    - [x] Implement User Auth & JWT (`server/auth/auth.go`).
+    - [x] Implement Sync APIs for Studio Wrapped logs & AutoEQ presets (`server/sync/sync.go`).
+    - [x] Implement Directory Audio Scanner & HTTP 206 Range Streamer (`server/scanner/scanner.go` indexing 684 local songs in 2.5s).
+  - [x] **74.2 Docker Compose & Web Server Configuration**:
+    - [x] Create `.env` with `MUSIC_HOST_DIR=/mnt/01DC9A2666E1A190/Other/Music` and `PORT_WEB=8111`.
+    - [x] Create `nginx.conf` with WASM COOP/COEP isolation headers and reverse proxy `/api/` -> `bayhifi-service:8081`.
+    - [x] Create `Dockerfile.web` and `docker-compose.yml`.
+  - [x] **74.3 Flutter Web Platforming & Platform Guards**:
+    - [x] Configure `web/index.html` with `assets/packages/flutter_soloud/web/init_soloud.js`.
+    - [x] Protect `dart:io` and desktop plugins across the app with `kIsWeb` guards and conditional exports (`_stub.dart` on Web vs `_io.dart` on Native).
+    - [x] Adapt `LocalPersistenceService` for Web platform compatibility via `SharedPreferences`.
+  - [x] **74.4 Flutter Cloud Sync & User Profile UI**:
+    - [x] Implement `CloudAuthService` & `CloudSyncService` (login, register, JWT storage, offline buffer, auto-sync when online).
+    - [x] Add User Profile Shortcut to top-left of `DashboardScreen` (avatar / offline status, tap to open modal).
+    - [x] Add User Account Card to top of `SettingsScreen`.
+    - [x] Build `CloudAuthDialog` (Login/Register, server URL configuration) and `UserProfileSheet` using 100% `material_3_expressive` widgets and `hugeicons`.
+  - [x] **74.5 Automated Testing & Verification**:
+    - [x] Create unit & widget tests (`test/cloud_sync_and_profile_ui_test.dart` - 8/8 tests passed).
+    - [x] Run `flutter analyze` (0 errors, 0 warnings across entire repo).
+    - [x] Run `flutter test` (100% pass rate: 659/659 tests passing).
+    - [x] Live Docker verification at `http://localhost:8111` with browser subagent screenshot verification.
+  - [x] **74.6 Docker Compose Warning & Web Server Music Library Indexing Resolution**:
+    - [x] **Compose Warning Removal**: Removed deprecated top-level `version: '3.8'` in `docker-compose.yml`, eliminating compose CLI warnings.
+    - [x] **Web Library Auto-Sync**: Enhanced `library_controller.dart` to automatically call `syncFromServer()` on Web startup, loading all 684 scanned host tracks directly from the `/api/library/tracks` endpoint.
+    - [x] **Empty State & Menu Actions**: Added responsive `LOAD SERVER MUSIC LIBRARY` button in `unified_library_screen.dart` when running on Web (`kIsWeb`), and added `Sync Server Music` in the options menu.
+    - [x] **Stream & Cover Resolution**: Updated `StudioArtworkWidget` and `PlayerController` with safe `Uri.base` and relative `/api/library/stream/{id}` / `/api/library/cover/{id}` streaming with `!kIsWeb` guards protecting against Web runtime file crashes.
+    - [x] **Verified via Live Browser**: Verified 684 songs rendered with cover art and successful audio streaming/playback at `http://localhost:8111/`.
+
 
 
 

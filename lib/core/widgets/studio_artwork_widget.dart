@@ -61,7 +61,10 @@ class StudioArtworkWidget extends StatelessWidget {
       final cleanUrl = normalizeArtworkUrl(rawUrl);
       if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
         return NetworkImage(cleanUrl);
-      } else {
+      } else if (cleanUrl.startsWith('/')) {
+        final resolved = kIsWeb ? Uri.base.resolve(cleanUrl).toString() : 'http://localhost:8111$cleanUrl';
+        return NetworkImage(resolved);
+      } else if (!kIsWeb) {
         final filePath = cleanUrl.startsWith('file://')
             ? Uri.parse(cleanUrl).toFilePath()
             : cleanUrl;
@@ -103,7 +106,16 @@ class StudioArtworkWidget extends StatelessWidget {
           height: height ?? double.infinity,
           errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
         );
-      } else {
+      } else if (cleanUrl.startsWith('/')) {
+        final resolved = kIsWeb ? Uri.base.resolve(cleanUrl).toString() : 'http://localhost:8111$cleanUrl';
+        imageContent = Image.network(
+          resolved,
+          fit: fit,
+          width: width ?? double.infinity,
+          height: height ?? double.infinity,
+          errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
+        );
+      } else if (!kIsWeb) {
         final filePath = cleanUrl.startsWith('file://')
             ? Uri.parse(cleanUrl).toFilePath()
             : cleanUrl;
@@ -119,6 +131,8 @@ class StudioArtworkWidget extends StatelessWidget {
         } else {
           imageContent = _buildFallback(theme, primary);
         }
+      } else {
+        imageContent = _buildFallback(theme, primary);
       }
     } else {
       imageContent = _buildFallback(theme, primary);

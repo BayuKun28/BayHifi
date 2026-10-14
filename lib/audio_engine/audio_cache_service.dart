@@ -40,6 +40,7 @@ class AudioCacheService extends ChangeNotifier {
 
   /// Inisialisasi direktori cache audio dan indeksasi file
   Future<void> init() async {
+    if (kIsWeb) return;
     if (_isInitialized && _cacheDir != null) return;
 
     try {

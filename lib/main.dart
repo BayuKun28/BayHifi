@@ -54,20 +54,22 @@ void main() async {
   }
 
   // Inisialisasi background AudioService untuk status bar notification
-  try {
-    await AudioService.init(
-      builder: () => BaydevAudioHandler.instance,
-      config: const AudioServiceConfig(
-        androidNotificationChannelId: 'com.baydev.baydev_hifi.channel.audio',
-        androidNotificationChannelName: 'Baydev HiFi Playback',
-        androidNotificationChannelDescription: 'Audiophile Lossless Music Playback Controls',
-        androidNotificationOngoing: true,
-        androidStopForegroundOnPause: true,
-        androidNotificationIcon: 'mipmap/ic_launcher',
-      ),
-    );
-  } catch (e) {
-    debugPrint('Peringatan: Inisialisasi background AudioService ditunda/mock: $e');
+  if (!kIsWeb) {
+    try {
+      await AudioService.init(
+        builder: () => BaydevAudioHandler.instance,
+        config: const AudioServiceConfig(
+          androidNotificationChannelId: 'com.baydev.baydev_hifi.channel.audio',
+          androidNotificationChannelName: 'Baydev HiFi Playback',
+          androidNotificationChannelDescription: 'Audiophile Lossless Music Playback Controls',
+          androidNotificationOngoing: true,
+          androidStopForegroundOnPause: true,
+          androidNotificationIcon: 'mipmap/ic_launcher',
+        ),
+      );
+    } catch (e) {
+      debugPrint('Peringatan: Inisialisasi background AudioService ditunda/mock: $e');
+    }
   }
 
   // Inisialisasi engine audio SoLoud native dengan sample rate 44100 Hz

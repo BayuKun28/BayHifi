@@ -9,6 +9,48 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../player/domain/track.dart';
 import 'webm_to_ogg_remuxer.dart';
 
+/// Forward proxy HTTP client for Flutter Web to route YouTube requests through Go backend
+class WebProxyHttpClient extends http.BaseClient {
+  final http.Client _inner;
+  WebProxyHttpClient([http.Client? inner]) : _inner = inner ?? http.Client();
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    if (kIsWeb) {
+      final originalUrl = request.url.toString();
+      final proxyUrl = Uri.base.resolve('/api/proxy?url=${Uri.encodeComponent(originalUrl)}');
+      if (request is http.Request) {
+        final newReq = http.Request(request.method, proxyUrl);
+        request.headers.forEach((k, v) {
+          final lk = k.toLowerCase();
+          if (lk != 'host' && lk != 'cookie' && lk != 'user-agent' && lk != 'referer') {
+            newReq.headers[k] = v;
+          }
+        });
+        newReq.bodyBytes = request.bodyBytes;
+        newReq.encoding = request.encoding;
+        newReq.followRedirects = request.followRedirects;
+        newReq.maxRedirects = request.maxRedirects;
+        return _inner.send(newReq);
+      } else {
+        final streamed = http.StreamedRequest(request.method, proxyUrl);
+        request.headers.forEach((k, v) {
+          final lk = k.toLowerCase();
+          if (lk != 'host' && lk != 'cookie' && lk != 'user-agent' && lk != 'referer') {
+            streamed.headers[k] = v;
+          }
+        });
+        streamed.followRedirects = request.followRedirects;
+        streamed.maxRedirects = request.maxRedirects;
+        // ignore: unawaited_futures
+        request.finalize().pipe(streamed.sink);
+        return _inner.send(streamed);
+      }
+    }
+    return _inner.send(request);
+  }
+}
+
 /// Service for YouTube & YouTube Music audio streaming, search, and metadata extraction.
 /// Integrates with Baydev HiFi's C++ SoLoud DSP mastering engine and AudioCacheService.
 class YouTubeMusicService {
@@ -16,10 +58,20 @@ class YouTubeMusicService {
   static final YouTubeMusicService instance = YouTubeMusicService._();
 
   YoutubeExplode? _yt;
-  YoutubeExplode get _client => _yt ??= YoutubeExplode();
+  YoutubeExplode get _client {
+    if (_yt == null) {
+      if (kIsWeb) {
+        _yt = YoutubeExplode(httpClient: YoutubeHttpClient(WebProxyHttpClient()));
+      } else {
+        _yt = YoutubeExplode();
+      }
+    }
+    return _yt!;
+  }
 
   static bool? _hasFfmpeg;
   static Future<bool> _checkFfmpeg() async {
+    if (kIsWeb) return false;
     if (_hasFfmpeg != null) return _hasFfmpeg!;
     try {
       final res = await Process.run('ffmpeg', ['-version']);
@@ -120,7 +172,11 @@ class YouTubeMusicService {
       try {
         _yt?.close();
       } catch (_) {}
-      _yt = YoutubeExplode();
+      if (kIsWeb) {
+        _yt = YoutubeExplode(httpClient: YoutubeHttpClient(WebProxyHttpClient()));
+      } else {
+        _yt = YoutubeExplode();
+      }
       try {
         final manifest = await _client.videos.streamsClient.getManifest(
           videoId,
@@ -162,19 +218,18 @@ class YouTubeMusicService {
 
   /// List of verified high-availability streaming instances for resilient full-duration audio playback
   static const List<String> _streamingInstances = [
-    'https://invidious.f5.si',
-    'https://inv.nadeko.net',
-    'https://invidious.nerdvpn.de',
     'https://yt.chocolatemoo53.com',
     'https://invidious.tiekoetter.com',
+    'https://inv.nadeko.net',
   ];
 
   /// Resolves direct audio stream format using fast verified streaming endpoints
   Future<({String url, int totalBytes, bool isOpusOrWebm})?> _resolveFullAudioStream(String videoId) async {
+    final client = kIsWeb ? WebProxyHttpClient() : http.Client();
     for (final host in _streamingInstances) {
       try {
         final uri = Uri.parse('$host/api/v1/videos/$videoId');
-        final res = await http.get(uri).timeout(const Duration(milliseconds: 2800));
+        final res = await client.get(uri).timeout(const Duration(milliseconds: 2800));
         if (res.statusCode == 200) {
           final data = json.decode(res.body) as Map<String, dynamic>;
           final adaptive = (data['adaptiveFormats'] as List<dynamic>?) ?? [];
@@ -217,7 +272,7 @@ class YouTubeMusicService {
     const chunkSize = 512 * 1024; // 512 KB chunks for max CDN throughput
     int start = 0;
     int retries = 0;
-    final client = http.Client();
+    final client = kIsWeb ? WebProxyHttpClient() : http.Client();
 
     while (totalBytes <= 0 || start < totalBytes) {
       final end = (totalBytes > 0) ? (start + chunkSize - 1).clamp(0, totalBytes - 1) : start + chunkSize - 1;

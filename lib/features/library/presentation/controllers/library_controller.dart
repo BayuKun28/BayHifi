@@ -12,6 +12,7 @@ import '../../../settings/data/backup_restore_service.dart';
 import '../../data/local_audio_scanner.dart';
 import '../../data/metadata_tagger_service.dart';
 import '../../data/online_metadata_service.dart';
+import '../../../cloud_sync/data/cloud_sync_service.dart';
 import '../../domain/library_collection_models.dart';
 import '../../domain/smart_playlist_models.dart';
 import '../../domain/smart_playlist_evaluator.dart';
@@ -84,7 +85,12 @@ class UnifiedLibraryState {
       !_hasLocalFile(t) &&
       (t.id.startsWith('yt_') || (t.remoteUrl?.contains('youtube') ?? false) || (t.remoteUrl?.contains('googlevideo') ?? false));
 
-  static bool _hasLocalFile(Track t) => t.filePath != null && t.filePath!.isNotEmpty;
+  static bool _hasLocalFile(Track t) {
+    if (kIsWeb) {
+      return !(t.id.startsWith('spotify_')) && !(t.id.startsWith('yt_'));
+    }
+    return t.filePath != null && t.filePath!.isNotEmpty;
+  }
 
   /// Daftar lagu yang telah difilter dan diurutkan
   List<Track> get filteredTracks {
@@ -449,9 +455,13 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
           favoriteTrackIds: LocalPersistenceService.instance.getFavoriteTrackIds().toSet(),
         );
       }
-      await syncNewTracksOnStartup();
-      await recoverMissingArtwork();
-      await restoreNavidromeSession();
+      if (kIsWeb) {
+        await syncFromServer();
+      } else {
+        await syncNewTracksOnStartup();
+        await recoverMissingArtwork();
+        await restoreNavidromeSession();
+      }
     });
   }
 
@@ -890,8 +900,102 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     }
   }
 
+  /// Sinkronisasi daftar lagu dari server (Docker Backend / Navidrome / Cloud)
+  Future<void> syncFromServer({String? serverUrl}) async {
+    state = state.copyWith(isScanning: true, statusMessage: 'Syncing music from server...');
+    try {
+      final syncService = CloudSyncService();
+      final url = serverUrl ?? (kIsWeb ? Uri.base.origin : 'http://localhost:8111');
+      final rawTracks = await syncService.fetchLibraryTracks(
+        serverUrl: url,
+        limit: 10000,
+      );
+
+      if (rawTracks.isNotEmpty) {
+        final serverTracks = rawTracks.map((m) {
+          final id = m['id']?.toString() ?? '';
+          final title = m['title']?.toString() ?? 'Unknown Title';
+          final artist = m['artist']?.toString() ?? 'Unknown Artist';
+          final album = m['album']?.toString() ?? 'Unknown Album';
+          final durationMs = (m['duration'] as num?)?.toInt() ??
+              (((m['duration_ms'] as num?)?.toInt() ?? 180000));
+          final formatStr = m['format']?.toString().toLowerCase() ?? 'mp3';
+          final streamUrl = kIsWeb ? '/api/library/stream/$id' : '$url/api/library/stream/$id';
+          final coverUrl = (m['hasEmbeddedArtwork'] == true || m['has_embedded_artwork'] == true)
+              ? (kIsWeb ? '/api/library/cover/$id' : '$url/api/library/cover/$id')
+              : null;
+
+          return Track(
+            id: id,
+            title: title,
+            artist: artist,
+            album: album,
+            duration: Duration(milliseconds: durationMs),
+            filePath: null,
+            remoteUrl: streamUrl,
+            albumArtUrl: coverUrl,
+            format: _resolveFormatFromStr(formatStr),
+            bitrate: (m['bitrate'] as num?)?.toInt(),
+            sampleRate: (m['sampleRate'] as num?)?.toInt() ?? (m['sample_rate'] as num?)?.toInt(),
+            bitDepth: (m['bitDepth'] as num?)?.toInt() ?? (m['bit_depth'] as num?)?.toInt(),
+            genre: m['genre']?.toString(),
+            year: (m['year'] as num?)?.toInt(),
+            trackNumber: (m['trackNumber'] as num?)?.toInt() ?? (m['track_number'] as num?)?.toInt(),
+            fileSize: (m['fileSize'] as num?)?.toInt() ?? (m['file_size_bytes'] as num?)?.toInt(),
+          );
+        }).toList();
+
+        // Merge with existing cloud tracks (Spotify / YouTube)
+        final existingCloud = state.tracks.where((t) => t.id.startsWith('spotify_') || t.id.startsWith('yt_')).toList();
+        final combined = [...serverTracks, ...existingCloud];
+        await _persistTracks(combined);
+        state = state.copyWith(
+          tracks: combined,
+          isScanning: false,
+          statusMessage: 'Discovered ${serverTracks.length} tracks from server.',
+        );
+        return;
+      }
+    } catch (e) {
+      debugPrint('[UnifiedLibraryController] Error syncing from server: $e');
+    } finally {
+      if (mounted) {
+        state = state.copyWith(isScanning: false);
+      }
+    }
+  }
+
+  static AudioFormat _resolveFormatFromStr(String ext) {
+    switch (ext) {
+      case 'flac':
+        return AudioFormat.flac;
+      case 'wav':
+        return AudioFormat.wav;
+      case 'mp3':
+        return AudioFormat.mp3;
+      case 'opus':
+        return AudioFormat.opus;
+      case 'ogg':
+        return AudioFormat.ogg;
+      case 'alac':
+      case 'm4a':
+      case 'aac':
+        return AudioFormat.alac;
+      case 'dsd':
+      case 'dsf':
+      case 'dff':
+        return AudioFormat.dsd;
+      default:
+        return AudioFormat.unknown;
+    }
+  }
+
   /// Rescan all previously configured music folders
   Future<void> rescanSavedFolders() async {
+    if (kIsWeb) {
+      await syncFromServer();
+      return;
+    }
     final savedFolders = LocalPersistenceService.instance.getMusicFolders();
     if (savedFolders.isEmpty) {
       await pickAndScanDirectory();

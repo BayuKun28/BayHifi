@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../pro_q_studio/domain/eq_band.dart';
 import '../../data/drivers/dac_driver.dart';
@@ -8,6 +9,7 @@ import '../../data/transports/android_usb_hid_transport.dart';
 import '../../data/transports/dac_transport.dart';
 import '../../data/transports/linux_hidraw_transport.dart';
 import '../../data/transports/mock_dac_transport.dart';
+import '../../data/transports/web_hid_transport.dart';
 import '../../domain/models/dac_band_config.dart';
 import '../../domain/models/dac_device.dart';
 import '../../domain/models/dac_peq_profile.dart';
@@ -16,6 +18,9 @@ import 'dac_bridge_state.dart';
 
 /// Riverpod provider for the hardware DAC transport layer.
 final dacTransportProvider = Provider<DacTransport>((ref) {
+  if (kIsWeb) {
+    return WebHidTransport();
+  }
   final isTest = Platform.environment.containsKey('FLUTTER_TEST');
   if (isTest) {
     return MockDacTransport(autoConnect: false);
@@ -48,6 +53,11 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
     required this.fitter,
     bool enableHotplugWatcher = true,
   }) : super(DacBridgeState(availablePresets: DacPeqProfile.builtInPresets)) {
+    if (kIsWeb) {
+      driver.transport.setOnDisconnectListener(_handleTransportDisconnect);
+      _initAutoConnectWeb();
+      return;
+    }
     driver.transport.setOnDisconnectListener(_handleTransportDisconnect);
     if (driver.transport is AndroidUsbHidTransport) {
       (driver.transport as AndroidUsbHidTransport).setOnDeviceAttachedListener(() {
@@ -89,6 +99,7 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
   }
 
   Future<void> _checkHotplugStatus() async {
+    if (kIsWeb) return;
     if (_activeConnectFuture != null) return;
 
     if (state.isConnected) {
@@ -146,6 +157,38 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
     await scanAndConnect();
   }
 
+  Future<void> _initAutoConnectWeb() async {
+    try {
+      final devices = await WebHidTransport.enumerateDevices();
+      if (devices.isNotEmpty) {
+        await scanAndConnect(targetDevice: devices.first);
+      }
+    } catch (_) {}
+  }
+
+  /// Prompts browser WebHID dialog to pair and connect a physical USB DAC
+  Future<void> requestAndConnectWebHid() async {
+    if (!kIsWeb) return;
+    state = state.copyWith(status: DacBridgeStatus.connecting);
+    try {
+      final device = await WebHidTransport.requestDevice();
+      if (device != null) {
+        await scanAndConnect(targetDevice: device, isManual: true);
+      } else {
+        state = state.copyWith(
+          status: DacBridgeStatus.disconnected,
+          device: () => null,
+          statusBannerMessage: () => 'No physical USB DAC was selected.',
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        status: DacBridgeStatus.error,
+        errorMessage: () => 'WebHID pairing error: $e',
+      );
+    }
+  }
+
   /// Scans for connected USB DACs and establishes HID connection.
   Future<void> scanAndConnect({DacDevice? targetDevice, bool isManual = false}) async {
     if (_activeConnectFuture != null) {
@@ -171,6 +214,19 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
   Future<void> _performScanAndConnect({DacDevice? targetDevice, bool isManual = false}) async {
     if (isManual) {
       _lastAttemptedDeviceId = null;
+    }
+    if (kIsWeb && isManual && targetDevice == null) {
+      try {
+        final paired = await WebHidTransport.enumerateDevices();
+        if (paired.isNotEmpty) {
+          targetDevice = paired.first;
+        } else {
+          final requested = await WebHidTransport.requestDevice();
+          if (requested != null) {
+            targetDevice = requested;
+          }
+        }
+      } catch (_) {}
     }
     state = state.copyWith(status: DacBridgeStatus.connecting);
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/player/domain/track.dart';
 
 /// Layanan Penyimpanan Lokal Persisten Cepat (JSON File-based DB Engine)
@@ -47,6 +48,25 @@ class LocalPersistenceService {
   Future<void> init({String? customPath}) async {
     if (_isInitialized && customPath == null) return;
 
+    if (kIsWeb) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final raw = prefs.getString('baydev_hifi_web_storage');
+        if (raw != null && raw.trim().isNotEmpty) {
+          _cache = jsonDecode(raw) as Map<String, dynamic>;
+        } else {
+          _cache = {};
+        }
+        _isInitialized = true;
+        debugPrint('[LocalPersistence] Initialized on Web via SharedPreferences');
+      } catch (e) {
+        debugPrint('[LocalPersistence] Web initialization error: $e');
+        _cache = {};
+        _isInitialized = true;
+      }
+      return;
+    }
+
     try {
       if (customPath != null) {
         _dbFile = File(customPath);
@@ -74,6 +94,15 @@ class LocalPersistenceService {
   }
 
   Future<void> _save() async {
+    if (kIsWeb) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('baydev_hifi_web_storage', jsonEncode(_cache));
+      } catch (e) {
+        debugPrint('[LocalPersistence] Web save error: $e');
+      }
+      return;
+    }
     if (_dbFile == null) return;
     try {
       await _dbFile!.writeAsString(jsonEncode(_cache), flush: true);

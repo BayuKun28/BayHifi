@@ -308,6 +308,7 @@ class BackupRestoreService {
 
   /// Export backup JSON directly to public shared directory (immune to Clear App Data)
   Future<File?> autoExportToPublicDirectory() async {
+    if (kIsWeb) return null;
     try {
       final jsonString = createBackupJson();
       final backupFile = await StoragePermissionService.instance.getPublicBackupFile();
@@ -322,6 +323,7 @@ class BackupRestoreService {
 
   /// Debounced auto-backup trigger (schedules an export 3 seconds after last state mutation)
   void scheduleAutoBackup() {
+    if (kIsWeb) return;
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () {
       autoExportToPublicDirectory();
@@ -330,6 +332,7 @@ class BackupRestoreService {
 
   /// Checks if local database is empty and automatically restores from public backup file if found
   Future<bool> autoRestoreIfDatabaseEmpty() async {
+    if (kIsWeb) return false;
     if (!LocalPersistenceService.instance.isEmpty) {
       return false;
     }
