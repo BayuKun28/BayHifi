@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/local_persistence_service.dart';
+import '../../../pro_q_studio/domain/pro_q_rta_style.dart';
 import '../../domain/player_customization_settings.dart';
 
 final playerCustomizationProvider =
@@ -12,6 +13,10 @@ class PlayerCustomizationNotifier extends StateNotifier<PlayerCustomizationSetti
     _loadSettings();
   }
 
+  void hydrateFromStorage() {
+    _loadSettings();
+  }
+
   void _loadSettings() {
     final storage = LocalPersistenceService.instance;
     final backdropStr = storage.getSetting<String>('player_backdrop_mode');
@@ -21,6 +26,7 @@ class PlayerCustomizationNotifier extends StateNotifier<PlayerCustomizationSetti
     final glow = storage.getSetting<bool>('player_ambient_glow', true) ?? true;
     final glowIntensity = storage.getSetting<double>('player_ambient_glow_intensity', 0.35) ?? 0.35;
     final bins = storage.getSetting<int>('player_fft_bins', 512) ?? 512;
+    final proQRtaStyleStr = storage.getSetting<String>('pro_q_rta_style');
 
     final perfModeStr = storage.getSetting<String>('player_perf_mode');
     final parallax = storage.getSetting<bool>('player_enable_parallax', true) ?? true;
@@ -65,7 +71,13 @@ class PlayerCustomizationNotifier extends StateNotifier<PlayerCustomizationSetti
       trackShowDirectFav: showDirectFav,
       trackSwipeLeft: TrackTileSwipeAction.fromString(swipeLeftStr, TrackTileSwipeAction.addToQueue),
       trackSwipeRight: TrackTileSwipeAction.fromString(swipeRightStr, TrackTileSwipeAction.toggleFavorite),
+      proQRtaStyle: ProQRtaStyle.fromString(proQRtaStyleStr),
     );
+  }
+
+  Future<void> setProQRtaStyle(ProQRtaStyle style) async {
+    state = state.copyWith(proQRtaStyle: style);
+    await LocalPersistenceService.instance.saveSetting('pro_q_rta_style', style.name);
   }
 
   Future<void> setBackdropMode(NowPlayingBackdropMode mode) async {

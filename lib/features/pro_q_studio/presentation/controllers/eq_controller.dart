@@ -6,6 +6,7 @@ import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/biquad_math.dart';
 import '../../domain/eq_band.dart';
 import '../../domain/fr_curve_data.dart';
+import '../../domain/pro_q_rta_style.dart';
 import '../../domain/squiglink_parser.dart';
 import 'eq_state.dart';
 
@@ -36,8 +37,21 @@ class EqController extends StateNotifier<EqState> {
 
   bool _isDisposed = false;
 
+  void hydrateFromStorage() {
+    _hydrateActiveState();
+    _loadCustomPresetNames();
+    _recalculateSafePreamp();
+    _syncWithVirtualDsp();
+  }
+
   void _hydrateActiveState() {
     try {
+      final rtaStyleStr = LocalPersistenceService.instance.getSetting<String>('pro_q_rta_style');
+      final persistedRtaStyle = ProQRtaStyle.fromString(rtaStyleStr);
+      if (state.rtaStyle != persistedRtaStyle) {
+        state = state.copyWith(rtaStyle: persistedRtaStyle);
+      }
+
       final saved = LocalPersistenceService.instance.getActiveEqState();
       if (saved != null && saved.isNotEmpty) {
         final bandMaps = saved['bands'];
@@ -128,6 +142,7 @@ class EqController extends StateNotifier<EqState> {
           selectedBandIndex: () => bands != null && bands.isNotEmpty ? bands.first.index : state.selectedBandIndex,
           isAutoEqActive: isAuto,
           isEnabled: isEnabled,
+          rtaStyle: persistedRtaStyle,
           bandResolution: bandRes,
           tuningMode: tuningMode,
           driverFr: driver != null ? () => driver : null,
@@ -572,6 +587,11 @@ class EqController extends StateNotifier<EqState> {
 
   void toggleRta() {
     state = state.copyWith(isRtaEnabled: !state.isRtaEnabled);
+  }
+
+  void setRtaStyle(ProQRtaStyle style) {
+    state = state.copyWith(rtaStyle: style);
+    LocalPersistenceService.instance.saveSetting('pro_q_rta_style', style.name);
   }
 
   void toggleFrCurves() {

@@ -47,6 +47,14 @@ class DspRackController extends StateNotifier<DspRackState> {
     super.dispose();
   }
 
+  /// Reloads DSP state, presets, and track overrides from the active user's storage partition
+  void hydrateFromStorage() {
+    _hydrateState();
+    _loadCustomPresets();
+    _loadTrackOverridesAndGenreMappings();
+    _syncWithEngine();
+  }
+
   void _hydrateState() {
     try {
       final saved = LocalPersistenceService.instance.getDspRackState();

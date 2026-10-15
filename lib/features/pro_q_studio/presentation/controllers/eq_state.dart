@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/eq_band.dart';
 import '../../domain/fr_curve_data.dart';
+import '../../domain/pro_q_rta_style.dart';
 
 /// Built-in factory preset names — these cannot be overwritten directly.
 const kBuiltInEqPresets = <String>[
@@ -20,6 +21,7 @@ class EqState {
   final int? selectedBandIndex; // 1-indexed matching band.index, or null
   final bool isEnabled;
   final bool isRtaEnabled;
+  final ProQRtaStyle rtaStyle;
   final bool showFrCurves;
   final FrCurveData? driverFr;
   final FrCurveData? targetFr;
@@ -48,6 +50,7 @@ class EqState {
     this.selectedBandIndex = 1, // Default selected on B1 (48Hz +1.8dB)
     this.isEnabled = true,
     this.isRtaEnabled = true,
+    this.rtaStyle = ProQRtaStyle.wireframe,
     this.showFrCurves = true,
     this.driverFr,
     this.targetFr,
@@ -79,6 +82,7 @@ class EqState {
     ValueGetter<int?>? selectedBandIndex,
     bool? isEnabled,
     bool? isRtaEnabled,
+    ProQRtaStyle? rtaStyle,
     bool? showFrCurves,
     ValueGetter<FrCurveData?>? driverFr,
     ValueGetter<FrCurveData?>? targetFr,
@@ -101,6 +105,7 @@ class EqState {
           : this.selectedBandIndex,
       isEnabled: isEnabled ?? this.isEnabled,
       isRtaEnabled: isRtaEnabled ?? this.isRtaEnabled,
+      rtaStyle: rtaStyle ?? this.rtaStyle,
       showFrCurves: showFrCurves ?? this.showFrCurves,
       driverFr: driverFr != null ? driverFr() : this.driverFr,
       targetFr: targetFr != null ? targetFr() : this.targetFr,

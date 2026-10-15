@@ -92,6 +92,7 @@ func main() {
 
 	// Cloud Sync Endpoints (Offline-first sync)
 	mux.HandleFunc("/api/sync/logs", auth.AuthMiddleware(sync.SyncLogsHandler))
+	mux.HandleFunc("/api/sync/settings", auth.AuthMiddleware(sync.SyncSettingsHandler))
 	mux.HandleFunc("/api/sync/dsp", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			auth.AuthMiddleware(sync.GetDspProfileHandler)(w, r)

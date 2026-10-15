@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/biquad_math.dart';
 import '../../domain/eq_band.dart';
 import '../../domain/fr_curve_data.dart';
+import '../../domain/pro_q_rta_style.dart';
 
 /// CustomPainter untuk Pro-Q Studio EQ Canvas
 class EqCurvePainter extends CustomPainter {
@@ -11,6 +12,7 @@ class EqCurvePainter extends CustomPainter {
   final bool isEnabled;
   final bool showFrCurves;
   final bool isRtaEnabled;
+  final ProQRtaStyle rtaStyle;
   final List<double>? rtaSpectrum;
   final FrCurveData? driverFr;
   final FrCurveData? targetFr;
@@ -76,7 +78,19 @@ class EqCurvePainter extends CustomPainter {
     ..strokeWidth = 1.5
     ..style = PaintingStyle.stroke;
 
+  // RTA Painting Objects (Zero allocations in paint loop)
   final Paint _rtaBarPaint = Paint()..style = PaintingStyle.fill;
+  final Paint _rtaStrokePaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
+  final Paint _rtaGlowPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round
+    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.5);
+  final Paint _rtaCapPaint = Paint()..style = PaintingStyle.fill;
+  final Paint _rtaDotPaint = Paint()..style = PaintingStyle.fill;
 
   final Paint _nodeBodyPaint = Paint()
     ..color = const Color(0xFF101318)
@@ -96,6 +110,12 @@ class EqCurvePainter extends CustomPainter {
   final Path _fillPath = Path();
   final Path _driverPath = Path();
   final Path _targetPath = Path();
+  final Path _rtaStrokePath = Path();
+  final Path _rtaFillPath = Path();
+
+  // Pre-allocated static arrays for RTA spline coordinates (Zero per-frame allocation)
+  static final List<double> _rtaPointXs = List.filled(64, 0.0);
+  static final List<double> _rtaPointYs = List.filled(64, 0.0);
 
   // Pre-instantiated TextPainter
   final TextPainter _textPainter = TextPainter(
@@ -109,6 +129,7 @@ class EqCurvePainter extends CustomPainter {
     required this.isEnabled,
     required this.showFrCurves,
     required this.isRtaEnabled,
+    this.rtaStyle = ProQRtaStyle.bars,
     required this.rtaSpectrum,
     required this.driverFr,
     required this.targetFr,
@@ -350,15 +371,85 @@ class EqCurvePainter extends CustomPainter {
     if (numBars == 0) return;
 
     final availableHeight = h - topMargin - bottomMargin;
+    final floorY = h - bottomMargin;
     final barWidth = w / numBars;
 
+    switch (rtaStyle) {
+      case ProQRtaStyle.bars:
+        _paintRtaBars(canvas, spec, numBars, barWidth, availableHeight, floorY);
+        break;
+      case ProQRtaStyle.filledCurve:
+        _paintRtaFilledCurve(canvas, spec, numBars, barWidth, availableHeight, floorY, topMargin, w);
+        break;
+      case ProQRtaStyle.wireframe:
+        _paintRtaWireframe(canvas, spec, numBars, barWidth, availableHeight, floorY, topMargin, w);
+        break;
+      case ProQRtaStyle.m3Pillars:
+        _paintRtaM3Pillars(canvas, spec, numBars, barWidth, availableHeight, floorY, topMargin);
+        break;
+      case ProQRtaStyle.peakDots:
+        _paintRtaPeakDots(canvas, spec, numBars, barWidth, availableHeight, floorY);
+        break;
+      case ProQRtaStyle.laserBeam:
+        _paintRtaLaserBeam(canvas, spec, numBars, barWidth, availableHeight, floorY);
+        break;
+    }
+  }
+
+  void _populateSplineCoordinates(
+    List<double> spec,
+    int numBars,
+    double barWidth,
+    double availableHeight,
+    double floorY,
+  ) {
+    final count = math.min(numBars, _rtaPointXs.length);
+    for (int i = 0; i < count; i++) {
+      final mag = spec[i].clamp(0.0, 1.0);
+      _rtaPointXs[i] = (i + 0.5) * barWidth;
+      _rtaPointYs[i] = floorY - (mag * availableHeight * 0.75);
+    }
+  }
+
+  void _buildSmoothSplinePath(int count) {
+    _rtaStrokePath.reset();
+    if (count < 2) return;
+
+    _rtaStrokePath.moveTo(_rtaPointXs[0], _rtaPointYs[0]);
+    for (int i = 0; i < count - 1; i++) {
+      final x0 = i > 0 ? _rtaPointXs[i - 1] : _rtaPointXs[i];
+      final y0 = i > 0 ? _rtaPointYs[i - 1] : _rtaPointYs[i];
+      final x1 = _rtaPointXs[i];
+      final y1 = _rtaPointYs[i];
+      final x2 = _rtaPointXs[i + 1];
+      final y2 = _rtaPointYs[i + 1];
+      final x3 = i + 2 < count ? _rtaPointXs[i + 2] : x2;
+      final y3 = i + 2 < count ? _rtaPointYs[i + 2] : y2;
+
+      final cp1x = x1 + (x2 - x0) / 6.0;
+      final cp1y = y1 + (y2 - y0) / 6.0;
+      final cp2x = x2 - (x3 - x1) / 6.0;
+      final cp2y = y2 - (y3 - y1) / 6.0;
+
+      _rtaStrokePath.cubicTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
+    }
+  }
+
+  void _paintRtaBars(
+    Canvas canvas,
+    List<double> spec,
+    int numBars,
+    double barWidth,
+    double availableHeight,
+    double floorY,
+  ) {
     for (int i = 0; i < numBars; i++) {
       final mag = spec[i].clamp(0.0, 1.0);
       if (mag <= 0.01) continue;
 
       final barHeight = mag * availableHeight * 0.75;
       final x = i * barWidth;
-      final y = (h - bottomMargin) - barHeight;
+      final y = floorY - barHeight;
 
       // Cyan to teal gradient bar with low opacity
       _rtaBarPaint.shader = LinearGradient(
@@ -379,16 +470,203 @@ class EqCurvePainter extends CustomPainter {
       );
 
       // Peak Hold cap line (Pro-Q ballistic peak marker)
-      final capPaint = Paint()
+      _rtaCapPaint
         ..color = const Color(0xFF00E5FF).withValues(alpha: 0.75)
+        ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5
         ..strokeCap = StrokeCap.round;
       canvas.drawLine(
         Offset(x + barWidth * 0.1, y),
         Offset(x + barWidth * 0.9, y),
-        capPaint,
+        _rtaCapPaint,
       );
     }
+  }
+
+  void _paintRtaFilledCurve(
+    Canvas canvas,
+    List<double> spec,
+    int numBars,
+    double barWidth,
+    double availableHeight,
+    double floorY,
+    double topMargin,
+    double w,
+  ) {
+    final count = math.min(numBars, _rtaPointXs.length);
+    _populateSplineCoordinates(spec, numBars, barWidth, availableHeight, floorY);
+    _buildSmoothSplinePath(count);
+
+    // Build closed fill path
+    _rtaFillPath.reset();
+    _rtaFillPath.addPath(_rtaStrokePath, Offset.zero);
+    _rtaFillPath.lineTo(_rtaPointXs[count - 1], floorY);
+    _rtaFillPath.lineTo(_rtaPointXs[0], floorY);
+    _rtaFillPath.close();
+
+    _rtaBarPaint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        const Color(0xFF00E5FF).withValues(alpha: 0.25),
+        const Color(0xFF00B0FF).withValues(alpha: 0.02),
+      ],
+    ).createShader(Rect.fromLTWH(0, topMargin, w, availableHeight));
+
+    canvas.drawPath(_rtaFillPath, _rtaBarPaint);
+
+    // Soft Ambient Glow
+    _rtaGlowPaint.color = const Color(0xFF00E5FF).withValues(alpha: 0.35);
+    _rtaGlowPaint.strokeWidth = 4.0;
+    canvas.drawPath(_rtaStrokePath, _rtaGlowPaint);
+
+    // Crisp Top Stroke
+    _rtaStrokePaint.color = const Color(0xFF00E5FF).withValues(alpha: 0.90);
+    _rtaStrokePaint.strokeWidth = 1.8;
+    canvas.drawPath(_rtaStrokePath, _rtaStrokePaint);
+  }
+
+  void _paintRtaWireframe(
+    Canvas canvas,
+    List<double> spec,
+    int numBars,
+    double barWidth,
+    double availableHeight,
+    double floorY,
+    double topMargin,
+    double w,
+  ) {
+    final count = math.min(numBars, _rtaPointXs.length);
+    _populateSplineCoordinates(spec, numBars, barWidth, availableHeight, floorY);
+    _buildSmoothSplinePath(count);
+
+    // Subtle glow
+    _rtaGlowPaint.color = const Color(0xFF00E5FF).withValues(alpha: 0.20);
+    _rtaGlowPaint.strokeWidth = 3.5;
+    canvas.drawPath(_rtaStrokePath, _rtaGlowPaint);
+
+    // Crisp 1.5px wireframe line
+    _rtaStrokePaint.color = const Color(0xFF00E5FF).withValues(alpha: 0.95);
+    _rtaStrokePaint.strokeWidth = 1.5;
+    canvas.drawPath(_rtaStrokePath, _rtaStrokePaint);
+  }
+
+  void _paintRtaM3Pillars(
+    Canvas canvas,
+    List<double> spec,
+    int numBars,
+    double barWidth,
+    double availableHeight,
+    double floorY,
+    double topMargin,
+  ) {
+    final pillarW = barWidth * 0.74;
+    final radius = Radius.circular(pillarW * 0.38);
+
+    for (int i = 0; i < numBars; i++) {
+      final mag = spec[i].clamp(0.0, 1.0);
+      if (mag <= 0.015) continue;
+
+      final barHeight = mag * availableHeight * 0.75;
+      final x = i * barWidth + (barWidth - pillarW) / 2.0;
+      final y = floorY - barHeight;
+
+      _rtaBarPaint.shader = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [
+          const Color(0xFF00B0FF).withValues(alpha: 0.05),
+          const Color(0xFF00E5FF).withValues(alpha: 0.28 + (mag * 0.25)),
+        ],
+      ).createShader(Rect.fromLTWH(x, y, pillarW, barHeight));
+
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(Rect.fromLTWH(x, y, pillarW, barHeight), radius),
+        _rtaBarPaint,
+      );
+
+      // Floating squircle peak pill
+      final pillY = (y - 5.0).clamp(topMargin, floorY);
+      _rtaCapPaint
+        ..color = const Color(0xFF00E5FF).withValues(alpha: 0.85)
+        ..style = PaintingStyle.fill;
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(x + pillarW * 0.08, pillY, pillarW * 0.84, 2.5),
+          const Radius.circular(1.25),
+        ),
+        _rtaCapPaint,
+      );
+    }
+  }
+
+  void _paintRtaPeakDots(
+    Canvas canvas,
+    List<double> spec,
+    int numBars,
+    double barWidth,
+    double availableHeight,
+    double floorY,
+  ) {
+    for (int i = 0; i < numBars; i++) {
+      final mag = spec[i].clamp(0.0, 1.0);
+      if (mag <= 0.02) continue;
+
+      final x = (i + 0.5) * barWidth;
+      final y = floorY - (mag * availableHeight * 0.75);
+
+      // Faint vertical guide stem
+      _rtaCapPaint
+        ..color = const Color(0xFF00E5FF).withValues(alpha: 0.08)
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(Offset(x, floorY), Offset(x, y), _rtaCapPaint);
+
+      // Outer soft halo
+      _rtaDotPaint
+        ..color = const Color(0xFF00E5FF).withValues(alpha: 0.30)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(x, y), 3.5, _rtaDotPaint);
+
+      // Inner solid core dot
+      _rtaDotPaint
+        ..color = const Color(0xFFE0F7FA).withValues(alpha: 0.95)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(x, y), 1.8, _rtaDotPaint);
+    }
+  }
+
+  void _paintRtaLaserBeam(
+    Canvas canvas,
+    List<double> spec,
+    int numBars,
+    double barWidth,
+    double availableHeight,
+    double floorY,
+  ) {
+    final count = math.min(numBars, _rtaPointXs.length);
+    _populateSplineCoordinates(spec, numBars, barWidth, availableHeight, floorY);
+
+    _rtaStrokePath.reset();
+    _rtaStrokePath.moveTo(_rtaPointXs[0], _rtaPointYs[0]);
+    for (int i = 1; i < count; i++) {
+      _rtaStrokePath.lineTo(_rtaPointXs[i], _rtaPointYs[i]);
+    }
+
+    // Outer optical glow
+    _rtaGlowPaint.color = const Color(0xFF00E5FF).withValues(alpha: 0.45);
+    _rtaGlowPaint.strokeWidth = 6.0;
+    canvas.drawPath(_rtaStrokePath, _rtaGlowPaint);
+
+    // Mid neon laser stroke
+    _rtaStrokePaint.color = const Color(0xFF00E5FF).withValues(alpha: 0.90);
+    _rtaStrokePaint.strokeWidth = 2.4;
+    canvas.drawPath(_rtaStrokePath, _rtaStrokePaint);
+
+    // Inner bright laser core wire
+    _rtaStrokePaint.color = Colors.white.withValues(alpha: 0.95);
+    _rtaStrokePaint.strokeWidth = 1.0;
+    canvas.drawPath(_rtaStrokePath, _rtaStrokePaint);
   }
 
   /// Driver & Target FR curves (dashed lines)
@@ -658,6 +936,8 @@ class EqCurvePainter extends CustomPainter {
         oldDelegate.isRtaEnabled != isRtaEnabled ||
         oldDelegate.rtaSpectrum != rtaSpectrum ||
         oldDelegate.driverFr != driverFr ||
-        oldDelegate.targetFr != targetFr;
+        oldDelegate.targetFr != targetFr ||
+        oldDelegate.isRawBypassed != isRawBypassed ||
+        oldDelegate.rtaStyle != rtaStyle;
   }
 }

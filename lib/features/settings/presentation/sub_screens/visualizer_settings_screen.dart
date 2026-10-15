@@ -5,6 +5,8 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../pro_q_studio/domain/pro_q_rta_style.dart';
+import '../../../pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../../domain/player_customization_settings.dart';
 import '../controllers/player_customization_controller.dart';
 
@@ -82,6 +84,27 @@ class VisualizerSettingsScreen extends ConsumerWidget {
 
           // ─── 3. SPECTRUM VISUALIZER STYLING ─────────────────────────────────
           _buildSpectrumVisualizerCard(context, theme, primary, settings, controller, isSolid),
+          const SizedBox(height: 14),
+
+          // ─── 3.5. PRO-Q STUDIO RTA GRAPH STYLING ────────────────────────────
+          _buildBentoDropdownSelector<ProQRtaStyle>(
+            context: context,
+            sectionTitle: 'PRO-Q STUDIO REALTIME SPECTRUM GRAPH',
+            sectionIcon: HugeIcons.strokeRoundedSlidersVertical,
+            currentValue: settings.proQRtaStyle,
+            items: ProQRtaStyle.values,
+            itemLabel: (s) => s.label,
+            itemDescription: (s) => s.description,
+            itemIcon: _getProQRtaStyleIcon,
+            onChanged: (val) {
+              if (val != null) {
+                AppHaptics.selectionClick();
+                controller.setProQRtaStyle(val);
+                ref.read(eqControllerProvider.notifier).setRtaStyle(val);
+              }
+            },
+            isSolid: isSolid,
+          ),
           const SizedBox(height: 14),
 
           // ─── 4. TIME BAR & SEEKBAR STYLING ──────────────────────────────────
@@ -229,6 +252,14 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                 label: 'Spectrum: ${settings.spectrumStyle.label}',
                 isActive: true,
                 color: theme.colorScheme.secondary,
+                isSolid: isSolid,
+              ),
+              _buildStatusPill(
+                context,
+                theme,
+                label: 'Pro-Q: ${settings.proQRtaStyle.label.split('(').first.trim()}',
+                isActive: true,
+                color: theme.colorScheme.tertiary,
                 isSolid: isSolid,
               ),
               _buildStatusPill(
@@ -871,6 +902,23 @@ class VisualizerSettingsScreen extends ConsumerWidget {
         return HugeIcons.strokeRoundedRuler;
       case TimeBarStyle.glowingPill:
         return HugeIcons.strokeRoundedSquare;
+    }
+  }
+
+  dynamic _getProQRtaStyleIcon(ProQRtaStyle style) {
+    switch (style) {
+      case ProQRtaStyle.bars:
+        return HugeIcons.strokeRoundedSlidersVertical;
+      case ProQRtaStyle.filledCurve:
+        return HugeIcons.strokeRoundedAudioWaveform;
+      case ProQRtaStyle.wireframe:
+        return HugeIcons.strokeRoundedActivity01;
+      case ProQRtaStyle.m3Pillars:
+        return HugeIcons.strokeRoundedLayers01;
+      case ProQRtaStyle.peakDots:
+        return HugeIcons.strokeRoundedGrid;
+      case ProQRtaStyle.laserBeam:
+        return HugeIcons.strokeRoundedSparkles;
     }
   }
 }

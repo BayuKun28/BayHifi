@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../audio_engine/fft_processor.dart';
 import '../../../../audio_engine/soloud_controller.dart';
+import '../../../settings/presentation/controllers/player_customization_controller.dart';
 import '../../domain/eq_band.dart';
 import '../controllers/eq_controller.dart';
 import 'eq_curve_painter.dart';
@@ -42,6 +43,7 @@ class _InteractiveEqCanvasState extends ConsumerState<InteractiveEqCanvas> {
   @override
   Widget build(BuildContext context) {
     final eqState = ref.watch(eqControllerProvider);
+    final customSettings = ref.watch(playerCustomizationProvider);
     final rtaSpectrum = ref.watch(rtaSpectrumProvider).value;
 
     return LayoutBuilder(
@@ -64,6 +66,7 @@ class _InteractiveEqCanvasState extends ConsumerState<InteractiveEqCanvas> {
                     isEnabled: eqState.isEnabled,
                     showFrCurves: eqState.showFrCurves,
                     isRtaEnabled: eqState.isRtaEnabled,
+                    rtaStyle: customSettings.proQRtaStyle,
                     rtaSpectrum: rtaSpectrum,
                     driverFr: eqState.driverFr,
                     targetFr: eqState.targetFr,

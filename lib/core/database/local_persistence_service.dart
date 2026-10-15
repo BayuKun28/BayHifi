@@ -16,16 +16,163 @@ class LocalPersistenceService {
   File? _dbFile;
   Map<String, dynamic> _cache = {};
   bool _isInitialized = false;
+  String _activeUserId = 'guest';
 
   bool get isInitialized => _isInitialized;
+  String get activeUserId => _activeUserId;
+
+  /// Global keys that belong to device hardware/system configuration and must NEVER be scoped per user
+  static const Set<String> _unscopedGlobalKeys = {
+    'saved_music_folders',
+    'saved_library_tracks',
+    'desktop_window_geometry',
+    'bayhifi_cloud_server_url',
+    'audio_cache_version',
+  };
+
+  /// Switches the active user namespace.
+  /// If [cloneGuestIfEmpty] is true and switching to an authenticated user who has no
+  /// prior local settings, the current guest preferences are cloned into this user's partition.
+  Future<void> switchUser(String? userId, {bool cloneGuestIfEmpty = true}) async {
+    final targetId = (userId == null || userId.trim().isEmpty) ? 'guest' : userId.trim();
+    if (_activeUserId == targetId) return;
+
+    final oldUserId = _activeUserId;
+    _activeUserId = targetId;
+
+    if (targetId != 'guest' && cloneGuestIfEmpty) {
+      final userPrefix = 'u_${targetId}_';
+      final hasUserData = _cache.keys.any((k) => k.startsWith(userPrefix));
+      if (!hasUserData) {
+        _clonePartition(sourceUserId: oldUserId, targetUserId: targetId);
+        await _save();
+      }
+    }
+    debugPrint('[LocalPersistence] Switched active user partition to: $targetId');
+  }
+
+  void _clonePartition({required String sourceUserId, required String targetUserId}) {
+    final srcPrefix = 'u_${sourceUserId}_';
+    final targetPrefix = 'u_${targetUserId}_';
+
+    // 1. Copy any explicitly scoped keys of source user
+    final sourceKeys = _cache.keys.where((k) => k.startsWith(srcPrefix)).toList();
+    for (final k in sourceKeys) {
+      final baseKey = k.substring(srcPrefix.length);
+      _cache['$targetPrefix$baseKey'] = jsonDecode(jsonEncode(_cache[k]));
+    }
+
+    // 2. If source user was guest and had unscoped legacy fallback keys, clone those too
+    if (sourceUserId == 'guest') {
+      for (final entry in _cache.entries) {
+        if (!entry.key.startsWith('u_') && !_unscopedGlobalKeys.contains(entry.key)) {
+          final targetKey = '$targetPrefix${entry.key}';
+          if (!_cache.containsKey(targetKey)) {
+            _cache[targetKey] = jsonDecode(jsonEncode(entry.value));
+          }
+        }
+      }
+    }
+  }
+
+  dynamic _readScoped(String baseKey) {
+    if (_unscopedGlobalKeys.contains(baseKey)) {
+      return _cache[baseKey];
+    }
+    final scoped = 'u_${_activeUserId}_$baseKey';
+    if (_cache.containsKey(scoped)) {
+      return _cache[scoped];
+    }
+    // Backward compatibility fallback for 'guest': if scoped doesn't exist, check unscoped legacy key
+    if (_activeUserId == 'guest' && _cache.containsKey(baseKey)) {
+      return _cache[baseKey];
+    }
+    return null;
+  }
+
+  void _writeScoped(String baseKey, dynamic value) {
+    if (_unscopedGlobalKeys.contains(baseKey)) {
+      _cache[baseKey] = value;
+    } else {
+      _cache['u_${_activeUserId}_$baseKey'] = value;
+    }
+  }
+
+  void _removeScoped(String baseKey) {
+    if (_unscopedGlobalKeys.contains(baseKey)) {
+      _cache.remove(baseKey);
+    } else {
+      _cache.remove('u_${_activeUserId}_$baseKey');
+    }
+  }
+
+  /// Exports active user's settings as an un-prefixed map for remote sync or export
+  Map<String, dynamic> exportCurrentUserSettings() {
+    final prefix = 'u_${_activeUserId}_';
+    final result = <String, dynamic>{};
+    for (final entry in _cache.entries) {
+      if (entry.key.startsWith(prefix)) {
+        final key = entry.key.substring(prefix.length);
+        if (!_unscopedGlobalKeys.contains(key) && key != 'playback_history_logs') {
+          result[key] = entry.value;
+        }
+      } else if (_activeUserId == 'guest' &&
+          !entry.key.startsWith('u_') &&
+          !_unscopedGlobalKeys.contains(entry.key) &&
+          entry.key != 'playback_history_logs') {
+        result[entry.key] = entry.value;
+      }
+    }
+    return result;
+  }
+
+  /// Imports user settings bundle into active user's partition
+  Future<void> importCurrentUserSettings(Map<String, dynamic> bundle, {bool overwrite = true}) async {
+    for (final entry in bundle.entries) {
+      if (_unscopedGlobalKeys.contains(entry.key)) continue;
+      if (overwrite || _readScoped(entry.key) == null) {
+        _writeScoped(entry.key, entry.value);
+      }
+    }
+    await _save();
+  }
+
+  /// Imports and deduplicates playback history logs into active user's partition
+  Future<void> importPlaybackLogs(List<Map<String, dynamic>> remoteLogs) async {
+    final currentLogs = getPlaybackHistoryLogs();
+    final existingIds = currentLogs.map((l) => l['id']?.toString() ?? '').toSet();
+
+    final toAdd = <Map<String, dynamic>>[];
+    for (final log in remoteLogs) {
+      final id = log['id']?.toString() ?? '';
+      if (id.isNotEmpty && !existingIds.contains(id)) {
+        toAdd.add(log);
+        existingIds.add(id);
+      }
+    }
+
+    if (toAdd.isNotEmpty) {
+      currentLogs.addAll(toAdd);
+      currentLogs.sort((a, b) {
+        final tA = a['playedAt'] ?? a['played_at'] ?? 0;
+        final tB = b['playedAt'] ?? b['played_at'] ?? 0;
+        return (tA as num).compareTo(tB as num);
+      });
+      if (currentLogs.length > 10000) {
+        currentLogs.removeRange(0, currentLogs.length - 10000);
+      }
+      _writeScoped('playback_history_logs', currentLogs);
+      await _save();
+    }
+  }
 
   /// Returns true if the database has no stored playlists, favorites, folders, or tracks
   bool get isEmpty {
     if (_cache.isEmpty) return true;
-    final hasPlaylists = _cache['custom_playlists'] is List && (_cache['custom_playlists'] as List).isNotEmpty;
-    final hasFavorites = _cache['favorite_track_ids'] is List && (_cache['favorite_track_ids'] as List).isNotEmpty;
-    final hasFolders = _cache['saved_music_folders'] is List && (_cache['saved_music_folders'] as List).isNotEmpty;
-    final hasTracks = _cache['saved_library_tracks'] is List && (_cache['saved_library_tracks'] as List).isNotEmpty;
+    final hasPlaylists = getCustomPlaylists().isNotEmpty;
+    final hasFavorites = getFavoriteTrackIds().isNotEmpty;
+    final hasFolders = getMusicFolders().isNotEmpty;
+    final hasTracks = getSavedLibraryTracks().isNotEmpty;
     return !hasPlaylists && !hasFavorites && !hasFolders && !hasTracks;
   }
 
@@ -113,7 +260,7 @@ class LocalPersistenceService {
 
   // ─── 1. FAVORITES ──────────────────────────────────────────────────────────
   List<String> getFavoriteTrackIds() {
-    final list = _cache['favorite_track_ids'];
+    final list = _readScoped('favorite_track_ids');
     if (list is List) {
       return list.map((e) => e.toString()).toList();
     }
@@ -121,13 +268,13 @@ class LocalPersistenceService {
   }
 
   Future<void> saveFavoriteTrackIds(Set<String> ids) async {
-    _cache['favorite_track_ids'] = ids.toList();
+    _writeScoped('favorite_track_ids', ids.toList());
     await _save();
   }
 
   // ─── 2. CUSTOM PLAYLISTS ───────────────────────────────────────────────────
   List<Map<String, dynamic>> getCustomPlaylists() {
-    final list = _cache['custom_playlists'];
+    final list = _readScoped('custom_playlists');
     if (list is List) {
       return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
@@ -135,13 +282,13 @@ class LocalPersistenceService {
   }
 
   Future<void> saveCustomPlaylists(List<Map<String, dynamic>> playlists) async {
-    _cache['custom_playlists'] = playlists;
+    _writeScoped('custom_playlists', playlists);
     await _save();
   }
 
   // ─── 2.1 SMART PLAYLISTS ───────────────────────────────────────────────────
   List<Map<String, dynamic>> getSmartPlaylists() {
-    final list = _cache['smart_playlists'];
+    final list = _readScoped('smart_playlists');
     if (list is List) {
       return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
@@ -149,30 +296,30 @@ class LocalPersistenceService {
   }
 
   Future<void> saveSmartPlaylists(List<Map<String, dynamic>> playlists) async {
-    _cache['smart_playlists'] = playlists;
+    _writeScoped('smart_playlists', playlists);
     await _save();
   }
 
   // ─── 3. PERSONALIZATION & SETTINGS ─────────────────────────────────────────
   T? getSetting<T>(String key, [T? defaultValue]) {
-    final val = _cache[key];
+    final val = _readScoped(key);
     if (val is T) return val;
     return defaultValue;
   }
 
   Future<void> saveSetting(String key, dynamic value) async {
-    _cache[key] = value;
+    _writeScoped(key, value);
     await _save();
   }
 
   Future<void> removeSetting(String key) async {
-    _cache.remove(key);
+    _removeScoped(key);
     await _save();
   }
 
   // ─── 3.1 THEME & PALETTE PERSISTENCE ───────────────────────────────────────
   Map<String, dynamic> getThemeSettings() {
-    final data = _cache['theme_settings'];
+    final data = _readScoped('theme_settings');
     if (data is Map<String, dynamic>) {
       return data;
     }
@@ -198,7 +345,7 @@ class LocalPersistenceService {
     int? dynamicVibrantValue,
     Map<String, dynamic>? wallpaperSettings,
   }) async {
-    _cache['theme_settings'] = {
+    _writeScoped('theme_settings', {
       'palette_id': paletteId,
       'theme_mode': themeModeIndex,
       'custom_accent': customAccentColorValue,
@@ -207,7 +354,7 @@ class LocalPersistenceService {
       'dynamic_dominant': ?dynamicDominantValue,
       'dynamic_vibrant': ?dynamicVibrantValue,
       'wallpaper_settings': ?wallpaperSettings,
-    };
+    });
     await _save();
   }
 
@@ -217,7 +364,7 @@ class LocalPersistenceService {
     if (nested is Map) {
       return Map<String, dynamic>.from(nested);
     }
-    final data = _cache['wallpaper_settings'];
+    final data = _readScoped('wallpaper_settings');
     if (data is Map) {
       return Map<String, dynamic>.from(data);
     }
@@ -247,10 +394,10 @@ class LocalPersistenceService {
       'sync_palette': syncPalette,
       'scope': scope,
     };
-    _cache['wallpaper_settings'] = map;
+    _writeScoped('wallpaper_settings', map);
     final themeSettings = Map<String, dynamic>.from(getThemeSettings());
     themeSettings['wallpaper_settings'] = map;
-    _cache['theme_settings'] = themeSettings;
+    _writeScoped('theme_settings', themeSettings);
     await _save();
   }
 
@@ -281,7 +428,7 @@ class LocalPersistenceService {
 
 
   List<Map<String, dynamic>> getPlaybackHistory() {
-    final list = _cache['playback_history'];
+    final list = _readScoped('playback_history');
     if (list is List) {
       return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
@@ -303,12 +450,12 @@ class LocalPersistenceService {
       history.removeRange(500, history.length);
     }
 
-    _cache['playback_history'] = history;
+    _writeScoped('playback_history', history);
     await _save();
   }
 
   Future<void> clearPlaybackHistory() async {
-    _cache['playback_history'] = [];
+    _writeScoped('playback_history', []);
     await _save();
   }
 
@@ -375,7 +522,7 @@ class LocalPersistenceService {
 
   // ─── 5. LAST SESSION RESUME & STATE RESTORATION ────────────────────────────
   Map<String, dynamic>? getLastSessionState() {
-    final state = _cache['last_session_state'];
+    final state = _readScoped('last_session_state');
     if (state is Map<String, dynamic>) {
       return state;
     }
@@ -383,11 +530,11 @@ class LocalPersistenceService {
   }
 
   Future<void> saveLastSessionState(Map<String, dynamic> state) async {
-    _cache['last_session_state'] = state;
+    _writeScoped('last_session_state', state);
     await _save();
   }
 
-  // ─── 6. SAVED LOCAL LIBRARY TRACKS & MUSIC FOLDERS ─────────────────────────
+  // ─── 6. SAVED LOCAL LIBRARY TRACKS & MUSIC FOLDERS (GLOBAL) ────────────────
   List<Map<String, dynamic>> getSavedLibraryTracks() {
     final list = _cache['saved_library_tracks'];
     if (list is List) {
@@ -433,7 +580,7 @@ class LocalPersistenceService {
 
   // ─── 7. AUTOEQ CLOUD PRESETS & OFFLINE FR CURVES ───────────────────────────
   List<Map<String, dynamic>> getSavedFrCurves() {
-    final list = _cache['saved_fr_curves'];
+    final list = _readScoped('saved_fr_curves');
     if (list is List) {
       return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
@@ -448,18 +595,18 @@ class LocalPersistenceService {
     // Replace if exists, or append
     final updated = list.where((c) => c['name'] != name).toList();
     updated.add(curveMap);
-    _cache['saved_fr_curves'] = updated;
+    _writeScoped('saved_fr_curves', updated);
     await _save();
   }
 
   Future<void> deleteFrCurve(String name) async {
     final list = getSavedFrCurves();
-    _cache['saved_fr_curves'] = list.where((c) => c['name'] != name).toList();
+    _writeScoped('saved_fr_curves', list.where((c) => c['name'] != name).toList());
     await _save();
   }
 
   List<String> getDownloadedAutoEqIds() {
-    final list = _cache['autoeq_downloaded_ids'];
+    final list = _readScoped('autoeq_downloaded_ids');
     if (list is List) {
       return list.map((e) => e.toString()).toList();
     }
@@ -474,13 +621,13 @@ class LocalPersistenceService {
   }
 
   Future<void> saveDownloadedAutoEqIds(Set<String> ids) async {
-    _cache['autoeq_downloaded_ids'] = ids.toList();
+    _writeScoped('autoeq_downloaded_ids', ids.toList());
     await _save();
   }
 
   // ─── 8. DSP RACK STATE & CUSTOM MASTERING PROFILES ─────────────────────────
   Map<String, dynamic>? getDspRackState() {
-    final data = _cache['dsp_rack_state'];
+    final data = _readScoped('dsp_rack_state');
     if (data is Map<String, dynamic>) {
       return data;
     }
@@ -491,12 +638,12 @@ class LocalPersistenceService {
   }
 
   Future<void> saveDspRackState(Map<String, dynamic> stateMap) async {
-    _cache['dsp_rack_state'] = stateMap;
+    _writeScoped('dsp_rack_state', stateMap);
     await _save();
   }
 
   List<Map<String, dynamic>> getCustomDspProfiles() {
-    final list = _cache['custom_dsp_profiles'];
+    final list = _readScoped('custom_dsp_profiles');
     if (list is List) {
       return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
@@ -504,13 +651,13 @@ class LocalPersistenceService {
   }
 
   Future<void> saveCustomDspProfiles(List<Map<String, dynamic>> profiles) async {
-    _cache['custom_dsp_profiles'] = profiles;
+    _writeScoped('custom_dsp_profiles', profiles);
     await _save();
   }
 
   // ─── 8.1 PER-TRACK DSP OVERRIDES & GENRE MAPPINGS ────────────────────────
   Map<String, Map<String, dynamic>> getDspTrackOverrides() {
-    final data = _cache['dsp_track_overrides'];
+    final data = _readScoped('dsp_track_overrides');
     if (data is Map) {
       final result = <String, Map<String, dynamic>>{};
       data.forEach((k, v) {
@@ -528,7 +675,7 @@ class LocalPersistenceService {
     if (trackId == null || trackId.isEmpty) return;
     final current = getDspTrackOverrides();
     current[trackId] = overrideMap;
-    _cache['dsp_track_overrides'] = current;
+    _writeScoped('dsp_track_overrides', current);
     await _save();
   }
 
@@ -536,13 +683,13 @@ class LocalPersistenceService {
     final current = getDspTrackOverrides();
     if (current.containsKey(trackId)) {
       current.remove(trackId);
-      _cache['dsp_track_overrides'] = current;
+      _writeScoped('dsp_track_overrides', current);
       await _save();
     }
   }
 
   Map<String, String> getDspGenreMappings() {
-    final data = _cache['dsp_genre_mappings'];
+    final data = _readScoped('dsp_genre_mappings');
     if (data is Map) {
       final result = <String, String>{};
       data.forEach((k, v) {
@@ -556,18 +703,18 @@ class LocalPersistenceService {
   }
 
   Future<void> saveDspGenreMappings(Map<String, String> mappings) async {
-    _cache['dsp_genre_mappings'] = Map<String, String>.from(mappings);
+    _writeScoped('dsp_genre_mappings', Map<String, String>.from(mappings));
     await _save();
   }
 
   bool isDspAutoApplyByGenreEnabled() {
-    final val = _cache['dsp_auto_apply_genre_enabled'];
+    final val = _readScoped('dsp_auto_apply_genre_enabled');
     if (val is bool) return val;
     return true; // Enabled by default
   }
 
   Future<void> setDspAutoApplyByGenreEnabled(bool enabled) async {
-    _cache['dsp_auto_apply_genre_enabled'] = enabled;
+    _writeScoped('dsp_auto_apply_genre_enabled', enabled);
     await _save();
   }
 
@@ -575,7 +722,7 @@ class LocalPersistenceService {
   // ─── 9. CUSTOM PRO-Q EQ PRESETS ─────────────────────────────────────────────
   /// Returns all user-saved EQ presets. Each entry has: name, preampDb, bands (List<Map>).
   List<Map<String, dynamic>> getCustomEqPresets() {
-    final list = _cache['custom_eq_presets'];
+    final list = _readScoped('custom_eq_presets');
     if (list is List) {
       return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
@@ -598,20 +745,20 @@ class LocalPersistenceService {
     };
     final updated = list.where((p) => p['name'] != name.trim()).toList();
     updated.add(entry);
-    _cache['custom_eq_presets'] = updated;
+    _writeScoped('custom_eq_presets', updated);
     await _save();
   }
 
   /// Deletes a custom EQ preset by name.
   Future<void> deleteCustomEqPreset(String name) async {
     final list = getCustomEqPresets();
-    _cache['custom_eq_presets'] = list.where((p) => p['name'] != name).toList();
+    _writeScoped('custom_eq_presets', list.where((p) => p['name'] != name).toList());
     await _save();
   }
 
   /// Returns the actively applied EQ state (bands, preampDb, activePresetName).
   Map<String, dynamic>? getActiveEqState() {
-    final data = _cache['active_eq_state'];
+    final data = _readScoped('active_eq_state');
     if (data is Map<String, dynamic>) {
       return data;
     }
@@ -637,7 +784,7 @@ class LocalPersistenceService {
     String? tuningMode,
   }) async {
     final existing = getActiveEqState();
-    _cache['active_eq_state'] = {
+    _writeScoped('active_eq_state', {
       'bands': bands,
       'preampDb': preampDb,
       'activePresetName': activePresetName,
@@ -650,7 +797,7 @@ class LocalPersistenceService {
       'bandResolution': bandResolution ?? (existing?['bandResolution'] as String?),
       'tuningMode': tuningMode ?? (existing?['tuningMode'] as String?),
       'savedAt': DateTime.now().toIso8601String(),
-    };
+    });
     await _save();
   }
 
@@ -665,7 +812,7 @@ class LocalPersistenceService {
     };
   }
 
-  // ─── 9. DESKTOP WINDOW GEOMETRY PERSISTENCE ────────────────────────────────
+  // ─── 9. DESKTOP WINDOW GEOMETRY PERSISTENCE (GLOBAL) ───────────────────────
   Map<String, dynamic>? getWindowDimensions() {
     final data = _cache['desktop_window_geometry'];
     if (data is Map<String, dynamic>) {
@@ -694,7 +841,7 @@ class LocalPersistenceService {
 
   // ─── 10. STUDIO WRAPPED & PLAYBACK TELEMETRY ───────────────────────────────
   List<Map<String, dynamic>> getPlaybackHistoryLogs() {
-    final list = _cache['playback_history_logs'];
+    final list = _readScoped('playback_history_logs');
     if (list is List) {
       return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     }
@@ -708,17 +855,17 @@ class LocalPersistenceService {
       list.removeAt(0);
     }
     list.add(sessionLog);
-    _cache['playback_history_logs'] = list;
+    _writeScoped('playback_history_logs', list);
     await _save();
   }
 
   Future<void> clearPlaybackHistoryLogs() async {
-    _cache['playback_history_logs'] = <Map<String, dynamic>>[];
+    _writeScoped('playback_history_logs', <Map<String, dynamic>>[]);
     await _save();
   }
 
   Map<String, dynamic>? getCachedWrappedSummary() {
-    final data = _cache['cached_wrapped_summary'];
+    final data = _readScoped('cached_wrapped_summary');
     if (data is Map<String, dynamic>) {
       return data;
     }
@@ -729,7 +876,7 @@ class LocalPersistenceService {
   }
 
   Future<void> saveCachedWrappedSummary(Map<String, dynamic> summary) async {
-    _cache['cached_wrapped_summary'] = summary;
+    _writeScoped('cached_wrapped_summary', summary);
     await _save();
   }
 }

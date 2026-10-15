@@ -637,6 +637,10 @@ class ThemeSettingsState {
 class ThemeController extends StateNotifier<ThemeSettingsState> {
   ThemeController() : super(_loadInitialState());
 
+  void hydrateFromStorage() {
+    state = _loadInitialState();
+  }
+
   static ThemeSettingsState _loadInitialState() {
     try {
       final saved = LocalPersistenceService.instance.getThemeSettings();

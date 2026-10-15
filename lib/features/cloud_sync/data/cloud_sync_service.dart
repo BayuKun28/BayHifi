@@ -271,6 +271,79 @@ class CloudSyncService {
     }
   }
 
+  /// Mengambil semua pengaturan dan preferensi pengguna dari cloud
+  Future<Map<String, dynamic>?> fetchUserSettings({
+    required String serverUrl,
+    required String token,
+  }) async {
+    final cleanUrl = sanitizeUrl(serverUrl);
+    try {
+      final res = await _dio.get(
+        '$cleanUrl/api/sync/settings',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        final data = res.data as Map<String, dynamic>;
+        if (data['success'] == true && data['settings'] != null) {
+          if (data['settings'] is Map<String, dynamic>) {
+            return data['settings'] as Map<String, dynamic>;
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint('[CloudSyncService] Fetch settings error: $e');
+      return null;
+    }
+  }
+
+  /// Menyimpan semua preferensi pengguna ke cloud
+  Future<bool> saveUserSettings({
+    required String serverUrl,
+    required String token,
+    required Map<String, dynamic> settings,
+  }) async {
+    final cleanUrl = sanitizeUrl(serverUrl);
+    try {
+      final res = await _dio.put(
+        '$cleanUrl/api/sync/settings',
+        data: settings,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return res.statusCode == 200 && res.data?['success'] == true;
+    } catch (e) {
+      debugPrint('[CloudSyncService] Save settings error: $e');
+      return false;
+    }
+  }
+
+  /// Mengambil riwayat log pemutaran (statistik) dari cloud untuk sinkronisasi perangkat baru
+  Future<List<Map<String, dynamic>>> fetchPlaybackLogs({
+    required String serverUrl,
+    required String token,
+    int limit = 500,
+  }) async {
+    final cleanUrl = sanitizeUrl(serverUrl);
+    try {
+      final res = await _dio.get(
+        '$cleanUrl/api/sync/logs',
+        queryParameters: {'limit': limit},
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        final data = res.data as Map<String, dynamic>;
+        if (data['success'] == true && data['logs'] is List) {
+          final list = data['logs'] as List;
+          return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      debugPrint('[CloudSyncService] Fetch logs error: $e');
+      return [];
+    }
+  }
+
   /// Mengambil daftar lagu dari library server
   Future<List<Map<String, dynamic>>> fetchLibraryTracks({
     String? serverUrl,

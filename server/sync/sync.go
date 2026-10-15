@@ -54,14 +54,69 @@ type DspProfileData struct {
 	UpdatedAt        time.Time       `json:"updatedAt,omitempty"`
 }
 
-// SyncLogsHandler handles batch upsert of playback logs from client
+// SyncLogsHandler handles batch upsert and retrieval of playback logs from client
 func SyncLogsHandler(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(auth.UserIDContextKey).(string)
+
+	if r.Method == http.MethodGet {
+		limit := 500
+		if lStr := r.URL.Query().Get("limit"); lStr != "" {
+			if parsed, err := strconv.Atoi(lStr); err == nil && parsed > 0 && parsed <= 5000 {
+				limit = parsed
+			}
+		}
+
+		rows, err := database.DB.Query(`
+			SELECT id, track_id, title, artist, album, genre,
+			       duration_played_ms, track_duration_ms, format, sample_rate, bit_depth,
+			       timestamp, driver_name, target_name, is_auto_eq_active, active_dsp_count, dac_device_name
+			FROM playback_logs
+			WHERE user_id = ?
+			ORDER BY timestamp DESC
+			LIMIT ?
+		`, userID, limit)
+		if err != nil {
+			sendJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "message": err.Error()})
+			return
+		}
+		defer rows.Close()
+
+		logs := []PlaybackLogItem{}
+		for rows.Next() {
+			var l PlaybackLogItem
+			var driver, target, dac sql.NullString
+			var ts time.Time
+			if err := rows.Scan(
+				&l.ID, &l.TrackID, &l.Title, &l.Artist, &l.Album, &l.Genre,
+				&l.DurationPlayedMs, &l.TrackDurationMs, &l.Format, &l.SampleRate, &l.BitDepth,
+				&ts, &driver, &target, &l.IsAutoEqActive, &l.ActiveDspCount, &dac,
+			); err == nil {
+				l.Timestamp = ts.Format(time.RFC3339)
+				if driver.Valid {
+					l.DriverName = driver.String
+				}
+				if target.Valid {
+					l.TargetName = target.String
+				}
+				if dac.Valid {
+					l.DacDeviceName = dac.String
+				}
+				logs = append(logs, l)
+			}
+		}
+
+		sendJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"logs":    logs,
+			"count":   len(logs),
+		})
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	userID := r.Context().Value(auth.UserIDContextKey).(string)
 
 	var req SyncLogsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -298,6 +353,70 @@ func GetWrappedSummaryHandler(w http.ResponseWriter, r *http.Request) {
 		"topArtists":  topArtists,
 		"topTracks":   topTracks,
 	})
+}
+
+// SyncSettingsHandler handles fetching and saving user preferences/settings
+func SyncSettingsHandler(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(auth.UserIDContextKey).(string)
+
+	if r.Method == http.MethodGet {
+		var settingsJSON sql.NullString
+		var updatedAt time.Time
+		err := database.DB.QueryRow(`
+			SELECT settings_json, updated_at
+			FROM user_settings
+			WHERE user_id = ?
+		`, userID).Scan(&settingsJSON, &updatedAt)
+
+		if err == sql.ErrNoRows || !settingsJSON.Valid {
+			sendJSON(w, http.StatusOK, map[string]interface{}{
+				"success":  true,
+				"settings": nil,
+			})
+			return
+		} else if err != nil {
+			sendJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "message": err.Error()})
+			return
+		}
+
+		sendJSON(w, http.StatusOK, map[string]interface{}{
+			"success":   true,
+			"settings":  json.RawMessage(settingsJSON.String),
+			"updatedAt": updatedAt.Format(time.RFC3339),
+		})
+		return
+	}
+
+	if r.Method == http.MethodPut || r.Method == http.MethodPost {
+		var rawBody json.RawMessage
+		if err := json.NewDecoder(r.Body).Decode(&rawBody); err != nil {
+			sendJSON(w, http.StatusBadRequest, map[string]interface{}{"success": false, "message": "Invalid JSON format"})
+			return
+		}
+
+		now := time.Now()
+		_, err := database.DB.Exec(`
+			INSERT INTO user_settings (user_id, settings_json, updated_at)
+			VALUES (?, ?, ?)
+			ON CONFLICT(user_id) DO UPDATE SET
+				settings_json = excluded.settings_json,
+				updated_at = excluded.updated_at
+		`, userID, string(rawBody), now)
+
+		if err != nil {
+			sendJSON(w, http.StatusInternalServerError, map[string]interface{}{"success": false, "message": err.Error()})
+			return
+		}
+
+		sendJSON(w, http.StatusOK, map[string]interface{}{
+			"success":   true,
+			"message":   "User settings saved successfully",
+			"updatedAt": now.Format(time.RFC3339),
+		})
+		return
+	}
+
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
 func sendJSON(w http.ResponseWriter, status int, data interface{}) {

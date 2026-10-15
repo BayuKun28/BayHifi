@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../settings/presentation/controllers/player_customization_controller.dart';
+import '../domain/pro_q_rta_style.dart';
 import 'controllers/eq_controller.dart';
 import 'controllers/eq_state.dart';
 import 'widgets/band_strip_bar.dart';
@@ -227,16 +229,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
                   const SizedBox(width: 12),
 
-                  // [∿ RTA] Button
-                  _buildToolbarButton(
-                    context: context,
-                    icon: HugeIcons.strokeRoundedAudioWaveform,
-                    label: 'RTA',
-                    color: const Color(0xFF00E5FF),
-                    isActive: state.isRtaEnabled,
-                    isSolid: isSolid,
-                    onTap: () => notifier.toggleRta(),
-                  ),
+                  // [∿ RTA Quick Group (Toggle + Style Dropdown)]
+                  _buildRtaToolbarGroup(context, state, notifier, isSolid),
 
                   const SizedBox(width: 6),
 
@@ -777,7 +771,226 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
       ),
     );
   }
+
+  Widget _buildRtaToolbarGroup(
+    BuildContext context,
+    EqState state,
+    EqController notifier,
+    bool isSolid,
+  ) {
+    final theme = Theme.of(context);
+    const rtaCyan = Color(0xFF00E5FF);
+    final isActive = state.isRtaEnabled;
+    final currentStyle = ref.watch(playerCustomizationProvider).proQRtaStyle;
+
+    return Container(
+      height: 28,
+      decoration: BoxDecoration(
+        color: isActive
+            ? StudioSurfaceTheme.tintedContainer(
+                context,
+                rtaCyan,
+                isSolid: isSolid,
+                translucentAlpha: 0.12,
+              )
+            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isActive
+              ? (isSolid ? theme.colorScheme.outline : rtaCyan.withValues(alpha: 0.8))
+              : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          width: 1.0,
+        ),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: rtaCyan.withValues(alpha: isSolid ? 0.15 : 0.25),
+                  blurRadius: 6,
+                ),
+              ]
+            : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 1. Toggle RTA ON/OFF
+          InkWell(
+            onTap: () => notifier.toggleRta(),
+            borderRadius: const BorderRadius.horizontal(left: Radius.circular(5)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedAudioWaveform,
+                    size: 11.5,
+                    color: isActive ? rtaCyan : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'RTA',
+                    style: TextStyle(
+                      color: isActive ? rtaCyan : theme.colorScheme.onSurfaceVariant,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Vertical separator
+          Container(
+            width: 1.0,
+            height: 14,
+            color: isActive
+                ? rtaCyan.withValues(alpha: 0.35)
+                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          ),
+
+          // 2. Style Dropdown Quick Switcher
+          PopupMenuButton<ProQRtaStyle>(
+            color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(
+                color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
+                width: 1,
+              ),
+            ),
+            tooltip: 'RTA Spectrum Graph Style',
+            onSelected: (style) {
+              ref.read(playerCustomizationProvider.notifier).setProQRtaStyle(style);
+              notifier.setRtaStyle(style);
+            },
+            itemBuilder: (ctx) {
+              final items = <PopupMenuEntry<ProQRtaStyle>>[];
+              items.add(PopupMenuItem<ProQRtaStyle>(
+                enabled: false,
+                height: 28,
+                child: Text(
+                  'RTA SPECTRUM STYLE',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ));
+
+              for (final s in ProQRtaStyle.values) {
+                final isCurr = currentStyle == s;
+                items.add(PopupMenuItem<ProQRtaStyle>(
+                  value: s,
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: isCurr
+                            ? HugeIcons.strokeRoundedCheckmarkCircle02
+                            : _getProQRtaIcon(s),
+                        size: 13,
+                        color: isCurr ? rtaCyan : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              s.label,
+                              style: TextStyle(
+                                color: isCurr ? rtaCyan : theme.colorScheme.onSurface,
+                                fontSize: 11.5,
+                                fontWeight: isCurr ? FontWeight.bold : FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              s.description,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontSize: 9.0,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ));
+              }
+              return items;
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _getRtaShortLabel(currentStyle),
+                    style: TextStyle(
+                      color: isActive ? rtaCyan : theme.colorScheme.onSurfaceVariant,
+                      fontSize: 9.0,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowDown01,
+                    size: 10,
+                    color: isActive ? rtaCyan : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getRtaShortLabel(ProQRtaStyle style) {
+    switch (style) {
+      case ProQRtaStyle.bars:
+        return 'BARS';
+      case ProQRtaStyle.filledCurve:
+        return 'FILL';
+      case ProQRtaStyle.wireframe:
+        return 'LINE';
+      case ProQRtaStyle.m3Pillars:
+        return 'M3';
+      case ProQRtaStyle.peakDots:
+        return 'DOTS';
+      case ProQRtaStyle.laserBeam:
+        return 'LASER';
+    }
+  }
+
+  dynamic _getProQRtaIcon(ProQRtaStyle style) {
+    switch (style) {
+      case ProQRtaStyle.bars:
+        return HugeIcons.strokeRoundedSlidersVertical;
+      case ProQRtaStyle.filledCurve:
+        return HugeIcons.strokeRoundedAudioWaveform;
+      case ProQRtaStyle.wireframe:
+        return HugeIcons.strokeRoundedActivity01;
+      case ProQRtaStyle.m3Pillars:
+        return HugeIcons.strokeRoundedLayers01;
+      case ProQRtaStyle.peakDots:
+        return HugeIcons.strokeRoundedGrid;
+      case ProQRtaStyle.laserBeam:
+        return HugeIcons.strokeRoundedSparkles;
+    }
+  }
 }
+
 
 // ─── Fullscreen Name Input Page ─────────────────────────────────────────────
 

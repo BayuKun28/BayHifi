@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../pro_q_studio/domain/pro_q_rta_style.dart';
 
 enum AlbumArtStyle {
   cdJewel('CD Jewel Case', 'Acrylic jewel case with spine tray and hologram optical sheen'),
@@ -172,6 +173,7 @@ class PlayerCustomizationSettings {
   final bool trackShowDirectFav;
   final TrackTileSwipeAction trackSwipeLeft;
   final TrackTileSwipeAction trackSwipeRight;
+  final ProQRtaStyle proQRtaStyle;
 
   const PlayerCustomizationSettings({
     this.backdropMode = NowPlayingBackdropMode.albumArtGlow,
@@ -197,6 +199,7 @@ class PlayerCustomizationSettings {
     this.trackShowDirectFav = true,
     this.trackSwipeLeft = TrackTileSwipeAction.addToQueue,
     this.trackSwipeRight = TrackTileSwipeAction.toggleFavorite,
+    this.proQRtaStyle = ProQRtaStyle.wireframe,
   });
 
   PlayerCustomizationSettings copyWith({
@@ -223,6 +226,7 @@ class PlayerCustomizationSettings {
     bool? trackShowDirectFav,
     TrackTileSwipeAction? trackSwipeLeft,
     TrackTileSwipeAction? trackSwipeRight,
+    ProQRtaStyle? proQRtaStyle,
   }) {
     return PlayerCustomizationSettings(
       backdropMode: backdropMode ?? this.backdropMode,
@@ -248,6 +252,7 @@ class PlayerCustomizationSettings {
       trackShowDirectFav: trackShowDirectFav ?? this.trackShowDirectFav,
       trackSwipeLeft: trackSwipeLeft ?? this.trackSwipeLeft,
       trackSwipeRight: trackSwipeRight ?? this.trackSwipeRight,
+      proQRtaStyle: proQRtaStyle ?? this.proQRtaStyle,
     );
   }
 }

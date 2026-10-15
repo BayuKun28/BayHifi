@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 74 Fase (Fase 1–73 Selesai • Fase 74 In Progress)
+- **Total Fase**: 75 Fase (Fase 1–75 Selesai • 100% Passing Tests)
 - **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 74: BayHifi Web & Docker Backend Service (User Auth, Offline-First Studio Wrapped Sync, AutoEQ Cloud & Directory Audio Streamer)_
+- **Status Proyek**: _Phase 75: Pro-Q Studio Real-Time Spectrum Graph Customization (Multi-Style RTA Engine & Quick Switcher)_
 
 ---
 
@@ -2012,6 +2012,62 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
     - [x] **Empty State & Menu Actions**: Added responsive `LOAD SERVER MUSIC LIBRARY` button in `unified_library_screen.dart` when running on Web (`kIsWeb`), and added `Sync Server Music` in the options menu.
     - [x] **Stream & Cover Resolution**: Updated `StudioArtworkWidget` and `PlayerController` with safe `Uri.base` and relative `/api/library/stream/{id}` / `/api/library/cover/{id}` streaming with `!kIsWeb` guards protecting against Web runtime file crashes.
     - [x] **Verified via Live Browser**: Verified 684 songs rendered with cover art and successful audio streaming/playback at `http://localhost:8111/`.
+- [x] **Phase 75 — Pro-Q Studio Real-Time Spectrum Graph Customization (Multi-Style RTA Engine & Quick Switcher) (Completed)**:
+  - [x] **75.1 Domain Model Definition**:
+    - [x] Create `ProQRtaStyle` enum with 6 studio styles: `bars` (Multi-Band Studio Bars), `filledCurve` (Smooth Spectral Fill), `wireframe` (Precision Line Contour), `m3Pillars` (M3 Expressive Pillars), `peakDots` (Matrix Peak Dots), and `laserBeam` (Studio Laser Trace).
+  - [x] **75.2 Persistence & Controller Integration**:
+    - [x] Integrate `proQRtaStyle` into `PlayerCustomizationSettings` and `PlayerCustomizationNotifier` with persistence key `'pro_q_rta_style'`.
+    - [x] Integrate `rtaStyle` into `EqState` and `EqController` with automatic storage synchronization.
+  - [x] **75.3 Zero-Allocation CustomPainter Engine**:
+    - [x] Implement smooth Catmull-Rom Cubic Bézier spline math, vertical area gradient fills, wireframe strokes, M3 squircle capsule pillars with floating pills, matrix constellation peak dots, and dual-layer neon laser bloom in `EqCurvePainter`.
+    - [x] Maintain zero object allocation during 60–120 FPS paint cycles using pre-allocated coordinate arrays and reusable paths.
+    - [x] Wire `rtaStyle` parameter through `InteractiveEqCanvas`.
+  - [x] **75.4 UI Presentation & Dual-Location Switching**:
+    - [x] Add Bento Card dropdown selector `PRO-Q STUDIO REALTIME SPECTRUM GRAPH` in `VisualizerSettingsScreen` under `VISUALIZER & DISPLAY`.
+    - [x] Add Quick Switcher popover toolbar group `[∿ RTA | BARS ▾]` in `ProQStudioScreen` top toolbar for instant in-studio style switching without leaving EQ.
+  - [x] **75.5 Automated Testing & Verification**:
+    - [x] Create comprehensive unit and widget tests (`test/pro_q_rta_styles_test.dart` - 13/13 tests passing).
+    - [x] Run regression test suite (`test/phase_33_visualizer_expansion_test.dart`, `test/auto_eq_test.dart`, `test/dsp_rack_and_pro_q_sync_test.dart` - 46/46 tests passing).
+    - [x] Run `flutter analyze`: **0 errors, 0 warnings** (100% clean).
+  - [x] **75.6 Bidirectional Reactive Synchronization Fix**:
+    - [x] **Painter Repaint Evaluation**: Added `oldDelegate.rtaStyle != rtaStyle` and `oldDelegate.isRawBypassed != isRawBypassed` to `EqCurvePainter.shouldRepaint()`, ensuring the canvas immediately marks itself dirty and repaints when style changes occur without waiting for new FFT frames.
+    - [x] **Reactive Provider Subscriptions**: Linked `InteractiveEqCanvas` to `ref.watch(playerCustomizationProvider)` and `pro_q_studio_screen.dart` toolbar pills to react directly to `customSettings.proQRtaStyle`.
+    - [x] **Dual Controller Synchronization**: Ensured `VisualizerSettingsScreen` updates both `playerCustomizationProvider` and `eqControllerProvider` in lockstep, with unconditional persistence hydration in `EqController._hydrateActiveState()`.
+- [x] **Phase 76 — Precision Line Contour Default Enforcement & Per-User Settings & Statistics Isolation (Completed)**:
+  - [x] **76.1 Precision Line Contour Default Enforcement (`ProQRtaStyle.wireframe`)**:
+    - [x] Added `ProQRtaStyle.defaultStyle = ProQRtaStyle.wireframe;` with fallback handling for null and unknown style values in `ProQRtaStyle.fromString`.
+    - [x] Set default RTA style to `ProQRtaStyle.wireframe` (`'LINE'`) across `PlayerCustomizationSettings`, `EqState`, and `LocalPersistenceService`.
+    - [x] Updated all 13 unit and widget tests in `test/pro_q_rta_styles_test.dart` to assert default wireframe line contour rendering (13/13 passing).
+  - [x] **76.2 Go Multi-Tenant Settings Sync Backend Engine**:
+    - [x] Created `user_settings` table migration in SQLite (`server/database/db.go`) with foreign key cascade on `user_id`.
+    - [x] Implemented `SyncSettingsHandler` (`server/sync/sync.go`) supporting `GET` (fetch active user settings bundle) and `PUT`/`POST` (atomic upsert of user settings bundle).
+    - [x] Added `GET` support to `SyncLogsHandler` (`server/sync/sync.go`) allowing user retrieval of historical playback logs.
+    - [x] Registered `/api/sync/settings` route behind `AuthMiddleware` in `server/main.go`.
+  - [x] **76.3 Multi-User Storage Partitioning Engine (`LocalPersistenceService`)**:
+    - [x] Added `_activeUserId` namespace management defaulting to `'guest'`.
+    - [x] Defined `_unscopedGlobalKeys` for hardware/system settings (`saved_music_folders`, `saved_library_tracks`, `desktop_window_geometry`, `bayhifi_cloud_server_url`, `audio_cache_version`).
+    - [x] Implemented `_readScoped`, `_writeScoped`, and `_removeScoped` with `u_${activeUserId}_$key` namespace isolation.
+    - [x] Added automatic fallback to legacy keys for guest sessions ensuring 100% backward compatibility for existing disk data.
+    - [x] Implemented `switchUser(targetUserId, {cloneGuestIfEmpty: true})` allowing seamless initial clone of guest preferences into newly registered accounts.
+    - [x] Implemented `exportCurrentUserSettings()` and `importCurrentUserSettings(bundle)`.
+    - [x] Implemented `importPlaybackLogs(remoteLogs)` with log ID deduplication and chronological ordering.
+  - [x] **76.4 Client Remote Sync & Auto-Apply Hydration Lifecycle (`CloudSyncService` & `CloudAuthController`)**:
+    - [x] Implemented `fetchUserSettings`, `saveUserSettings`, and `fetchPlaybackLogs` in `CloudSyncService`.
+    - [x] Added `_autoApplyUserConfiguration()` in `CloudAuthController` that immediately synchronizes state across:
+      - `ThemeController.hydrateFromStorage()` (palette, dark/light mode, wallpaper)
+      - `PlayerCustomizationController.hydrateFromStorage()` (RTA style, artwork style, gestures)
+      - `EqController.hydrateFromStorage()` (active EQ curve, preamp, bands)
+      - `DspRackController.hydrateFromStorage()` (tube saturation, limiter, reverb, crossfeed)
+      - `UnifiedLibraryController.reloadFromPersistence()` (custom playlists, favorites)
+      - `analyticsRevisionProvider` (Studio Wrapped statistics and telemetry charts)
+    - [x] Wired user switching and remote hydration directly into `login()`, `register()`, `_hydrateSession()`, and `logout()`.
+    - [x] Updated `syncNow()` to upload full settings bundles alongside playback logs and DSP profiles.
+  - [x] **76.5 Quality Gate & Automated Verification**:
+    - [x] Created `test/user_settings_and_stats_isolation_test.dart` with 8 comprehensive unit and integration tests (8/8 passing).
+    - [x] Verified zero bleed between user partitions, proper global key sharing, guest cloning, deduplication, and complete login/logout auto-apply cycles.
+    - [x] Ran `flutter analyze`: **0 errors, 0 warnings** (100% clean).
+    - [x] Ran all affected test suites (`test/user_settings_and_stats_isolation_test.dart`, `test/pro_q_rta_styles_test.dart`, `test/cloud_sync_and_profile_ui_test.dart`, `test/features/cloud_sync/change_password_test.dart`): **100% passing (32/32 tests)**.
+
 
 
 

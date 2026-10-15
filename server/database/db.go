@@ -65,6 +65,13 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 	);
 
+	CREATE TABLE IF NOT EXISTS user_settings (
+		user_id TEXT PRIMARY KEY,
+		settings_json TEXT NOT NULL,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+	);
+
 	CREATE TABLE IF NOT EXISTS playback_logs (
 		id TEXT PRIMARY KEY,
 		user_id TEXT NOT NULL,
