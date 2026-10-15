@@ -313,7 +313,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         libraryState.currentTab == CollectionTab.artists;
 
     final mediaQuery = MediaQuery.of(context);
-    final isExpandedLayout = mediaQuery.size.width >= 600 || mediaQuery.orientation == Orientation.landscape;
     final isDesktopLayout = mediaQuery.size.width >= 960;
     final selectionState = ref.watch(librarySelectionProvider);
     final showDesktopShuffleFab = isDesktopLayout &&
@@ -607,9 +606,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       body: Column(
             children: [
               // ─── 0. CATEGORY TABS (TRACKS / ALBUMS / ARTISTS / GENRES / FOLDERS / YOUTUBE) ───
-              // Rendered on Tablet & Landscape/Desktop; on Android/Mobile Portrait FAB is used instead.
-              if (isExpandedLayout)
-                _buildCategoryTabsRow(context, libraryState, controller, primaryColor, theme, isSolid),
+              _buildCategoryTabsRow(context, libraryState, controller, primaryColor, theme, isSolid),
 
               // ─── 1. SUB-HEADER UTILITY ROW (Item Count & Grid/List Layout Switcher) ───
               Container(
@@ -923,12 +920,12 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     final tabs = [
       (tab: CollectionTab.tracks, label: 'Tracks', count: state.totalTracksCount, icon: HugeIcons.strokeRoundedMusicNote01, color: primaryColor),
-      (tab: CollectionTab.albums, label: 'Albums', count: state.albums.length, icon: HugeIcons.strokeRoundedDisc, color: StudioCategoryColors.storageIndigo),
-      (tab: CollectionTab.artists, label: 'Artists', count: state.artists.length, icon: HugeIcons.strokeRoundedMic01, color: StudioCategoryColors.bitPerfect),
-      (tab: CollectionTab.genres, label: 'Genres', count: state.genres.length, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.hiResGold),
-      (tab: CollectionTab.downloads, label: 'Downloads', count: activeCount > 0 ? activeCount : null, icon: HugeIcons.strokeRoundedDownload01, color: const Color(0xFF10B981)),
-      (tab: CollectionTab.folders, label: 'Folders', count: state.folders.length, icon: HugeIcons.strokeRoundedFolder01, color: StudioCategoryColors.libraryScanner),
-      (tab: CollectionTab.youtube, label: 'YouTube', count: null, icon: HugeIcons.strokeRoundedPlayList, color: StudioCategoryColors.youtubeMusic),
+      (tab: CollectionTab.albums, label: 'Albums', count: state.albums.length, icon: HugeIcons.strokeRoundedDisc, color: primaryColor),
+      (tab: CollectionTab.artists, label: 'Artists', count: state.artists.length, icon: HugeIcons.strokeRoundedMic01, color: primaryColor),
+      (tab: CollectionTab.genres, label: 'Genres', count: state.genres.length, icon: HugeIcons.strokeRoundedPlayList, color: primaryColor),
+      (tab: CollectionTab.downloads, label: 'Downloads', count: activeCount > 0 ? activeCount : null, icon: HugeIcons.strokeRoundedDownload01, color: primaryColor),
+      (tab: CollectionTab.folders, label: 'Folders', count: state.folders.length, icon: HugeIcons.strokeRoundedFolder01, color: primaryColor),
+      (tab: CollectionTab.youtube, label: 'YouTube', count: null, icon: HugeIcons.strokeRoundedPlayList, color: primaryColor),
     ];
 
     return Container(
@@ -950,17 +947,17 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               ref.read(librarySelectionProvider.notifier).clear();
               controller.setTab(item.tab);
             },
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(20),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
                 color: isSelected
                     ? (isSolid
                         ? StudioSurfaceTheme.tintedContainer(context, accent, isSolid: true, solidBlendAlpha: 0.22)
                         : StudioSurfaceTheme.tintedContainer(context, accent, isSolid: false, translucentAlpha: 0.18))
                     : StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
                       ? (isSolid ? theme.colorScheme.outline : accent.withValues(alpha: 0.6))

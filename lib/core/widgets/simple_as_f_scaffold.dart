@@ -31,7 +31,9 @@ class SimpleAsFScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = backgroundColor ?? SimpleAsFTheme.forestCanvas;
+    final baseColor = backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
+    final primaryAccent = SimpleAsFTheme.accent(context);
+    final glowColor = SimpleAsFTheme.ambientGlow(context);
 
     return Scaffold(
       backgroundColor: baseColor,
@@ -58,8 +60,8 @@ class SimpleAsFScaffold extends StatelessWidget {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        SimpleAsFTheme.forestGlowAccent.withValues(alpha: 0.35),
-                        SimpleAsFTheme.forestGlow.withValues(alpha: 0.15),
+                        primaryAccent.withValues(alpha: 0.12),
+                        glowColor.withValues(alpha: 0.15),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.5, 1.0],
@@ -68,6 +70,7 @@ class SimpleAsFScaffold extends StatelessWidget {
                 ),
               ),
             ),
+
             // Soft bottom-right glow
             Positioned(
               bottom: 40,
@@ -80,7 +83,7 @@ class SimpleAsFScaffold extends StatelessWidget {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        SimpleAsFTheme.forestGlow.withValues(alpha: 0.25),
+                        primaryAccent.withValues(alpha: 0.08),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 1.0],

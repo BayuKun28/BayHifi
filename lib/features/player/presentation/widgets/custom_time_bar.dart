@@ -326,7 +326,12 @@ class _CustomTimeBarState extends State<CustomTimeBar> {
                                 ? (theme.brightness == Brightness.dark
                                     ? Colors.white
                                     : widget.primaryColor)
-                                : const Color(0xFF23352B),
+                                : Color.alphaBlend(
+                                    widget.primaryColor.withValues(alpha: 0.15),
+                                    theme.brightness == Brightness.dark
+                                        ? const Color(0xFF161E1A)
+                                        : const Color(0xFFDCE6DF),
+                                  ),
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),

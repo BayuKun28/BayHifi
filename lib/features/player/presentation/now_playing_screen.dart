@@ -856,8 +856,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 icon: Badge(
                   isLabelVisible: playback.queue.isNotEmpty,
                   label: Text('${playback.queue.length}'),
-                  backgroundColor: SimpleAsFTheme.emeraldMint,
-                  textColor: Colors.black,
+                  backgroundColor: primary,
+                  textColor: theme.colorScheme.onPrimary,
                   smallSize: 8,
                   child: HugeIcon(
                     icon: HugeIcons.strokeRoundedPlaylist01,
@@ -907,7 +907,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           },
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedShuffle,
-            color: playback.isShuffle ? SimpleAsFTheme.emeraldMint : Colors.white.withValues(alpha: 0.6),
+            color: playback.isShuffle ? primary : Colors.white.withValues(alpha: 0.6),
             size: 22,
           ),
           tooltip: 'Shuffle Playback',
@@ -944,10 +944,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             height: 64,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: SimpleAsFTheme.emeraldMint,
+              color: primary,
               boxShadow: [
                 BoxShadow(
-                  color: SimpleAsFTheme.emeraldMint.withValues(alpha: 0.35),
+                  color: primary.withValues(alpha: 0.35),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),
@@ -955,19 +955,19 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             ),
             child: Center(
               child: playback.isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: Color(0xFF0B110E),
+                        color: theme.colorScheme.onPrimary,
                       ),
                     )
                   : HugeIcon(
                       icon: playback.isPlaying
                           ? HugeIcons.strokeRoundedPause
                           : HugeIcons.strokeRoundedPlay,
-                      color: const Color(0xFF0B110E),
+                      color: theme.colorScheme.onPrimary,
                       size: 28,
                     ),
             ),
@@ -1005,7 +1005,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 ? HugeIcons.strokeRoundedRepeatOne01
                 : HugeIcons.strokeRoundedRepeat,
             color: playback.repeatMode != PlaybackRepeatMode.off
-                ? SimpleAsFTheme.emeraldMint
+                ? primary
                 : Colors.white.withValues(alpha: 0.6),
             size: 22,
           ),
@@ -1021,6 +1021,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     Track? track,
     EqState eqState,
   ) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1046,7 +1047,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: track.isHiRes ? StudioCategoryColors.hiResGold : SimpleAsFTheme.emeraldMint,
+                      color: track.isHiRes ? StudioCategoryColors.hiResGold : primary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1077,12 +1078,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: eqState.isEnabled
-                  ? SimpleAsFTheme.emeraldMint.withValues(alpha: 0.15)
+                  ? primary.withValues(alpha: 0.15)
                   : Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: eqState.isEnabled
-                    ? SimpleAsFTheme.emeraldMint.withValues(alpha: 0.3)
+                    ? primary.withValues(alpha: 0.3)
                     : Colors.transparent,
                 width: 1,
               ),
@@ -1093,7 +1094,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 HugeIcon(
                   icon: HugeIcons.strokeRoundedSlidersVertical,
                   size: 14,
-                  color: eqState.isEnabled ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
+                  color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
                 ),
                 const SizedBox(width: 5),
                 Text(
@@ -1102,7 +1103,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.6,
-                    color: eqState.isEnabled ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
+                    color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
                   ),
                 ),
               ],

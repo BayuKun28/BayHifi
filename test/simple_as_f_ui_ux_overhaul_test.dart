@@ -37,11 +37,16 @@ void main() {
       expect(settings.timeBarStyle, TimeBarStyle.waveform);
     });
 
-    testWidgets('4. TwoToneHeader renders white keyword and accent keyword in RichText',
+    testWidgets('4. TwoToneHeader renders white keyword and accent keyword dynamically from Theme',
         (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: const ColorScheme.dark(
+              primary: SimpleAsFTheme.emeraldMint,
+            ),
+          ),
+          home: const Scaffold(
             body: TwoToneHeader(
               primaryText: 'RECENTLY',
               accentText: 'PLAYED',
@@ -237,6 +242,100 @@ void main() {
       expect(find.byType(CustomTimeBar), findsOneWidget);
       expect(find.text('01:25'), findsOneWidget);
       expect(find.text('-02:20'), findsOneWidget);
+    });
+
+    testWidgets('10. SimpleAsFTheme dynamically resolves to selected custom palette (Amber Tube)',
+        (tester) async {
+      const amberAccent = Color(0xFFF59E0B);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            scaffoldBackgroundColor: const Color(0xFF141009),
+            colorScheme: const ColorScheme.dark(
+              primary: amberAccent,
+              surfaceContainer: Color(0xFF282115),
+            ),
+          ),
+          home: Builder(
+            builder: (context) {
+              final accent = SimpleAsFTheme.accent(context);
+              final canvas = SimpleAsFTheme.canvas(context);
+              final activeCapsule = SimpleAsFTheme.surfaceActive(context);
+
+              expect(accent, amberAccent);
+              expect(canvas, const Color(0xFF141009));
+              expect(activeCapsule, const Color(0xFF282115));
+
+              return Scaffold(
+                body: TwoToneHeader(
+                  primaryText: 'AMBER',
+                  accentText: 'STUDIO',
+                  fontSize: 20,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final textFinder = find.byType(Text);
+      final textWidget = tester.widget<Text>(textFinder);
+      final textSpan = textWidget.textSpan! as TextSpan;
+      final span2 = textSpan.children![1] as TextSpan;
+
+      expect(span2.text, 'STUDIO');
+      expect(span2.style?.color, amberAccent);
+    });
+
+    testWidgets('11. SimpleAsFTheme decorators and colors adapt dynamically to Midnight Sapphire',
+        (tester) async {
+      const sapphireAccent = Color(0xFF2563EB);
+      const sapphireCanvas = Color(0xFF0A0F1D);
+      const sapphireContainer = Color(0xFF131D36);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            scaffoldBackgroundColor: sapphireCanvas,
+            colorScheme: const ColorScheme.dark(
+              primary: sapphireAccent,
+              surfaceContainer: sapphireContainer,
+            ),
+          ),
+          home: Builder(
+            builder: (context) {
+              final accent = SimpleAsFTheme.accent(context);
+              final canvas = SimpleAsFTheme.canvas(context);
+              final surfaceContainer = SimpleAsFTheme.surfaceContainer(context);
+              final unplayedBar = SimpleAsFTheme.unplayedBarColor(context);
+              final ambientGlow = SimpleAsFTheme.ambientGlow(context);
+              final capsuleDecoration = SimpleAsFTheme.activeTrackCapsuleDecoration(context);
+
+              expect(accent, sapphireAccent);
+              expect(canvas, sapphireCanvas);
+              expect(surfaceContainer, sapphireContainer);
+              expect(unplayedBar, Color.alphaBlend(sapphireAccent.withValues(alpha: 0.12), sapphireCanvas));
+              expect(ambientGlow, Color.alphaBlend(sapphireAccent.withValues(alpha: 0.08), sapphireCanvas));
+              expect(capsuleDecoration.color, sapphireContainer);
+
+              return const Scaffold(body: SizedBox());
+            },
+          ),
+        ),
+      );
+    });
+
+    test('12. Quality Gate: No emojis in theme definitions or typography tokens', () {
+      final emojiRegex = RegExp(
+        r'[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]',
+        unicode: true,
+      );
+
+      for (final palette in AppPalette.allPresets) {
+        expect(emojiRegex.hasMatch(palette.name), isFalse,
+            reason: 'Palette name ${palette.name} must not contain emojis');
+      }
     });
   });
 }

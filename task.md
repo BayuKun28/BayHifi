@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 79 Fase (Fase 1–78 Selesai • Fase 79 In Progress)
-- **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Obsidian Forest & Emerald Mint Palette (`#0B110E`, `#2EE672`), Two-Tone Typography, Interactive Waveform Seekbar, Uncarded Floating Track Rows, Floating Capsule MiniPlayer & Dock, HugeIcons, Zero Emojis (100% English)_
-- **Status Proyek**: _Phase 79: Simple-As-F UI/UX Overhaul PRD & Implementation Roadmap_
+- **Total Fase**: 80 Fase (Fase 1–80 Selesai • 100% Passing)
+- **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Obsidian Forest & Emerald Mint Palette (`#0B110E`, `#2EE672`), Two-Tone Typography, Interactive Waveform Seekbar, Uncarded Floating Track Rows, Dynamic Theme Palette Binding, HugeIcons, Zero Emojis (100% English)_
+- **Status Proyek**: _Phase 80: Dynamic Color Palette Adaptation, Dashboard Decluttering & Screen Harmonization Complete_
 
 ---
 
@@ -2158,6 +2158,36 @@ Transformasi total antarmuka Baydev HiFi menuju estetika ultra-minimalist, berna
 - [x] **79.6 Automated Verification & Quality Gate**:
   - [x] Buat unit & widget tests untuk komponen baru (`test/simple_as_f_ui_ux_overhaul_test.dart`).
   - [x] Jalankan `flutter analyze` dan `flutter test` memastikan 0 errors, 0 warnings, dan 100% passing tests.
+
+---
+
+## Fase 80: Dynamic Color Palette Adaptation, Dashboard Decluttering & Screen Harmonization
+
+Rombak total seluruh screen aplikasi mengikuti referensi Simple-As-F minimalis, decluttering dashboard yang terlalu sesak ("yang perlu saja"), dan mengikat seluruh token warna tema (icon, card, button, active capsule, waveform seekbar) secara dinamis ke pengaturan tema aplikasi (Settings Theming / Palettes / Dynamic Album Art).
+
+- [x] **80.1 Dynamic Context-Aware Token System (`SimpleAsFTheme`)**:
+  - [x] Tambahkan helper getters dinamis: `SimpleAsFTheme.accent(context)`, `accentLight(context)`, `canvas(context)`, `surface(context)`, `surfaceContainer(context)`, `surfaceActive(context)`, `unplayedBarColor(context)`, `ambientGlow(context)`, `activeTrackCapsuleDecoration(context)`, `squircleCardDecoration(context)`.
+  - [x] Buat `TwoToneHeader.accentColor` otomatis resolve ke `SimpleAsFTheme.accent(context)` jika tidak dioverride.
+  - [x] Buat `SimpleAsFScaffold` secara dinamis memadukan ambient radial glow dengan `scaffoldBackgroundColor` dan `colorScheme.primary`.
+- [x] **80.2 Dashboard Decluttering ("Yang Perlu Saja")**:
+  - [x] Bersihkan widget-widget bento yang terlalu padat dan sesak:
+    - Hapus `EngineTelemetryBentoCard`
+    - Hapus `StudioWrappedBentoBanner`
+    - Hapus `ListeningStatisticsCard`
+  - [x] Pertahankan hanya 3 bagian esensial yang bernapas lega:
+    1. Greeting Header & Avatar (`DashboardProfileButton` + `TwoToneHeader('DISCOVER', 'MUSIC')`)
+    2. Recently Played 2-Column Squircle Grid (`SimpleAsFDiscoveryGrid` dengan dynamic accent quick-play button)
+    3. Liked Songs & Download Toggle Row + Uncarded Floating `TrackTile` dengan dynamic active capsule.
+- [x] **80.3 Dynamic Theming across All Screens & Widgets**:
+  - [x] `TrackTile`: Active capsule background, title, progress indicator, and waveform icon dynamically bind to `surfaceActive(context)` and `accent(context)`.
+  - [x] `DownloadToggleRow`: Pill switch dynamically adapts track and border to `accent(context)`.
+  - [x] `CustomTimeBar`: Unplayed waveform bars dynamically alpha-blend with `primaryColor` and `scaffoldBackgroundColor`.
+  - [x] `NowPlayingScreen`: Centerpiece play/pause button, queue badge, shuffle/repeat toggles, and options sheet bind to `primary` and `onPrimary`.
+  - [x] `SettingsScreen`: Hapus telemetry hero banner yang sesak, buat kartu profil dan setting tiles squircle bersih.
+  - [x] `UnifiedLibraryScreen`: Category tabs pill bar (`Tracks`, `Albums`, `Artists`, `Genres`, `Downloads`, `Folders`, `YouTube`) tampil di semua form factor (mobile, tablet, desktop) dengan pill border radius (`20px`) dan dynamic `primaryColor`.
+- [x] **80.4 Automated Verification & Quality Gate**:
+  - [x] 12 unit & widget tests di `test/simple_as_f_ui_ux_overhaul_test.dart` (100% pass).
+  - [x] `flutter analyze` 0 errors, 0 warnings across all files.
 
 
 

@@ -12,10 +12,7 @@ import '../../library/presentation/controllers/library_controller.dart';
 import '../../library/presentation/widgets/download_toggle_row.dart';
 import '../../library/presentation/widgets/track_tile.dart';
 import '../../player/presentation/controllers/player_controller.dart';
-import 'widgets/engine_telemetry_bento_card.dart';
-import 'widgets/listening_statistics_card.dart';
 import 'widgets/simple_as_f_discovery_grid.dart';
-import 'widgets/studio_wrapped_bento_banner.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   final VoidCallback? onNavigateToPlayer;
@@ -196,26 +193,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-
-              const SizedBox(height: 28),
-
-              // ─── 4. AUDIOPHILE INSIGHTS & DSP TELEMETRY ──────────────────────
-              const TwoToneHeader(
-                primaryText: 'AUDIO',
-                accentText: 'INSIGHTS',
-                fontSize: 18,
-              ),
-              const SizedBox(height: 12),
-
-              const EngineTelemetryBentoCard(),
-
-              const SizedBox(height: 16),
-
-              const StudioWrappedBentoBanner(),
-
-              const SizedBox(height: 16),
-
-              const ListeningStatisticsCard(),
             ],
           ),
         ),

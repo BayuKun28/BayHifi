@@ -115,7 +115,7 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
                               height: 34,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: SimpleAsFTheme.emeraldMint,
+                                color: SimpleAsFTheme.accent(context),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.35),
@@ -124,11 +124,11 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: HugeIcon(
                                   icon: HugeIcons.strokeRoundedPlay,
                                   size: 16,
-                                  color: Color(0xFF0B110E),
+                                  color: Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             ),

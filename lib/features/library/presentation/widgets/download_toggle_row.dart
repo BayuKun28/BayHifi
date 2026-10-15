@@ -44,11 +44,14 @@ class DownloadToggleRow extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: isDownloaded
-                    ? SimpleAsFTheme.emeraldMint
-                    : const Color(0xFF1B2B22),
+                    ? SimpleAsFTheme.accent(context)
+                    : Color.alphaBlend(
+                        SimpleAsFTheme.accent(context).withValues(alpha: 0.10),
+                        const Color(0xFF1A241F),
+                      ),
                 border: Border.all(
                   color: isDownloaded
-                      ? SimpleAsFTheme.emeraldMint
+                      ? SimpleAsFTheme.accent(context)
                       : Colors.white.withValues(alpha: 0.1),
                   width: 1,
                 ),

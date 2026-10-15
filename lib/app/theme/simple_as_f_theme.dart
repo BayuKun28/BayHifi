@@ -60,8 +60,8 @@ abstract final class SimpleAsFTheme {
   /// Small meta tags & buttons
   static final BorderRadius buttonPillRadius = BorderRadius.circular(999.0);
 
-  // ─── Shared BoxDecorations ────────────────────────────────────────────────
-  /// Active playing track capsule decoration
+  // ─── Static Fallback BoxDecorations ────────────────────────────────────────
+  /// Default active playing track capsule decoration
   static BoxDecoration activeTrackDecoration = BoxDecoration(
     color: surfaceActiveCapsule,
     borderRadius: capsuleRowRadius,
@@ -71,7 +71,7 @@ abstract final class SimpleAsFTheme {
     ),
   );
 
-  /// Squircle Album Art decoration with soft dark drop shadow
+  /// Default squircle album art decoration with soft dark drop shadow
   static BoxDecoration squircleArtworkDecoration({String? imagePath}) => BoxDecoration(
     borderRadius: squircleArtworkRadius,
     color: surfaceElevated,
@@ -89,4 +89,79 @@ abstract final class SimpleAsFTheme {
       ),
     ],
   );
+
+  // ─── Dynamic Context-Aware Accessors ──────────────────────────────────────
+  /// Dynamic vibrant primary accent (derived from Theme's ColorScheme)
+  static Color accent(BuildContext context) =>
+      Theme.of(context).colorScheme.primary;
+
+  /// Dynamic secondary accent
+  static Color accentLight(BuildContext context) =>
+      Theme.of(context).colorScheme.secondary;
+
+  /// Dynamic main background canvas
+  static Color canvas(BuildContext context) =>
+      Theme.of(context).scaffoldBackgroundColor;
+
+  /// Dynamic surface color
+  static Color surface(BuildContext context) =>
+      Theme.of(context).colorScheme.surface;
+
+  /// Dynamic surface container
+  static Color surfaceContainer(BuildContext context) =>
+      Theme.of(context).colorScheme.surfaceContainer;
+
+  /// Dynamic soft dark capsule container for active playing track
+  static Color surfaceActive(BuildContext context) =>
+      Theme.of(context).colorScheme.surfaceContainer;
+
+  /// Dynamic unplayed seekbar bar color
+  static Color unplayedBarColor(BuildContext context) =>
+      Color.alphaBlend(
+        Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+        Theme.of(context).scaffoldBackgroundColor,
+      );
+
+  /// Dynamic subtle hairline border
+  static Color subtleBorder(BuildContext context) =>
+      Theme.of(context).colorScheme.primary.withValues(alpha: 0.18);
+
+  /// Dynamic ambient radial glow color
+  static Color ambientGlow(BuildContext context) =>
+      Color.alphaBlend(
+        Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+        Theme.of(context).scaffoldBackgroundColor,
+      );
+
+  /// Dynamic active playing track capsule decoration
+  static BoxDecoration activeTrackCapsuleDecoration(BuildContext context) =>
+      BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: capsuleRowRadius,
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.20),
+          width: 1.0,
+        ),
+      );
+
+  /// Dynamic squircle card decoration
+  static BoxDecoration squircleCardDecoration(
+    BuildContext context, {
+    BorderRadius? radius,
+  }) =>
+      BoxDecoration(
+        borderRadius: radius ?? squircleCardRadius,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.25),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 16.0,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      );
 }

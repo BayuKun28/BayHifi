@@ -66,9 +66,12 @@ class NowPlayingOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = SimpleAsFTheme.accent(context);
+    final canvasColor = SimpleAsFTheme.canvas(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: SimpleAsFTheme.forestCanvas,
+        color: canvasColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.08),
@@ -107,10 +110,10 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                   if (track != null)
                     Text(
                       track!.format.name.toUpperCase(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: SimpleAsFTheme.emeraldMint,
+                        color: accent,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -123,7 +126,7 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                 icon: HugeIcons.strokeRoundedSlidersVertical,
                 title: 'Pro-Q Studio Equalizer',
                 subtitle: 'Parametric EQ, target matching & biquad filters',
-                iconColor: SimpleAsFTheme.emeraldMint,
+                iconColor: accent,
                 onTap: () {
                   Navigator.pop(context);
                   onOpenProQStudio();

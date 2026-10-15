@@ -32,7 +32,7 @@ class TwoToneHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pColor = primaryColor ?? SimpleAsFTheme.textWhite;
-    final aColor = accentColor ?? SimpleAsFTheme.emeraldMint;
+    final aColor = accentColor ?? SimpleAsFTheme.accent(context);
 
     final headerText = Text.rich(
       TextSpan(

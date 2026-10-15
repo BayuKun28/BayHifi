@@ -107,16 +107,16 @@ class TrackTile extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         color: isSelected
-            ? SimpleAsFTheme.surfaceActiveCapsule
+            ? SimpleAsFTheme.surfaceActive(context)
             : (isTileActive
-                ? SimpleAsFTheme.surfaceActiveCapsule
+                ? SimpleAsFTheme.surfaceActive(context)
                 : Colors.transparent),
         borderRadius: BorderRadius.circular(16),
         border: isSelected
-            ? Border.all(color: SimpleAsFTheme.emeraldMint, width: 1.2)
+            ? Border.all(color: SimpleAsFTheme.accent(context), width: 1.2)
             : (isTileActive
                 ? Border.all(
-                    color: SimpleAsFTheme.emeraldMint.withValues(alpha: 0.35),
+                    color: SimpleAsFTheme.accent(context).withValues(alpha: 0.35),
                     width: 1.0,
                   )
                 : null),
@@ -148,7 +148,7 @@ class TrackTile extends ConsumerWidget {
                   height: 46,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? SimpleAsFTheme.emeraldMint.withValues(alpha: 0.85)
+                        ? SimpleAsFTheme.accent(context).withValues(alpha: 0.85)
                         : Colors.black.withValues(alpha: 0.45),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -172,17 +172,17 @@ class TrackTile extends ConsumerWidget {
                   ),
                   child: Center(
                     child: isBuffering
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.0,
-                              valueColor: AlwaysStoppedAnimation<Color>(SimpleAsFTheme.emeraldMint),
+                              valueColor: AlwaysStoppedAnimation<Color>(SimpleAsFTheme.accent(context)),
                             ),
                           )
-                        : const HugeIcon(
+                        : HugeIcon(
                             icon: HugeIcons.strokeRoundedAudioWaveform,
-                            color: SimpleAsFTheme.emeraldMint,
+                            color: SimpleAsFTheme.accent(context),
                             size: 22,
                           ),
                   ),
@@ -195,7 +195,7 @@ class TrackTile extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontWeight: isTileActive ? FontWeight.w800 : FontWeight.w600,
-              color: isTileActive ? SimpleAsFTheme.emeraldMint : Colors.white,
+              color: isTileActive ? SimpleAsFTheme.accent(context) : Colors.white,
               fontSize: 14,
             ),
           ),
