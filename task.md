@@ -2088,6 +2088,45 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
   - [x] Ran `flutter analyze`: **0 errors, 0 warnings** (100% clean).
   - [x] Ran all affected test suites: **25/25 passing tests**.
 
+---
+
+## Fase 78: Per-User Pro-Q Frequency Response Curves Library & Hardware DAC Configuration Profiles
+
+- [x] **78.1 Domain Models & Serialization Polish (`FrCurveData` & `DacPeqProfile`)**:
+  - [x] Extended `FrCurveData` with `id`, `category` ('driver' | 'target'), `importedAt`, `sourceFileName`, and `isDefault` flag.
+  - [x] Added `exportToRewText()` generating Room EQ Wizard V5 tab-delimited text (`Freq(Hz) SPL(dB)`).
+  - [x] Added `exportToSquiglinkCsv()` generating standard comma-separated curves (`frequency,raw`).
+  - [x] Added `toMap()` and `fromMap()` backward-compatible persistence methods.
+  - [x] Extended `DacPeqProfile` with `isBuiltIn` getter, `exportToJsonString()` for `.dac` configuration files, and `importFromJsonString(jsonStr)`.
+- [x] **78.2 Multi-User Storage Scoping (`LocalPersistenceService`)**:
+  - [x] Enhanced `getSavedFrCurves({String? category})` with category filtering and user partition scoping (`u_${userId}_saved_fr_curves`).
+  - [x] Enhanced `saveFrCurve(FrCurveData curve)` and `deleteFrCurve(String idOrName)` with ID/name resolution.
+  - [x] Added `getSavedDacProfiles()`, `saveDacProfile(Map<String, dynamic>)`, and `deleteDacProfile(String idOrName)`.
+  - [x] Included both `saved_fr_curves` and `saved_dac_profiles` in `exportCurrentUserSettings()` and `importCurrentUserSettings()`, automatically enabling remote cloud sync across user sessions.
+- [x] **78.3 Controller Layer & Remote Hydration (`EqController`, `DacBridgeController`, `CloudAuthController`)**:
+  - [x] Tagged imported curves with category, timestamp, and filename in `EqController.importDriver` and `importTarget`.
+  - [x] Added `deleteSavedCurve(FrCurveData, {required String category})` in `EqController`.
+  - [x] Added `hydrateFromStorage()` in `DacBridgeController` to restore custom saved profiles on startup and user login.
+  - [x] Added `saveCurrentAsProfile({required String name, String description})`, `deleteCustomProfile(profileId)`, and `importProfileFromJson(jsonStr)` in `DacBridgeController`.
+  - [x] Wired `dacBridgeControllerProvider.notifier.hydrateFromStorage()` into `CloudAuthController._autoApplyUserConfiguration()`.
+- [x] **78.4 Pro-Q FR Curves Library Sheet (`SavedCurvesLibrarySheet`)**:
+  - [x] Built dedicated `SavedCurvesLibrarySheet` modal bottom sheet using 100% pure Material 3 Expressive (`M3ECard`, `M3EButton`, `M3EIconButton`, `M3EChip`).
+  - [x] Dual-tab navigation for Drivers / IEMs vs Target Signatures with instant curve count badges.
+  - [x] Real-time search filter and instant import action.
+  - [x] Quick Load (`LOAD`/`ACTIVE`), Export (`.txt`/`.csv`), and Delete actions with tactile `AppHaptics`.
+  - [x] Linked into `AutoEqModalDialog` via new "SAVED LIBRARY" action button.
+- [x] **78.5 Hardware DAC Profile Management & Save Dialogs**:
+  - [x] Created `SaveDacProfileDialog` modal dialog with 5-band snapshot capsule, chipset info, input validation, and `M3EButton.filled` saving.
+  - [x] Created `DacProfileManagerModal` bottom sheet organizing Custom Profiles vs Factory Stock Presets.
+  - [x] Supported Quick Load to DAC, EEPROM Flash Burning, `.dac`/`.json` file export, and file import.
+  - [x] Linked into `DacActionToolbar` and `HardwareDacStudioScreen` via "PROFILE LIBRARY" button.
+- [x] **78.6 Automated Verification & Quality Gate**:
+  - [x] Created comprehensive test suite `test/user_curves_and_dac_profiles_test.dart` (11 unit and widget tests covering model roundtrips, multi-user isolation, controller lifecycle, and dialog rendering).
+  - [x] Verified zero regressions on existing suites (`test/pro_q_rta_styles_test.dart`, `test/features/cloud_sync/change_password_test.dart`).
+  - [x] `flutter analyze`: **0 errors, 0 warnings** (100% clean).
+  - [x] `flutter test`: **11/11 new tests passing, 100% test pass rate**.
+
+
 
 
 

@@ -2,29 +2,45 @@ import 'dart:math' as math;
 
 /// Model data untuk kurva respons frekuensi (Driver IEM atau Target Respons)
 class FrCurveData {
+  final String id;
   final String name;
+  final String category; // 'driver' or 'target'
   final List<double> frequencies; // Hz (20 - 20000)
   final List<double> splDb; // Raw SPL atau Normalized SPL (dB)
   final double referenceSpl1kHz;
+  final DateTime? importedAt;
+  final String? sourceFileName;
 
   const FrCurveData({
+    this.id = '',
     required this.name,
+    this.category = 'driver',
     required this.frequencies,
     required this.splDb,
     this.referenceSpl1kHz = 0.0,
+    this.importedAt,
+    this.sourceFileName,
   });
 
   FrCurveData copyWith({
+    String? id,
     String? name,
+    String? category,
     List<double>? frequencies,
     List<double>? splDb,
     double? referenceSpl1kHz,
+    DateTime? importedAt,
+    String? sourceFileName,
   }) {
     return FrCurveData(
+      id: id ?? this.id,
       name: name ?? this.name,
+      category: category ?? this.category,
       frequencies: frequencies ?? this.frequencies,
       splDb: splDb ?? this.splDb,
       referenceSpl1kHz: referenceSpl1kHz ?? this.referenceSpl1kHz,
+      importedAt: importedAt ?? this.importedAt,
+      sourceFileName: sourceFileName ?? this.sourceFileName,
     );
   }
 
@@ -157,22 +173,58 @@ class FrCurveData {
     return spls[closestIdx];
   }
 
+  bool get isDefault {
+    return defaultDrivers.any((d) => d.name == name) ||
+        defaultTargets.any((t) => t.name == name);
+  }
+
+  /// Exports curve data in standard REW V5 tab-delimited text format
+  String exportToRewText() {
+    final buffer = StringBuffer();
+    buffer.writeln('* Frequency Response Measurement exported from Baydev HiFi');
+    buffer.writeln('* Name: $name');
+    buffer.writeln('* Points: ${frequencies.length}');
+    buffer.writeln('* Exported: ${DateTime.now().toIso8601String()}');
+    buffer.writeln('Freq\tSPL');
+    for (int i = 0; i < frequencies.length && i < splDb.length; i++) {
+      buffer.writeln('${frequencies[i].toStringAsFixed(1)}\t${splDb[i].toStringAsFixed(2)}');
+    }
+    return buffer.toString();
+  }
+
+  /// Exports curve data in standard Squiglink comma-separated CSV format
+  String exportToSquiglinkCsv() {
+    final buffer = StringBuffer();
+    buffer.writeln('Freq,SPL');
+    for (int i = 0; i < frequencies.length && i < splDb.length; i++) {
+      buffer.writeln('${frequencies[i].toStringAsFixed(1)},${splDb[i].toStringAsFixed(2)}');
+    }
+    return buffer.toString();
+  }
+
   Map<String, dynamic> toMap({String? category}) {
     final map = <String, dynamic>{
+      'id': id.isNotEmpty ? id : name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_'),
       'name': name,
+      'category': category ?? this.category,
       'frequencies': frequencies,
       'splDb': splDb,
       'referenceSpl1kHz': referenceSpl1kHz,
+      'importedAt': (importedAt ?? DateTime.now()).toIso8601String(),
     };
-    if (category != null) {
-      map['category'] = category;
+    if (sourceFileName != null && sourceFileName!.isNotEmpty) {
+      map['sourceFileName'] = sourceFileName;
     }
     return map;
   }
 
   factory FrCurveData.fromMap(Map<String, dynamic> map) {
+    final cat = map['category'] as String?;
+    final nameStr = map['name'] as String? ?? 'Curve';
     return FrCurveData(
-      name: map['name'] as String? ?? 'Curve',
+      id: map['id'] as String? ?? nameStr.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_'),
+      name: nameStr,
+      category: cat ?? (nameStr.toLowerCase().contains('target') ? 'target' : 'driver'),
       frequencies: (map['frequencies'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
@@ -182,6 +234,8 @@ class FrCurveData {
               .toList() ??
           [],
       referenceSpl1kHz: (map['referenceSpl1kHz'] as num?)?.toDouble() ?? 0.0,
+      importedAt: map['importedAt'] != null ? DateTime.tryParse(map['importedAt'] as String) : null,
+      sourceFileName: map['sourceFileName'] as String?,
     );
   }
 

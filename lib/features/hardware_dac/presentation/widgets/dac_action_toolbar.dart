@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../domain/models/dac_peq_profile.dart';
+import 'dac_profile_manager_modal.dart';
+import 'save_dac_profile_dialog.dart';
 
 /// Pure Material 3 Expressive Action Toolbar for Hardware DAC operations:
 /// Flashing to EEPROM, Reading from DAC, Preset Selection, and Factory Reset.
@@ -65,17 +67,26 @@ class DacActionToolbar extends StatelessWidget {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: presets.map((preset) {
-                      return Padding(
+                    children: [
+                      ...presets.map((preset) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6.0),
+                          child: M3EChip(
+                            label: preset.name,
+                            onPressed: isConnected && !isBusy
+                                ? () => onSelectPreset(preset)
+                                : null,
+                          ),
+                        );
+                      }),
+                      Padding(
                         padding: const EdgeInsets.only(right: 6.0),
                         child: M3EChip(
-                          label: preset.name,
-                          onPressed: isConnected && !isBusy
-                              ? () => onSelectPreset(preset)
-                              : null,
+                          label: 'MANAGE ALL',
+                          onPressed: () => DacProfileManagerModal.show(context),
                         ),
-                      );
-                    }).toList(),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -100,6 +111,16 @@ class DacActionToolbar extends StatelessWidget {
                 ),
                 label: const Text('Burn to Flash'),
                 onPressed: isConnected && !isBusy ? onBurnToFlash : null,
+              ),
+
+              // Save Current Tuning as Named Profile
+              M3EButton.tonal(
+                icon: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedBookmark02,
+                  size: 18,
+                ),
+                label: const Text('Save Profile'),
+                onPressed: isConnected && !isBusy ? () => SaveDacProfileDialog.show(context) : null,
               ),
 
               // Import AutoEQ / Pro-Q

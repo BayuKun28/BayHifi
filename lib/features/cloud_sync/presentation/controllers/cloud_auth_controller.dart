@@ -5,6 +5,7 @@ import '../../../../audio_engine/virtual_dsp_service.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../analytics/data/playback_analytics_service.dart';
 import '../../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
+import '../../../hardware_dac/presentation/controllers/dac_bridge_controller.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 import '../../../pro_q_studio/presentation/controllers/eq_controller.dart';
 import '../../../settings/presentation/controllers/player_customization_controller.dart';
@@ -54,6 +55,11 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
       r.read(dspRackControllerProvider.notifier).hydrateFromStorage();
     } catch (e) {
       debugPrint('[CloudAuthController] DSP rack hydration notice: $e');
+    }
+    try {
+      r.read(dacBridgeControllerProvider.notifier).hydrateFromStorage();
+    } catch (e) {
+      debugPrint('[CloudAuthController] DAC bridge hydration notice: $e');
     }
     try {
       r.read(unifiedLibraryProvider.notifier).reloadFromPersistence();

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'dac_band_config.dart';
 import 'dac_device.dart';
@@ -36,8 +37,30 @@ class DacPeqProfile {
   /// Creation timestamp.
   final DateTime? createdAt;
 
+  /// Returns true if this profile is one of the built-in factory stock presets.
+  bool get isBuiltIn => builtInPresets.any((p) => p.id == id);
+
   /// Returns true if all bands in the profile have 0 dB gain.
   bool get isFlat => bands.every((band) => band.gainDb == 0.0);
+
+  /// Exports this profile to a formatted JSON string for file sharing/backup.
+  String exportToJsonString() {
+    const encoder = JsonEncoder.withIndent('  ');
+    return encoder.convert(toJson());
+  }
+
+  /// Parses and imports a DacPeqProfile from a JSON string.
+  static DacPeqProfile? importFromJsonString(String jsonStr) {
+    try {
+      final map = jsonDecode(jsonStr);
+      if (map is Map<String, dynamic>) {
+        return DacPeqProfile.fromJson(map);
+      } else if (map is Map) {
+        return DacPeqProfile.fromJson(Map<String, dynamic>.from(map));
+      }
+    } catch (_) {}
+    return null;
+  }
 
   /// Computes safe pre-amp headroom based on maximum positive filter gain.
   double get calculatedSafePreamp {

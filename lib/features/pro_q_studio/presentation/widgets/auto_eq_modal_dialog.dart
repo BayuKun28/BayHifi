@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/auto_eq_optimizer.dart';
 import '../../domain/fr_curve_data.dart';
 import '../controllers/eq_controller.dart';
 import '../controllers/eq_state.dart';
 import 'auto_eq_cloud_browser_dialog.dart';
+import 'saved_curves_library_sheet.dart';
 import 'squiglink_dialog.dart';
 
 /// Modal dialog utama "Auto EQ Studio & Target Matching"
@@ -146,12 +148,15 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                       ),
                     ),
                     M3EIconButton(
-                      variant: M3EIconButtonVariant.standard,
-                      onPressed: () => Navigator.pop(context),
+                      variant: M3EIconButtonVariant.tonal,
+                      onPressed: () {
+                        AppHaptics.selectionClick();
+                        Navigator.pop(context);
+                      },
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
                         size: 22,
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: theme.colorScheme.onSurface,
                       ),
                       tooltip: 'Close',
                     ),
@@ -175,13 +180,32 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                         const SizedBox(height: 5),
                         _buildDriverDropdown(eqState, notifier, isSolid, theme),
                         const SizedBox(height: 6),
-                        _buildActionOutlinedButton(
-                          icon: HugeIcons.strokeRoundedHeadphones,
-                          label: 'IMPORT DRIVER FR (TXT/CSV)',
-                          borderColor: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6),
-                          color: theme.colorScheme.secondary,
-                          bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.secondary, isSolid: isSolid, translucentAlpha: 0.12),
-                          onTap: () => _handleImportDriver(context, notifier),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 6,
+                              child: _buildActionOutlinedButton(
+                                icon: HugeIcons.strokeRoundedHeadphones,
+                                label: 'IMPORT DRIVER (TXT/CSV)',
+                                borderColor: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6),
+                                color: theme.colorScheme.secondary,
+                                bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.secondary, isSolid: isSolid, translucentAlpha: 0.12),
+                                onTap: () => _handleImportDriver(context, notifier),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              flex: 5,
+                              child: _buildActionOutlinedButton(
+                                icon: HugeIcons.strokeRoundedFolderLibrary,
+                                label: 'CURVE LIBRARY',
+                                borderColor: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6),
+                                color: theme.colorScheme.primary,
+                                bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid, translucentAlpha: 0.12),
+                                onTap: () => SavedCurvesLibrarySheet.show(context, initialCategory: 'driver'),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 10),
 
@@ -200,25 +224,36 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             Expanded(
                               child: _buildActionOutlinedButton(
                                 icon: HugeIcons.strokeRoundedTarget02,
-                                label: 'IMPORT TARGET',
+                                label: 'IMPORT',
                                 borderColor: isSolid ? const Color(0xFFFF9F0A) : const Color(0xFFFF9F0A).withValues(alpha: 0.6),
                                 color: const Color(0xFFFF9F0A),
                                 bgColor: StudioSurfaceTheme.tintedContainer(context, const Color(0xFFFF9F0A), isSolid: isSolid, translucentAlpha: 0.12),
                                 onTap: () => _handleImportTarget(context, notifier),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: _buildActionOutlinedButton(
+                                icon: HugeIcons.strokeRoundedFolderLibrary,
+                                label: 'LIBRARY',
+                                borderColor: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6),
+                                color: theme.colorScheme.primary,
+                                bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid, translucentAlpha: 0.12),
+                                onTap: () => SavedCurvesLibrarySheet.show(context, initialCategory: 'target'),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
                             Expanded(
                               child: _buildActionOutlinedButton(
                                 icon: HugeIcons.strokeRoundedCloudDownload,
                                 label: 'CLOUD DB',
-                                borderColor: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6),
-                                color: theme.colorScheme.primary,
-                                bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid, translucentAlpha: 0.12),
+                                borderColor: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6),
+                                color: theme.colorScheme.secondary,
+                                bgColor: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.secondary, isSolid: isSolid, translucentAlpha: 0.12),
                                 onTap: () => AutoEqCloudBrowserDialog.show(context),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 5),
                             Expanded(
                               child: _buildActionOutlinedButton(
                                 icon: HugeIcons.strokeRoundedSparkles,

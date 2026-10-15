@@ -148,6 +148,8 @@ class EqController extends StateNotifier<EqState> {
           driverFr: driver != null ? () => driver : null,
           targetFr: target != null ? () => target : null,
         );
+        _loadCustomPresetNames();
+        _loadSampleCurves();
       }
     } catch (_) {}
   }
@@ -663,39 +665,78 @@ class EqController extends StateNotifier<EqState> {
   }
 
   void importDriver(FrCurveData driver) {
+    final curveWithCat = driver.copyWith(
+      category: 'driver',
+      importedAt: driver.importedAt ?? DateTime.now(),
+    );
     final currentList = List<FrCurveData>.from(state.availableDrivers);
-    currentList.removeWhere((d) => d.name == driver.name);
-    currentList.add(driver);
+    currentList.removeWhere((d) => d.name == curveWithCat.name || (curveWithCat.id.isNotEmpty && d.id == curveWithCat.id));
+    currentList.add(curveWithCat);
 
     // Save offline to persistence
     try {
-      LocalPersistenceService.instance.saveFrCurve(driver.toMap(category: 'driver'));
+      LocalPersistenceService.instance.saveFrCurve(curveWithCat.toMap(category: 'driver'));
     } catch (_) {}
 
     state = state.copyWith(
       availableDrivers: currentList,
-      driverFr: () => driver,
+      driverFr: () => curveWithCat,
       showFrCurves: true,
     );
     _persistActiveState();
   }
 
   void importTarget(FrCurveData target) {
+    final curveWithCat = target.copyWith(
+      category: 'target',
+      importedAt: target.importedAt ?? DateTime.now(),
+    );
     final currentList = List<FrCurveData>.from(state.availableTargets);
-    currentList.removeWhere((t) => t.name == target.name);
-    currentList.add(target);
+    currentList.removeWhere((t) => t.name == curveWithCat.name || (curveWithCat.id.isNotEmpty && t.id == curveWithCat.id));
+    currentList.add(curveWithCat);
 
     // Save offline to persistence
     try {
-      LocalPersistenceService.instance.saveFrCurve(target.toMap(category: 'target'));
+      LocalPersistenceService.instance.saveFrCurve(curveWithCat.toMap(category: 'target'));
     } catch (_) {}
 
     state = state.copyWith(
       availableTargets: currentList,
-      targetFr: () => target,
+      targetFr: () => curveWithCat,
       showFrCurves: true,
     );
     _persistActiveState();
+  }
+
+  /// Deletes a user-saved FR curve from persistence and active state
+  Future<void> deleteSavedCurve(FrCurveData curve, {required String category}) async {
+    try {
+      await LocalPersistenceService.instance.deleteFrCurve(curve.id.isNotEmpty ? curve.id : curve.name);
+      if (category == 'target') {
+        final updated = state.availableTargets
+            .where((t) => t.name != curve.name && (curve.id.isEmpty || t.id != curve.id))
+            .toList();
+        final nextTarget = state.targetFr?.name == curve.name
+            ? (updated.isNotEmpty ? updated.first : null)
+            : state.targetFr;
+        state = state.copyWith(
+          availableTargets: updated,
+          targetFr: () => nextTarget,
+        );
+      } else {
+        final updated = state.availableDrivers
+            .where((d) => d.name != curve.name && (curve.id.isEmpty || d.id != curve.id))
+            .toList();
+        final nextDriver = state.driverFr?.name == curve.name
+            ? (updated.isNotEmpty ? updated.first : null)
+            : state.driverFr;
+        state = state.copyWith(
+          availableDrivers: updated,
+          driverFr: () => nextDriver,
+        );
+      }
+      _persistActiveState();
+    } catch (_) {}
   }
 
   bool applyAutoEq() {

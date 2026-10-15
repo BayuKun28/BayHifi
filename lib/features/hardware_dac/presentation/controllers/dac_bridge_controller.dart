@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/database/local_persistence_service.dart';
 import '../../../pro_q_studio/domain/eq_band.dart';
 import '../../data/drivers/dac_driver.dart';
 import '../../data/drivers/kiwi_ears_kt_driver.dart';
@@ -53,6 +54,7 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
     required this.fitter,
     bool enableHotplugWatcher = true,
   }) : super(DacBridgeState(availablePresets: DacPeqProfile.builtInPresets)) {
+    hydrateFromStorage();
     if (kIsWeb) {
       driver.transport.setOnDisconnectListener(_handleTransportDisconnect);
       _initAutoConnectWeb();
@@ -456,6 +458,85 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
         errorMessage: () => 'Failed to read from hardware: $e',
       );
     }
+  }
+
+  /// Hydrates user-saved custom DAC profiles from LocalPersistenceService
+  void hydrateFromStorage() {
+    try {
+      final savedMaps = LocalPersistenceService.instance.getSavedDacProfiles();
+      final customProfiles = <DacPeqProfile>[];
+      for (final map in savedMaps) {
+        try {
+          customProfiles.add(DacPeqProfile.fromJson(map));
+        } catch (_) {}
+      }
+      final merged = [...DacPeqProfile.builtInPresets, ...customProfiles];
+      state = state.copyWith(availablePresets: merged);
+    } catch (_) {}
+  }
+
+  /// Saves current 5-band configuration and global gain as a new user profile
+  Future<DacPeqProfile> saveCurrentAsProfile({
+    required String name,
+    String description = '',
+  }) async {
+    final cleanName = name.trim().isEmpty ? 'Custom DAC Tuning' : name.trim();
+    final profileId = 'user_dac_${DateTime.now().millisecondsSinceEpoch}';
+    final newProfile = DacPeqProfile(
+      id: profileId,
+      name: cleanName,
+      description: description.trim(),
+      bands: List<DacBandConfig>.from(state.bands),
+      preampGainDb: state.globalGainDb,
+      targetChipset: state.device?.chipset ?? DacChipset.kt0211l,
+      createdAt: DateTime.now(),
+    );
+
+    await LocalPersistenceService.instance.saveDacProfile(newProfile.toJson());
+    final currentCustoms = state.availablePresets.where((p) => !p.isBuiltIn && p.id != profileId).toList();
+    currentCustoms.add(newProfile);
+    final merged = [...DacPeqProfile.builtInPresets, ...currentCustoms];
+
+    state = state.copyWith(
+      availablePresets: merged,
+      currentProfile: newProfile,
+      statusBannerMessage: () => 'Profile "$cleanName" saved successfully.',
+    );
+    return newProfile;
+  }
+
+  /// Deletes a custom user DAC profile
+  Future<bool> deleteCustomProfile(String profileId) async {
+    try {
+      await LocalPersistenceService.instance.deleteDacProfile(profileId);
+      final updated = state.availablePresets.where((p) => p.id != profileId).toList();
+      state = state.copyWith(availablePresets: updated);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Imports a DacPeqProfile from JSON string and persists it
+  Future<DacPeqProfile?> importProfileFromJson(String jsonStr) async {
+    final profile = DacPeqProfile.importFromJsonString(jsonStr);
+    if (profile == null) return null;
+
+    final assignedId = profile.id.isEmpty || profile.isBuiltIn
+        ? 'imported_dac_${DateTime.now().millisecondsSinceEpoch}'
+        : profile.id;
+    final imported = profile.copyWith(id: assignedId);
+
+    await LocalPersistenceService.instance.saveDacProfile(imported.toJson());
+    final currentCustoms = state.availablePresets.where((p) => !p.isBuiltIn && p.id != assignedId).toList();
+    currentCustoms.add(imported);
+    final merged = [...DacPeqProfile.builtInPresets, ...currentCustoms];
+
+    state = state.copyWith(
+      availablePresets: merged,
+      statusBannerMessage: () => 'Profile "${imported.name}" imported successfully.',
+    );
+    return imported;
   }
 
   @override

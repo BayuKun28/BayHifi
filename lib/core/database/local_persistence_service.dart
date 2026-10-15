@@ -579,29 +579,71 @@ class LocalPersistenceService {
   }
 
   // ─── 7. AUTOEQ CLOUD PRESETS & OFFLINE FR CURVES ───────────────────────────
-  List<Map<String, dynamic>> getSavedFrCurves() {
+  List<Map<String, dynamic>> getSavedFrCurves({String? category}) {
     final list = _readScoped('saved_fr_curves');
     if (list is List) {
-      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+      final items = list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+      if (category != null && category.isNotEmpty) {
+        return items.where((c) {
+          final cat = c['category'] as String?;
+          final name = (c['name'] as String? ?? '').toLowerCase();
+          if (category == 'target') {
+            return cat == 'target' || name.contains('target');
+          } else {
+            return cat == 'driver' || (!name.contains('target') && cat != 'target');
+          }
+        }).toList();
+      }
+      return items;
     }
     return [];
   }
 
   Future<void> saveFrCurve(Map<String, dynamic> curveMap) async {
     final list = getSavedFrCurves();
+    final id = curveMap['id'] as String?;
     final name = curveMap['name'] as String?;
-    if (name == null || name.trim().isEmpty) return;
+    if ((name == null || name.trim().isEmpty) && (id == null || id.trim().isEmpty)) return;
 
     // Replace if exists, or append
-    final updated = list.where((c) => c['name'] != name).toList();
+    final updated = list.where((c) => (id == null || c['id'] != id) && (name == null || c['name'] != name)).toList();
     updated.add(curveMap);
     _writeScoped('saved_fr_curves', updated);
     await _save();
   }
 
-  Future<void> deleteFrCurve(String name) async {
+  Future<void> deleteFrCurve(String idOrName) async {
     final list = getSavedFrCurves();
-    _writeScoped('saved_fr_curves', list.where((c) => c['name'] != name).toList());
+    _writeScoped('saved_fr_curves',
+        list.where((c) => c['id'] != idOrName && c['name'] != idOrName).toList());
+    await _save();
+  }
+
+  // ─── 8. HARDWARE DAC CUSTOM PROFILES (SCOPED PER USER) ─────────────────────
+  List<Map<String, dynamic>> getSavedDacProfiles() {
+    final list = _readScoped('saved_dac_profiles');
+    if (list is List) {
+      return list.whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+    }
+    return [];
+  }
+
+  Future<void> saveDacProfile(Map<String, dynamic> profileMap) async {
+    final list = getSavedDacProfiles();
+    final id = profileMap['id'] as String?;
+    final name = profileMap['name'] as String?;
+    if ((id == null || id.trim().isEmpty) && (name == null || name.trim().isEmpty)) return;
+
+    final updated = list.where((p) => (id == null || p['id'] != id) && (name == null || p['name'] != name)).toList();
+    updated.add(profileMap);
+    _writeScoped('saved_dac_profiles', updated);
+    await _save();
+  }
+
+  Future<void> deleteDacProfile(String profileIdOrName) async {
+    final list = getSavedDacProfiles();
+    _writeScoped('saved_dac_profiles',
+        list.where((p) => p['id'] != profileIdOrName && p['name'] != profileIdOrName).toList());
     await _save();
   }
 

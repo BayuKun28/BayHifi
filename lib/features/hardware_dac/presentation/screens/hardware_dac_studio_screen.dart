@@ -9,6 +9,7 @@ import '../widgets/dac_action_toolbar.dart';
 import '../widgets/dac_band_slider_tile.dart';
 import '../widgets/dac_global_gain_card.dart';
 import '../widgets/dac_hero_status_card.dart';
+import '../widgets/dac_profile_manager_modal.dart';
 import '../widgets/hardware_curve_visualizer.dart';
 
 /// Full Hardware DAC Studio screen for configuring onboard DSP registers,
@@ -77,6 +78,14 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
                 ),
               ),
             ),
+          M3EIconButton(
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedBookmark02,
+              size: 22,
+            ),
+            tooltip: 'DAC Profile Library',
+            onPressed: () => DacProfileManagerModal.show(context),
+          ),
           M3EIconButton(
             icon: const HugeIcon(
               icon: HugeIcons.strokeRoundedRefresh,
