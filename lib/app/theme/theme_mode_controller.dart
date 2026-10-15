@@ -283,6 +283,21 @@ class AppPalette {
 
   // ─── Curated Presets (Strict Non-Neon Studio Palettes) ───────────────────────
 
+  static const AppPalette simpleAsF = AppPalette(
+    id: 'simple_as_f',
+    name: 'Simple as F*** (Obsidian Emerald)',
+    description: 'Ultra-minimalist obsidian forest deep dark with vibrant organic emerald mint accents (Dribbble 27089924)',
+    primary: Color(0xFF2EE672),
+    secondary: Color(0xFF4ADE80),
+    accent: Color(0xFF2EE672),
+    backgroundDark: Color(0xFF0B110E),
+    backgroundLight: Color(0xFFF1F8F4),
+    surfaceDark: Color(0xFF101914),
+    surfaceLight: Color(0xFFF7FBF9),
+    surfaceContainerDark: Color(0xFF16241C),
+    surfaceContainerLight: Color(0xFFE2F5EA),
+  );
+
   static const AppPalette namidaCyan = AppPalette(
     id: 'obsidian_cyan',
     name: 'Obsidian Cyan',
@@ -570,6 +585,7 @@ class AppPalette {
   );
 
   static const List<AppPalette> allPresets = [
+    simpleAsF,
     namidaCyan,
     nordicSlate,
     terracottaClay,
@@ -607,8 +623,8 @@ class ThemeSettingsState {
 
   const ThemeSettingsState({
     this.themeMode = AppThemeMode.dark,
-    this.currentPalette = AppPalette.namidaCyan,
-    this.customAccentColor = const Color(0xFF38BDF8),
+    this.currentPalette = AppPalette.simpleAsF,
+    this.customAccentColor = const Color(0xFF2EE672),
     this.dynamicAlbumArtEnabled = false,
     this.surfaceFillStyle = SurfaceFillStyle.solid,
     this.wallpaperSettings = const WallpaperSettings(),
@@ -646,7 +662,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
       final saved = LocalPersistenceService.instance.getThemeSettings();
       final paletteId = saved['palette_id'] as String? ?? 'obsidian_cyan';
       final modeIndex = saved['theme_mode'] as int? ?? AppThemeMode.dark.index;
-      final accentVal = saved['custom_accent'] as int? ?? 0xFF38BDF8;
+      final accentVal = saved['custom_accent'] as int? ?? 0xFF2EE672;
       final dynamicArt = saved['dynamic_album_art'] as bool? ?? false;
       final fillStyleStr = saved['surface_fill_style'] as String? ?? 'translucent';
 
@@ -659,7 +675,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
 
       final palette = AppPalette.allPresets.firstWhere(
         (p) => p.id == paletteId,
-        orElse: () => AppPalette.namidaCyan,
+        orElse: () => AppPalette.simpleAsF,
       );
 
       final customColor = Color(accentVal);
@@ -1053,7 +1069,7 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
     }
 
     final fallbackPalette = state.currentPalette.id == 'custom_wallpaper'
-        ? AppPalette.namidaCyan
+        ? AppPalette.simpleAsF
         : state.currentPalette;
 
     state = state.copyWith(

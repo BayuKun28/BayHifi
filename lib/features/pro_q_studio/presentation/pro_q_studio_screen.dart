@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../core/widgets/two_tone_header.dart';
 import '../../settings/presentation/controllers/player_customization_controller.dart';
 import '../domain/pro_q_rta_style.dart';
 import 'controllers/eq_controller.dart';
@@ -134,14 +135,11 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                 color: primary,
               ),
               const SizedBox(width: 6),
-              Text(
-                'PRO-Q STUDIO',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
-                  fontSize: 12.5,
-                ),
+              const TwoToneHeader(
+                primaryText: 'PRO-Q',
+                accentText: 'STUDIO',
+                fontSize: 13,
+                letterSpacing: 0.8,
               ),
               const SizedBox(width: 4),
               Tooltip(

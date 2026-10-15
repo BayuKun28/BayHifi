@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../../core/widgets/two_tone_header.dart';
 import '../../domain/models/dac_peq_profile.dart';
 import '../controllers/dac_bridge_controller.dart';
 import '../controllers/dac_bridge_state.dart';
@@ -62,9 +63,11 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         elevation: 0,
-        title: Text(
-          'Hardware DAC Studio',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        title: const TwoToneHeader(
+          primaryText: 'HARDWARE',
+          accentText: 'DAC STUDIO',
+          fontSize: 18,
+          letterSpacing: 0.2,
         ),
         actions: [
           if (dacState.isBusy)

@@ -177,9 +177,9 @@ class PlayerCustomizationSettings {
 
   const PlayerCustomizationSettings({
     this.backdropMode = NowPlayingBackdropMode.albumArtGlow,
-    this.albumArtStyle = AlbumArtStyle.cdJewel,
+    this.albumArtStyle = AlbumArtStyle.squircle,
     this.spectrumStyle = SpectrumStyle.m3Expressive,
-    this.timeBarStyle = TimeBarStyle.wavy,
+    this.timeBarStyle = TimeBarStyle.waveform,
     this.ambientGlow = true,
     this.ambientGlowIntensity = 0.35,
     this.fftBins = 512,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../audio_engine/audio_cache_service.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
@@ -87,8 +87,6 @@ class TrackTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final isSolid = ref.isSolidStyle;
     final settings = ref.watch(playerCustomizationProvider);
     final libraryState = ref.watch(unifiedLibraryProvider);
     final playback = ref.watch(playerControllerProvider);
@@ -103,28 +101,34 @@ class TrackTile extends ConsumerWidget {
         : '${track.title} • ${track.album}';
 
     Widget tileContent = Container(
-      margin: const EdgeInsets.only(bottom: 6),
+      margin: EdgeInsets.symmetric(
+        horizontal: isTileActive ? 2 : 0,
+        vertical: isTileActive ? 4 : 1,
+      ),
       decoration: BoxDecoration(
         color: isSelected
-            ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.16, solidBlendAlpha: 0.22)
+            ? SimpleAsFTheme.surfaceActiveCapsule
             : (isTileActive
-                ? StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.1, solidBlendAlpha: 0.14)
-                : StudioSurfaceTheme.surface(context, isSolid: isSolid)),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isSelected
-              ? primary
-              : (isTileActive
-                  ? (isSolid ? primary : primary.withValues(alpha: 0.5))
-                  : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
-          width: isSelected ? 1.4 : 1.0,
-        ),
+                ? SimpleAsFTheme.surfaceActiveCapsule
+                : Colors.transparent),
+        borderRadius: BorderRadius.circular(16),
+        border: isSelected
+            ? Border.all(color: SimpleAsFTheme.emeraldMint, width: 1.2)
+            : (isTileActive
+                ? Border.all(
+                    color: SimpleAsFTheme.emeraldMint.withValues(alpha: 0.35),
+                    width: 1.0,
+                  )
+                : null),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: isTileActive ? 12 : 8,
+            vertical: 2,
+          ),
           onTap: onTap,
           onLongPress: onLongPress,
           leading: Stack(
@@ -134,7 +138,7 @@ class TrackTile extends ConsumerWidget {
                 track: track,
                 width: 46,
                 height: 46,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
                 fallbackIconSize: 22,
               ),
@@ -144,16 +148,16 @@ class TrackTile extends ConsumerWidget {
                   height: 46,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? theme.colorScheme.primary.withValues(alpha: 0.85)
+                        ? SimpleAsFTheme.emeraldMint.withValues(alpha: 0.85)
                         : Colors.black.withValues(alpha: 0.45),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
                     child: HugeIcon(
                       icon: isSelected
                           ? HugeIcons.strokeRoundedCheckmarkSquare02
                           : HugeIcons.strokeRoundedSquare,
-                      color: isSelected ? theme.colorScheme.onPrimary : Colors.white,
+                      color: isSelected ? const Color(0xFF0B110E) : Colors.white,
                       size: 20,
                     ),
                   ),
@@ -163,22 +167,22 @@ class TrackTile extends ConsumerWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.45),
-                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
                     child: isBuffering
-                        ? SizedBox(
+                        ? const SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.0,
-                              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                              valueColor: AlwaysStoppedAnimation<Color>(SimpleAsFTheme.emeraldMint),
                             ),
                           )
-                        : HugeIcon(
+                        : const HugeIcon(
                             icon: HugeIcons.strokeRoundedAudioWaveform,
-                            color: theme.colorScheme.primary,
+                            color: SimpleAsFTheme.emeraldMint,
                             size: 22,
                           ),
                   ),
@@ -191,8 +195,8 @@ class TrackTile extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontWeight: isTileActive ? FontWeight.w800 : FontWeight.w600,
-              color: isTileActive ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-              fontSize: 13,
+              color: isTileActive ? SimpleAsFTheme.emeraldMint : Colors.white,
+              fontSize: 14,
             ),
           ),
           subtitle: Column(
@@ -203,9 +207,9 @@ class TrackTile extends ConsumerWidget {
                 subtitleText,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: SimpleAsFTheme.sageSlate,
                 ),
               ),
               const SizedBox(height: 3),
@@ -306,12 +310,11 @@ class TrackTile extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (settings.trackShowDirectFav)
-                M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
+                IconButton(
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedFavourite,
-                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurfaceVariant,
-                    size: 22,
+                    color: isFav ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
+                    size: 20,
                   ),
                   tooltip: isFav ? 'Remove Favorite' : 'Favorite Track',
                   onPressed: () {
@@ -319,12 +322,11 @@ class TrackTile extends ConsumerWidget {
                     ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
                   },
                 ),
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                icon: HugeIcon(
+              IconButton(
+                icon: const HugeIcon(
                   icon: HugeIcons.strokeRoundedMoreVertical,
-                  color: theme.colorScheme.onSurfaceVariant,
-                  size: 22,
+                  color: SimpleAsFTheme.sageSlate,
+                  size: 20,
                 ),
                 tooltip: 'Track Options',
                 onPressed: () => StudioTrackActionSheet.show(context, track),

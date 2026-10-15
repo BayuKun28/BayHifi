@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../app/theme/app_typography.dart';
-import '../../../app/theme/studio_surface_theme.dart';
+import '../../../app/theme/app_haptics.dart';
+import '../../../app/theme/simple_as_f_theme.dart';
+import '../../../core/widgets/meta_tracking_label.dart';
+import '../../../core/widgets/simple_as_f_scaffold.dart';
+import '../../../core/widgets/two_tone_header.dart';
 import '../../cloud_sync/presentation/widgets/dashboard_profile_button.dart';
+import '../../library/presentation/controllers/library_controller.dart';
+import '../../library/presentation/widgets/download_toggle_row.dart';
+import '../../library/presentation/widgets/track_tile.dart';
+import '../../player/presentation/controllers/player_controller.dart';
 import 'widgets/engine_telemetry_bento_card.dart';
 import 'widgets/listening_statistics_card.dart';
-import 'widgets/recent_sessions_bento_carousel.dart';
-import 'widgets/studio_hero_showcase_carousel.dart';
+import 'widgets/simple_as_f_discovery_grid.dart';
 import 'widgets/studio_wrapped_bento_banner.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   final VoidCallback? onNavigateToPlayer;
   final VoidCallback? onNavigateToLibrary;
   final VoidCallback? onNavigateToDsp;
@@ -24,68 +30,192 @@ class DashboardScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  bool _isOfflineOnly = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final libraryState = ref.watch(unifiedLibraryProvider);
+    final tracks = libraryState.tracks;
+    final playback = ref.watch(playerControllerProvider);
+
+    // Get favorite tracks or fallback to recent tracks
+    final favoriteTracks = tracks
+        .where((t) => libraryState.favoriteTrackIds.contains(t.id))
+        .take(5)
+        .toList();
+    final sampleTracks = favoriteTracks.isNotEmpty
+        ? favoriteTracks
+        : tracks.take(5).toList();
+
+    return SimpleAsFScaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
-          padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 160.0),
+          padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 160.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ─── 1. HERO HEADER WITH LIVE BADGE ─────────────────────────────
-              _buildHeader(context, ref, primary, theme)
+              // ─── 1. USER GREETING HEADER ─────────────────────────────────────
+              _buildHeader(context)
                   .animate()
-                  .fadeIn(duration: 300.ms, curve: Curves.easeOut)
-                  .slideY(begin: -0.05, end: 0.0, curve: Curves.easeOutCubic),
+                  .fadeIn(duration: 250.ms, curve: Curves.easeOut)
+                  .slideY(begin: -0.04, end: 0.0, curve: Curves.easeOutCubic),
+
+              const SizedBox(height: 22),
+
+              // ─── 2. RECENTLY PLAYED SQUIRCLE GRID ────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  const TwoToneHeader(
+                    primaryText: 'RECENTLY',
+                    accentText: 'PLAYED',
+                    fontSize: 20,
+                  ),
+                  if (widget.onNavigateToLibrary != null)
+                    InkWell(
+                      onTap: () {
+                        AppHaptics.lightImpact();
+                        widget.onNavigateToLibrary!();
+                      },
+                      borderRadius: BorderRadius.circular(6),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        child: Row(
+                          children: [
+                            Text(
+                              'See all',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: SimpleAsFTheme.sageSlate,
+                              ),
+                            ),
+                            SizedBox(width: 2),
+                            HugeIcon(
+                              icon: HugeIcons.strokeRoundedArrowRight01,
+                              size: 14,
+                              color: SimpleAsFTheme.sageSlate,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              const SimpleAsFDiscoveryGrid(),
+
+              const SizedBox(height: 26),
+
+              // ─── 3. FAVORITE SONGS & DOWNLOAD TOGGLE ─────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  TwoToneHeader(
+                    primaryText: favoriteTracks.isNotEmpty ? 'LIKED' : 'TOP',
+                    accentText: 'SONGS',
+                    fontSize: 20,
+                  ),
+                  if (widget.onNavigateToLibrary != null)
+                    InkWell(
+                      onTap: () {
+                        AppHaptics.lightImpact();
+                        widget.onNavigateToLibrary!();
+                      },
+                      borderRadius: BorderRadius.circular(6),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        child: Text(
+                          'View library',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: SimpleAsFTheme.sageSlate,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+
+              // Download Toggle Row matching Dribbble 27089924
+              DownloadToggleRow(
+                isDownloaded: _isOfflineOnly,
+                onToggle: (val) => setState(() => _isOfflineOnly = val),
+              ),
+
+              const SizedBox(height: 4),
+
+              // Uncarded floating track list with soft dark active capsule
+              if (sampleTracks.isNotEmpty)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  itemCount: sampleTracks.length,
+                  itemBuilder: (context, index) {
+                    final track = sampleTracks[index];
+                    final isPlaying = playback.isPlaying && playback.currentTrack?.id == track.id;
+
+                    return TrackTile(
+                      track: track,
+                      isPlaying: isPlaying,
+                      onTap: () {
+                        AppHaptics.selectionClick();
+                        ref.read(playerControllerProvider.notifier).setQueue(
+                          sampleTracks,
+                          initialIndex: index,
+                        );
+                      },
+                    );
+                  },
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'No tracks available yet. Scan your music folder in Library.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: SimpleAsFTheme.sageSlate,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+              const SizedBox(height: 28),
+
+              // ─── 4. AUDIOPHILE INSIGHTS & DSP TELEMETRY ──────────────────────
+              const TwoToneHeader(
+                primaryText: 'AUDIO',
+                accentText: 'INSIGHTS',
+                fontSize: 18,
+              ),
+              const SizedBox(height: 12),
+
+              const EngineTelemetryBentoCard(),
 
               const SizedBox(height: 16),
 
-              // ─── 2. BENTO 1: C++ AUDIO ENGINE & HARDWARE TELEMETRY ──────────
-              const EngineTelemetryBentoCard()
-                  .animate()
-                  .fadeIn(delay: 50.ms, duration: 350.ms, curve: Curves.easeOut)
-                  .slideY(begin: 0.06, end: 0.0, curve: Curves.easeOutBack),
+              const StudioWrappedBentoBanner(),
 
               const SizedBox(height: 16),
 
-              // ─── 3. BENTO 2: STUDIO WRAPPED & AUDIOPHILE RECAP BANNER ───────
-              const StudioWrappedBentoBanner()
-                  .animate()
-                  .fadeIn(delay: 80.ms, duration: 350.ms, curve: Curves.easeOut)
-                  .slideY(begin: 0.06, end: 0.0, curve: Curves.easeOutBack),
-
-              const SizedBox(height: 16),
-
-              // ─── 4. STUDIO HERO SHOWCASE CAROUSEL (DYNAMIC STUDIO MIXES) ────
-              const StudioHeroShowcaseCarousel()
-                  .animate()
-                  .fadeIn(delay: 120.ms, duration: 350.ms, curve: Curves.easeOut)
-                  .slideY(begin: 0.06, end: 0.0, curve: Curves.easeOutBack),
-
-              const SizedBox(height: 16),
-
-              // ─── 5. BENTO 3: RECENT LOSSLESS SESSIONS & QUICK RESUME ────────
-              RecentSessionsBentoCarousel(
-                onNavigateToLibrary: onNavigateToLibrary,
-              )
-                  .animate()
-                  .fadeIn(delay: 160.ms, duration: 350.ms, curve: Curves.easeOut)
-                  .slideY(begin: 0.06, end: 0.0, curve: Curves.easeOutBack),
-
-              const SizedBox(height: 16),
-
-              // ─── 6. BENTO 4: AUDIOPHILE LISTENING STATS & HI-RES INSIGHTS ───
-              const ListeningStatisticsCard()
-                  .animate()
-                  .fadeIn(delay: 200.ms, duration: 350.ms, curve: Curves.easeOut)
-                  .slideY(begin: 0.06, end: 0.0, curve: Curves.easeOutBack),
+              const ListeningStatisticsCard(),
             ],
           ),
         ),
@@ -93,75 +223,34 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(
-    BuildContext context,
-    WidgetRef ref,
-    Color primary,
-    ThemeData theme,
-  ) {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const DashboardProfileButton(),
-              const SizedBox(width: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.asset(
-                  'assets/images/baydev_logo.png',
-                  width: 20,
-                  height: 20,
-                  fit: BoxFit.contain,
-                ),
+              const MetaTrackingLabel(
+                'WELCOME TO BAYDEV HIFI',
+                fontSize: 11,
+                letterSpacing: 1.6,
+                color: SimpleAsFTheme.sageSlate,
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'BAYDEV HIFI STUDIO',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              const SizedBox(height: 4),
+              const TwoToneHeader(
+                primaryText: 'DISCOVER',
+                accentText: 'MUSIC',
+                fontSize: 24,
+                letterSpacing: -0.4,
               ),
             ],
           ),
         ),
 
-        // Live Engine Pulse Badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
-          decoration: BoxDecoration(
-            color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: ref.isSolidStyle),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedCpu,
-                size: 13,
-                color: primary,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                'SoLoud Active',
-                style: TextStyle(
-                  fontFeatures: AppTypography.audioFigures,
-                  color: primary,
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Right: Profile Avatar Button
+        const DashboardProfileButton(),
       ],
     );
   }

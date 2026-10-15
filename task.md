@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 75 Fase (Fase 1–75 Selesai • 100% Passing Tests)
-- **Arsitektur UI**: _100% Pure Material 3 Expressive (`material_3_expressive: ^1.1.3`), `material_ui`, `motor` Spring Physics, `material_new_shapes`, Bento Grid Modular System, Floating Rounded Dock, Dynamic Studio Palettes & Unified HugeIcons (100% English)_
-- **Status Proyek**: _Phase 75: Pro-Q Studio Real-Time Spectrum Graph Customization (Multi-Style RTA Engine & Quick Switcher)_
+- **Total Fase**: 79 Fase (Fase 1–78 Selesai • Fase 79 In Progress)
+- **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Obsidian Forest & Emerald Mint Palette (`#0B110E`, `#2EE672`), Two-Tone Typography, Interactive Waveform Seekbar, Uncarded Floating Track Rows, Floating Capsule MiniPlayer & Dock, HugeIcons, Zero Emojis (100% English)_
+- **Status Proyek**: _Phase 79: Simple-As-F UI/UX Overhaul PRD & Implementation Roadmap_
 
 ---
 
@@ -2125,6 +2125,40 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
   - [x] Verified zero regressions on existing suites (`test/pro_q_rta_styles_test.dart`, `test/features/cloud_sync/change_password_test.dart`).
   - [x] `flutter analyze`: **0 errors, 0 warnings** (100% clean).
   - [x] `flutter test`: **11/11 new tests passing, 100% test pass rate**.
+
+---
+
+## Fase 79: Simple-As-F UI/UX Overhaul Roadmap (Dribbble 27089924 Reference)
+
+Transformasi total antarmuka Baydev HiFi menuju estetika ultra-minimalist, bernapas lega, dan elegan terinspirasi dari referensi Dribbble `27089924` (`Music App` oleh Murat Ak). Menghilangkan mandat kaku 100% M3E dan menggantinya dengan komponen bespoke presisi tinggi.
+
+- [x] **79.1 Fondasi Tema & Palet Warna Simple-As-F**:
+  - [x] Definisikan token tema `SimpleAsFTheme`: Obsidian Forest Canvas (`#0B110E`), Forest Glow (`#12231A`), Emerald Mint (`#2EE672`), Sage Slate (`#8A9A90`), Pure White (`#FFFFFF`).
+  - [x] Implementasikan widget pembungkus aura radial `SimpleAsFScaffold` dengan ambient radial glow halus di sudut atas/bawah.
+  - [x] Buat helper widget tipografi dua warna `TwoToneHeader(first: "Recently", second: "Played", accentColor: emerald)`.
+  - [x] Buat helper widget meta tracking `MetaLabel(text: "WELCOME, MATT", tracking: 1.8)`.
+- [x] **79.2 Now Playing Screen Redesign & Interactive Waveform Seekbar**:
+  - [x] Rancang ulang `NowPlayingScreen` dengan layout terpusat yang luas:
+    - [x] Squircle Album Art (`BorderRadius.circular(30)`) dengan subtle shadow.
+    - [x] Heart Favorite button di kiri, centered bold title & artist, options di kanan.
+    - [x] **Interactive Waveform Seekbar** (`WaveformSeekbarWidget` / `CustomTimeBar`): Baris 48 amplitude bars dengan played vs unplayed visual split dan seek drag/tap listener.
+    - [x] Tabular timestamp di bawah waveform (`0:00` dan durasi total).
+    - [x] Minimalist Controls: Shuffle, Previous, Pill/Circle Play/Pause, Next, Repeat.
+- [x] **79.3 Uncarded Track List & Active Capsule Item**:
+  - [x] Ganti `TrackTile` bento card lama menjadi `SimpleAsFTrackTile` tanpa kartu terbungkus (floating row).
+  - [x] Implementasikan visual state aktif: lagu yang sedang berputar dibungkus soft dark capsule (`#16241C`, radius 16px) dengan icon speaker/wave emerald di sisi kiri.
+  - [x] Implementasikan download toggle row minimalis (`DOWNLOAD` uppercase text + green pill switch).
+- [x] **79.4 Home / Discovery & Library Screen Redesign**:
+  - [x] Rancang ulang layar Home dengan salam personal (`WELCOME, USER`), avatar header, dan two-tone title `"Recently Played"`.
+  - [x] 2-column squircle cover art grid (`BorderRadius.circular(20)`) dengan metadata bersih di bawah cover.
+  - [x] Floating pill miniplayer dock yang ramping melayang di atas navigasi.
+- [x] **79.5 Pro-Q Studio & Hardware DAC Theme Harmonization**:
+  - [x] Harmonisasi tampilan kurva EQ Pro-Q Studio dan Hardware DAC Studio agar menyatu mulus dengan palet Obsidian Forest dan aksen Emerald Mint.
+  - [x] Pertahankan performa CustomPainter (`RepaintBoundary`, zero allocations di `paint()`, tabular figures).
+- [x] **79.6 Automated Verification & Quality Gate**:
+  - [x] Buat unit & widget tests untuk komponen baru (`test/simple_as_f_ui_ux_overhaul_test.dart`).
+  - [x] Jalankan `flutter analyze` dan `flutter test` memastikan 0 errors, 0 warnings, dan 100% passing tests.
+
 
 
 

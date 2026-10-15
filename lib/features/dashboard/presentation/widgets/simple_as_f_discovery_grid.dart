@@ -1,0 +1,174 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
+import '../../../../app/theme/app_haptics.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
+import '../../../../core/widgets/studio_artwork_widget.dart';
+import '../../../library/presentation/controllers/library_controller.dart';
+import '../../../library/presentation/screens/album_detail_screen.dart';
+import '../../../player/presentation/controllers/player_controller.dart';
+
+/// 2-Column squircle grid for albums and playlists adhering to Screen 1 of Dribbble 27089924.
+/// Clean, high-breathability layout with metadata displayed directly below each squircle card.
+class SimpleAsFDiscoveryGrid extends ConsumerWidget {
+  const SimpleAsFDiscoveryGrid({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final libraryState = ref.watch(unifiedLibraryProvider);
+    final albums = libraryState.albums;
+
+    if (albums.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final displayAlbums = albums.take(6).toList();
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.78,
+      ),
+      itemCount: displayAlbums.length,
+      itemBuilder: (context, index) {
+        final album = displayAlbums[index];
+        final firstTrack = album.tracks.isNotEmpty ? album.tracks.first : null;
+
+        return InkWell(
+          onTap: () {
+            AppHaptics.lightImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AlbumDetailScreen(album: album),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Squircle Album Art Card
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(19),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (firstTrack != null)
+                          StudioArtworkWidget(
+                            track: firstTrack,
+                            width: double.infinity,
+                            height: double.infinity,
+                            borderRadius: BorderRadius.circular(19),
+                            fallbackIcon: HugeIcons.strokeRoundedAlbum02,
+                            fallbackIconSize: 32,
+                          )
+                        else
+                          Container(
+                            color: const Color(0xFF14221A),
+                            child: const Center(
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedAlbum02,
+                                size: 32,
+                                color: SimpleAsFTheme.sageSlate,
+                              ),
+                            ),
+                          ),
+
+                        // Subtle play button overlay
+                        Positioned(
+                          right: 8,
+                          bottom: 8,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (album.tracks.isNotEmpty) {
+                                AppHaptics.mediumImpact();
+                                ref.read(playerControllerProvider.notifier).setQueue(
+                                  album.tracks,
+                                  initialIndex: 0,
+                                );
+                              }
+                            },
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: SimpleAsFTheme.emeraldMint,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.35),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: HugeIcon(
+                                  icon: HugeIcons.strokeRoundedPlay,
+                                  size: 16,
+                                  color: Color(0xFF0B110E),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Title below artwork
+              Text(
+                album.name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+
+              // Subtitle / Artist below title
+              Text(
+                album.artist.isNotEmpty ? album.artist : '${album.tracks.length} Tracks',
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w500,
+                  color: SimpleAsFTheme.sageSlate,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

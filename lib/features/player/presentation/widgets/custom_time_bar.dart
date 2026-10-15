@@ -297,28 +297,37 @@ class _CustomTimeBarState extends State<CustomTimeBar> {
           onTapDown: (details) => _handleTouch(context, details.localPosition),
           onTapUp: (_) => _handleTouchEnd(),
           child: Container(
-            height: 28,
+            height: 38,
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                const int bars = 40;
+                const int bars = 48;
                 final activeBars = (progress * bars).round();
+
+                // Natural organic envelope heights (sinusoidal clusters with musical peaks)
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: List.generate(bars, (i) {
                     final isActive = i < activeBars;
-                    final double normalizedHeight = 0.3 + 0.7 * ((i * 7 + 3) % 11) / 10.0;
+                    // Procedural organic amplitude curve simulating a dynamic musical track
+                    final double phase = (i / bars) * 3.14159 * 3.5;
+                    final double wave1 = (phase).abs() % 1.0;
+                    final double wave2 = ((i * 13 + 7) % 17) / 16.0;
+                    final double normalizedHeight = (0.25 + 0.5 * wave1 + 0.25 * wave2).clamp(0.2, 1.0);
+
                     return Expanded(
                       child: Center(
                         child: Container(
-                          width: 2.5,
-                          height: 20 * normalizedHeight,
-                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                          width: 3.0,
+                          height: 30 * normalizedHeight,
+                          margin: const EdgeInsets.symmetric(horizontal: 0.5),
                           decoration: BoxDecoration(
                             color: isActive
-                                ? widget.primaryColor
-                                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-                            borderRadius: BorderRadius.circular(2),
+                                ? (theme.brightness == Brightness.dark
+                                    ? Colors.white
+                                    : widget.primaryColor)
+                                : const Color(0xFF23352B),
+                            borderRadius: BorderRadius.circular(3),
                           ),
                         ),
                       ),
