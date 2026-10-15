@@ -623,7 +623,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     color: sleepTimer.isActive
                         ? StudioSurfaceTheme.tintedContainer(
                             context,
-                            StudioCategoryColors.sleepTimer,
+                            primary,
                             isSolid: isSolid,
                             translucentAlpha: 0.16,
                             solidBlendAlpha: 0.2,
@@ -638,7 +638,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                         icon: HugeIcons.strokeRoundedHourglass,
                         size: 18,
                         color: sleepTimer.isActive
-                            ? StudioCategoryColors.sleepTimer
+                            ? primary
                             : theme.colorScheme.onSurface.withValues(alpha: 0.75),
                       ),
                       if (sleepTimer.isActive) ...[
@@ -649,7 +649,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                             fontFeatures: AppTypography.audioFigures,
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
-                            color: StudioCategoryColors.sleepTimer,
+                            color: primary,
                           ),
                         ),
                       ],
@@ -1047,7 +1047,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: track.isHiRes ? StudioCategoryColors.hiResGold : primary,
+                      color: primary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1185,7 +1185,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               decoration: BoxDecoration(
                 color: StudioSurfaceTheme.tintedContainer(
                   context,
-                  isHiRes ? StudioCategoryColors.hiResGold : StudioCategoryColors.flacLossless,
+                  primary,
                   isSolid: isSolid,
                   translucentAlpha: 0.18,
                   solidBlendAlpha: 0.22,
@@ -1197,7 +1197,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 style: TextStyle(
                   fontSize: 8.5,
                   fontWeight: FontWeight.w900,
-                  color: isHiRes ? StudioCategoryColors.hiResGold : StudioCategoryColors.flacLossless,
+                  color: primary,
                   letterSpacing: 0.5,
                 ),
               ),

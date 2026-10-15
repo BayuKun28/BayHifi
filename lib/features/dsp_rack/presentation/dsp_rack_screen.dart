@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
+import '../../../../core/widgets/two_tone_header.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
 import '../domain/dsp_models.dart';
@@ -37,54 +38,11 @@ class DspRackScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.tintedContainer(
-                  context,
-                  primaryColor,
-                  isSolid: isSolid,
-                  translucentAlpha: 0.15,
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedSlidersVertical,
-                color: primaryColor,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'MASTERING DSP RACK',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.0,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    'C++ Low-Latency Processing Engine',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
+        titleSpacing: 18,
+        title: const TwoToneHeader(
+          primaryText: 'MASTERING',
+          accentText: 'DSP',
+          fontSize: 18,
         ),
         actions: [
           // Save Custom DSP Profile Button
@@ -113,15 +71,13 @@ class DspRackScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
-          // 0. PRO-Q STUDIO EQ LAUNCHER BANNER
-          _buildProQStudioBanner(context, isSolid),
-
-          // 0.1 HARDWARE DAC BRIDGE & FLASHER BANNER
-          _buildHardwareDacBanner(context, isSolid),
+          // 0. DUAL QUICK LAUNCHERS (PRO-Q & HARDWARE DAC)
+          _buildStudioLaunchersRow(context, isSolid, primaryColor),
+          const SizedBox(height: 12),
 
           // 1. MASTER HEADER & A/B COMPARISON STRIP
           _buildMasterSection(context, dspState, controller, isSolid),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // 2. STUDIO PRESETS SELECTOR
           _buildPresetsSelector(
@@ -131,7 +87,7 @@ class DspRackScreen extends ConsumerWidget {
             isSolid,
             currentTrack: currentTrack,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
           // UNIT 01: PRE-AMP GAIN STAGE
           RackUnitCard(
@@ -139,8 +95,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Pre-Amp Gain Stage',
             subtitle: 'Headroom Input Level & Digital Protection',
             isActive: !dspState.isBypassed,
+            initiallyExpanded: true,
             onToggle: () {},
-            accentColor: StudioCategoryColors.bitPerfect,
+            accentColor: primaryColor,
             headerTrailing: TextButton.icon(
               onPressed: () => controller.setPreamp(0.0),
               icon: const HugeIcon(
@@ -166,7 +123,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.preampDb >= 0 ? '+' : ''}${dspState.preampDb.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setPreamp(val),
-                  accentColor: StudioCategoryColors.bitPerfect,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 SingleChildScrollView(
@@ -197,8 +154,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Dynamic Bass Boost',
             subtitle: 'Psychoacoustic Sub-Bass Impact (40 - 160 Hz)',
             isActive: !dspState.isBypassed && dspState.bassBoostEnabled,
+            initiallyExpanded: dspState.bassBoostEnabled,
             onToggle: () => controller.toggleBassBoost(),
-            accentColor: StudioCategoryColors.proQEqualizer,
+            accentColor: primaryColor,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -210,7 +168,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.bassBoostAmount.toStringAsFixed(1)}x',
                   onChanged: (val) => controller.setBassBoostAmount(val),
-                  accentColor: StudioCategoryColors.proQEqualizer,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -220,7 +178,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 1.0,
                   formattedValue: '${(dspState.bassBoostWet * 100).toInt()}%',
                   onChanged: (val) => controller.setBassBoostWet(val),
-                  accentColor: StudioCategoryColors.proQEqualizer,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -232,8 +190,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Tube Harmonic Exciter',
             subtitle: 'Analog Triode Saturation y = tanh(k · x)',
             isActive: !dspState.isBypassed && dspState.tubeExciterEnabled,
+            initiallyExpanded: dspState.tubeExciterEnabled,
             onToggle: () => controller.toggleTubeExciter(),
-            accentColor: StudioCategoryColors.dspTubeWarmth,
+            accentColor: primaryColor,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -250,7 +209,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 10.0,
                   formattedValue: '${dspState.tubeDrive.toStringAsFixed(1)}x',
                   onChanged: (val) => controller.setTubeDrive(val),
-                  accentColor: StudioCategoryColors.dspTubeWarmth,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -260,7 +219,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 1.0,
                   formattedValue: '${(dspState.tubeWarmth * 100).toInt()}%',
                   onChanged: (val) => controller.setTubeWarmth(val),
-                  accentColor: StudioCategoryColors.dspTubeWarmth,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -270,7 +229,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 1.0,
                   formattedValue: '${(dspState.tubeMix * 100).toInt()}%',
                   onChanged: (val) => controller.setTubeMix(val),
-                  accentColor: StudioCategoryColors.dspTubeWarmth,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -282,8 +241,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Dynamic Compressor',
             subtitle: 'Studio Dynamic Range Transient Sculptor',
             isActive: !dspState.isBypassed && dspState.compressorEnabled,
+            initiallyExpanded: dspState.compressorEnabled,
             onToggle: () => controller.toggleCompressor(),
-            accentColor: StudioCategoryColors.dspCompressor,
+            accentColor: primaryColor,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -303,7 +263,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.compThreshold.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setCompThreshold(val),
-                  accentColor: StudioCategoryColors.dspCompressor,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -313,7 +273,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 10.0,
                   formattedValue: '${dspState.compRatio.toStringAsFixed(1)}:1',
                   onChanged: (val) => controller.setCompRatio(val),
-                  accentColor: StudioCategoryColors.dspCompressor,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -327,7 +287,7 @@ class DspRackScreen extends ConsumerWidget {
                         formattedValue:
                             '${dspState.compAttack.toStringAsFixed(0)} ms',
                         onChanged: (val) => controller.setCompAttack(val),
-                        accentColor: StudioCategoryColors.dspCompressor,
+                        accentColor: primaryColor,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -340,7 +300,7 @@ class DspRackScreen extends ConsumerWidget {
                         formattedValue:
                             '${dspState.compRelease.toStringAsFixed(0)} ms',
                         onChanged: (val) => controller.setCompRelease(val),
-                        accentColor: StudioCategoryColors.dspCompressor,
+                        accentColor: primaryColor,
                       ),
                     ),
                   ],
@@ -354,7 +314,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.compMakeup >= 0 ? '+' : ''}${dspState.compMakeup.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setCompMakeup(val),
-                  accentColor: StudioCategoryColors.dspCompressor,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -366,8 +326,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Mid-Side Stereo Widener',
             subtitle: 'Soundstage Matrix M = (L+R)/2, S = (L-R)/2',
             isActive: !dspState.isBypassed && dspState.stereoWidthEnabled,
+            initiallyExpanded: dspState.stereoWidthEnabled,
             onToggle: () => controller.toggleStereoWidth(),
-            accentColor: StudioCategoryColors.themingPalettes,
+            accentColor: primaryColor,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -383,7 +344,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 3.0,
                   formattedValue: '${(dspState.stereoWidth * 100).toInt()}%',
                   onChanged: (val) => controller.setStereoWidth(val),
-                  accentColor: StudioCategoryColors.themingPalettes,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -393,7 +354,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 2.0,
                   formattedValue: '${(dspState.stereoMidGain * 100).toInt()}%',
                   onChanged: (val) => controller.setStereoMidGain(val),
-                  accentColor: StudioCategoryColors.themingPalettes,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -405,8 +366,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Bauer Binaural Crossfeed',
             subtitle: 'Acoustic Headphone Simulation (Reduces Fatigue)',
             isActive: !dspState.isBypassed && dspState.crossfeedEnabled,
+            initiallyExpanded: dspState.crossfeedEnabled,
             onToggle: () => controller.toggleCrossfeed(),
-            accentColor: StudioCategoryColors.autoEq,
+            accentColor: primaryColor,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -418,7 +380,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.crossfeedCutoff.toStringAsFixed(0)} Hz',
                   onChanged: (val) => controller.setCrossfeedCutoff(val),
-                  accentColor: StudioCategoryColors.autoEq,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -429,7 +391,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.crossfeedFeed.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setCrossfeedFeed(val),
-                  accentColor: StudioCategoryColors.autoEq,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -440,7 +402,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${(dspState.crossfeedDelayMs * 1000).toStringAsFixed(0)} µs',
                   onChanged: (val) => controller.setCrossfeedDelay(val),
-                  accentColor: StudioCategoryColors.autoEq,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -452,8 +414,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Spatial Studio Reverb',
             subtitle: 'Freeverb 3D Acoustic Space & Room Reflection',
             isActive: !dspState.isBypassed && dspState.reverbEnabled,
+            initiallyExpanded: dspState.reverbEnabled,
             onToggle: () => controller.toggleReverb(),
-            accentColor: StudioCategoryColors.storageCache,
+            accentColor: primaryColor,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -464,7 +427,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 1.0,
                   formattedValue: '${(dspState.reverbRoomSize * 100).toInt()}%',
                   onChanged: (val) => controller.setReverbRoomSize(val),
-                  accentColor: StudioCategoryColors.storageCache,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -474,7 +437,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 1.0,
                   formattedValue: '${(dspState.reverbDamp * 100).toInt()}%',
                   onChanged: (val) => controller.setReverbDamp(val),
-                  accentColor: StudioCategoryColors.storageCache,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -484,7 +447,7 @@ class DspRackScreen extends ConsumerWidget {
                   max: 1.0,
                   formattedValue: '${(dspState.reverbWet * 100).toInt()}%',
                   onChanged: (val) => controller.setReverbWet(val),
-                  accentColor: StudioCategoryColors.storageCache,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -496,14 +459,15 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Granular Pitch Shifter',
             subtitle: 'Real-Time Chromatic Pitch Shift (Tempo Invariant)',
             isActive: !dspState.isBypassed && dspState.pitchShiftEnabled,
+            initiallyExpanded: dspState.pitchShiftEnabled,
             onToggle: () => controller.togglePitchShift(),
-            accentColor: StudioCategoryColors.lyricsMagenta,
+            accentColor: primaryColor,
             headerTrailing: TextButton.icon(
               onPressed: () => controller.setPitchSemitones(0.0),
               icon: const HugeIcon(
                 icon: HugeIcons.strokeRoundedRefresh,
                 size: 14,
-                color: StudioCategoryColors.lyricsMagenta,
+                color: null,
               ),
               label: const Text('Reset', style: TextStyle(fontSize: 11)),
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
@@ -520,7 +484,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.pitchSemitones >= 0 ? '+' : ''}${dspState.pitchSemitones.toStringAsFixed(1)} st',
                   onChanged: (val) => controller.setPitchSemitones(val),
-                  accentColor: StudioCategoryColors.lyricsMagenta,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -532,8 +496,9 @@ class DspRackScreen extends ConsumerWidget {
             title: 'Peak Brickwall Limiter',
             subtitle: 'Zero-Overshoot Anti-Clipping Lookahead Safety',
             isActive: !dspState.isBypassed && dspState.limiterEnabled,
+            initiallyExpanded: dspState.limiterEnabled,
             onToggle: () => controller.toggleLimiter(),
-            accentColor: StudioCategoryColors.dspLimiter,
+            accentColor: primaryColor,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -545,7 +510,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.limiterThreshold.toStringAsFixed(1)} dB',
                   onChanged: (val) => controller.setLimiterThreshold(val),
-                  accentColor: StudioCategoryColors.dspLimiter,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -556,7 +521,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.limiterOutputCeiling.toStringAsFixed(1)} dBFS',
                   onChanged: (val) => controller.setLimiterCeiling(val),
-                  accentColor: StudioCategoryColors.dspLimiter,
+                  accentColor: primaryColor,
                 ),
                 const SizedBox(height: 8),
                 RackKnobSlider(
@@ -567,7 +532,7 @@ class DspRackScreen extends ConsumerWidget {
                   formattedValue:
                       '${dspState.limiterRelease.toStringAsFixed(0)} ms',
                   onChanged: (val) => controller.setLimiterRelease(val),
-                  accentColor: StudioCategoryColors.dspLimiter,
+                  accentColor: primaryColor,
                 ),
               ],
             ),
@@ -656,15 +621,15 @@ class DspRackScreen extends ConsumerWidget {
                     color: state.isBypassed
                         ? StudioSurfaceTheme.tintedContainer(
                             context,
-                            const Color(0xFFFF3B30),
+                            theme.colorScheme.onSurfaceVariant,
                             isSolid: isSolid,
                             translucentAlpha: 0.12,
                           )
                         : StudioSurfaceTheme.tintedContainer(
                             context,
-                            const Color(0xFF34C759),
+                            primaryColor,
                             isSolid: isSolid,
-                            translucentAlpha: 0.12,
+                            translucentAlpha: 0.16,
                           ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -677,8 +642,8 @@ class DspRackScreen extends ConsumerWidget {
                             : HugeIcons.strokeRoundedCheckmarkCircle01,
                         size: 16,
                         color: state.isBypassed
-                            ? const Color(0xFFFF3B30)
-                            : const Color(0xFF34C759),
+                            ? theme.colorScheme.onSurfaceVariant
+                            : primaryColor,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -689,8 +654,8 @@ class DspRackScreen extends ConsumerWidget {
                           fontSize: 11.5,
                           fontWeight: FontWeight.bold,
                           color: state.isBypassed
-                              ? const Color(0xFFFF3B30)
-                              : const Color(0xFF34C759),
+                              ? theme.colorScheme.onSurfaceVariant
+                              : primaryColor,
                         ),
                       ),
                     ],
@@ -1412,307 +1377,118 @@ class DspRackScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProQStudioBanner(BuildContext context, bool isSolid) {
-    final theme = Theme.of(context);
-    final proQColor = StudioCategoryColors.proQEqualizer;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: isSolid
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
-                  blurRadius: 12,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            AppHaptics.lightImpact();
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const ProQStudioScreen()));
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.tintedContainer(
-                      context,
-                      proQColor,
-                      isSolid: isSolid,
-                      translucentAlpha: 0.16,
-                      solidBlendAlpha: 0.2,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedSlidersVertical,
-                      color: proQColor,
-                      size: 24,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: proQColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'PRO-Q STUDIO EQ',
-                            style: TextStyle(
-                              color: proQColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '10-Band Biquad Parametric Equalizer',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.tintedContainer(
-                      context,
-                      proQColor,
-                      isSolid: isSolid,
-                      translucentAlpha: 0.16,
-                      solidBlendAlpha: 0.2,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'OPEN',
-                        style: TextStyle(
-                          color: proQColor,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedArrowRight01,
-                        size: 13,
-                        color: proQColor,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+  Widget _buildStudioLaunchersRow(BuildContext context, bool isSolid, Color primaryColor) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildLauncherCard(
+              context: context,
+              title: 'PRO-Q EQ',
+              subtitle: '10-Band Parametric',
+              icon: HugeIcons.strokeRoundedSlidersVertical,
+              accentColor: primaryColor,
+              isSolid: isSolid,
+              onTap: () {
+                AppHaptics.lightImpact();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ProQStudioScreen()),
+                );
+              },
             ),
           ),
-        ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _buildLauncherCard(
+              context: context,
+              title: 'HARDWARE DAC',
+              subtitle: 'USB Bridge & Flash',
+              icon: HugeIcons.strokeRoundedUsb,
+              accentColor: primaryColor,
+              isSolid: isSolid,
+              onTap: () {
+                AppHaptics.lightImpact();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const HardwareDacStudioScreen()),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildHardwareDacBanner(BuildContext context, bool isSolid) {
+  Widget _buildLauncherCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required dynamic icon,
+    required Color accentColor,
+    required bool isSolid,
+    required VoidCallback onTap,
+  }) {
     final theme = Theme.of(context);
-    final dacAccentColor = theme.colorScheme.tertiary;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: isSolid
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
-                  blurRadius: 12,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            AppHaptics.lightImpact();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const HardwareDacStudioScreen(),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.tintedContainer(
-                      context,
-                      dacAccentColor,
-                      isSolid: isSolid,
-                      translucentAlpha: 0.16,
-                      solidBlendAlpha: 0.2,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedUsb,
-                      color: dacAccentColor,
-                      size: 24,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: dacAccentColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              'HARDWARE DAC BRIDGE',
-                              style: TextStyle(
-                                color: dacAccentColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.8,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Kiwi Ears AD1 & Universal DSP Flasher',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Direct USB HID 5-band hardware tuning & flash',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          fontSize: 11,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: StudioSurfaceTheme.tintedContainer(
-                      context,
-                      dacAccentColor,
-                      isSolid: isSolid,
-                      translucentAlpha: 0.16,
-                      solidBlendAlpha: 0.2,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'CONNECT',
-                        style: TextStyle(
-                          color: dacAccentColor,
-                          fontSize: 10.0,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(width: 3),
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedArrowRight01,
-                        size: 12,
-                        color: dacAccentColor,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: accentColor.withValues(alpha: 0.18),
+              width: 1.0,
             ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: HugeIcon(icon: icon, color: accentColor, size: 18),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w900,
+                        color: accentColor,
+                        letterSpacing: 0.6,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

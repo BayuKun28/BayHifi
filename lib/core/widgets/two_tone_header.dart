@@ -15,6 +15,8 @@ class TwoToneHeader extends StatelessWidget {
   final double letterSpacing;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final TextOverflow overflow;
+  final int? maxLines;
 
   const TwoToneHeader({
     super.key,
@@ -27,6 +29,8 @@ class TwoToneHeader extends StatelessWidget {
     this.letterSpacing = -0.5,
     this.trailing,
     this.onTap,
+    this.overflow = TextOverflow.ellipsis,
+    this.maxLines = 1,
   });
 
   @override
@@ -57,6 +61,8 @@ class TwoToneHeader extends StatelessWidget {
           ),
         ],
       ),
+      overflow: overflow,
+      maxLines: maxLines,
     );
 
     if (trailing == null && onTap == null) {

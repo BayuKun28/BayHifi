@@ -34,6 +34,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
   PaletteCategoryFilter _selectedCategory = PaletteCategoryFilter.all;
 
   static const List<Color> _accentOptions = [
+    Color(0xFF2EE672), // Organic Emerald Mint (Simple-As-F Default)
     Color(0xFF38BDF8), // Sky Studio
     Color(0xFF64748B), // Nordic Slate
     Color(0xFFC2410C), // Terracotta Clay

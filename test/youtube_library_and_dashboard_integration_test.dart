@@ -71,17 +71,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 1. Verify YouTube Quick Action Ribbon is visible on tracks view
-      expect(find.text('YOUTUBE MUSIC HIFI HUB'), findsOneWidget);
-      expect(find.text('Explore'), findsOneWidget);
+      // 1. Scroll until YouTube tab is visible and verify it exists
+      final youtubeTabFinder = find.text('YouTube');
+      await tester.scrollUntilVisible(
+        youtubeTabFinder,
+        100.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(youtubeTabFinder, findsOneWidget);
 
-      // 2. Tap Quick Action Ribbon
-      await tester.tap(find.text('YOUTUBE MUSIC HIFI HUB'));
+      // 2. Tap YouTube tab
+      await tester.tap(youtubeTabFinder);
       await tester.pumpAndSettle();
 
       // 3. Verify state tab switched to CollectionTab.youtube
       expect(controller.state.currentTab, CollectionTab.youtube);
-      expect(find.text('YouTube Music HiFi • Global Streaming'), findsOneWidget);
       expect(find.byType(YouTubeDiscoveryScreen), findsOneWidget);
     });
 

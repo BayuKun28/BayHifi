@@ -457,7 +457,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                   decoration: BoxDecoration(
                     color: StudioSurfaceTheme.tintedContainer(
                       context,
-                      isHiRes ? StudioCategoryColors.hiResGold : StudioCategoryColors.flacLossless,
+                      theme.colorScheme.primary,
                       isSolid: isSolid,
                       translucentAlpha: 0.18,
                       solidBlendAlpha: 0.22,
@@ -469,7 +469,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                     style: TextStyle(
                       fontSize: 8,
                       fontWeight: FontWeight.w900,
-                      color: isHiRes ? StudioCategoryColors.hiResGold : StudioCategoryColors.flacLossless,
+                      color: theme.colorScheme.primary,
                       letterSpacing: 0.5,
                     ),
                   ),

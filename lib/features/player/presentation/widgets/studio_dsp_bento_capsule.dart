@@ -127,7 +127,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
     // 3. Hardware DAC State
     final isDacConnected = dacState.isConnected && dacState.device != null;
     final dacLabel = isDacConnected ? StudioDspBentoCapsule.formatDacLabel(dacState.device) : 'DAC Direct';
-    const mintColor = Color(0xFF10B981);
+    final primary = colorScheme.primary;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -156,7 +156,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                       color: isAutoActive
                           ? StudioSurfaceTheme.tintedContainer(
                               context,
-                              StudioCategoryColors.autoEq,
+                              primary,
                               isSolid: true,
                               solidBlendAlpha: 0.25,
                             )
@@ -164,7 +164,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isAutoActive
-                            ? StudioCategoryColors.autoEq
+                            ? primary
                             : colorScheme.outline.withValues(alpha: 0.20),
                         width: isAutoActive ? 1.0 : 0.8,
                       ),
@@ -176,7 +176,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                           icon: HugeIcons.strokeRoundedHeadphones,
                           size: 11.5,
                           color: isAutoActive
-                              ? StudioCategoryColors.autoEq
+                              ? primary
                               : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
@@ -187,7 +187,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                             fontWeight: isAutoActive ? FontWeight.w800 : FontWeight.w700,
                             letterSpacing: 0.2,
                             color: isAutoActive
-                                ? StudioCategoryColors.autoEq
+                                ? primary
                                 : colorScheme.onSurface,
                           ),
                           maxLines: 1,
@@ -204,7 +204,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
             _AnimatedSignalConnector(
               animation: _flowController,
               isPlaying: isPlaying,
-              color: isAutoActive ? StudioCategoryColors.autoEq : colorScheme.outline,
+              color: isAutoActive ? primary : colorScheme.outline,
             ),
 
             // ─── STAGE 2: Mastering DSP Rack ──────────────────────────
@@ -229,7 +229,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                       color: isDspActive
                           ? StudioSurfaceTheme.tintedContainer(
                               context,
-                              StudioCategoryColors.dspMastering,
+                              primary,
                               isSolid: true,
                               solidBlendAlpha: 0.25,
                             )
@@ -237,7 +237,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isDspActive
-                            ? StudioCategoryColors.dspMastering
+                            ? primary
                             : colorScheme.outline.withValues(alpha: 0.20),
                         width: isDspActive ? 1.0 : 0.8,
                       ),
@@ -248,7 +248,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                         HugeIcon(
                           icon: HugeIcons.strokeRoundedSlidersVertical,
                           size: 11.5,
-                          color: isDspActive ? StudioCategoryColors.dspMastering : colorScheme.onSurfaceVariant,
+                          color: isDspActive ? primary : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -258,7 +258,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                             fontWeight: isDspActive ? FontWeight.w800 : FontWeight.w700,
                             letterSpacing: 0.2,
                             color: isDspActive
-                                ? StudioCategoryColors.dspMastering
+                                ? primary
                                 : colorScheme.onSurface,
                           ),
                           maxLines: 1,
@@ -275,7 +275,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
             _AnimatedSignalConnector(
               animation: _flowController,
               isPlaying: isPlaying,
-              color: isDspActive ? StudioCategoryColors.dspMastering : (isDacConnected ? mintColor : colorScheme.outline),
+              color: isDspActive ? primary : (isDacConnected ? primary : colorScheme.outline),
             ),
 
             // ─── STAGE 3: Hardware DAC Bridge ─────────────────────────
@@ -302,7 +302,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                       color: isDacConnected
                           ? StudioSurfaceTheme.tintedContainer(
                               context,
-                              mintColor,
+                              primary,
                               isSolid: true,
                               solidBlendAlpha: 0.25,
                             )
@@ -310,7 +310,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isDacConnected
-                            ? mintColor
+                            ? primary
                             : colorScheme.outline.withValues(alpha: 0.20),
                         width: isDacConnected ? 1.0 : 0.8,
                       ),
@@ -322,9 +322,9 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                           Container(
                             width: 5.5,
                             height: 5.5,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: mintColor,
+                              color: primary,
                             ),
                           ),
                           const SizedBox(width: 4),
@@ -343,7 +343,7 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                             fontWeight: isDacConnected ? FontWeight.w800 : FontWeight.w700,
                             letterSpacing: 0.2,
                             color: isDacConnected
-                                ? mintColor
+                                ? primary
                                 : colorScheme.onSurface,
                           ),
                           maxLines: 1,

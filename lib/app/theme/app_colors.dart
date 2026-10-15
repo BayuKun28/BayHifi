@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Backgrounds & Surfaces (Studio Obsidian)
-  static const Color background = Color(0xFF0D0F12);
-  static const Color surface = Color(0xFF14171D);
-  static const Color surfaceContainer = Color(0xFF1C2028);
-  static const Color surfaceContainerHigh = Color(0xFF242A35);
-  static const Color surfaceContainerHighest = Color(0xFF2D3442);
-  static const Color surfaceBorder = Color(0xFF2E3544);
+  // Backgrounds & Surfaces (Obsidian Forest - Simple-As-F Dribbble 27089924)
+  static const Color background = Color(0xFF0B110E);
+  static const Color surface = Color(0xFF101914);
+  static const Color surfaceContainer = Color(0xFF16241C);
+  static const Color surfaceContainerHigh = Color(0xFF1C2C23);
+  static const Color surfaceContainerHighest = Color(0xFF24362B);
+  static const Color surfaceBorder = Color(0xFF1D3326);
+  static const Color emeraldMint = Color(0xFF2EE672);
 
   // Audiophile Studio Curve Accents (Non-Neon)
   static const Color amberEq = Color(0xFFF59E0B);       // EQ line warm amber

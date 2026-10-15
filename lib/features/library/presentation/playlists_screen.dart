@@ -5,6 +5,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../core/widgets/two_tone_header.dart';
 import 'controllers/library_controller.dart';
 import 'screens/playlist_detail_screen.dart';
 import 'screens/smart_playlists_screen.dart';
@@ -153,36 +154,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
       appBar: AppBar(
         toolbarHeight: 56.0,
         elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: HugeIcon(icon: HugeIcons.strokeRoundedPlayList, color: primary, size: 18),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'STUDIO PLAYLISTS',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 0.8),
-                ),
-                Text(
-                  '${smartPlaylists.length + customPlaylists.length + studioPlaylists.length} Playlists & Collections',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    fontFeatures: AppTypography.audioFigures,
-                  ),
-                ),
-              ],
-            ),
-          ],
+        titleSpacing: 18,
+        title: const TwoToneHeader(
+          primaryText: 'STUDIO',
+          accentText: 'PLAYLISTS',
+          fontSize: 18,
         ),
         actions: [
           M3EIconButton(
@@ -220,7 +196,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
               icon: HugeIcons.strokeRoundedFavourite,
               title: favPlaylist.name,
               subtitle: '${favPlaylist.description} • ${favPlaylist.trackCount} Tracks',
-              accentColor: theme.colorScheme.tertiary,
+              accentColor: primary,
               isSolid: isSolid,
               onTap: () {
                 Navigator.of(context).push(
@@ -241,7 +217,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
               icon: HugeIcons.strokeRoundedSparkles,
               title: hiresPlaylist.name,
               subtitle: '${hiresPlaylist.description} • ${hiresPlaylist.trackCount} Tracks',
-              accentColor: theme.colorScheme.secondary,
+              accentColor: primary,
               isSolid: isSolid,
               onTap: () {
                 Navigator.of(context).push(
@@ -377,11 +353,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                               decoration: BoxDecoration(
                                 color: StudioSurfaceTheme.tintedContainer(
                                   context,
-                                  p.sourceType == 'spotify'
-                                      ? const Color(0xFF1DB954)
-                                      : (p.sourceType == 'youtube'
-                                          ? StudioCategoryColors.youtubeMusic
-                                          : primary),
+                                  primary,
                                   isSolid: isSolid,
                                   translucentAlpha: 0.15,
                                 ),
@@ -392,11 +364,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                                   icon: p.sourceType == 'spotify' || p.sourceType == 'youtube'
                                       ? HugeIcons.strokeRoundedLink01
                                       : HugeIcons.strokeRoundedPlaylist01,
-                                  color: p.sourceType == 'spotify'
-                                      ? const Color(0xFF1DB954)
-                                      : (p.sourceType == 'youtube'
-                                          ? StudioCategoryColors.youtubeMusic
-                                          : primary),
+                                  color: primary,
                                   size: 20,
                                 ),
                               ),
@@ -416,9 +384,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                               margin: const EdgeInsets.only(left: 6),
                               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                               decoration: BoxDecoration(
-                                color: p.sourceType == 'spotify'
-                                    ? const Color(0xFF1DB954).withValues(alpha: 0.2)
-                                    : StudioCategoryColors.youtubeMusic.withValues(alpha: 0.2),
+                                color: primary.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -426,9 +392,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                                 style: TextStyle(
                                   fontSize: 8.5,
                                   fontWeight: FontWeight.w900,
-                                  color: p.sourceType == 'spotify'
-                                      ? const Color(0xFF1DB954)
-                                      : StudioCategoryColors.youtubeMusic,
+                                  color: primary,
                                 ),
                               ),
                             ),

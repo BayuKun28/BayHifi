@@ -6,12 +6,12 @@ class AppTheme {
 
   static ThemeData get darkStudioTheme {
     final colorScheme = ColorScheme.dark(
-      primary: AppColors.amberEq,
-      onPrimary: Colors.black,
-      secondary: AppColors.cyanDriver,
-      onSecondary: Colors.black,
-      tertiary: AppColors.mintTarget,
-      onTertiary: Colors.black,
+      primary: const Color(0xFF2EE672), // Emerald Mint
+      onPrimary: const Color(0xFF0B110E),
+      secondary: const Color(0xFF4ADE80),
+      onSecondary: const Color(0xFF0B110E),
+      tertiary: const Color(0xFF2EE672),
+      onTertiary: const Color(0xFF0B110E),
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
       surfaceContainer: AppColors.surfaceContainer,

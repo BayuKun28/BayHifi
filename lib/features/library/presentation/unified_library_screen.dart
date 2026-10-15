@@ -9,6 +9,7 @@ import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/widgets/studio_alphabetical_scroller.dart';
 import '../../../core/widgets/studio_artwork_widget.dart';
+import '../../../core/widgets/two_tone_header.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
 import '../../navidrome/domain/subsonic_models.dart';
@@ -397,46 +398,11 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                     ],
                   ),
                 )
-              : Row(
-                  key: const ValueKey('library_title'),
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: StudioSurfaceTheme.tintedContainer(context, primaryColor, isSolid: isSolid),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, color: primaryColor, size: 18),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'MUSIC LIBRARY',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.6,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            '${libraryState.totalTracksCount} Tracks Available',
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              : const TwoToneHeader(
+                  key: ValueKey('library_title'),
+                  primaryText: 'MUSIC',
+                  accentText: 'LIBRARY',
+                  fontSize: 18,
                 ),
         ),
         actions: [
@@ -509,7 +475,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                         HugeIcon(
                           icon: HugeIcons.strokeRoundedFolder01,
                           size: 18,
-                          color: StudioCategoryColors.libraryScanner,
+                          color: primaryColor,
                         ),
                         const SizedBox(width: 10),
                         const Text('Pick & Scan Music Folder', style: TextStyle(fontSize: 12.5)),
@@ -523,7 +489,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                         HugeIcon(
                           icon: HugeIcons.strokeRoundedMusicNote01,
                           size: 18,
-                          color: StudioCategoryColors.storageIndigo,
+                          color: primaryColor,
                         ),
                         const SizedBox(width: 10),
                         const Text('Pick Audio Files', style: TextStyle(fontSize: 12.5)),
@@ -538,7 +504,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                       HugeIcon(
                         icon: HugeIcons.strokeRoundedRefresh,
                         size: 18,
-                        color: StudioCategoryColors.bitPerfect,
+                        color: primaryColor,
                       ),
                       const SizedBox(width: 10),
                       Text(kIsWeb ? 'Sync Server Music' : 'Rescan Music Folders', style: const TextStyle(fontSize: 12.5)),
@@ -552,7 +518,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                       HugeIcon(
                         icon: isNavidromeConnected ? HugeIcons.strokeRoundedCloudCheck : HugeIcons.strokeRoundedCloud,
                         size: 18,
-                        color: isNavidromeConnected ? StudioCategoryColors.bitPerfect : StudioCategoryColors.navidromeAzure,
+                        color: primaryColor,
                       ),
                       const SizedBox(width: 10),
                       Text(
@@ -569,7 +535,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                       HugeIcon(
                         icon: HugeIcons.strokeRoundedPlayList,
                         size: 18,
-                        color: StudioCategoryColors.youtubeMusic,
+                        color: primaryColor,
                       ),
                       const SizedBox(width: 10),
                       const Text(
@@ -587,12 +553,12 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                       HugeIcon(
                         icon: HugeIcons.strokeRoundedDelete02,
                         size: 18,
-                        color: StudioCategoryColors.dspLimiter,
+                        color: theme.colorScheme.error,
                       ),
                       const SizedBox(width: 10),
                       Text(
                         'Clear Music Library',
-                        style: TextStyle(fontSize: 12.5, color: StudioCategoryColors.dspLimiter),
+                        style: TextStyle(fontSize: 12.5, color: theme.colorScheme.error),
                       ),
                     ],
                   ),
@@ -666,8 +632,8 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 ),
               ),
 
-          // ─── 2. SOURCE FILTER CHIPS (ALL / OFFLINE / CLOUD LIBRARY / HI-RES) ───
-          if (libraryState.currentTab != CollectionTab.youtube)
+          // ─── 2. SOURCE FILTER CHIPS (ONLY ON TRACKS TAB) ─────────────────
+          if (libraryState.currentTab == CollectionTab.tracks)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               child: Column(
@@ -692,7 +658,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                           context: context,
                           label: 'Offline Local (${libraryState.offlineTracksCount})',
                           icon: HugeIcons.strokeRoundedFolder01,
-                          accentColor: StudioCategoryColors.storageIndigo,
+                          accentColor: primaryColor,
                           filter: LibrarySourceFilter.offline,
                           isSelected: libraryState.selectedFilter == LibrarySourceFilter.offline,
                           onTap: () => controller.setFilter(LibrarySourceFilter.offline),
@@ -702,7 +668,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                           context: context,
                           label: 'Cloud Library (${libraryState.cloudTracksCount})',
                           icon: HugeIcons.strokeRoundedCloud,
-                          accentColor: StudioCategoryColors.navidromeAzure,
+                          accentColor: primaryColor,
                           filter: LibrarySourceFilter.cloud,
                           isSelected: libraryState.selectedFilter == LibrarySourceFilter.cloud,
                           onTap: () => controller.setFilter(LibrarySourceFilter.cloud),
@@ -712,7 +678,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                           context: context,
                           label: 'Hi-Res Lossless (${libraryState.hiResTracksCount})',
                           icon: HugeIcons.strokeRoundedCd,
-                          accentColor: StudioCategoryColors.hiResGold,
+                          accentColor: primaryColor,
                           filter: LibrarySourceFilter.hiRes,
                           isSelected: libraryState.selectedFilter == LibrarySourceFilter.hiRes,
                           onTap: () => controller.setFilter(LibrarySourceFilter.hiRes),
@@ -722,7 +688,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                           context: context,
                           label: 'Untagged (${libraryState.untaggedTracksCount})',
                           icon: HugeIcons.strokeRoundedAlertCircle,
-                          accentColor: StudioCategoryColors.warmTubeAmber,
+                          accentColor: primaryColor,
                           filter: LibrarySourceFilter.untagged,
                           isSelected: libraryState.selectedFilter == LibrarySourceFilter.untagged,
                           onTap: () => controller.setFilter(LibrarySourceFilter.untagged),
@@ -745,7 +711,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                                     context: context,
                                     label: 'All Cloud (${libraryState.cloudTracksCount})',
                                     icon: HugeIcons.strokeRoundedCloudServer,
-                                    accentColor: StudioCategoryColors.navidromeAzure,
+                                    accentColor: primaryColor,
                                     sub: CloudSubFilter.all,
                                     isSelected: libraryState.cloudSubFilter == CloudSubFilter.all,
                                     onTap: () => controller.setCloudSubFilter(CloudSubFilter.all),
@@ -755,7 +721,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                                     context: context,
                                     label: 'Spotify (${libraryState.spotifyCloudCount})',
                                     icon: HugeIcons.strokeRoundedMusic01,
-                                    accentColor: StudioCategoryColors.spotifyGreen,
+                                    accentColor: primaryColor,
                                     sub: CloudSubFilter.spotify,
                                     isSelected: libraryState.cloudSubFilter == CloudSubFilter.spotify,
                                     onTap: () => controller.setCloudSubFilter(CloudSubFilter.spotify),
@@ -765,7 +731,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                                     context: context,
                                     label: 'Navidrome (${libraryState.navidromeCloudCount})',
                                     icon: HugeIcons.strokeRoundedCloudSync,
-                                    accentColor: StudioCategoryColors.navidromeAzure,
+                                    accentColor: primaryColor,
                                     sub: CloudSubFilter.navidrome,
                                     isSelected: libraryState.cloudSubFilter == CloudSubFilter.navidrome,
                                     onTap: () => controller.setCloudSubFilter(CloudSubFilter.navidrome),
@@ -775,7 +741,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                                     context: context,
                                     label: 'YouTube (${libraryState.youtubeCloudCount})',
                                     icon: HugeIcons.strokeRoundedYoutube,
-                                    accentColor: StudioCategoryColors.youtubeMusic,
+                                    accentColor: primaryColor,
                                     sub: CloudSubFilter.youtube,
                                     isSelected: libraryState.cloudSubFilter == CloudSubFilter.youtube,
                                     onTap: () => controller.setCloudSubFilter(CloudSubFilter.youtube),
@@ -789,10 +755,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 ],
               ),
             ),
-
-          // ─── 2b. YOUTUBE MUSIC HIFI QUICK ACTION CAPSULE ───
-          if (libraryState.currentTab != CollectionTab.youtube)
-            _buildYouTubeQuickRibbon(context, primaryColor, theme, controller),
 
           // ─── 3. TAB CONTENT VIEWS ─────────────────────────────────────────
           Expanded(
@@ -1008,122 +970,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildYouTubeQuickRibbon(
-    BuildContext context,
-    Color primaryColor,
-    ThemeData theme,
-    UnifiedLibraryController controller,
-  ) {
-    final isSolid = ref.isSolidStyle;
-    final ytColor = StudioCategoryColors.youtubeMusic;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(14, 2, 14, 4),
-      child: InkWell(
-        onTap: () {
-          AppHaptics.selectionClick();
-          controller.setTab(CollectionTab.youtube);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: StudioSurfaceTheme.tintedContainer(
-              context,
-              ytColor,
-              isSolid: isSolid,
-              translucentAlpha: 0.09,
-              solidBlendAlpha: 0.14,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.tintedContainer(
-                    context,
-                    ytColor,
-                    isSolid: isSolid,
-                    translucentAlpha: 0.18,
-                    solidBlendAlpha: 0.22,
-                  ),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlayList,
-                  size: 13,
-                  color: ytColor,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'YOUTUBE MUSIC HIFI HUB',
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
-                        color: ytColor,
-                      ),
-                    ),
-                    Text(
-                      'Search & stream bit-perfect Opus audio through DSP chain',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.tintedContainer(
-                    context,
-                    ytColor,
-                    isSolid: isSolid,
-                    translucentAlpha: 0.16,
-                    solidBlendAlpha: 0.2,
-                  ),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Explore',
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                        color: ytColor,
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedArrowRight01,
-                      size: 10,
-                      color: ytColor,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -1410,7 +1256,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     bool isSolid,
   ) {
     final cs = theme.colorScheme;
-    const amber = StudioCategoryColors.warmTubeAmber;
+    final primary = cs.primary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12, top: 4),
@@ -1418,14 +1264,14 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.tintedContainer(
           context,
-          amber,
+          primary,
           isSolid: isSolid,
           solidBlendAlpha: 0.16,
           translucentAlpha: 0.12,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: amber.withValues(alpha: 0.35),
+          color: primary.withValues(alpha: 0.35),
           width: 0.8,
         ),
       ),
@@ -1437,13 +1283,13 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: amber.withValues(alpha: 0.2),
+                  color: primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const HugeIcon(
+                child: HugeIcon(
                   icon: HugeIcons.strokeRoundedAlertCircle,
                   size: 18,
-                  color: StudioCategoryColors.warmTubeAmber,
+                  color: primary,
                 ),
               ),
               const SizedBox(width: 10),
@@ -1477,7 +1323,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               Expanded(
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: amber,
+                    backgroundColor: primary,
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(

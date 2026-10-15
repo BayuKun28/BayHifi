@@ -91,15 +91,7 @@ class _NamidaExpandableMiniPlayerState
   }
 
   Color _getTabColor(CollectionTab tab, Color fallbackPrimary) {
-    return switch (tab) {
-      CollectionTab.tracks => fallbackPrimary,
-      CollectionTab.albums => StudioCategoryColors.themingPalettes,
-      CollectionTab.artists => StudioCategoryColors.visualizer,
-      CollectionTab.genres => StudioCategoryColors.gestures,
-      CollectionTab.downloads => const Color(0xFF10B981),
-      CollectionTab.youtube => StudioCategoryColors.youtubeMusic,
-      CollectionTab.folders => StudioCategoryColors.libraryScanner,
-    };
+    return fallbackPrimary;
   }
 
 

@@ -182,9 +182,9 @@ class BackupRestoreService {
       if (restoreTheme && data['theme_settings'] is Map) {
         final theme = Map<String, dynamic>.from(data['theme_settings'] as Map);
         await storage.saveThemeSettings(
-          paletteId: theme['palette_id'] as String? ?? 'obsidian_cyan',
+          paletteId: theme['palette_id'] as String? ?? 'simple_as_f',
           themeModeIndex: (theme['theme_mode'] as num?)?.toInt() ?? 2,
-          customAccentColorValue: (theme['custom_accent'] as num?)?.toInt() ?? 0xFF38BDF8,
+          customAccentColorValue: (theme['custom_accent'] as num?)?.toInt() ?? 0xFF2EE672,
           dynamicAlbumArtEnabled: theme['dynamic_album_art'] as bool? ?? false,
         );
       }

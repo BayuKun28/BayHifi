@@ -100,19 +100,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 if (_searchQuery.isNotEmpty)
                   ..._buildSearchResults(context, theme, isSolid)
                 else ...[
-            // ─── 3. SECTION 1: AESTHETICS & ATMOSPHERE ──────────────────────
+            // ─── 1. SECTION 1: AESTHETICS & ATMOSPHERE ──────────────────────
             _buildSectionHeader(
               context,
-              title: 'AESTHETICS & ATMOSPHERE',
+              title: 'AESTHETICS & DISPLAY',
               icon: HugeIcons.strokeRoundedLayers01,
-              color: StudioCategoryColors.themingPalettes,
+              color: primary,
             ),
             const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedColorPicker,
-            accentColor: StudioCategoryColors.themingPalettes,
+            accentColor: primary,
             title: 'THEMING & COLOR PALETTES',
             subtitle: '19 Studio Palettes, Light/Dark/System Mode, Pure Solid M3 Surface Fills & Monet Dynamic Art',
             badgeText: '${themeState.currentPalette.name} • ${themeState.isSolidStyle ? "Pure Solid" : "Translucent"}',
@@ -128,7 +128,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedAudioWaveform,
-            accentColor: StudioCategoryColors.visualizer,
+            accentColor: primary,
             title: 'VISUALIZER & DISPLAY',
             subtitle: 'Turntable Tonearm, Cassette, CD Jewel, Dual VU Meters, Mirror Wave & Precision Studio Ruler',
             badgeText: 'Live RTA • 20 Expressive Styles',
@@ -144,7 +144,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCar01,
-            accentColor: StudioCategoryColors.dockingDesk,
+            accentColor: primary,
             title: 'STUDIO WORKSTATION & CAR DOCK',
             subtitle: 'High-contrast studio timecode clock, dual analog VU level dials & large controls for desk stands',
             badgeText: 'Fullscreen Stand Mode',
@@ -157,19 +157,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 24),
 
-          // ─── 3. SECTION 2: AUDIO ARCHITECTURE & DSP ─────────────────────
+          // ─── 2. SECTION 2: AUDIO ARCHITECTURE & HARDWARE ─────────────────
           _buildSectionHeader(
             context,
-            title: 'AUDIO ARCHITECTURE & DSP WORKSTATION',
+            title: 'AUDIO ARCHITECTURE & ENGINE',
             icon: HugeIcons.strokeRoundedCpu,
-            color: StudioCategoryColors.audioHardware,
+            color: primary,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedCpu,
-            accentColor: StudioCategoryColors.audioHardware,
+            accentColor: primary,
             title: 'AUDIO HARDWARE & DAC ENGINE',
             subtitle: 'SoLoud C++ Engine, Bit-Perfect Direct Stream Bypass, Output Devices & Latency Buffer Tuning',
             badgeText: 'Bit-Perfect PCM Ready',
@@ -185,7 +185,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedDashboardSpeed01,
-            accentColor: StudioCategoryColors.proQEqualizer,
+            accentColor: primary,
             title: 'ADVANCED PLAYBACK ENGINE & FADES',
             subtitle: 'Smooth volume fades, headphone unplug guard, speed/pitch semitones, ReplayGain & seek stepper',
             badgeText: 'Engine Transitions & Policies',
@@ -198,19 +198,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 24),
 
-          // ─── 4. SECTION 3: MEDIA, LIBRARY & STORAGE ──────────────────────
+          // ─── 3. SECTION 3: MEDIA, STORAGE & ARCHIVE ──────────────────────
           _buildSectionHeader(
             context,
-            title: 'MEDIA, LIBRARY & STORAGE',
+            title: 'MEDIA, STORAGE & VAULT',
             icon: HugeIcons.strokeRoundedFolder01,
-            color: StudioCategoryColors.libraryScanner,
+            color: primary,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedFolder01,
-            accentColor: StudioCategoryColors.libraryScanner,
+            accentColor: primary,
             title: 'LIBRARY SCANNER & SLEEP TIMER',
             subtitle: 'Automated 15s/30s volume attenuation sleep timer, startup library scan & audio clip filters',
             badgeText: 'Scanner Rules Active',
@@ -226,7 +226,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildCategoryCard(
             context,
             icon: HugeIcons.strokeRoundedDatabase,
-            accentColor: StudioCategoryColors.storageCache,
+            accentColor: primary,
             title: 'STORAGE & CACHE QUOTA',
             subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & database vacuum',
             badgeText: 'Cache & Integrity',
@@ -237,24 +237,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
             isSolid: isSolid,
           ),
-          const SizedBox(height: 24),
-
-          // ─── 5. SECTION 4: SYSTEM, GESTURES & ARCHIVE ────────────────────
-          _buildSectionHeader(
-            context,
-            title: 'SYSTEM, GESTURES & ARCHIVE',
-            icon: HugeIcons.strokeRoundedSettings01,
-            color: StudioCategoryColors.gestures,
-          ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedActivity01,
-            accentColor: StudioCategoryColors.gestures,
-            title: 'GESTURES & TRACK TILES',
-            subtitle: 'Artwork tap triggers (Lyrics, Fav, Inspector), swipe-to-queue/favorite & track tile layouts',
-            badgeText: 'Touch Gestures • Swipe Actions',
+            icon: HugeIcons.strokeRoundedSettings01,
+            accentColor: primary,
+            title: 'GESTURES, HOTKEYS & CONTROLS',
+            subtitle: 'MiniPlayer swipe gestures, track tile actions, double-tap seek intervals & keyboard shortcuts',
+            badgeText: 'Custom Interaction Matrix',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const GesturesSettingsScreen()),
@@ -266,11 +257,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedCloudSync,
-            accentColor: StudioCategoryColors.backupVault,
-            title: 'BACKUP & RESTORE ARCHIVE',
-            subtitle: 'Export and import portable .bayhifi JSON snapshots containing playlists, smart rules & presets',
-            badgeText: '.bayhifi Snapshot Engine',
+            icon: HugeIcons.strokeRoundedCloudCheck,
+            accentColor: primary,
+            title: 'CLOUD VAULT & BACKUP',
+            subtitle: 'Export/import library playlists, equalizer curves, hardware DAC profiles & backup archives',
+            badgeText: 'Encrypted JSON Vault',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const BackupRestoreSettingsScreen()),
@@ -278,6 +269,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
             isSolid: isSolid,
           ),
+
             const SizedBox(height: 28),
 
             // ─── 6. BAYDEV STUDIO WATERMARK ─────────────────────────────────
@@ -356,10 +348,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   List<Widget> _buildSearchResults(BuildContext context, ThemeData theme, bool isSolid) {
     final query = _searchQuery.toLowerCase();
+    final primary = theme.colorScheme.primary;
     final allItems = [
       (
         icon: HugeIcons.strokeRoundedColorPicker,
-        accentColor: StudioCategoryColors.themingPalettes,
+        accentColor: primary,
         title: 'THEMING & COLOR PALETTES',
         subtitle: '19 Studio Palettes, Light/Dark/System Mode, Pure Solid M3 Surface Fills & Monet Dynamic Art',
         badgeText: 'Studio Wallpapers • Palettes',
@@ -368,7 +361,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedAudioWaveform,
-        accentColor: StudioCategoryColors.visualizer,
+        accentColor: primary,
         title: 'VISUALIZER & DISPLAY',
         subtitle: 'Turntable Tonearm, Cassette, CD Jewel, Dual VU Meters, Mirror Wave & Precision Studio Ruler',
         badgeText: 'Live RTA • 20 Expressive Styles',
@@ -377,7 +370,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedCar01,
-        accentColor: StudioCategoryColors.dockingDesk,
+        accentColor: primary,
         title: 'STUDIO WORKSTATION & CAR DOCK',
         subtitle: 'High-contrast studio timecode clock, dual analog VU level dials & large controls for desk stands',
         badgeText: 'Fullscreen Stand Mode',
@@ -386,7 +379,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedCpu,
-        accentColor: StudioCategoryColors.audioHardware,
+        accentColor: primary,
         title: 'AUDIO HARDWARE & DAC ENGINE',
         subtitle: 'SoLoud C++ Engine, Bit-Perfect Direct Stream Bypass, Output Devices & Latency Buffer Tuning',
         badgeText: 'Bit-Perfect PCM Ready',
@@ -395,7 +388,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedDashboardSpeed01,
-        accentColor: StudioCategoryColors.proQEqualizer,
+        accentColor: primary,
         title: 'ADVANCED PLAYBACK ENGINE & FADES',
         subtitle: 'Smooth volume fades, headphone unplug guard, speed/pitch semitones, ReplayGain & seek stepper',
         badgeText: 'Engine Transitions & Policies',
@@ -404,7 +397,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedFolder01,
-        accentColor: StudioCategoryColors.libraryScanner,
+        accentColor: primary,
         title: 'LIBRARY SCANNER & SLEEP TIMER',
         subtitle: 'Automated 15s/30s volume attenuation sleep timer, startup library scan & audio clip filters',
         badgeText: 'Scanner Rules Active',
@@ -413,7 +406,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedDatabase,
-        accentColor: StudioCategoryColors.storageCache,
+        accentColor: primary,
         title: 'STORAGE & CACHE QUOTA',
         subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & database vacuum',
         badgeText: 'Cache & Integrity',
@@ -422,7 +415,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedActivity01,
-        accentColor: StudioCategoryColors.gestures,
+        accentColor: primary,
         title: 'GESTURES & TRACK TILES',
         subtitle: 'Artwork tap triggers (Lyrics, Fav, Inspector), swipe-to-queue/favorite & track tile layouts',
         badgeText: 'Touch Gestures • Swipe Actions',
@@ -431,7 +424,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       (
         icon: HugeIcons.strokeRoundedCloudSync,
-        accentColor: StudioCategoryColors.backupVault,
+        accentColor: primary,
         title: 'BACKUP & RESTORE ARCHIVE',
         subtitle: 'Export and import portable .bayhifi JSON snapshots containing playlists, smart rules & presets',
         badgeText: '.bayhifi Snapshot Engine',
@@ -495,7 +488,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: _buildCategoryCard(
               context,
               icon: item.icon,
-              accentColor: item.accentColor,
+              accentColor: theme.colorScheme.primary,
               title: item.title,
               subtitle: item.subtitle,
               badgeText: item.badgeText,

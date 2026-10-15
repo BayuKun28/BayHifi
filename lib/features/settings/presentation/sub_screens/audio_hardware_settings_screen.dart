@@ -66,7 +66,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
   }
 
   Widget _buildStatusHero(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
-    final hardwareColor = StudioCategoryColors.audioHardware;
+    final hardwareColor = primary;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: StudioSurfaceTheme.cardDecoration(
@@ -133,7 +133,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 theme,
                 label: 'Engine: SoLoud Native C++',
                 isActive: true,
-                color: StudioCategoryColors.audioEngineSoloud,
+                color: primary,
                 isSolid: isSolid,
               ),
               _buildStatusPill(
@@ -141,7 +141,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 theme,
                 label: 'Buffer: ${_bufferLatency.toInt()}ms',
                 isActive: true,
-                color: StudioCategoryColors.proQEqualizer,
+                color: primary,
                 isSolid: isSolid,
               ),
               _buildStatusPill(
@@ -149,7 +149,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                 theme,
                 label: _bitPerfect ? 'Bit-Perfect: ON' : 'Bit-Perfect: OFF',
                 isActive: _bitPerfect,
-                color: StudioCategoryColors.bitPerfect,
+                color: _bitPerfect ? primary : theme.colorScheme.outlineVariant,
                 isSolid: isSolid,
               ),
             ],

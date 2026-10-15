@@ -660,11 +660,17 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
   static ThemeSettingsState _loadInitialState() {
     try {
       final saved = LocalPersistenceService.instance.getThemeSettings();
-      final paletteId = saved['palette_id'] as String? ?? 'obsidian_cyan';
+      var paletteId = saved['palette_id'] as String? ?? 'simple_as_f';
+      if (paletteId == 'obsidian_cyan') {
+        paletteId = 'simple_as_f';
+      }
       final modeIndex = saved['theme_mode'] as int? ?? AppThemeMode.dark.index;
-      final accentVal = saved['custom_accent'] as int? ?? 0xFF2EE672;
+      var accentVal = saved['custom_accent'] as int? ?? 0xFF2EE672;
+      if (accentVal == 0xFF38BDF8) {
+        accentVal = 0xFF2EE672;
+      }
       final dynamicArt = saved['dynamic_album_art'] as bool? ?? false;
-      final fillStyleStr = saved['surface_fill_style'] as String? ?? 'translucent';
+      final fillStyleStr = saved['surface_fill_style'] as String? ?? 'solid';
 
       final wallpaperJson = LocalPersistenceService.instance.getWallpaperSettings();
       final wallpaperSettings = WallpaperSettings.fromJson(wallpaperJson);

@@ -221,14 +221,8 @@ class TrackTile extends ConsumerWidget {
                       Builder(
                         builder: (context) {
                           final Color badgeColor = track.isHiRes
-                              ? StudioCategoryColors.hiResGold
-                              : (track.format.name.toLowerCase() == 'flac'
-                                  ? StudioCategoryColors.flacLossless
-                                  : (track.format.name.toLowerCase() == 'wav'
-                                      ? StudioCategoryColors.wavPcm
-                                      : (track.format.name.toLowerCase() == 'opus'
-                                          ? StudioCategoryColors.opusStream
-                                          : theme.colorScheme.onSurfaceVariant)));
+                              ? SimpleAsFTheme.accent(context)
+                              : SimpleAsFTheme.sageSlate;
 
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),

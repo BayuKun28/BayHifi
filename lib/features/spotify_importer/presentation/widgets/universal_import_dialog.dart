@@ -402,9 +402,7 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: _detectedSource == 'spotify'
-                                        ? const Color(0xFF1DB954).withValues(alpha: 0.2)
-                                        : StudioCategoryColors.youtubeMusic.withValues(alpha: 0.2),
+                                    color: theme.colorScheme.primary.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
@@ -412,9 +410,7 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                                     style: TextStyle(
                                       fontSize: 9.5,
                                       fontWeight: FontWeight.w900,
-                                      color: _detectedSource == 'spotify'
-                                          ? const Color(0xFF1DB954)
-                                          : StudioCategoryColors.youtubeMusic,
+                                      color: theme.colorScheme.primary,
                                     ),
                                   ),
                                 ),

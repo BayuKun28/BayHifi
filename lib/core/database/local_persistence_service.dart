@@ -319,19 +319,61 @@ class LocalPersistenceService {
 
   // ─── 3.1 THEME & PALETTE PERSISTENCE ───────────────────────────────────────
   Map<String, dynamic> getThemeSettings() {
+    final hasMigratedV2 = _readScoped('migrated_to_simple_as_f_v2') == true;
+    if (!hasMigratedV2) {
+      _writeScoped('migrated_to_simple_as_f_v2', true);
+      final defaultSettings = <String, dynamic>{
+        'palette_id': 'simple_as_f',
+        'theme_mode': 2, // dark
+        'custom_accent': 0xFF2EE672,
+        'dynamic_album_art': false,
+        'surface_fill_style': 'solid',
+      };
+      _writeScoped('theme_settings', defaultSettings);
+      _save();
+      return defaultSettings;
+    }
+
     final data = _readScoped('theme_settings');
     if (data is Map<String, dynamic>) {
+      bool changed = false;
+      if (data['palette_id'] == 'obsidian_cyan' || data['palette_id'] == null) {
+        data['palette_id'] = 'simple_as_f';
+        changed = true;
+      }
+      if (data['custom_accent'] == 0xFF38BDF8 || data['custom_accent'] == null) {
+        data['custom_accent'] = 0xFF2EE672;
+        changed = true;
+      }
+      if (changed) {
+        _writeScoped('theme_settings', data);
+        _save();
+      }
       return data;
     }
     if (data is Map) {
-      return Map<String, dynamic>.from(data);
+      final map = Map<String, dynamic>.from(data);
+      bool changed = false;
+      if (map['palette_id'] == 'obsidian_cyan' || map['palette_id'] == null) {
+        map['palette_id'] = 'simple_as_f';
+        changed = true;
+      }
+      if (map['custom_accent'] == 0xFF38BDF8 || map['custom_accent'] == null) {
+        map['custom_accent'] = 0xFF2EE672;
+        changed = true;
+      }
+      if (changed) {
+        _writeScoped('theme_settings', map);
+        _save();
+      }
+      return map;
     }
     return {
-      'palette_id': 'obsidian_cyan',
+      'palette_id': 'simple_as_f',
       'theme_mode': 2, // dark
-      'custom_accent': 0xFF38BDF8,
+      'custom_accent': 0xFF2EE672,
       'dynamic_album_art': false,
-      'surface_fill_style': 'translucent',
+      'surface_fill_style': 'solid',
     };
   }
 

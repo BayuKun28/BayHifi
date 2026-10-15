@@ -69,13 +69,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               // ─── 2. RECENTLY PLAYED SQUIRCLE GRID ────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const TwoToneHeader(
-                    primaryText: 'RECENTLY',
-                    accentText: 'PLAYED',
-                    fontSize: 20,
+                  const Expanded(
+                    child: TwoToneHeader(
+                      primaryText: 'RECENTLY',
+                      accentText: 'PLAYED',
+                      fontSize: 20,
+                    ),
                   ),
                   if (widget.onNavigateToLibrary != null)
                     InkWell(
@@ -117,13 +118,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               // ─── 3. FAVORITE SONGS & DOWNLOAD TOGGLE ─────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  TwoToneHeader(
-                    primaryText: favoriteTracks.isNotEmpty ? 'LIKED' : 'TOP',
-                    accentText: 'SONGS',
-                    fontSize: 20,
+                  Expanded(
+                    child: TwoToneHeader(
+                      primaryText: favoriteTracks.isNotEmpty ? 'LIKED' : 'TOP',
+                      accentText: 'SONGS',
+                      fontSize: 20,
+                    ),
                   ),
                   if (widget.onNavigateToLibrary != null)
                     InkWell(
