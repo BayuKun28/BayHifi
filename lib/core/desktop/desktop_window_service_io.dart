@@ -27,7 +27,7 @@ class DesktopWindowService with WindowListener {
       await windowManager.ensureInitialized();
       windowManager.addListener(this);
 
-      const minSize = Size(960, 640);
+      const minSize = Size(360, 560);
       const defaultSize = Size(1280, 820);
 
       final saved = LocalPersistenceService.instance.getWindowDimensions();
@@ -201,6 +201,45 @@ class DesktopWindowService with WindowListener {
       isFullScreenNotifier.value = !isFull;
     } catch (e) {
       debugPrint('[DesktopWindowService] Error toggling fullscreen: $e');
+    }
+  }
+
+  /// Resize desktop window to Mobile Phone proportion (430 x 860)
+  Future<void> setMobileSize() async {
+    if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
+    try {
+      if (await windowManager.isMaximized()) {
+        await windowManager.unmaximize();
+      }
+      await windowManager.setSize(const Size(430, 860));
+    } catch (e) {
+      debugPrint('[DesktopWindowService] Error setting mobile size: $e');
+    }
+  }
+
+  /// Resize desktop window to Tablet proportion (780 x 860)
+  Future<void> setTabletSize() async {
+    if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
+    try {
+      if (await windowManager.isMaximized()) {
+        await windowManager.unmaximize();
+      }
+      await windowManager.setSize(const Size(780, 860));
+    } catch (e) {
+      debugPrint('[DesktopWindowService] Error setting tablet size: $e');
+    }
+  }
+
+  /// Resize desktop window to Desktop Workstation proportion (1280 x 820)
+  Future<void> setDesktopSize() async {
+    if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
+    try {
+      if (await windowManager.isMaximized()) {
+        await windowManager.unmaximize();
+      }
+      await windowManager.setSize(const Size(1280, 820));
+    } catch (e) {
+      debugPrint('[DesktopWindowService] Error setting desktop size: $e');
     }
   }
 }

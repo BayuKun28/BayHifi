@@ -575,8 +575,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               _buildCategoryTabsRow(context, libraryState, controller, primaryColor, theme, isSolid),
 
               // ─── 1. SUB-HEADER UTILITY ROW (Item Count & Grid/List Layout Switcher) ───
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              if (libraryState.currentTab != CollectionTab.tracks)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

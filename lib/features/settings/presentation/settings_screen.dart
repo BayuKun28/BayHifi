@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/theme_mode_controller.dart';
+import '../../../core/widgets/two_tone_header.dart';
 import '../../cloud_sync/presentation/widgets/settings_account_card.dart';
 import 'sub_screens/audio_hardware_settings_screen.dart';
 import 'sub_screens/backup_restore_settings_screen.dart';
@@ -45,7 +46,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('SETTINGS & PREFERENCES'),
+        title: const TwoToneHeader(
+          primaryText: 'STUDIO',
+          accentText: 'SETTINGS',
+          fontSize: 18,
+        ),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),

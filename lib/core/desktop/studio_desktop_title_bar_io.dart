@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:window_manager/window_manager.dart';
+import '../../app/theme/app_haptics.dart';
 import '../../features/player/presentation/controllers/player_controller.dart';
+import 'desktop_layout_controller.dart';
 import 'desktop_window_service.dart';
 
 /// Custom Frameless Studio Desktop Title Bar (CSD - Client-Side Decoration).
@@ -131,6 +133,10 @@ class StudioDesktopTitleBar extends ConsumerWidget implements PreferredSizeWidge
             ),
           ),
 
+          // ─── 2.5 Center-Right: Responsive Layout Mode Shortcuts ───────────
+          const _DesktopLayoutSwitcherPill(),
+          const SizedBox(width: 8),
+
           // ─── 3. Right: Studio Window Controls (3 Essential Buttons) ──
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -166,6 +172,121 @@ class StudioDesktopTitleBar extends ConsumerWidget implements PreferredSizeWidge
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Compact Segmented Pill for Instant Layout Switching on Desktop
+class _DesktopLayoutSwitcherPill extends ConsumerWidget {
+  const _DesktopLayoutSwitcherPill();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeMode = ref.watch(desktopLayoutModeProvider);
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
+    return Container(
+      height: 26,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildItem(
+            context: context,
+            ref: ref,
+            mode: DesktopLayoutMode.mobile,
+            icon: HugeIcons.strokeRoundedSmartPhone01,
+            tooltip: 'Mobile Layout (430px)',
+            isActive: activeMode == DesktopLayoutMode.mobile,
+            primary: primary,
+          ),
+          _buildItem(
+            context: context,
+            ref: ref,
+            mode: DesktopLayoutMode.tablet,
+            icon: HugeIcons.strokeRoundedTablet01,
+            tooltip: 'Tablet Layout (780px)',
+            isActive: activeMode == DesktopLayoutMode.tablet,
+            primary: primary,
+          ),
+          _buildItem(
+            context: context,
+            ref: ref,
+            mode: DesktopLayoutMode.desktop,
+            icon: HugeIcons.strokeRoundedComputer,
+            tooltip: 'Desktop Workstation (1280px)',
+            isActive: activeMode == DesktopLayoutMode.desktop,
+            primary: primary,
+          ),
+          _buildItem(
+            context: context,
+            ref: ref,
+            mode: DesktopLayoutMode.auto,
+            icon: HugeIcons.strokeRoundedLayers01,
+            tooltip: 'Auto Responsive (Follow Window Width)',
+            isActive: activeMode == DesktopLayoutMode.auto,
+            primary: primary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItem({
+    required BuildContext context,
+    required WidgetRef ref,
+    required DesktopLayoutMode mode,
+    required dynamic icon,
+    required String tooltip,
+    required bool isActive,
+    required Color primary,
+  }) {
+    final theme = Theme.of(context);
+
+    return M3ETooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: () {
+          AppHaptics.lightImpact();
+          ref.read(desktopLayoutModeProvider.notifier).setLayoutMode(mode);
+          if (mode == DesktopLayoutMode.mobile) {
+            DesktopWindowService.instance.setMobileSize();
+          } else if (mode == DesktopLayoutMode.tablet) {
+            DesktopWindowService.instance.setTabletSize();
+          } else if (mode == DesktopLayoutMode.desktop) {
+            DesktopWindowService.instance.setDesktopSize();
+          }
+        },
+        borderRadius: BorderRadius.circular(6),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+          decoration: BoxDecoration(
+            color: isActive ? primary.withValues(alpha: 0.18) : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+            border: isActive
+                ? Border.all(color: primary.withValues(alpha: 0.5), width: 0.8)
+                : null,
+          ),
+          child: Center(
+            child: HugeIcon(
+              icon: icon,
+              size: 13,
+              color: isActive ? primary : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
       ),
     );
   }

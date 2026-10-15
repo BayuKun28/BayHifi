@@ -178,7 +178,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
           controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
           children: [
-            // ─── 1. STUDIO COLLECTIONS & DYNAMIC SMART PLAYLISTS MERGED ROW ──
+            // ─── 1. STUDIO COLLECTIONS & DYNAMIC SMART PLAYLISTS RESPONSIVE ROW ──
             Text(
               'STUDIO COLLECTIONS',
               style: TextStyle(
@@ -190,65 +190,90 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
             ),
             const SizedBox(height: 10),
 
-            // Collection 1: Favorites
-            _buildCollectionCard(
-              context: context,
-              icon: HugeIcons.strokeRoundedFavourite,
-              title: favPlaylist.name,
-              subtitle: '${favPlaylist.description} • ${favPlaylist.trackCount} Tracks',
-              accentColor: primary,
-              isSolid: isSolid,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => PlaylistDetailScreen(playlist: favPlaylist),
-                  ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final favCard = _buildCollectionPillCard(
+                  context: context,
+                  icon: HugeIcons.strokeRoundedFavourite,
+                  title: favPlaylist.name,
+                  subtitle: '${favPlaylist.trackCount} Tracks',
+                  accentColor: primary,
+                  isSolid: isSolid,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => PlaylistDetailScreen(playlist: favPlaylist),
+                      ),
+                    );
+                  },
+                  onMoreTap: () {
+                    StudioPlaylistActionSheet.showForPlaylist(context, playlist: favPlaylist);
+                  },
                 );
-              },
-              onMoreTap: () {
-                StudioPlaylistActionSheet.showForPlaylist(context, playlist: favPlaylist);
-              },
-            ),
-            const SizedBox(height: 8),
 
-            // Collection 2: Hi-Res Studio Masters
-            _buildCollectionCard(
-              context: context,
-              icon: HugeIcons.strokeRoundedSparkles,
-              title: hiresPlaylist.name,
-              subtitle: '${hiresPlaylist.description} • ${hiresPlaylist.trackCount} Tracks',
-              accentColor: primary,
-              isSolid: isSolid,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => PlaylistDetailScreen(playlist: hiresPlaylist),
-                  ),
+                final hiresCard = _buildCollectionPillCard(
+                  context: context,
+                  icon: HugeIcons.strokeRoundedSparkles,
+                  title: hiresPlaylist.name,
+                  subtitle: '${hiresPlaylist.trackCount} Tracks',
+                  accentColor: theme.colorScheme.secondary,
+                  isSolid: isSolid,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => PlaylistDetailScreen(playlist: hiresPlaylist),
+                      ),
+                    );
+                  },
+                  onMoreTap: () {
+                    StudioPlaylistActionSheet.showForPlaylist(context, playlist: hiresPlaylist);
+                  },
                 );
-              },
-              onMoreTap: () {
-                StudioPlaylistActionSheet.showForPlaylist(context, playlist: hiresPlaylist);
-              },
-            ),
-            const SizedBox(height: 8),
 
-            // Collection 3: Dynamic Smart Playlists (Merged Entrance)
-            _buildCollectionCard(
-              context: context,
-              icon: HugeIcons.strokeRoundedFilterHorizontal,
-              title: 'Dynamic Smart Playlists',
-              subtitle: '${smartPlaylists.length} Active Dynamic Rule Sets & Studio Presets',
-              badgeText: '${smartPlaylists.length} Rules',
-              accentColor: primary,
-              isSolid: isSolid,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SmartPlaylistsScreen(),
+                final smartCard = _buildCollectionPillCard(
+                  context: context,
+                  icon: HugeIcons.strokeRoundedFilterHorizontal,
+                  title: 'Smart Rules',
+                  subtitle: '${smartPlaylists.length} Rules Active',
+                  accentColor: theme.colorScheme.tertiary,
+                  isSolid: isSolid,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SmartPlaylistsScreen(),
+                      ),
+                    );
+                  },
+                  onMoreTap: () => _showCreateOptionsSheet(context),
+                );
+
+                if (constraints.maxWidth >= 600) {
+                  return Row(
+                    children: [
+                      Expanded(child: favCard),
+                      const SizedBox(width: 10),
+                      Expanded(child: hiresCard),
+                      const SizedBox(width: 10),
+                      Expanded(child: smartCard),
+                    ],
+                  );
+                }
+
+                return SizedBox(
+                  height: 104,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      favCard,
+                      const SizedBox(width: 10),
+                      hiresCard,
+                      const SizedBox(width: 10),
+                      smartCard,
+                    ],
                   ),
                 );
               },
-              onMoreTap: () => _showCreateOptionsSheet(context),
             ),
 
             const SizedBox(height: 24),
@@ -448,12 +473,11 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
     );
   }
 
-  Widget _buildCollectionCard({
+  Widget _buildCollectionPillCard({
     required BuildContext context,
     required dynamic icon,
     required String title,
     required String subtitle,
-    String? badgeText,
     required Color accentColor,
     required bool isSolid,
     required VoidCallback onTap,
@@ -461,97 +485,82 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
   }) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-      shape: RoundedRectangleBorder(
+    return Container(
+      width: 146,
+      decoration: BoxDecoration(
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.25),
+          width: 0.8,
+        ),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: StudioSurfaceTheme.tintedContainer(
-              context,
-              accentColor,
-              isSolid: isSolid,
-              translucentAlpha: 0.15,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: HugeIcon(
-              icon: icon,
-              color: accentColor,
-              size: 20,
-            ),
-          ),
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (badgeText != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.tintedContainer(
-                    context,
-                    accentColor,
-                    isSolid: isSolid,
-                    translucentAlpha: 0.15,
-                  ),
-                  borderRadius: BorderRadius.circular(6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: HugeIcon(icon: icon, color: accentColor, size: 16),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: onMoreTap,
+                      borderRadius: BorderRadius.circular(6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedMoreVertical,
+                          size: 15,
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  badgeText,
-                  style: TextStyle(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w900,
-                    color: accentColor,
-                    fontFeatures: AppTypography.audioFigures,
-                  ),
+                const SizedBox(height: 6),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        fontFeatures: AppTypography.audioFigures,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ),
-          ],
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 11,
-            fontFeatures: AppTypography.audioFigures,
+              ],
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            M3EIconButton(
-              variant: M3EIconButtonVariant.standard,
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedMoreVertical,
-                size: 22,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              onPressed: onMoreTap,
-              tooltip: 'Collection Actions',
-            ),
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowRight01,
-              size: 16,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-            ),
-          ],
-        ),
-        onTap: onTap,
       ),
     );
   }

@@ -21,4 +21,7 @@ class DesktopWindowService {
   Future<void> close() async {}
 
   Future<void> toggleFullScreen() async {}
+  Future<void> setMobileSize() async {}
+  Future<void> setTabletSize() async {}
+  Future<void> setDesktopSize() async {}
 }

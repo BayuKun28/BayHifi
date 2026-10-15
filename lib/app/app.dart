@@ -6,6 +6,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../app/theme/theme_mode_controller.dart';
 import '../core/desktop/desktop_bottom_master_transport_deck.dart';
 import '../core/desktop/desktop_drag_drop_zone.dart';
+import '../core/desktop/desktop_layout_controller.dart';
 import '../core/desktop/desktop_shortcuts_dispatcher.dart';
 import '../core/desktop/desktop_studio_sidebar.dart';
 import '../core/desktop/studio_desktop_title_bar.dart';
@@ -110,8 +111,30 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> with WidgetsBindi
                 child: LayoutBuilder(
                 builder: (context, constraints) {
                   final theme = Theme.of(context);
-                  final isDesktop = constraints.maxWidth >= 960;
-                  final isMobile = constraints.maxWidth < 650;
+                  final layoutOverride = ref.watch(desktopLayoutModeProvider);
+                  final isDesktopPlatform = !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
+
+                  final bool isDesktop;
+                  final bool isMobile;
+
+                  switch (layoutOverride) {
+                    case DesktopLayoutMode.mobile:
+                      isMobile = true;
+                      isDesktop = false;
+                      break;
+                    case DesktopLayoutMode.tablet:
+                      isMobile = false;
+                      isDesktop = false;
+                      break;
+                    case DesktopLayoutMode.desktop:
+                      isMobile = false;
+                      isDesktop = true;
+                      break;
+                    case DesktopLayoutMode.auto:
+                      isDesktop = constraints.maxWidth >= 960;
+                      isMobile = constraints.maxWidth < 650;
+                      break;
+                  }
 
                   // 6 Studio Pages
                   final pages = [
@@ -132,115 +155,132 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> with WidgetsBindi
                   final safeIndex = _selectedNavIndex.clamp(0, pages.length - 1);
                   final isSelectingTracks = selectionState.isSelecting && safeIndex == 2;
 
-                  // ─── 1. MOBILE PHONE LAYOUT (< 650px) ─────────────────────────
+                  // ─── 1. MOBILE PHONE LAYOUT (< 650px or forced mobile) ─────────
                   if (isMobile) {
                     final mobileNavIndex = safeIndex > 4 ? 4 : (safeIndex == 4 ? 3 : safeIndex);
-                    return Scaffold(
-                      backgroundColor: theme.scaffoldBackgroundColor,
-                      resizeToAvoidBottomInset: false,
-                      body: Stack(
-                        children: [
-                          // Layer 1: Page Content
-                          AnimatedPadding(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeInOutCubic,
-                            padding: EdgeInsets.only(bottom: isSelectingTracks ? 0.0 : 80.0),
-                            child: IndexedStack(
-                              index: safeIndex,
-                              children: pages,
-                            ),
+                    final mobileBody = Stack(
+                      children: [
+                        // Layer 1: Page Content
+                        AnimatedPadding(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOutCubic,
+                          padding: EdgeInsets.only(bottom: isSelectingTracks ? 0.0 : 80.0),
+                          child: IndexedStack(
+                            index: safeIndex,
+                            children: pages,
                           ),
+                        ),
 
-                          // Layer 2: Floating Rounded Dock
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            child: AnimatedSlide(
-                              offset: isSelectingTracks ? const Offset(0, 1.4) : Offset.zero,
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOutCubic,
-                              child: IgnorePointer(
-                                ignoring: isSelectingTracks,
-                                child: FloatingRoundedDock(
-                                  selectedIndex: mobileNavIndex,
-                                  onItemSelected: (idx) {
-                                    // Map 5 mobile items: 0->0, 1->1, 2->2, 3->3, 4->5 (Settings)
-                                    final mapped = idx == 4 ? 5 : idx;
-                                    setState(() => _selectedNavIndex = mapped);
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // Layer 3: Namida Omnipresent Expandable MiniPlayer
-                          AnimatedSlide(
-                            offset: isSelectingTracks ? const Offset(0, 2.0) : Offset.zero,
+                        // Layer 2: Floating Rounded Dock
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: AnimatedSlide(
+                            offset: isSelectingTracks ? const Offset(0, 1.4) : Offset.zero,
                             duration: const Duration(milliseconds: 250),
                             curve: Curves.easeInOutCubic,
                             child: IgnorePointer(
                               ignoring: isSelectingTracks,
-                              child: NamidaExpandableMiniPlayer(
-                                collapsedBottomOffset: 78.0,
-                                isLibraryTab: safeIndex == 2,
+                              child: FloatingRoundedDock(
+                                selectedIndex: mobileNavIndex,
+                                onItemSelected: (idx) {
+                                  // Map 5 mobile items: 0->0, 1->1, 2->2, 3->3, 4->5 (Settings)
+                                  final mapped = idx == 4 ? 5 : idx;
+                                  setState(() => _selectedNavIndex = mapped);
+                                },
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+
+                        // Layer 3: Namida Omnipresent Expandable MiniPlayer
+                        AnimatedSlide(
+                          offset: isSelectingTracks ? const Offset(0, 2.0) : Offset.zero,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOutCubic,
+                          child: IgnorePointer(
+                            ignoring: isSelectingTracks,
+                            child: NamidaExpandableMiniPlayer(
+                              collapsedBottomOffset: 78.0,
+                              isLibraryTab: safeIndex == 2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+
+                    return Scaffold(
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      resizeToAvoidBottomInset: false,
+                      body: isDesktopPlatform
+                          ? Column(
+                              children: [
+                                const StudioDesktopTitleBar(),
+                                Expanded(child: mobileBody),
+                              ],
+                            )
+                          : mobileBody,
                     );
                   }
 
                   // ─── 2. TABLET / COMPACT LANDSCAPE LAYOUT (650px - 959px) ──────
                   if (!isDesktop) {
-                    return Scaffold(
-                      backgroundColor: theme.scaffoldBackgroundColor,
-                      body: Stack(
-                        children: [
-                          Row(
-                            children: [
-                              DesktopStudioSidebar(
-                                isCompact: true,
-                                selectedIndex: safeIndex,
-                                onDestinationSelected: (idx) =>
-                                    setState(() => _selectedNavIndex = idx),
-                              ),
-                              Expanded(
-                                child: AnimatedPadding(
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.easeInOutCubic,
-                                  padding: EdgeInsets.only(bottom: isSelectingTracks ? 0.0 : 74.0),
-                                  child: IndexedStack(
-                                    index: safeIndex,
-                                    children: pages,
-                                  ),
+                    final tabletBody = Stack(
+                      children: [
+                        Row(
+                          children: [
+                            DesktopStudioSidebar(
+                              isCompact: true,
+                              selectedIndex: safeIndex,
+                              onDestinationSelected: (idx) =>
+                                  setState(() => _selectedNavIndex = idx),
+                            ),
+                            Expanded(
+                              child: AnimatedPadding(
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeInOutCubic,
+                                padding: EdgeInsets.only(bottom: isSelectingTracks ? 0.0 : 74.0),
+                                child: IndexedStack(
+                                  index: safeIndex,
+                                  children: pages,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
+                        ),
 
-                          // Namida Expandable MiniPlayer on Tablet
-                          AnimatedSlide(
-                            offset: isSelectingTracks ? const Offset(0, 2.0) : Offset.zero,
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeInOutCubic,
-                            child: IgnorePointer(
-                              ignoring: isSelectingTracks,
-                              child: NamidaExpandableMiniPlayer(
-                                collapsedBottomOffset: 12.0,
-                                isLibraryTab: safeIndex == 2,
-                              ),
+                        // Namida Expandable MiniPlayer on Tablet
+                        AnimatedSlide(
+                          offset: isSelectingTracks ? const Offset(0, 2.0) : Offset.zero,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOutCubic,
+                          child: IgnorePointer(
+                            ignoring: isSelectingTracks,
+                            child: NamidaExpandableMiniPlayer(
+                              collapsedBottomOffset: 12.0,
+                              isLibraryTab: safeIndex == 2,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    );
+
+                    return Scaffold(
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      body: isDesktopPlatform
+                          ? Column(
+                              children: [
+                                const StudioDesktopTitleBar(),
+                                Expanded(child: tabletBody),
+                              ],
+                            )
+                          : tabletBody,
                     );
                   }
 
                   // ─── 3. DESKTOP STUDIO MASTER LAYOUT (>= 960px) ───────────────
                   final isPlayerExpanded = ref.watch(playerExpansionProvider);
-                  final isDesktopPlatform = !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
 
                   return Scaffold(
                     backgroundColor: theme.scaffoldBackgroundColor,

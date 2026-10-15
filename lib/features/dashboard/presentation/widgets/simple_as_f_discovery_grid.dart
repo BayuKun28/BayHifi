@@ -19,7 +19,60 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
     final albums = libraryState.albums;
 
     if (albums.isEmpty) {
-      return const SizedBox.shrink();
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          color: SimpleAsFTheme.surfaceElevated,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.06),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: SimpleAsFTheme.emeraldMint.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedMusicNote01,
+                  size: 20,
+                  color: SimpleAsFTheme.emeraldMint,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'No albums indexed yet',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Scan local music folders or connect Navidrome.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: SimpleAsFTheme.sageSlate,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     final displayAlbums = albums.take(6).toList();
