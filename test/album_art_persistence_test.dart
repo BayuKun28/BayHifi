@@ -53,7 +53,42 @@ void main() {
       final netProvider = StudioArtworkWidget.getImageProvider(netTrack);
       expect(netProvider, isA<NetworkImage>());
 
-      // 3. Null track
+      // 3. Local file paths (Linux / Android)
+      const localTrackAndroid = Track(
+        id: 'local_android_1',
+        title: 'Local Android Track',
+        artist: 'Artist',
+        album: 'Album',
+        duration: Duration(minutes: 3),
+        albumArtUrl: '/data/user/0/com.baydev.baydev_hifi/app_flutter/covers/art_123.jpg',
+      );
+      final localProviderAndroid = StudioArtworkWidget.getImageProvider(localTrackAndroid);
+      expect(localProviderAndroid, isA<FileImage>());
+
+      const localTrackLinux = Track(
+        id: 'local_linux_1',
+        title: 'Local Linux Track',
+        artist: 'Artist',
+        album: 'Album',
+        duration: Duration(minutes: 3),
+        albumArtUrl: '/home/user/.local/share/bayhifi/covers/art_456.jpg',
+      );
+      final localProviderLinux = StudioArtworkWidget.getImageProvider(localTrackLinux);
+      expect(localProviderLinux, isA<FileImage>());
+
+      // 4. Server relative path
+      const serverTrack = Track(
+        id: 'server_1',
+        title: 'Server Track',
+        artist: 'Artist',
+        album: 'Album',
+        duration: Duration(minutes: 3),
+        albumArtUrl: '/api/library/cover/srv_123',
+      );
+      final serverProvider = StudioArtworkWidget.getImageProvider(serverTrack);
+      expect(serverProvider, isA<NetworkImage>());
+
+      // 5. Null track
       expect(StudioArtworkWidget.getImageProvider(null), isNull);
     });
 

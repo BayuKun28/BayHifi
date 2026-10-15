@@ -71,9 +71,60 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
       );
     }
 
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
       AppHaptics.mediumImpact();
       Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _isRegister ? 'Account created and connected!' : 'Welcome back, $username!',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      AppHaptics.heavyImpact();
+      final err = ref.read(cloudAuthControllerProvider).errorMessage ?? 'Connection or authentication failed';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+          content: Row(
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedAlertCircle,
+                size: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  err,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -232,11 +283,16 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                 decoration: InputDecoration(
                   labelText: 'Server Host URL',
                   hintText: 'http://localhost:8111',
-                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                  prefixIcon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedServer,
-                    size: 15,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 8),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedServer,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   filled: true,
                   fillColor: theme.colorScheme.surfaceContainerHighest,
@@ -253,11 +309,16 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: 'Username',
-                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                  prefixIcon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedUser,
-                    size: 15,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 8),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedUser,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   filled: true,
                   fillColor: theme.colorScheme.surfaceContainerHighest,
@@ -275,16 +336,21 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                  prefixIcon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedLockKey,
-                    size: 15,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 8),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedLockKey,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  suffixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                  suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                   suffixIcon: IconButton(
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: () {
                       AppHaptics.selectionClick();
                       setState(() => _obscurePassword = !_obscurePassword);
@@ -311,11 +377,16 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'Email (Optional)',
-                    prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                    prefixIcon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedMail01,
-                      size: 15,
-                      color: theme.colorScheme.onSurfaceVariant,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 14, right: 8),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedMail01,
+                        size: 15,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     filled: true,
                     fillColor: theme.colorScheme.surfaceContainerHighest,
@@ -331,18 +402,34 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
               if (authState.errorMessage != null) ...[
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    authState.errorMessage!,
-                    style: TextStyle(
-                      color: theme.colorScheme.error,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: theme.colorScheme.error.withValues(alpha: 0.4),
+                      width: 1.0,
                     ),
+                  ),
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedAlertCircle,
+                        size: 16,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          authState.errorMessage!,
+                          style: TextStyle(
+                            color: theme.colorScheme.error,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -354,7 +441,14 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   ? M3EButton.filled(
                       label: Text(isLoading ? 'CONNECTING...' : 'CREATE ACCOUNT'),
                       icon: isLoading
-                          ? null
+                          ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            )
                           : HugeIcon(
                               icon: HugeIcons.strokeRoundedUserAdd01,
                               size: 18,
@@ -365,7 +459,14 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   : M3EButton.filled(
                       label: Text(isLoading ? 'CONNECTING...' : 'CONNECT & SIGN IN'),
                       icon: isLoading
-                          ? null
+                          ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            )
                           : HugeIcon(
                               icon: HugeIcons.strokeRoundedLogin01,
                               size: 18,

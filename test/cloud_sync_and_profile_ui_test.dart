@@ -212,5 +212,56 @@ void main() {
       expect(find.text('Email (Optional)'), findsOneWidget);
       expect(find.text('CREATE ACCOUNT'), findsOneWidget);
     });
+
+    testWidgets('Renders loading indicator when auth is loading', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            cloudAuthControllerProvider.overrideWith(
+              (ref) => CloudAuthController(
+                ref.read(cloudSyncServiceProvider),
+                const CloudAuthState(
+                  status: CloudAuthStatus.loading,
+                ),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: CloudAuthDialog(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('Renders error banner when errorMessage is present', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            cloudAuthControllerProvider.overrideWith(
+              (ref) => CloudAuthController(
+                ref.read(cloudSyncServiceProvider),
+                const CloudAuthState(
+                  status: CloudAuthStatus.guest,
+                  errorMessage: 'Invalid username or password',
+                ),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: CloudAuthDialog(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('Invalid username or password'), findsOneWidget);
+    });
   });
 }

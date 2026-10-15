@@ -81,10 +81,36 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
       );
     } else {
       AppHaptics.heavyImpact();
+      final err = res['message'] as String? ?? 'Failed to change password';
       setState(() {
         _isLoading = false;
-        _errorMessage = res['message'] as String? ?? 'Failed to change password';
+        _errorMessage = err;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+          content: Row(
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedAlertCircle,
+                size: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  err,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -196,16 +222,21 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                 obscureText: _obscureOld,
                 decoration: InputDecoration(
                   labelText: 'Current Password',
-                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                  prefixIcon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedLockKey,
-                    size: 15,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 8),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedLockKey,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  suffixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                  suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                   suffixIcon: IconButton(
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: () {
                       AppHaptics.selectionClick();
                       setState(() => _obscureOld = !_obscureOld);
@@ -234,16 +265,21 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                 obscureText: _obscureNew,
                 decoration: InputDecoration(
                   labelText: 'New Password',
-                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                  prefixIcon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedLockKey,
-                    size: 15,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 8),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedLockKey,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  suffixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                  suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                   suffixIcon: IconButton(
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: () {
                       AppHaptics.selectionClick();
                       setState(() => _obscureNew = !_obscureNew);
@@ -272,16 +308,21 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                 obscureText: _obscureConfirm,
                 decoration: InputDecoration(
                   labelText: 'Confirm New Password',
-                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                  prefixIcon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedLockKey,
-                    size: 15,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 8),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedLockKey,
+                      size: 15,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  suffixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                  suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                   suffixIcon: IconButton(
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: () {
                       AppHaptics.selectionClick();
                       setState(() => _obscureConfirm = !_obscureConfirm);

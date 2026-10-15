@@ -380,6 +380,7 @@ func CoverArtHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", pic.MIMEType)
 			w.Header().Set("Cache-Control", "public, max-age=604800") // 7 days
 			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Cross-Origin-Resource-Policy", "cross-origin")
 			_, _ = w.Write(pic.Data)
 			f.Close()
 			return
@@ -398,6 +399,7 @@ func CoverArtHandler(w http.ResponseWriter, r *http.Request) {
 				defer cFile.Close()
 				w.Header().Set("Cache-Control", "public, max-age=604800")
 				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Header().Set("Cross-Origin-Resource-Policy", "cross-origin")
 				if strings.HasSuffix(c, ".png") {
 					w.Header().Set("Content-Type", "image/png")
 				} else {

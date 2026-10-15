@@ -130,5 +130,46 @@ void main() {
 
       expect(find.text('New passwords do not match'), findsOneWidget);
     });
+
+    testWidgets('ChangePasswordDialog displays error banner on backend failure',
+        (tester) async {
+      mockService.changePasswordSuccess = false;
+      final authenticatedState = CloudAuthState(
+        status: CloudAuthStatus.authenticated,
+        token: 'mock_jwt_token',
+        serverUrl: 'http://localhost:8111',
+        user: UserProfile(
+          id: 'usr_1',
+          username: 'audiophile',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            cloudAuthControllerProvider.overrideWith(
+              (ref) => CloudAuthController(mockService, authenticatedState),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: ChangePasswordDialog(),
+            ),
+          ),
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      await tester.enterText(textFields.at(0), 'wrongPassword');
+      await tester.enterText(textFields.at(1), 'newPassword123');
+      await tester.enterText(textFields.at(2), 'newPassword123');
+
+      await tester.ensureVisible(find.byType(M3EButton).last);
+      await tester.tap(find.byType(M3EButton).last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Current password is incorrect'), findsWidgets);
+    });
   });
 }

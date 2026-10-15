@@ -2062,11 +2062,32 @@ Sistem rekapitulasi audio dan visualisasi statistik retrospektif bergaya *Spotif
       - `analyticsRevisionProvider` (Studio Wrapped statistics and telemetry charts)
     - [x] Wired user switching and remote hydration directly into `login()`, `register()`, `_hydrateSession()`, and `logout()`.
     - [x] Updated `syncNow()` to upload full settings bundles alongside playback logs and DSP profiles.
-  - [x] **76.5 Quality Gate & Automated Verification**:
-    - [x] Created `test/user_settings_and_stats_isolation_test.dart` with 8 comprehensive unit and integration tests (8/8 passing).
-    - [x] Verified zero bleed between user partitions, proper global key sharing, guest cloning, deduplication, and complete login/logout auto-apply cycles.
-    - [x] Ran `flutter analyze`: **0 errors, 0 warnings** (100% clean).
-    - [x] Ran all affected test suites (`test/user_settings_and_stats_isolation_test.dart`, `test/pro_q_rta_styles_test.dart`, `test/cloud_sync_and_profile_ui_test.dart`, `test/features/cloud_sync/change_password_test.dart`): **100% passing (32/32 tests)**.
+---
+
+## Fase 77: Polish Dialog Textbox Icons, Loading States & Artwork Local Path Resolution Bugfix
+
+- [x] **77.1 Artwork Resolution Bug Analysis & Fix (`StudioArtworkWidget`)**:
+  - [x] Identified root cause: local cached artwork paths (`~/.local/share/bayhifi/covers/art_...jpg`, `/mnt/.../folder.jpg`, `/data/user/0/...`) were hijacked by `cleanUrl.startsWith('/')` and turned into invalid `http://localhost:8111/home/...` network requests.
+  - [x] Implemented `_isLocalPath(path)` in `StudioArtworkWidget` checking standard local filesystem roots (`/home/`, `/mnt/`, `/data/`, `/storage/`, Windows drive letters, `file://`) and filesystem existence before checking server relative paths.
+  - [x] Updated both `getImageProvider()` and `build()` to prioritize local file resolution (`Image.file(File(filePath))` and `FileImage(File(filePath))`).
+  - [x] Replaced hardcoded `http://localhost:8111` fallback with dynamic `bayhifi_cloud_server_url` setting.
+  - [x] Added `Cross-Origin-Resource-Policy: cross-origin` header to `CoverArtHandler` in `server/scanner/scanner.go` preventing Web COEP blocking.
+- [x] **77.2 CloudAuthDialog Icon Polish, Loading Spinners & Error Alerts**:
+  - [x] Refined text box styling (`Server Host URL`, `Username`, `Password`, `Email`) with `isDense: true`, `contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12)`, `prefixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 20)`, and wrapped `HugeIcon(size: 15)` in `Padding(left: 14, right: 8)`.
+  - [x] Replaced oversized password visibility toggle with compact `suffixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 40)`.
+  - [x] Integrated `CircularProgressIndicator` (size 16, strokeWidth 2) inside `M3EButton.filled` during `CloudAuthStatus.loading`.
+  - [x] Added animated in-dialog error banner and floating `SnackBar` using `Theme.of(context).colorScheme.errorContainer` upon login/register failure.
+- [x] **77.3 ChangePasswordDialog Polish & Loading Spinners**:
+  - [x] Refined `Current Password`, `New Password`, and `Confirm New Password` text fields with matching compact prefix icon padding (`HugeIcon(size: 15)`), `isDense: true`, and `BoxConstraints`.
+  - [x] Submit button renders spinning `CircularProgressIndicator` during `_isLoading`.
+  - [x] Added floating themed error `SnackBar` alongside the in-dialog error banner on password change failure.
+- [x] **77.4 Dedicated Automated Verification & Quality Gate**:
+  - [x] Expanded `test/album_art_persistence_test.dart` to verify `FileImage` resolution for Android and Linux local paths, and `NetworkImage` for server relative routes.
+  - [x] Added widget test cases in `test/cloud_sync_and_profile_ui_test.dart` for auth loading spinners and error banners.
+  - [x] Added failure handling and banner test cases in `test/features/cloud_sync/change_password_test.dart`.
+  - [x] Ran `flutter analyze`: **0 errors, 0 warnings** (100% clean).
+  - [x] Ran all affected test suites: **25/25 passing tests**.
+
 
 
 

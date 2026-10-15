@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../database/local_persistence_service.dart';
 import '../../features/player/domain/track.dart';
 
 /// Unified Studio Artwork Widget for Baydev HiFi
@@ -48,6 +49,39 @@ class StudioArtworkWidget extends StatelessWidget {
     return clean;
   }
 
+  static bool _isLocalPath(String path) {
+    if (kIsWeb) return false;
+    if (path.startsWith('file://')) return true;
+    if (path.startsWith('/home/') ||
+        path.startsWith('/mnt/') ||
+        path.startsWith('/data/') ||
+        path.startsWith('/storage/') ||
+        path.startsWith('/private/') ||
+        path.startsWith('/Users/') ||
+        path.startsWith('/var/') ||
+        path.startsWith('/tmp/') ||
+        RegExp(r'^[a-zA-Z]:[/\\]').hasMatch(path)) {
+      return true;
+    }
+    try {
+      final clean = path.startsWith('file://') ? Uri.parse(path).toFilePath() : path;
+      return File(clean).existsSync();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static String _resolveServerUrl(String relativePath) {
+    if (kIsWeb) {
+      return Uri.base.resolve(relativePath).toString();
+    }
+    final serverUrl = LocalPersistenceService.instance.getSetting<String>('bayhifi_cloud_server_url') ??
+        'http://localhost:8111';
+    final cleanBase = serverUrl.endsWith('/') ? serverUrl.substring(0, serverUrl.length - 1) : serverUrl;
+    final cleanPath = relativePath.startsWith('/') ? relativePath : '/$relativePath';
+    return '$cleanBase$cleanPath';
+  }
+
   /// Helper to obtain an ImageProvider from a Track (for ThemeController, PaletteGenerator, etc.)
   static ImageProvider? getImageProvider(Track? track) {
     if (track == null) return null;
@@ -61,17 +95,14 @@ class StudioArtworkWidget extends StatelessWidget {
       final cleanUrl = normalizeArtworkUrl(rawUrl);
       if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
         return NetworkImage(cleanUrl);
-      } else if (cleanUrl.startsWith('/')) {
-        final resolved = kIsWeb ? Uri.base.resolve(cleanUrl).toString() : 'http://localhost:8111$cleanUrl';
-        return NetworkImage(resolved);
-      } else if (!kIsWeb) {
+      } else if (_isLocalPath(cleanUrl)) {
         final filePath = cleanUrl.startsWith('file://')
             ? Uri.parse(cleanUrl).toFilePath()
             : cleanUrl;
-        final file = File(filePath);
-        if (file.existsSync()) {
-          return FileImage(file);
-        }
+        return FileImage(File(filePath));
+      } else if (cleanUrl.startsWith('/')) {
+        final resolved = _resolveServerUrl(cleanUrl);
+        return NetworkImage(resolved);
       }
     }
 
@@ -106,8 +137,19 @@ class StudioArtworkWidget extends StatelessWidget {
           height: height ?? double.infinity,
           errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
         );
+      } else if (_isLocalPath(cleanUrl)) {
+        final filePath = cleanUrl.startsWith('file://')
+            ? Uri.parse(cleanUrl).toFilePath()
+            : cleanUrl;
+        imageContent = Image.file(
+          File(filePath),
+          fit: fit,
+          width: width ?? double.infinity,
+          height: height ?? double.infinity,
+          errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
+        );
       } else if (cleanUrl.startsWith('/')) {
-        final resolved = kIsWeb ? Uri.base.resolve(cleanUrl).toString() : 'http://localhost:8111$cleanUrl';
+        final resolved = _resolveServerUrl(cleanUrl);
         imageContent = Image.network(
           resolved,
           fit: fit,
@@ -115,22 +157,6 @@ class StudioArtworkWidget extends StatelessWidget {
           height: height ?? double.infinity,
           errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
         );
-      } else if (!kIsWeb) {
-        final filePath = cleanUrl.startsWith('file://')
-            ? Uri.parse(cleanUrl).toFilePath()
-            : cleanUrl;
-        final file = File(filePath);
-        if (file.existsSync()) {
-          imageContent = Image.file(
-            file,
-            fit: fit,
-            width: width ?? double.infinity,
-            height: height ?? double.infinity,
-            errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
-          );
-        } else {
-          imageContent = _buildFallback(theme, primary);
-        }
       } else {
         imageContent = _buildFallback(theme, primary);
       }
