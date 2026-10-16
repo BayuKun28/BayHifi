@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/app_haptics.dart';
@@ -123,8 +123,8 @@ class _YouTubeImportPlaylistDialogState
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlayList,
+                    child: Icon(
+                      LucideIcons.listMusic,
                       size: 22,
                       color: primary,
                     ),
@@ -189,11 +189,10 @@ class _YouTubeImportPlaylistDialogState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (_urlController.text.isNotEmpty)
-                      M3EIconButton(
-                        variant: M3EIconButtonVariant.standard,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedCancel01,
-                          size: 20,
+                      IconButton(
+                        icon: Icon(
+                          LucideIcons.x,
+                          size: 18,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         onPressed: () {
@@ -202,11 +201,10 @@ class _YouTubeImportPlaylistDialogState
                           });
                         },
                       ),
-                    M3EIconButton(
-                      variant: M3EIconButtonVariant.standard,
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedClipboard,
-                        size: 22,
+                    IconButton(
+                      icon: Icon(
+                        LucideIcons.clipboard,
+                        size: 18,
                         color: primary,
                       ),
                       tooltip: 'Paste from Clipboard',
@@ -257,10 +255,9 @@ class _YouTubeImportPlaylistDialogState
                   onPressed: _isLoading || _urlController.text.trim().isEmpty
                       ? null
                       : () => _importPlaylist(autoPlay: false),
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedQueue01,
+                  icon: const Icon(
+                    LucideIcons.listPlus,
                     size: 16,
-                    color: null,
                   ),
                   label: const Text('Add to Queue'),
                 ),
@@ -268,10 +265,9 @@ class _YouTubeImportPlaylistDialogState
                   onPressed: _isLoading || _urlController.text.trim().isEmpty
                       ? null
                       : () => _importPlaylist(autoPlay: true),
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlay,
+                  icon: const Icon(
+                    LucideIcons.play,
                     size: 16,
-                    color: null,
                   ),
                   label: const Text('Play All'),
                 ),

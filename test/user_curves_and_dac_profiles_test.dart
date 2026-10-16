@@ -13,7 +13,6 @@ import 'package:baydev_hifi/features/hardware_dac/presentation/widgets/dac_profi
 import 'package:baydev_hifi/features/hardware_dac/presentation/widgets/save_dac_profile_dialog.dart';
 import 'package:baydev_hifi/features/pro_q_studio/domain/fr_curve_data.dart';
 import 'package:baydev_hifi/features/pro_q_studio/presentation/widgets/saved_curves_library_sheet.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -306,7 +305,7 @@ void main() {
       expect(find.text('SAVE PROFILE'), findsOneWidget);
 
       // Tap SAVE PROFILE without filling name -> validation error
-      await tester.tap(find.byType(M3EButton).last);
+      await tester.tap(find.text('SAVE PROFILE'));
       await tester.pumpAndSettle();
       expect(find.text('Please enter a profile name'), findsOneWidget);
 
@@ -318,7 +317,7 @@ void main() {
 
       // Tap SAVE PROFILE and allow async file I/O to complete inside real async zone
       await tester.runAsync(() async {
-        await tester.tap(find.byType(M3EButton).last);
+        await tester.tap(find.text('SAVE PROFILE'));
         await tester.pump();
         for (var i = 0; i < 20; i++) {
           if (controller.state.availablePresets.any((p) => p.name == 'My Audiophile DAC')) {

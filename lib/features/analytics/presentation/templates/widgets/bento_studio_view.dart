@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -82,7 +82,7 @@ class BentoStudioView extends StatelessWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(icon: HugeIcons.strokeRoundedSparkles, size: 11, color: accentColor),
+                    Icon(LucideIcons.sparkles, size: 11, color: accentColor),
                     SizedBox(width: 4),
                     Text(
                       'STUDIO LOSSLESS',
@@ -114,7 +114,7 @@ class BentoStudioView extends StatelessWidget {
                     children: [
                       const Row(
                         children: [
-                          HugeIcon(icon: HugeIcons.strokeRoundedDisc, size: 13, color: accentColor),
+                          Icon(LucideIcons.disc, size: 13, color: accentColor),
                           SizedBox(width: 4),
                           Text(
                             'TOP TRACK #1',
@@ -130,7 +130,7 @@ class BentoStudioView extends StatelessWidget {
                             width: 36,
                             height: 36,
                             borderRadius: BorderRadius.circular(8),
-                            fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                            fallbackIcon: LucideIcons.music,
                             fallbackIconSize: 18,
                             backgroundColor: const Color(0xFF27272A),
                           ),
@@ -189,7 +189,7 @@ class BentoStudioView extends StatelessWidget {
                     children: [
                       const Row(
                         children: [
-                          HugeIcon(icon: HugeIcons.strokeRoundedClock01, size: 13, color: Color(0xFF10B981)),
+                          Icon(LucideIcons.clock, size: 13, color: Color(0xFF10B981)),
                           SizedBox(width: 4),
                           Text(
                             'STUDIO TIME',
@@ -237,7 +237,7 @@ class BentoStudioView extends StatelessWidget {
                     children: [
                       const Row(
                         children: [
-                          HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 13, color: Color(0xFFEC4899)),
+                          Icon(LucideIcons.user, size: 13, color: Color(0xFFEC4899)),
                           SizedBox(width: 4),
                           Text(
                             'TOP ARTIST',
@@ -253,7 +253,7 @@ class BentoStudioView extends StatelessWidget {
                             width: 30,
                             height: 30,
                             borderRadius: BorderRadius.circular(15),
-                            fallbackIcon: HugeIcons.strokeRoundedUser,
+                            fallbackIcon: LucideIcons.user,
                             fallbackIconSize: 16,
                             backgroundColor: const Color(0xFF27272A),
                           ),
@@ -298,7 +298,7 @@ class BentoStudioView extends StatelessWidget {
                     children: [
                       const Row(
                         children: [
-                          HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkBadge01, size: 13, color: Color(0xFFA855F7)),
+                          Icon(LucideIcons.badgeCheck, size: 13, color: Color(0xFFA855F7)),
                           SizedBox(width: 4),
                           Text(
                             'HI-RES PURITY',
@@ -370,7 +370,7 @@ class BentoStudioView extends StatelessWidget {
                           width: 18,
                           height: 18,
                           borderRadius: BorderRadius.circular(4),
-                          fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                          fallbackIcon: LucideIcons.music,
                           fallbackIconSize: 10,
                           backgroundColor: const Color(0xFF27272A),
                         ),
@@ -424,7 +424,7 @@ class BentoStudioView extends StatelessWidget {
                     color: persona.primaryColor.withValues(alpha: 0.3),
                     shape: BoxShape.circle,
                   ),
-                  child: HugeIcon(icon: persona.icon, size: 20, color: persona.primaryColor),
+                  child: Icon(persona.icon, size: 20, color: persona.primaryColor),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

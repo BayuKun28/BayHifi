@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -185,8 +185,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                           width: 0.8,
                         ),
                       ),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedFilterHorizontal,
+                      child: Icon(
+                        LucideIcons.slidersHorizontal,
                         size: 18,
                         color: primary,
                       ),
@@ -235,8 +235,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedMusicNote01,
+                          Icon(
+                            LucideIcons.music,
                             size: 13,
                             color: primary,
                           ),
@@ -275,8 +275,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                         hintText: 'e.g. 24-bit 96k Studio Acoustic',
                         prefixIcon: Padding(
                           padding: const EdgeInsets.all(12),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlaylist01,
+                          child: Icon(
+                            LucideIcons.listMusic,
                             size: 18,
                             color: primary,
                           ),
@@ -311,8 +311,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                         hintText: 'Filter definition notes',
                         prefixIcon: Padding(
                           padding: const EdgeInsets.all(12),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedNote01,
+                          child: Icon(
+                            LucideIcons.fileText,
                             size: 18,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
@@ -400,7 +400,7 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             child: Row(
                               children: [
-                                HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 15, color: primary),
+                                Icon(LucideIcons.circlePlus, size: 15, color: primary),
                                 const SizedBox(width: 4),
                                 Text(
                                   '+ Add Condition',
@@ -492,10 +492,10 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        HugeIcon(
-                                          icon: _sortAscending
-                                              ? HugeIcons.strokeRoundedSorting01
-                                              : HugeIcons.strokeRoundedSorting02,
+                                        Icon(
+                                          _sortAscending
+                                              ? LucideIcons.arrowUpAZ
+                                              : LucideIcons.arrowDownZA,
                                           size: 15,
                                           color: primary,
                                         ),
@@ -522,8 +522,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                               hintText: 'e.g. 50 (leave empty for unlimited)',
                               prefixIcon: Padding(
                                 padding: const EdgeInsets.all(12),
-                                child: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedLayers01,
+                                child: Icon(
+                                  LucideIcons.layers,
                                   size: 16,
                                   color: primary,
                                 ),
@@ -579,8 +579,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
                           ref.read(unifiedLibraryProvider.notifier).saveSmartPlaylist(result);
                           Navigator.of(context).pop(result);
                         },
-                        icon: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                        icon: const Icon(
+                          LucideIcons.circleCheck,
                           size: 18,
                           color: Colors.black,
                         ),
@@ -676,8 +676,8 @@ class _CreateSmartPlaylistDialogState extends ConsumerState<CreateSmartPlaylistD
               if (_rules.length > 1) ...[
                 const SizedBox(width: 4),
                 IconButton(
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedDelete02,
+                  icon: Icon(
+                    LucideIcons.trash2,
                     size: 16,
                     color: theme.colorScheme.error,
                   ),

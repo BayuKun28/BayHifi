@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 import '../../../domain/models/lyric_sticker_model.dart';
 
 /// Decorative angled audiophile stamp sticker badge
@@ -33,19 +32,12 @@ class LyricStickerBadge extends StatelessWidget {
             color: color.withValues(alpha: 0.85),
             width: 1.2 * scale,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.25),
-              blurRadius: 8.0 * scale,
-              offset: Offset(0, 2.0 * scale),
-            ),
-          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HugeIcon(
-              icon: sticker.icon,
+            Icon(
+              sticker.icon,
               size: 11.5 * scale,
               color: color,
             ),

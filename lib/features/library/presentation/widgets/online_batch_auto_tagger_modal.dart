@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -251,8 +251,8 @@ class _OnlineBatchAutoTaggerModalState
                       color: StudioCategoryColors.warmTubeAmber.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedSparkles,
+                    child: const Icon(
+                      LucideIcons.sparkles,
                       size: 18,
                       color: StudioCategoryColors.warmTubeAmber,
                     ),
@@ -285,8 +285,8 @@ class _OnlineBatchAutoTaggerModalState
                     ),
                   ),
                   IconButton(
-                    icon: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
+                    icon: const Icon(
+                      LucideIcons.x,
                       size: 18,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
@@ -371,15 +371,15 @@ class _OnlineBatchAutoTaggerModalState
                                         match!.artworkUrl!,
                                         fit: BoxFit.cover,
                                         errorBuilder: (_, _, _) => const Center(
-                                          child: HugeIcon(
-                                            icon: HugeIcons.strokeRoundedMusicNote01,
+                                          child: Icon(
+                                            LucideIcons.music,
                                             size: 18,
                                           ),
                                         ),
                                       )
                                     : const Center(
-                                        child: HugeIcon(
-                                          icon: HugeIcons.strokeRoundedMusicNote01,
+                                        child: Icon(
+                                          LucideIcons.music,
                                           size: 18,
                                         ),
                                       )),
@@ -482,8 +482,8 @@ class _OnlineBatchAutoTaggerModalState
                             color: Colors.white,
                           ),
                         )
-                      : const HugeIcon(
-                          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      : const Icon(
+                          LucideIcons.circleCheck,
                           size: 20,
                           color: Colors.white,
                         ),

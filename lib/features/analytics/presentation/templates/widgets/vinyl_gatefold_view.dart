@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -61,8 +61,8 @@ class VinylGatefoldView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedRecord,
+                      const Icon(
+                        LucideIcons.disc,
                         size: 14,
                         color: goldAccent,
                       ),
@@ -153,7 +153,7 @@ class VinylGatefoldView extends StatelessWidget {
                                     width: 84,
                                     height: 84,
                                     borderRadius: BorderRadius.circular(42),
-                                    fallbackIcon: HugeIcons.strokeRoundedDisc,
+                                    fallbackIcon: LucideIcons.disc,
                                     fallbackIconSize: 36,
                                     backgroundColor: const Color(0xFF241F1A),
                                   ),
@@ -219,7 +219,7 @@ class VinylGatefoldView extends StatelessWidget {
                           width: 50,
                           height: 50,
                           borderRadius: BorderRadius.circular(10),
-                          fallbackIcon: HugeIcons.strokeRoundedUser,
+                          fallbackIcon: LucideIcons.user,
                           fallbackIconSize: 24,
                           backgroundColor: goldAccent.withValues(alpha: 0.1),
                         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -206,8 +206,8 @@ class _OnlineCandidatePickerModalState
                     color: StudioCategoryColors.warmTubeAmber.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedSparkles,
+                  child: const Icon(
+                    LucideIcons.sparkles,
                     size: 18,
                     color: StudioCategoryColors.warmTubeAmber,
                   ),
@@ -238,8 +238,8 @@ class _OnlineCandidatePickerModalState
                   ),
                 ),
                 IconButton(
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedCancel01,
+                  icon: const Icon(
+                    LucideIcons.x,
                     size: 18,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
@@ -264,8 +264,8 @@ class _OnlineCandidatePickerModalState
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 12, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedSearch01,
+                    child: Icon(
+                      LucideIcons.search,
                       size: 18,
                     ),
                   ),
@@ -284,7 +284,7 @@ class _OnlineCandidatePickerModalState
                   ),
                   if (_searchController.text.isNotEmpty)
                     IconButton(
-                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 16),
+                      icon: const Icon(LucideIcons.x, size: 16),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {});
@@ -372,8 +372,8 @@ class _OnlineCandidatePickerModalState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedAlertCircle,
+            Icon(
+              LucideIcons.alertCircle,
               size: 36,
               color: cs.onSurfaceVariant.withValues(alpha: 0.5),
             ),
@@ -441,15 +441,15 @@ class _OnlineCandidatePickerModalState
                             candidate.artworkUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (_, _, _) => const Center(
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedMusicNote01,
+                              child: Icon(
+                                LucideIcons.music,
                                 size: 24,
                               ),
                             ),
                           )
                         : const Center(
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedDisc,
+                            child: Icon(
+                              LucideIcons.disc,
                               size: 24,
                             ),
                           ),

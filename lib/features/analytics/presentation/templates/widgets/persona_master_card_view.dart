@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -35,13 +35,9 @@ class PersonaMasterCardView extends StatelessWidget {
         border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withValues(alpha: 0.22),
-            blurRadius: 36,
-            offset: const Offset(0, 12),
-          ),
-          BoxShadow(
             color: Colors.black.withValues(alpha: 0.8),
             blurRadius: 28,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -104,9 +100,6 @@ class PersonaMasterCardView extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: accentColor,
-                              boxShadow: [
-                                BoxShadow(color: accentColor.withValues(alpha: 0.8), blurRadius: 6),
-                              ],
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -177,16 +170,10 @@ class PersonaMasterCardView extends StatelessWidget {
                               secondaryAccent.withValues(alpha: 0.25),
                             ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: accentColor.withValues(alpha: 0.4),
-                              blurRadius: 20,
-                            ),
-                          ],
                         ),
                         child: Center(
-                          child: HugeIcon(
-                            icon: persona.icon,
+                          child: Icon(
+                            persona.icon,
                             size: 44,
                             color: textBright,
                           ),
@@ -331,7 +318,7 @@ class PersonaMasterCardView extends StatelessWidget {
                           width: 28,
                           height: 28,
                           borderRadius: BorderRadius.circular(6),
-                          fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                          fallbackIcon: LucideIcons.music,
                           fallbackIconSize: 14,
                         ),
                       const SizedBox(width: 10),

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -78,8 +78,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
         title: const Text('THEMING & COLOR PALETTES'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -90,31 +90,31 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: [
           // ─── 1. ACTIVE THEME COCKPIT PREVIEW ───────────────────────────
-          _buildSectionHeader(context, 'ACTIVE STUDIO THEME PREVIEW', HugeIcons.strokeRoundedView),
+          _buildSectionHeader(context, 'ACTIVE STUDIO THEME PREVIEW', LucideIcons.eye),
           const SizedBox(height: 8),
           _buildLiveThemePreview(context, themeState, isSolid),
           const SizedBox(height: 24),
 
           // ─── 2. DISPLAY GROUND & SURFACE STYLE ─────────────────────────
-          _buildSectionHeader(context, 'DISPLAY GROUND & SURFACE STYLE', HugeIcons.strokeRoundedSun01),
+          _buildSectionHeader(context, 'DISPLAY GROUND & SURFACE STYLE', LucideIcons.sun),
           const SizedBox(height: 8),
           _buildDisplayGroundCard(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 24),
 
           // ─── 3. DYNAMIC & OLED ENGINES ─────────────────────────────────
-          _buildSectionHeader(context, 'DYNAMIC & DISPLAY ENGINES', HugeIcons.strokeRoundedSparkles),
+          _buildSectionHeader(context, 'DYNAMIC & DISPLAY ENGINES', LucideIcons.sparkles),
           const SizedBox(height: 8),
           _buildEnginesRow(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 24),
 
           // ─── 4. CUSTOM STUDIO WALLPAPER & BACKDROP ─────────────────────
-          _buildSectionHeader(context, 'CUSTOM STUDIO WALLPAPER & BACKDROP', HugeIcons.strokeRoundedImage01),
+          _buildSectionHeader(context, 'CUSTOM STUDIO WALLPAPER & BACKDROP', LucideIcons.image),
           const SizedBox(height: 8),
           _buildWallpaperSection(context, themeState, themeNotifier, isSolid),
           const SizedBox(height: 24),
 
           // ─── 5. CURATED STUDIO PALETTES ────────────────────────────────
-          _buildSectionHeader(context, 'STUDIO COLOR PALETTES', HugeIcons.strokeRoundedLayers01),
+          _buildSectionHeader(context, 'STUDIO COLOR PALETTES', LucideIcons.layers),
           const SizedBox(height: 8),
           _buildPaletteCategoryFilterBar(context, isSolid),
           const SizedBox(height: 12),
@@ -122,7 +122,7 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
           const SizedBox(height: 24),
 
           // ─── 6. CUSTOM STUDIO ACCENT COLOR ─────────────────────────────
-          _buildSectionHeader(context, 'CUSTOM STUDIO ACCENT COLOR', HugeIcons.strokeRoundedColorPicker),
+          _buildSectionHeader(context, 'CUSTOM STUDIO ACCENT COLOR', LucideIcons.palette),
           const SizedBox(height: 8),
           _buildAccentPicker(context, themeState, themeNotifier, isSolid),
         ],
@@ -130,11 +130,11 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,
@@ -251,17 +251,10 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                       decoration: BoxDecoration(
                         color: primary,
                         borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primary.withValues(alpha: 0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Center(
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedMusicNote01,
+                        child: Icon(
+                          LucideIcons.music,
                           color: theme.colorScheme.onPrimary,
                           size: 20,
                         ),
@@ -404,8 +397,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                       ),
                       child: Column(
                         children: [
-                          HugeIcon(
-                            icon: modeOption.icon,
+                          Icon(
+                            modeOption.icon,
                             size: 18,
                             color: isSelected
                                 ? theme.colorScheme.primary
@@ -432,78 +425,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Surface Fill Style (2 Options)
-          Text(
-            'SURFACE & COMPONENT FILL STYLE',
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: SurfaceFillStyle.values.map((fillOption) {
-              final activeStyle = state.surfaceFillStyle ?? SurfaceFillStyle.solid;
-              final isSelected = activeStyle == fillOption;
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                  child: InkWell(
-                    onTap: () {
-                      AppHaptics.selectionClick();
-                      notifier.setSurfaceFillStyle(fillOption);
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? StudioSurfaceTheme.tintedContainer(
-                                context,
-                                theme.colorScheme.primary,
-                                isSolid: isSolid,
-                                translucentAlpha: 0.16,
-                                solidBlendAlpha: 0.20,
-                              )
-                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          HugeIcon(
-                            icon: fillOption.icon,
-                            size: 17,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              fillOption.label,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                color: isSelected
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurface,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
         ],
       ),
     );
@@ -543,8 +464,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedSparkles,
+                  child: Icon(
+                    LucideIcons.sparkles,
                     size: 20,
                     color: state.dynamicAlbumArtEnabled ? primary : theme.colorScheme.onSurfaceVariant,
                   ),
@@ -638,8 +559,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedMoon02,
+                    child: Icon(
+                      LucideIcons.moon,
                       size: 20,
                       color: Colors.white,
                     ),
@@ -683,8 +604,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                   ),
                 ),
                 if (state.currentPalette.id == 'true_oled')
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                  Icon(
+                    LucideIcons.checkCircle2,
                     size: 20,
                     color: primary,
                   ),
@@ -838,8 +759,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                       ],
                     ),
                     if (isSelected)
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      Icon(
+                        LucideIcons.checkCircle2,
                         size: 16,
                         color: primary,
                       ),
@@ -926,14 +847,6 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
               decoration: BoxDecoration(
                 color: accentColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: 0.5),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                ],
                 border: isSelected
                     ? Border.all(
                         color: Colors.white,
@@ -943,8 +856,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
               ),
               child: isSelected
                   ? Center(
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedTick02,
+                      child: Icon(
+                        LucideIcons.check,
                         size: 16,
                         color: accentColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                       ),
@@ -993,8 +906,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedImage01,
+                  child: Icon(
+                    LucideIcons.image,
                     size: 20,
                     color: wallpaper.enabled ? primary : theme.colorScheme.onSurfaceVariant,
                   ),
@@ -1096,8 +1009,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                               wallpaper.imagePath!,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) => Center(
-                                child: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedImage01,
+                                child: Icon(
+                                  LucideIcons.image,
                                   size: 24,
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
@@ -1107,16 +1020,16 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                               File(wallpaper.imagePath!),
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) => Center(
-                                child: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedImage01,
+                                child: Icon(
+                                  LucideIcons.image,
                                   size: 24,
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ))
                       : Center(
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedImage01,
+                          child: Icon(
+                            LucideIcons.image,
                             size: 24,
                             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                           ),
@@ -1189,8 +1102,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
               Expanded(
                 child: M3EButton.elevated(
                   label: Text(hasImage && !wallpaper.isAsset ? 'CHANGE CUSTOM IMAGE' : 'CUSTOM IMAGE FROM DEVICE'),
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedFolder01,
+                  icon: Icon(
+                    LucideIcons.folder,
                     size: 18,
                     color: primary,
                   ),
@@ -1213,8 +1126,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                 const SizedBox(width: 10),
                 M3EIconButton(
                   variant: M3EIconButtonVariant.tonal,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedDelete02,
+                  icon: Icon(
+                    LucideIcons.trash2,
                     size: 18,
                     color: theme.colorScheme.error,
                   ),
@@ -1238,8 +1151,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
               ),
               child: Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedSparkles,
+                  Icon(
+                    LucideIcons.sparkles,
                     size: 18,
                     color: wallpaper.syncPalette ? primary : theme.colorScheme.onSurfaceVariant,
                   ),
@@ -1366,8 +1279,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
       children: [
         Row(
           children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedPaintBoard,
+            Icon(
+              LucideIcons.palette,
               size: 14,
               color: primary,
             ),
@@ -1422,8 +1335,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
                           child: const Center(
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedImage01,
+                            child: Icon(
+                              LucideIcons.image,
                               size: 24,
                               color: Colors.grey,
                             ),
@@ -1496,8 +1409,8 @@ class _ThemingSettingsScreenState extends ConsumerState<ThemingSettingsScreen> {
                               color: primary,
                               shape: BoxShape.circle,
                             ),
-                            child: const HugeIcon(
-                              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                            child: const Icon(
+                              LucideIcons.checkCircle2,
                               size: 13,
                               color: Colors.black,
                             ),

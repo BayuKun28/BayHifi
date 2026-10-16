@@ -1,6 +1,8 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
@@ -13,6 +15,7 @@ import '../now_playing_screen.dart';
 import '../../../pro_q_studio/presentation/pro_q_studio_screen.dart';
 import '../../../library/domain/library_collection_models.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
+import '../../../library/presentation/controllers/library_selection_controller.dart';
 import '../../../library/presentation/playlists_screen.dart';
 
 /// Namida-inspired Expandable MiniPlayer
@@ -37,7 +40,7 @@ class _NamidaExpandableMiniPlayerState
     with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
   late final Animation<double> _expandAnimation;
-  bool _isCategoryDockExpanded = false;
+  bool _isSourceDockExpanded = false;
 
   @override
   void initState() {
@@ -56,8 +59,8 @@ class _NamidaExpandableMiniPlayerState
   @override
   void didUpdateWidget(covariant NamidaExpandableMiniPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isLibraryTab && !widget.isLibraryTab && _isCategoryDockExpanded) {
-      _isCategoryDockExpanded = false;
+    if (oldWidget.isLibraryTab && !widget.isLibraryTab && _isSourceDockExpanded) {
+      _isSourceDockExpanded = false;
     }
   }
 
@@ -69,7 +72,7 @@ class _NamidaExpandableMiniPlayerState
 
   void _onExpand() {
     FocusManager.instance.primaryFocus?.unfocus();
-    setState(() => _isCategoryDockExpanded = false);
+    setState(() => _isSourceDockExpanded = false);
     ref.read(playerExpansionProvider.notifier).expand();
   }
 
@@ -78,20 +81,44 @@ class _NamidaExpandableMiniPlayerState
     ref.read(playerExpansionProvider.notifier).collapse();
   }
 
-  dynamic _getTabIcon(CollectionTab tab) {
-    return switch (tab) {
-      CollectionTab.tracks => HugeIcons.strokeRoundedMusicNote01,
-      CollectionTab.albums => HugeIcons.strokeRoundedAlbum01,
-      CollectionTab.artists => HugeIcons.strokeRoundedUser,
-      CollectionTab.genres => HugeIcons.strokeRoundedTag01,
-      CollectionTab.downloads => HugeIcons.strokeRoundedDownload01,
-      CollectionTab.youtube => HugeIcons.strokeRoundedPlayList,
-      CollectionTab.folders => HugeIcons.strokeRoundedFolder01,
+  IconData _getSourceFilterIcon(LibrarySourceFilter filter) {
+    return switch (filter) {
+      LibrarySourceFilter.all => LucideIcons.music,
+      LibrarySourceFilter.offline => LucideIcons.folder,
+      LibrarySourceFilter.cloud => LucideIcons.cloud,
+      LibrarySourceFilter.hiRes => LucideIcons.disc,
+      LibrarySourceFilter.untagged => LucideIcons.alertCircle,
     };
   }
 
-  Color _getTabColor(CollectionTab tab, Color fallbackPrimary) {
-    return fallbackPrimary;
+  String _getSourceFilterLabel(LibrarySourceFilter filter) {
+    return switch (filter) {
+      LibrarySourceFilter.all => 'All Sources',
+      LibrarySourceFilter.offline => 'Offline Local',
+      LibrarySourceFilter.cloud => 'Cloud Library',
+      LibrarySourceFilter.hiRes => 'Hi-Res Lossless',
+      LibrarySourceFilter.untagged => 'Untagged Audio',
+    };
+  }
+
+  String _getSourceFilterShortLabel(LibrarySourceFilter filter) {
+    return switch (filter) {
+      LibrarySourceFilter.all => 'ALL',
+      LibrarySourceFilter.offline => 'OFFLINE',
+      LibrarySourceFilter.cloud => 'CLOUD',
+      LibrarySourceFilter.hiRes => 'HI-RES',
+      LibrarySourceFilter.untagged => 'UNTAGGED',
+    };
+  }
+
+  int _getSourceFilterCount(UnifiedLibraryState state, LibrarySourceFilter filter) {
+    return switch (filter) {
+      LibrarySourceFilter.all => state.totalTracksCount,
+      LibrarySourceFilter.offline => state.offlineTracksCount,
+      LibrarySourceFilter.cloud => state.cloudTracksCount,
+      LibrarySourceFilter.hiRes => state.hiResTracksCount,
+      LibrarySourceFilter.untagged => state.untaggedTracksCount,
+    };
   }
 
 
@@ -106,6 +133,9 @@ class _NamidaExpandableMiniPlayerState
     final isSolid = ref.isSolidStyle;
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
+    final bool isDesktopPlatform = !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
+    final double desktopTitleBarHeight = isDesktopPlatform ? 38.0 : 0.0;
+    final double maxAvailableHeight = screenHeight - desktopTitleBarHeight;
 
     // Sinkronkan controller animasi dengan state
     if (isExpanded && _animController.status != AnimationStatus.completed) {
@@ -128,11 +158,11 @@ class _NamidaExpandableMiniPlayerState
         );
 
     return PopScope(
-      canPop: !isExpanded && !_isCategoryDockExpanded,
+      canPop: !isExpanded && !_isSourceDockExpanded,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (_isCategoryDockExpanded) {
-          setState(() => _isCategoryDockExpanded = false);
+        if (_isSourceDockExpanded) {
+          setState(() => _isSourceDockExpanded = false);
           return;
         }
         if (isExpanded) {
@@ -149,10 +179,10 @@ class _NamidaExpandableMiniPlayerState
             widget.collapsedBottomOffset + mediaQuery.padding.bottom;
         final double currentBottom = (1.0 - progress) * baseBottomOffset;
 
-        // Animasikan tinggi: dari 66px ke screenHeight
+        // Animasikan tinggi: dari 66px ke maxAvailableHeight (menghindari tumpang tindih dengan Desktop TitleBar)
         const double miniPlayerHeight = 66.0;
         final double currentHeight =
-            miniPlayerHeight + progress * (screenHeight - miniPlayerHeight);
+            miniPlayerHeight + progress * (maxAvailableHeight - miniPlayerHeight);
 
         // Animasikan margin samping: dari 10px ke 0px
         final double horizontalMargin = (1.0 - progress) * 10.0;
@@ -164,22 +194,22 @@ class _NamidaExpandableMiniPlayerState
 
         return Stack(
           children: [
-            // ─── 0. DISMISS BACKDROP SAAT CATEGORY DOCK EXPANDED ────────────
-            if (_isCategoryDockExpanded && widget.isLibraryTab && progress < 0.1)
+            // ─── 0. DISMISS BACKDROP SAAT SOURCE DOCK EXPANDED ──────────────
+            if (_isSourceDockExpanded && widget.isLibraryTab && progress < 0.1)
               Positioned.fill(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () => setState(() => _isCategoryDockExpanded = false),
+                  onTap: () => setState(() => _isSourceDockExpanded = false),
                   child: const ColoredBox(color: Colors.transparent),
                 ),
               ),
 
-            // ─── 1. FLOATING SECONDARY CATEGORY DOCK POPUP ───────────────────
-            if (_isCategoryDockExpanded && widget.isLibraryTab && progress < 0.1)
+            // ─── 1. FLOATING AUDIO SOURCE FILTER DOCK POPUP ──────────────────
+            if (_isSourceDockExpanded && widget.isLibraryTab && progress < 0.1)
               Positioned(
                 right: 10,
                 bottom: currentBottom + miniPlayerHeight + 8.0,
-                child: _buildFloatingCategoryDock(context, theme, isSolid),
+                child: _buildFloatingSourceFilterDock(context, theme, isSolid),
               ),
 
             // ─── 2. MAIN EXPANDABLE MINIPLAYER ──────────────────────────────
@@ -224,7 +254,7 @@ class _NamidaExpandableMiniPlayerState
                               top: 0,
                               left: 0,
                               width: mediaQuery.size.width,
-                              height: screenHeight,
+                              height: maxAvailableHeight,
                               child: Opacity(
                                 opacity: progress.clamp(0.0, 1.0),
                                 child: NowPlayingScreen(
@@ -266,7 +296,7 @@ class _NamidaExpandableMiniPlayerState
               ),
             ),
 
-            // ─── 3. CATEGORY FAB (SEJAJAR DI KANAN MINIPLAYER) ───────────────
+            // ─── 3. AUDIO SOURCE FILTER FAB (SEJAJAR DI KANAN MINIPLAYER) ──
             if (widget.isLibraryTab && progress < 0.95)
               Positioned(
                 right: 10,
@@ -275,14 +305,14 @@ class _NamidaExpandableMiniPlayerState
                 height: miniPlayerHeight,
                 child: Opacity(
                   opacity: (1.0 - progress * 3.0).clamp(0.0, 1.0),
-                  child: _buildCategoryFab(context, theme, isSolid),
+                  child: _buildSourceFilterFab(context, theme, isSolid),
                 ),
               ),
 
-            // ─── 4. SHUFFLE SHORTCUT FAB (DI ATAS CATEGORY FAB PADA TRACKS TAB) ───
+            // ─── 4. SHUFFLE SHORTCUT FAB (DI ATAS SOURCE FILTER FAB PADA TRACKS TAB) ───
             if (widget.isLibraryTab &&
                 libraryState.currentTab == CollectionTab.tracks &&
-                !_isCategoryDockExpanded &&
+                !_isSourceDockExpanded &&
                 progress < 0.95)
               Positioned(
                 right: 10,
@@ -358,8 +388,8 @@ class _NamidaExpandableMiniPlayerState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedShuffle,
+                Icon(
+                  LucideIcons.shuffle,
                   size: 20,
                   color: primary,
                 ),
@@ -371,12 +401,13 @@ class _NamidaExpandableMiniPlayerState
     );
   }
 
-  Widget _buildCategoryFab(BuildContext context, ThemeData theme, bool isSolid) {
+  Widget _buildSourceFilterFab(BuildContext context, ThemeData theme, bool isSolid) {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final primary = theme.colorScheme.primary;
+    final isFiltered = libraryState.selectedFilter != LibrarySourceFilter.all;
 
     return Tooltip(
-      message: 'Switch Library Category',
+      message: 'Filter Audio Source',
       child: Material(
         color: Colors.transparent,
         elevation: 10,
@@ -384,7 +415,7 @@ class _NamidaExpandableMiniPlayerState
         child: InkWell(
           onTap: () {
             AppHaptics.selectionClick();
-            setState(() => _isCategoryDockExpanded = !_isCategoryDockExpanded);
+            setState(() => _isSourceDockExpanded = !_isSourceDockExpanded);
           },
           borderRadius: BorderRadius.circular(16),
           child: Container(
@@ -393,6 +424,12 @@ class _NamidaExpandableMiniPlayerState
             decoration: BoxDecoration(
               color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(16),
+              border: isFiltered
+                  ? Border.all(
+                      color: primary.withValues(alpha: 0.6),
+                      width: 1.2,
+                    )
+                  : null,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.35),
@@ -404,19 +441,19 @@ class _NamidaExpandableMiniPlayerState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                HugeIcon(
-                  icon: _getTabIcon(libraryState.currentTab),
+                Icon(
+                  _getSourceFilterIcon(libraryState.selectedFilter),
                   size: 20,
                   color: primary,
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  libraryState.currentTab.label.toUpperCase(),
+                  _getSourceFilterShortLabel(libraryState.selectedFilter),
                   style: TextStyle(
                     fontSize: 8.5,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.4,
-                    color: theme.colorScheme.onSurface,
+                    color: isFiltered ? primary : theme.colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -429,7 +466,7 @@ class _NamidaExpandableMiniPlayerState
     );
   }
 
-  Widget _buildFloatingCategoryDock(BuildContext context, ThemeData theme, bool isSolid) {
+  Widget _buildFloatingSourceFilterDock(BuildContext context, ThemeData theme, bool isSolid) {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final primary = theme.colorScheme.primary;
 
@@ -438,7 +475,8 @@ class _NamidaExpandableMiniPlayerState
       elevation: 16,
       borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        width: 220,
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         decoration: StudioSurfaceTheme.cardDecoration(
           context: context,
           isSolid: isSolid,
@@ -448,30 +486,44 @@ class _NamidaExpandableMiniPlayerState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...CollectionTab.values.map((tab) {
-              final isSelected = libraryState.currentTab == tab;
-              final tabColor = _getTabColor(tab, primary);
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Text(
+                'AUDIO SOURCE',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: 2),
+            ...LibrarySourceFilter.values.map((filter) {
+              final isSelected = libraryState.selectedFilter == filter;
+              final count = _getSourceFilterCount(libraryState, filter);
               return InkWell(
                 onTap: () {
                   AppHaptics.selectionClick();
-                  ref.read(unifiedLibraryProvider.notifier).setTab(tab);
-                  setState(() => _isCategoryDockExpanded = false);
+                  ref.read(librarySelectionProvider.notifier).clear();
+                  ref.read(unifiedLibraryProvider.notifier).setFilter(filter);
+                  setState(() => _isSourceDockExpanded = false);
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? (isSolid
                             ? StudioSurfaceTheme.tintedContainer(
                                 context,
-                                tabColor,
+                                primary,
                                 isSolid: true,
                                 solidBlendAlpha: 0.18,
                               )
                             : StudioSurfaceTheme.tintedContainer(
                                 context,
-                                tabColor,
+                                primary,
                                 isSolid: false,
                                 translucentAlpha: 0.15,
                               ))
@@ -479,20 +531,42 @@ class _NamidaExpandableMiniPlayerState
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: _getTabIcon(tab),
+                      Icon(
+                        _getSourceFilterIcon(filter),
                         size: 16,
-                        color: isSelected ? tabColor : tabColor.withValues(alpha: 0.7),
+                        color: isSelected ? primary : primary.withValues(alpha: 0.7),
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        tab.label,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                          color: isSelected ? tabColor : theme.colorScheme.onSurface,
+                      Expanded(
+                        child: Text(
+                          _getSourceFilterLabel(filter),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: isSelected ? primary : theme.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? primary.withValues(alpha: 0.2)
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '$count',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                            color: isSelected ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
                         ),
                       ),
                     ],
@@ -500,35 +574,36 @@ class _NamidaExpandableMiniPlayerState
                 ),
               );
             }),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Divider(height: 1, color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid)),
             const SizedBox(height: 4),
             InkWell(
               onTap: () {
                 AppHaptics.selectionClick();
-                setState(() => _isCategoryDockExpanded = false);
+                setState(() => _isSourceDockExpanded = false);
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PlaylistsScreen()),
                 );
               },
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlayList,
+                    Icon(
+                      LucideIcons.listMusic,
                       size: 16,
                       color: theme.colorScheme.secondary,
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      'Playlists',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.secondary,
+                    Expanded(
+                      child: Text(
+                        'Playlists',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.secondary,
+                        ),
                       ),
                     ),
                   ],
@@ -698,8 +773,8 @@ class _NamidaExpandableMiniPlayerState
                                   color: theme.colorScheme.onPrimary,
                                 ),
                               )
-                            : HugeIcon(
-                                icon: isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                            : Icon(
+                                isPlaying ? LucideIcons.pause : LucideIcons.play,
                                 color: theme.colorScheme.onPrimary,
                                 size: 20,
                               ),
@@ -719,8 +794,8 @@ class _NamidaExpandableMiniPlayerState
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(6),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedNext,
+                      child: Icon(
+                        LucideIcons.stepForward,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         size: 20,
                       ),
@@ -736,8 +811,8 @@ class _NamidaExpandableMiniPlayerState
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedArrowUp01,
+                      child: Icon(
+                        LucideIcons.chevronUp,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         size: 20,
                       ),

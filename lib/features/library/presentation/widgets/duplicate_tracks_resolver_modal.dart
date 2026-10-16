@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/database/local_persistence_service.dart';
@@ -111,8 +111,8 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
             // Header
             Row(
               children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedLayers01,
+                Icon(
+                  LucideIcons.layers,
                   size: 20,
                   color: primary,
                 ),
@@ -160,8 +160,8 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      Icon(
+                        LucideIcons.circleCheck,
                         size: 44,
                         color: const Color(0xFF00E676),
                       ),
@@ -197,8 +197,8 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
                 ),
                 child: Row(
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedSparkles,
+                    Icon(
+                      LucideIcons.sparkles,
                       size: 16,
                       color: primary,
                     ),
@@ -278,8 +278,8 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
                             ),
                             child: Row(
                               children: [
-                                HugeIcon(
-                                  icon: HugeIcons.strokeRoundedCheckmarkBadge01,
+                                Icon(
+                                  LucideIcons.badgeCheck,
                                   size: 14,
                                   color: primary,
                                 ),
@@ -305,8 +305,8 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
                               padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                               child: Row(
                                 children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedDelete02,
+                                  Icon(
+                                    LucideIcons.trash2,
                                     size: 12,
                                     color: theme.colorScheme.error,
                                   ),
@@ -337,8 +337,8 @@ class _DuplicateTracksResolverModalState extends ConsumerState<DuplicateTracksRe
                 width: double.infinity,
                 child: M3EButton.filled(
                   onPressed: _purgeAllRedundantDuplicates,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedSparkles,
+                  icon: Icon(
+                    LucideIcons.sparkles,
                     size: 16,
                     color: theme.colorScheme.onPrimary,
                   ),

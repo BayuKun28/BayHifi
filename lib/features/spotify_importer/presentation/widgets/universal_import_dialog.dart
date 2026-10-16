@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/app_haptics.dart';
@@ -241,8 +241,8 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                       ),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedLink01,
+                    child: Icon(
+                      LucideIcons.link,
                       size: 20,
                       color: primary,
                     ),
@@ -289,8 +289,8 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                 child: Row(
                   children: [
                     const SizedBox(width: 12),
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedSearch01,
+                    Icon(
+                      LucideIcons.search,
                       size: 18,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
@@ -323,8 +323,8 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                     else
                       M3EIconButton(
                         variant: M3EIconButtonVariant.standard,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedArrowRight01,
+                        icon: Icon(
+                          LucideIcons.arrowRight,
                           size: 22,
                           color: primary,
                         ),
@@ -345,8 +345,8 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                   ),
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedAlertCircle,
+                      Icon(
+                        LucideIcons.alertCircle,
                         size: 16,
                         color: theme.colorScheme.error,
                       ),
@@ -460,17 +460,17 @@ class _UniversalImportDialogState extends ConsumerState<UniversalImportDialog> {
                   alignment: WrapAlignment.end,
                   children: [
                     M3EButton.outlined(
-                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 16, color: Colors.grey),
+                      icon: const Icon(LucideIcons.play, size: 16, color: Colors.grey),
                       label: const Text('Stream Now', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       onPressed: _handleStreamNow,
                     ),
                     M3EButton.tonal(
-                      icon: HugeIcon(icon: HugeIcons.strokeRoundedPlaylist01, size: 16, color: primary),
+                      icon: Icon(LucideIcons.listMusic, size: 16, color: primary),
                       label: const Text('Import Playlist', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       onPressed: _handleImportPlaylist,
                     ),
                     M3EButton.filled(
-                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedDownload01, size: 16, color: Colors.white),
+                      icon: const Icon(LucideIcons.download, size: 16, color: Colors.white),
                       label: const Text('Download All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
                       onPressed: _handleDownloadAll,
                     ),

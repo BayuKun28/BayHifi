@@ -20,26 +20,28 @@ Pada branch `simple-as-f`, aplikasi Baydev HiFi bertransformasi dari arsitektur 
 - **Kebijakan M3E**: Paket `material_3_expressive` **TIDAK LAGI MENJADI BASIS WAJIB**. Komponen UI utama dibangun menggunakan widget Flutter bespoke dengan kustomisasi presisi tinggi sesuai referensi Dribbble. Komponen M3E (`M3ESwitch`, `M3ESlider`, `M3EButton`, `motor` spring physics) hanya diterapkan secara selektif jika benar-benar cocok dan tidak merusak estetika minimalis.
 - **Prinsip Anti-Clutter**: Hindari penumpukan kartu (*nested cards*), hilangkan border tebal yang bertumpuk, dan minimalkan badge status dekoratif yang tidak perlu.
 
-### 2.1 Palet Warna Obsidian Forest & Emerald Mint
-- **Warna Latar Belakang (Base Atmosphere)**:
-  - `Obsidian Forest Deep Dark`: `#0B110E` / `#0E1713` sebagai latar kanvas utama.
-  - `Ambient Glow`: Sentuhan aura radial hijau lumut/hutan yang sangat lembut di sudut kanvas (`#12231A` / `#162E22`, blur luas, opacity halus) menciptakan kedalaman visual organik.
-  - `Surface Elevated / Capsule`: `#141F18` hingga `#1A2820` untuk kartu aktif dan floating capsule dock.
-- **Aksen Utama (Vibrant Emerald Mint)**:
-  - `#2EE672` (atau `#4ADE80`): Digunakan untuk keyword highlight pada judul, tombol Play aktif, seekbar played progress, toggle active switch, dan audio wave icon.
+### 2.1 Palet Warna Neutral Matte Obsidian Carbon & Studio Emerald Mint
+- **Warna Latar Belakang & Permukaan Solid (100% Opaque Solid Surfaces)**:
+  - `Neutral Matte Obsidian Canvas`: `#0D0E12` sebagai latar kanvas utama.
+  - `Pitch Black Foundation`: `#08090B` untuk kontras kedalaman maksimum.
+  - `Surface Elevated / Cards`: `#16181F` untuk elevated cards, dialog cards, dan floating capsule dock.
+  - `Active Playing Capsule`: `#1E212B` untuk membungkus lagu yang sedang aktif diputar di playlist / library.
+  - `Unplayed Seekbar & Muted Containers`: `#252834` / `#12141A`.
+- **Aksen Utama (Clean Studio Emerald Mint)**:
+  - `#10B981` (dengan highlight `#34D399`): Digunakan untuk keyword highlight pada judul, tombol Play aktif, seekbar played progress, toggle active switch, dan audio wave icon.
 - **Warna Teks & Tipografi**:
   - `Primary Text`: Pure Solid White (`#FFFFFF`).
-  - `Secondary / Subtitle`: Muted Sage Slate (`#8A9A90` / `#A1B2A7`).
-  - `Muted Borders / Dividers`: Halus 1px dengan opasitas rendah (`#22352A` with 30-50% alpha).
-- **Zero-Neon & Restrained Tone Policy**:
-  - Dilarang menggunakan neon menyala yang menyilaukan mata. Warna hijau yang digunakan adalah hijau hutan/mint organik berkelas studio.
+  - `Secondary / Subtitle`: Neutral Slate Gray (`#94A3B8` / tertiary `#64748B`).
+  - `Crisp Subtle Borders`: Halus 0.8–1px kontras struktural solid (`#262936` / `#2E3242`).
+- **Zero-Neon & Pure Solid Policy**:
+  - Dilarang keras menggunakan neon menyala yang menyilaukan mata, radial glowing halos, atau drop shadow colored blur tebal. Seluruh permukaan harus solid, elegan, dan berkelas studio (`SimpleAsFTheme`, `StudioSurfaceTheme`).
 
 ### 2.2 Tipografi Dinamis Two-Tone & Spaced Tracking
 - **Two-Tone Title Keywords**:
-  - Judul layar dan bagian header menggunakan kombinasi teks dua warna: kata pertama berwarna putih solid, kata kedua/aksen diberi warna Emerald Mint:
-    - `"Liked"` (White) + `"Songs"` (Emerald Mint `#2EE672`).
-    - `"Recently"` (White) + `"Played"` (Emerald Mint `#2EE672`).
-    - `"Equalizer"` (White) + `"Studio"` (Emerald Mint `#2EE672`).
+  - Judul layar dan bagian header menggunakan kombinasi teks dua warna: kata pertama berwarna putih solid, kata kedua/aksen diberi warna Studio Emerald Mint:
+    - `"Liked"` (White) + `"Songs"` (Emerald Mint `#10B981`).
+    - `"Recently"` (White) + `"Played"` (Emerald Mint `#10B981`).
+    - `"Equalizer"` (White) + `"Studio"` (Emerald Mint `#10B981`).
 - **Small Uppercase Spaced Tracking Headers**:
   - Label metadata dan navigasi mini menggunakan huruf kapital dengan *letter-spacing* lebar (1.5 – 2.0):
     - `WELCOME, MATT`, `RECENTLY PLAYED`, `LOST IN SPACE`, `DOWNLOAD`, `2 FOLLOWERS`.
@@ -51,7 +53,7 @@ Pada branch `simple-as-f`, aplikasi Baydev HiFi bertransformasi dari arsitektur 
   - Album art ditampilkan besar di tengah dengan bentuk squircle elegan (`borderRadius: BorderRadius.circular(28)` hingga `(32)`).
   - Bayangan lembut terpadu dengan latar belakang obsidian tanpa border kasar.
 - **Track Meta & Favorit**:
-  - Di bawah artwork: Icon Heart favorit di kiri (`HugeIcons.strokeRoundedFavourite`), Judul Lagu (Bold White, ~24px) & Nama Artis (Sage Slate, ~14px) di tengah, dan Icon More/Options di kanan.
+  - Di bawah artwork: Icon Heart favorit di kiri (`LucideIcons.heart`), Judul Lagu (Bold White, ~24px) & Nama Artis (Sage Slate, ~14px) di tengah, dan Icon More/Options di kanan.
 - **Interactive Audio Waveform Seekbar**:
   - Menggantikan slider garis tradisional dengan baris **Waveform Bar Spectrum** (40–60 batang amplitudo audio vertikal).
   - Bagian lagu yang sudah diputar disorot dengan warna putih terang / emerald mint, sedangkan bagian belum diputar bernada abu-abu sage gelap.
@@ -77,15 +79,16 @@ Pada branch `simple-as-f`, aplikasi Baydev HiFi bertransformasi dari arsitektur 
   - MiniPlayer melayang ramping di atas navigation bar dengan thumbnail album art, teks berjalan halus (*marquee*), tombol play/pause dan next, serta indikator progress halus.
   - Transisi buka-tutup NowPlayingScreen menggunakan gestur drag yang halus.
 
-### 2.6 Ikonografi HugeIcons & Zero-Emoji Policy
-- **HugeIcons Library Mandate**: Seluruh ikon di aplikasi wajib menggunakan `HugeIcons` (`HugeIcons.strokeRounded...` atau `HugeIcons.solidRounded...`).
-- **Zero-Emoji Policy (Strictly Enforced)**: Dilarang keras menggunakan emoji di UI, tombol, dialog, komentar kode, maupun dokumentasi. Selalu gunakan ikon resmi.
+### 2.6 Ikonografi Lucide Icons, Zero-Emoji & No-Neon Solid Policy
+- **Lucide Icons Library Mandate**: Seluruh ikon di aplikasi wajib menggunakan `lucide_icons_flutter` (`LucideIcons.*`). Dilarang mencampur icon legacy Material 1/2 ataupun HugeIcons.
+- **Zero-Emoji Policy (Strictly Enforced)**: Dilarang keras menggunakan emoji di UI, tombol, dialog, komentar kode, maupun dokumentasi. Selalu gunakan icon resmi dari `LucideIcons`.
+- **Pure Solid & Anti-Neon Policy**: Dilarang keras efek neon glow buram (glowing box-shadows dengan colored blur yang tebal). Seluruh permukaan kartu dan modal wajib solid, bersih, elegan (`SimpleAsFTheme`, `StudioSurfaceTheme`) dengan batas struktural kontras (`Border.all`) atau bayangan gelap tipis (`Colors.black.withValues(alpha: ...)`).
+- **Desktop Mobile Mode CSD Offset**: Pada desktop window mode mobile (<650px), header bar (`NowPlayingScreen`) wajib diberi offset padding atas (`StudioDesktopTitleBar.barHeight`) dengan platform guard `isDesktopPlatform`, agar tombol aksi tidak tertutup oleh tombol kontrol CSD window desktop, tanpa merusak layout Android mobile/tablet.
 - **100% English Language Policy**: Seluruh teks antarmuka wajib dalam Bahasa Inggris.
 
 ### 2.7 Aturan Performa CustomPainter & Visualizer
 - **`RepaintBoundary`**: Semua canvas interaktif (`WaveformSeekbar`, `ProQCanvas`, `RtaVisualizerCanvas`) wajib dibungkus dalam `RepaintBoundary`.
 - **Zero Allocations inside `paint()`**: Dilarang mengalokasikan objek `Paint`, `Path`, atau `TextStyle` baru di dalam loop `paint()`. Cache objek sebagai field class.
-h.
 
 ## 3. Standar Koding & Pembuatan Fungsi
 

@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../audio_engine/fft_processor.dart';
 import '../../../../audio_engine/soloud_controller.dart';
 import '../../../settings/presentation/controllers/player_customization_controller.dart';
@@ -185,8 +185,8 @@ class _InteractiveEqCanvasState extends ConsumerState<InteractiveEqCanvas> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedSlidersVertical,
+                        Icon(
+                          LucideIcons.slidersVertical,
                           size: 12,
                           color: Color(0xFF29B6F6),
                         ),

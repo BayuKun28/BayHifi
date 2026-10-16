@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -35,7 +35,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           // ─── 2. SMOOTH PLAY / PAUSE VOLUME FADE ────────────────────────
           _buildCardHeader(
             theme,
-            icon: HugeIcons.strokeRoundedVolumeHigh,
+            icon: LucideIcons.volume2,
             color: primary,
             title: 'SMOOTH VOLUME FADE TRANSITIONS',
             subtitle: 'Prevents sudden audio clicks or volume snaps on play & pause',
@@ -47,7 +47,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           // ─── 3. AUDIO DEVICE INTERRUPTION & HEADPHONE POLICIES ──────────
           _buildCardHeader(
             theme,
-            icon: HugeIcons.strokeRoundedHeadphones,
+            icon: LucideIcons.headphones,
             color: theme.colorScheme.secondary,
             title: 'AUDIO DEVICE INTERRUPTION POLICIES',
             subtitle: 'Auto-pause and intelligent auto-resume for DACs, earphones & Bluetooth',
@@ -59,7 +59,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           // ─── 4. SPEED & PITCH SEMITONE ENGINE ───────────────────────────
           _buildCardHeader(
             theme,
-            icon: HugeIcons.strokeRoundedDashboardSpeed01,
+            icon: LucideIcons.gauge,
             color: theme.colorScheme.tertiary,
             title: 'SPEED & PITCH SEMITONE ENGINE',
             subtitle: 'Granular time-stretch and semitone tuning with lock linkage',
@@ -71,7 +71,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           // ─── 5. REPLAYGAIN NORMALIZATION & SKIP SILENCE ─────────────────
           _buildCardHeader(
             theme,
-            icon: HugeIcons.strokeRoundedSlidersHorizontal,
+            icon: LucideIcons.slidersHorizontal,
             color: primary,
             title: 'REPLAYGAIN & SILENCE MANAGEMENT',
             subtitle: 'Loudness normalization standard (-18 LUFS) & silent intro trimming',
@@ -83,7 +83,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
           // ─── 6. CUSTOM SEEK STEPPER & TIME DISPLAY MODES ────────────────
           _buildCardHeader(
             theme,
-            icon: HugeIcons.strokeRoundedHourglass,
+            icon: LucideIcons.hourglass,
             color: theme.colorScheme.secondary,
             title: 'SEEK STEPPER & TIME DISPLAY MODES',
             subtitle: 'Configure fast forward/rewind jump step and countdown format',
@@ -98,8 +98,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
               AppHaptics.mediumImpact();
               _showResetConfirmation(context, notifier, isSolid);
             },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedRotateLeft01,
+            icon: Icon(
+              LucideIcons.rotateCcw,
               size: 16,
               color: theme.colorScheme.error,
             ),
@@ -150,8 +150,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedActivity01,
+                child: Icon(
+                  LucideIcons.activity,
                   size: 18,
                   color: primary,
                 ),
@@ -265,14 +265,14 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
   // ─── CARD HEADER HELPER ───────────────────────────────────────────────────
   Widget _buildCardHeader(
     ThemeData theme, {
-    required dynamic icon,
+    required IconData icon,
     required Color color,
     required String title,
     required String subtitle,
   }) {
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: color),
+        Icon(icon, size: 15, color: color),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -751,11 +751,11 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             itemIcon: (m) {
               switch (m) {
                 case ReplayGainMode.off:
-                  return HugeIcons.strokeRoundedCancel01;
+                  return LucideIcons.x;
                 case ReplayGainMode.track:
-                  return HugeIcons.strokeRoundedMusicNote01;
+                  return LucideIcons.music;
                 case ReplayGainMode.album:
-                  return HugeIcons.strokeRoundedDisc;
+                  return LucideIcons.disc;
               }
             },
             onChanged: (val) {
@@ -959,9 +959,9 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             itemIcon: (s) {
               switch (s) {
                 case SeekStepMode.constantSeconds:
-                  return HugeIcons.strokeRoundedHourglass;
+                  return LucideIcons.hourglass;
                 case SeekStepMode.percentage:
-                  return HugeIcons.strokeRoundedPieChart;
+                  return LucideIcons.pieChart;
               }
             },
             onChanged: (val) {
@@ -1069,9 +1069,9 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             itemIcon: (t) {
               switch (t) {
                 case TimeDisplayMode.remaining:
-                  return HugeIcons.strokeRoundedHourglass;
+                  return LucideIcons.hourglass;
                 case TimeDisplayMode.total:
-                  return HugeIcons.strokeRoundedClock01;
+                  return LucideIcons.clock;
               }
             },
             onChanged: (val) {
@@ -1095,7 +1095,7 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
     required List<T> items,
     required String Function(T) itemLabel,
     required String Function(T) itemDescription,
-    required dynamic Function(T) itemIcon,
+    required IconData Function(T) itemIcon,
     required ValueChanged<T?> onChanged,
     required bool isSolid,
   }) {
@@ -1128,8 +1128,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
             child: DropdownButton<T>(
               value: currentValue,
               isExpanded: true,
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowDown01,
+              icon: Icon(
+                LucideIcons.chevronDown,
                 size: 15,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -1143,8 +1143,8 @@ class PlaybackEngineSettingsScreen extends ConsumerWidget {
                   value: item,
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: itemIcon(item),
+                      Icon(
+                        itemIcon(item),
                         size: 16,
                         color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                       ),

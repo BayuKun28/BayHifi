@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
-import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../library/domain/instant_mix_engine.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 import '../../domain/track.dart';
@@ -17,17 +15,40 @@ enum QueueAddSourceMode {
   favorites,
 }
 
-/// Pure Material 3 Expressive Bottom Sheet for adding dynamic batches of tracks to active queue (Namida style).
+/// Solid Matte Dialog & Bottom Sheet for adding dynamic batches of tracks to active queue.
 class AddTracksToQueueSheet extends ConsumerStatefulWidget {
-  const AddTracksToQueueSheet({super.key});
+  final bool isDialog;
+
+  const AddTracksToQueueSheet({
+    super.key,
+    this.isDialog = false,
+  });
 
   static Future<void> show(BuildContext context) {
     AppHaptics.lightImpact();
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 650) {
+      return showDialog(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.65),
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: const AddTracksToQueueSheet(isDialog: true),
+            ),
+          ),
+        ),
+      );
+    }
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const AddTracksToQueueSheet(),
+      builder: (_) => const AddTracksToQueueSheet(isDialog: false),
     );
   }
 
@@ -38,7 +59,7 @@ class AddTracksToQueueSheet extends ConsumerStatefulWidget {
 class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
   QueueAddSourceMode _selectedMode = QueueAddSourceMode.smartRandom;
   StudioMusicMood _selectedMood = StudioMusicMood.chillAcoustic;
-  int _selectedCount = 10; // Default 10 tracks autofill as mandated
+  int _selectedCount = 10;
   QueueAddPlacement _placement = QueueAddPlacement.appendToEnd;
 
   static const List<int> _countOptions = [5, 10, 20, 50];
@@ -101,13 +122,17 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
         break;
 
       case QueueAddSourceMode.favorites:
-        final favTracks = allTracks.where((t) => library.favoriteTrackIds.contains(t.id)).toList();
-        if (favTracks.isNotEmpty) {
-          favTracks.shuffle();
-          newTracks = favTracks.take(_selectedCount).toList();
+        final favorites = allTracks
+            .where((t) => library.favoriteTrackIds.contains(t.id))
+            .toList();
+        if (favorites.isNotEmpty) {
+          newTracks = engine.generateQueueAdditions(
+            pool: favorites,
+            criteria: InstantMixCriteria.smartRandom,
+            count: _selectedCount,
+          );
         } else {
           newTracks = engine.generateQueueAdditions(
-            currentTrack: currentTrack,
             pool: allTracks,
             criteria: InstantMixCriteria.smartRandom,
             count: _selectedCount,
@@ -116,117 +141,124 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
         break;
     }
 
-    if (newTracks.isEmpty) {
-      newTracks = allTracks.take(_selectedCount).toList();
-    }
-
-    final isPlayNext = _placement == QueueAddPlacement.playNext;
-    ref.read(playerControllerProvider.notifier).addTracksToQueue(newTracks, playNext: isPlayNext);
-
-    Navigator.of(context).pop();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isPlayNext
-              ? 'Inserted ${newTracks.length} tracks up next in queue.'
-              : 'Added ${newTracks.length} tracks to end of queue.',
+    if (newTracks.isNotEmpty) {
+      ref.read(playerControllerProvider.notifier).addTracksToQueue(
+            newTracks,
+            playNext: _placement == QueueAddPlacement.playNext,
+          );
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Added ${newTracks.length} tracks to ${_placement == QueueAddPlacement.playNext ? 'play next' : 'queue end'}.',
+          ),
+          backgroundColor: const Color(0xFF1E212B),
         ),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+      );
+    } else {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No matching tracks found.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isSolid = ref.isSolidStyle;
-    final primary = colorScheme.primary;
+    final isDialog = widget.isDialog;
 
     return Container(
       decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: theme.brightness == Brightness.dark ? 0.35 : 0.08,
-            ),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        color: const Color(0xFF16181F),
+        borderRadius: isDialog
+            ? BorderRadius.circular(24)
+            : const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(
+          color: const Color(0xFF262936),
+          width: 1.0,
+        ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Drag Handle
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+              // 1. Drag Handle (mobile only)
+              if (!isDialog) ...[
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2E3242),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 14),
+              ],
 
               // 2. Title & Icon
               Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlayList,
-                    size: 22,
-                    color: primary,
+                  const Icon(
+                    LucideIcons.listPlus,
+                    size: 20,
+                    color: Color(0xFF10B981),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
+                  const SizedBox(width: 10),
+                  const Text(
                     'Add Tracks to Queue',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
                     ),
                   ),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: isSolid ? 0.18 : 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSolid ? colorScheme.outline : primary.withValues(alpha: 0.3),
-                        width: 0.8,
-                      ),
+                      color: const Color(0xFF1E212B),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFF262936), width: 0.8),
                     ),
-                    child: Text(
+                    child: const Text(
                       'SMART MIX',
                       style: TextStyle(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w900,
-                        color: primary,
-                        letterSpacing: 0.5,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF10B981),
+                        letterSpacing: 0.8,
                       ),
                     ),
                   ),
+                  if (isDialog) ...[
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      borderRadius: BorderRadius.circular(8),
+                      child: const Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(LucideIcons.x, size: 16, color: Color(0xFF8A9A90)),
+                      ),
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
               // 3. Mode Selection Grid
-              Text(
+              const Text(
                 'SELECT SOURCE & CRITERIA',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: colorScheme.onSurfaceVariant,
+                  letterSpacing: 1.0,
+                  color: Color(0xFF8A9A90),
                 ),
               ),
               const SizedBox(height: 8),
@@ -235,25 +267,25 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                 children: [
                   _buildModeTile(
                     label: 'Random',
-                    icon: HugeIcons.strokeRoundedShuffle,
+                    icon: LucideIcons.shuffle,
                     mode: QueueAddSourceMode.smartRandom,
                   ),
                   const SizedBox(width: 8),
                   _buildModeTile(
-                    label: 'Mood & Vibe',
-                    icon: HugeIcons.strokeRoundedSparkles,
+                    label: 'Mood',
+                    icon: LucideIcons.sparkles,
                     mode: QueueAddSourceMode.mood,
                   ),
                   const SizedBox(width: 8),
                   _buildModeTile(
                     label: 'Similar',
-                    icon: HugeIcons.strokeRoundedAudioWaveform,
+                    icon: LucideIcons.audioLines,
                     mode: QueueAddSourceMode.similarToCurrent,
                   ),
                   const SizedBox(width: 8),
                   _buildModeTile(
                     label: 'Favorites',
-                    icon: HugeIcons.strokeRoundedFavourite,
+                    icon: LucideIcons.heart,
                     mode: QueueAddSourceMode.favorites,
                   ),
                 ],
@@ -262,23 +294,23 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               // Mood Selector Sub-options
               if (_selectedMode == QueueAddSourceMode.mood) ...[
                 const SizedBox(height: 14),
-                Text(
+                const Text(
                   'TARGET MOOD',
                   style: TextStyle(
-                    fontSize: 10.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                    color: colorScheme.onSurfaceVariant,
+                    letterSpacing: 1.0,
+                    color: Color(0xFF8A9A90),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: 6,
+                  runSpacing: 6,
                   children: StudioMusicMood.values.map((mood) {
                     final isSelected = _selectedMood == mood;
                     return InkWell(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                       onTap: () {
                         AppHaptics.selectionClick();
                         setState(() {
@@ -289,22 +321,22 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? primary.withValues(alpha: isSolid ? 0.22 : 0.16)
-                              : colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(10),
+                              ? const Color(0xFF252834)
+                              : const Color(0xFF16181F),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isSelected
-                                ? primary
-                                : colorScheme.outlineVariant.withValues(alpha: 0.5),
-                            width: isSelected ? 1.4 : 0.8,
+                                ? const Color(0xFF383D50)
+                                : const Color(0xFF262936),
+                            width: 0.8,
                           ),
                         ),
                         child: Text(
                           mood.displayName,
                           style: TextStyle(
-                            fontSize: 11.5,
+                            fontSize: 11,
                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? primary : colorScheme.onSurface,
+                            color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
                           ),
                         ),
                       ),
@@ -315,26 +347,26 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
 
               const SizedBox(height: 18),
 
-              // 4. Number of Tracks Selector (Default: 10)
+              // 4. Number of Tracks Selector
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'NUMBER OF TRACKS',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                      color: colorScheme.onSurfaceVariant,
+                      letterSpacing: 1.0,
+                      color: Color(0xFF8A9A90),
                     ),
                   ),
                   Text(
                     '$_selectedCount tracks',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: primary,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],
@@ -349,7 +381,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 3.0),
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         onTap: () {
                           AppHaptics.selectionClick();
                           setState(() {
@@ -357,26 +389,26 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                           });
                         },
                         child: Container(
-                          height: 38,
+                          height: 36,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? primary.withValues(alpha: isSolid ? 0.22 : 0.16)
-                                : colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(10),
+                                ? const Color(0xFF252834)
+                                : const Color(0xFF16181F),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isSelected
-                                  ? primary
-                                  : colorScheme.outlineVariant.withValues(alpha: 0.5),
-                              width: isSelected ? 1.4 : 0.8,
+                                  ? const Color(0xFF383D50)
+                                  : const Color(0xFF262936),
+                              width: 0.8,
                             ),
                           ),
                           child: Text(
                             '$count',
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 12.5,
                               fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                              color: isSelected ? primary : colorScheme.onSurface,
+                              color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
                               fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
@@ -390,13 +422,13 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               const SizedBox(height: 18),
 
               // 5. Queue Placement Selector
-              Text(
+              const Text(
                 'QUEUE PLACEMENT',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: colorScheme.onSurfaceVariant,
+                  letterSpacing: 1.0,
+                  color: Color(0xFF8A9A90),
                 ),
               ),
               const SizedBox(height: 8),
@@ -408,7 +440,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                       title: 'Append to End',
                       subtitle: 'Add after current queue',
                       placement: QueueAddPlacement.appendToEnd,
-                      icon: HugeIcons.strokeRoundedPlaylist01,
+                      icon: LucideIcons.listPlus,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -417,26 +449,40 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                       title: 'Play Next',
                       subtitle: 'Insert right after playing',
                       placement: QueueAddPlacement.playNext,
-                      icon: HugeIcons.strokeRoundedNext,
+                      icon: LucideIcons.stepForward,
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
               // 6. Action Button
-              M3EButton.filled(
-                label: Text(
-                  _placement == QueueAddPlacement.playNext
-                      ? 'INSERT $_selectedCount TRACKS NEXT'
-                      : 'ADD $_selectedCount TRACKS TO END',
+              SizedBox(
+                height: 42,
+                child: ElevatedButton.icon(
+                  onPressed: _executeAdd,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF252834),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Color(0xFF2E3242), width: 1),
+                    ),
+                  ),
+                  icon: const Icon(LucideIcons.plus, size: 16),
+                  label: Text(
+                    _placement == QueueAddPlacement.playNext
+                        ? 'INSERT $_selectedCount TRACKS NEXT'
+                        : 'ADD $_selectedCount TRACKS TO END',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
                 ),
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlusSign,
-                  size: 18,
-                ),
-                onPressed: _executeAdd,
               ),
             ],
           ),
@@ -447,17 +493,14 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
 
   Widget _buildModeTile({
     required String label,
-    required dynamic icon,
+    required IconData icon,
     required QueueAddSourceMode mode,
   }) {
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-    final primary = theme.colorScheme.primary;
     final isSelected = _selectedMode == mode;
 
     return Expanded(
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         onTap: () {
           AppHaptics.selectionClick();
           setState(() {
@@ -468,21 +511,21 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? primary.withValues(alpha: isSolid ? 0.22 : 0.16)
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
+                ? const Color(0xFF252834)
+                : const Color(0xFF16181F),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? primary : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-              width: isSelected ? 1.4 : 0.8,
+              color: isSelected ? const Color(0xFF383D50) : const Color(0xFF262936),
+              width: 0.8,
             ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              HugeIcon(
-                icon: icon,
-                size: 18,
-                color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? Colors.white : const Color(0xFF8A9A90),
               ),
               const SizedBox(height: 4),
               Text(
@@ -490,7 +533,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                 style: TextStyle(
                   fontSize: 10.5,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? primary : theme.colorScheme.onSurface,
+                  color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -506,15 +549,12 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
     required String title,
     required String subtitle,
     required QueueAddPlacement placement,
-    required dynamic icon,
+    required IconData icon,
   }) {
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-    final primary = theme.colorScheme.primary;
     final isSelected = _placement == placement;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       onTap: () {
         AppHaptics.selectionClick();
         setState(() {
@@ -525,20 +565,20 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: isSelected
-              ? primary.withValues(alpha: isSolid ? 0.18 : 0.12)
-              : theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
+              ? const Color(0xFF20232E)
+              : const Color(0xFF16181F),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? primary : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-            width: isSelected ? 1.4 : 0.8,
+            color: isSelected ? const Color(0xFF383D50) : const Color(0xFF262936),
+            width: 0.8,
           ),
         ),
         child: Row(
           children: [
-            HugeIcon(
-              icon: icon,
-              size: 18,
-              color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? const Color(0xFF10B981) : const Color(0xFF8A9A90),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -550,16 +590,16 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? primary : theme.colorScheme.onSurface,
+                      color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 9.5,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: Color(0xFF8A9A90),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

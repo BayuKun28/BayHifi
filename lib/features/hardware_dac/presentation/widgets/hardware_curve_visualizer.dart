@@ -29,13 +29,16 @@ class HardwareCurveVisualizer extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: height,
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        child: Stack(
-          children: [
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color(0xFF16181F),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF262936)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
             // CustomPainter for grid, zones, and composite curve
             CustomPaint(
               size: Size.infinite,
@@ -110,8 +113,7 @@ class HardwareCurveVisualizer extends StatelessWidget {
               ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   int? _findClosestBand(Offset touchPos, Size size) {

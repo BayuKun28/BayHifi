@@ -1,25 +1,26 @@
-import 'package:hugeicons/hugeicons.dart';
+import 'package:flutter/widgets.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-/// Helper to generate consistent, genre-appropriate or hash-mapped random HugeIcons
+/// Helper to generate consistent, genre-appropriate or hash-mapped random LucideIcons
 class GenreIconHelper {
   const GenreIconHelper._();
 
-  static const List<dynamic> _iconPalette = [
-    HugeIcons.strokeRoundedGuitar,
-    HugeIcons.strokeRoundedHeadphones,
-    HugeIcons.strokeRoundedAlbum01,
-    HugeIcons.strokeRoundedMic01,
-    HugeIcons.strokeRoundedSparkles,
-    HugeIcons.strokeRoundedAudioWaveform,
-    HugeIcons.strokeRoundedMusicNote01,
-    HugeIcons.strokeRoundedMusicNote02,
-    HugeIcons.strokeRoundedMusicNote03,
-    HugeIcons.strokeRoundedSlidersVertical,
-    HugeIcons.strokeRoundedRadio,
-    HugeIcons.strokeRoundedPlaylist01,
+  static const List<IconData> _iconPalette = [
+    LucideIcons.flame,
+    LucideIcons.headphones,
+    LucideIcons.disc,
+    LucideIcons.mic,
+    LucideIcons.sparkles,
+    LucideIcons.audioLines,
+    LucideIcons.music,
+    LucideIcons.music2,
+    LucideIcons.sliders,
+    LucideIcons.radio,
+    LucideIcons.listMusic,
+    LucideIcons.zap,
   ];
 
-  static dynamic getGenreIcon(String genreName) {
+  static IconData getGenreIcon(String genreName) {
     final lower = genreName.trim().toLowerCase();
 
     // 1. Rock & Metal
@@ -29,7 +30,7 @@ class GenreIconHelper {
         lower.contains('grunge') ||
         lower.contains('heavy') ||
         lower.contains('guitar')) {
-      return HugeIcons.strokeRoundedGuitar;
+      return LucideIcons.flame;
     }
 
     // 2. Jazz, Blues & Soul
@@ -39,7 +40,7 @@ class GenreIconHelper {
         lower.contains('funk') ||
         lower.contains('groove') ||
         lower.contains('brass')) {
-      return HugeIcons.strokeRoundedMusicNote02;
+      return LucideIcons.music2;
     }
 
     // 3. Classical & Acoustic
@@ -51,7 +52,7 @@ class GenreIconHelper {
         lower.contains('acoustic') ||
         lower.contains('instrumental') ||
         lower.contains('chamber')) {
-      return HugeIcons.strokeRoundedMusicNote03;
+      return LucideIcons.music;
     }
 
     // 4. Electronic & Dance
@@ -64,7 +65,7 @@ class GenreIconHelper {
         lower.contains('trance') ||
         lower.contains('club') ||
         lower.contains('dubstep')) {
-      return HugeIcons.strokeRoundedAudioWaveform;
+      return LucideIcons.audioLines;
     }
 
     // 5. Hip Hop & Rap
@@ -74,7 +75,7 @@ class GenreIconHelper {
         lower.contains('trap') ||
         lower.contains('r&b') ||
         lower.contains('urban')) {
-      return HugeIcons.strokeRoundedMic01;
+      return LucideIcons.mic;
     }
 
     // 6. Pop & Indie
@@ -83,7 +84,7 @@ class GenreIconHelper {
         lower.contains('folk') ||
         lower.contains('vocal') ||
         lower.contains('country')) {
-      return HugeIcons.strokeRoundedHeadphones;
+      return LucideIcons.headphones;
     }
 
     // 7. Ambient & Soundtracks
@@ -93,7 +94,7 @@ class GenreIconHelper {
         lower.contains('score') ||
         lower.contains('ost') ||
         lower.contains('meditation')) {
-      return HugeIcons.strokeRoundedRadio;
+      return LucideIcons.radio;
     }
 
     // 8. Studio Master & Audiophile
@@ -104,7 +105,7 @@ class GenreIconHelper {
         lower.contains('lossless') ||
         lower.contains('dsd') ||
         lower.contains('flac')) {
-      return HugeIcons.strokeRoundedSparkles;
+      return LucideIcons.sparkles;
     }
 
     // 9. Deterministic hash mapping for custom / other genres

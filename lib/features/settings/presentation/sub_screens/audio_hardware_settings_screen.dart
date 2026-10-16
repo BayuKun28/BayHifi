@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -41,8 +41,8 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
         title: const Text('AUDIO HARDWARE & DAC ENGINE'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -57,7 +57,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
           const SizedBox(height: 18),
 
           // ─── 2. HARDWARE AUDIO & BIT-PERFECT DAC ────────────────────────────
-          _buildSectionHeader(context, 'HARDWARE AUDIO & BIT-PERFECT DAC', HugeIcons.strokeRoundedCpu),
+          _buildSectionHeader(context, 'HARDWARE AUDIO & BIT-PERFECT DAC', LucideIcons.cpu),
           const SizedBox(height: 8),
           _buildHardwareCard(context, theme, primary, storage, isSolid),
         ],
@@ -91,8 +91,8 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedCpu,
+                child: Icon(
+                  LucideIcons.cpu,
                   size: 18,
                   color: hardwareColor,
                 ),
@@ -190,11 +190,11 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -281,8 +281,8 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
               return 'Standard high-fidelity multi-channel system mixer audio routing';
             },
             itemIcon: (d) {
-              if (d.contains('USB')) return HugeIcons.strokeRoundedUsbMemory01;
-              return HugeIcons.strokeRoundedHeadphones;
+              if (d.contains('USB')) return LucideIcons.usb;
+              return LucideIcons.headphones;
             },
             onChanged: (val) {
               if (val != null) {
@@ -371,7 +371,7 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
     required List<T> items,
     required String Function(T) itemLabel,
     required String Function(T) itemDescription,
-    required dynamic Function(T) itemIcon,
+    required IconData Function(T) itemIcon,
     required ValueChanged<T?> onChanged,
     required bool isSolid,
   }) {
@@ -404,8 +404,8 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
             child: DropdownButton<T>(
               value: currentValue,
               isExpanded: true,
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowDown01,
+              icon: Icon(
+                LucideIcons.chevronDown,
                 size: 15,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -419,8 +419,8 @@ class _AudioHardwareSettingsScreenState extends ConsumerState<AudioHardwareSetti
                   value: item,
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: itemIcon(item),
+                      Icon(
+                        itemIcon(item),
                         size: 16,
                         color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                       ),

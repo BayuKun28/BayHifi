@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/app/theme/theme_mode_controller.dart';
 import 'package:baydev_hifi/features/dsp_rack/presentation/dsp_rack_screen.dart';
 import 'package:baydev_hifi/features/dsp_rack/presentation/widgets/rack_unit_card.dart';
@@ -69,27 +68,29 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Category FAB should be visible on Library tab
-      final triggerPill = find.byTooltip('Switch Library Category');
+      // Source Filter FAB should be visible on Library tab
+      final triggerPill = find.byTooltip('Filter Audio Source');
       expect(triggerPill, findsOneWidget);
 
-      // Tap the FAB to expand dock
+      // Tap the FAB to expand source dock
       await tester.tap(triggerPill);
       await tester.pumpAndSettle();
 
       // Options should be visible in popup
-      expect(find.text('Albums'), findsWidgets);
-      expect(find.text('Artists'), findsWidgets);
-      expect(find.text('Genres'), findsWidgets);
-      expect(find.text('Folders'), findsWidgets);
-      expect(find.text('Playlists'), findsWidgets);
+      expect(find.text('AUDIO SOURCE'), findsOneWidget);
+      expect(find.text('All Sources'), findsOneWidget);
+      expect(find.text('Offline Local'), findsOneWidget);
+      expect(find.text('Cloud Library'), findsOneWidget);
+      expect(find.text('Hi-Res Lossless'), findsOneWidget);
+      expect(find.text('Untagged Audio'), findsOneWidget);
+      expect(find.text('Playlists'), findsOneWidget);
 
-      // Tap 'Albums' option
-      await tester.tap(find.text('Albums').last);
+      // Tap 'Offline Local' option
+      await tester.tap(find.text('Offline Local'));
       await tester.pumpAndSettle();
 
       // Popup should be dismissed
-      expect(find.text('Folders'), findsNothing);
+      expect(find.text('AUDIO SOURCE'), findsNothing);
 
       // 2. Render on other tab (isLibraryTab: false)
       await tester.pumpWidget(
@@ -110,8 +111,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Category FAB should NOT be visible when not on Library tab
-      expect(find.byTooltip('Switch Library Category'), findsNothing);
+      // Source Filter FAB should NOT be visible when not on Library tab
+      expect(find.byTooltip('Filter Audio Source'), findsNothing);
     });
 
     test('ThemeController supports curated Pastel Studio Palettes', () {
@@ -151,9 +152,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check tooltips for playback controls
-      expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Previous Track'), findsOneWidget);
-      expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Next Track'), findsOneWidget);
-      expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Shuffle Playback'), findsOneWidget);
+      expect(find.byTooltip('Previous Track'), findsOneWidget);
+      expect(find.byTooltip('Next Track'), findsOneWidget);
+      expect(find.byTooltip('Shuffle Playback'), findsOneWidget);
     });
   });
 }

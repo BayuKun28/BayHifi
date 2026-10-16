@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
-/// Pure Material 3 Expressive Card for adjusting the hardware USB DAC's Master Preamp Gain
+/// Solid Matte Card for adjusting the hardware USB DAC's Master Preamp Gain
 /// (-18.0 dB .. +3.0 dB) in real-time on register 0x3B.
 class DacGlobalGainCard extends StatelessWidget {
   const DacGlobalGainCard({
@@ -18,17 +18,15 @@ class DacGlobalGainCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final clampedGain = globalGainDb.clamp(-18.0, 3.0);
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
+        color: const Color(0xFF16181F),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.4),
-          width: 1.0,
+          color: const Color(0xFF262936),
+          width: 0.8,
         ),
       ),
       child: Padding(
@@ -40,38 +38,41 @@ class DacGlobalGainCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 28,
-                  height: 28,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     color: isConnected
-                        ? colorScheme.primaryContainer
-                        : colorScheme.surfaceContainerHighest,
+                        ? const Color(0xFF222532)
+                        : const Color(0xFF1E212B),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF262936), width: 0.8),
                   ),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedVolumeHigh,
+                  alignment: Alignment.center,
+                  child: Icon(
+                    LucideIcons.volume2,
                     color: isConnected
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurfaceVariant,
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFF8A9A90),
                     size: 16,
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Master Pre-Amp Gain',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
                         'Hardware analog volume / digital headroom',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                        style: TextStyle(
+                          color: Color(0xFF8A9A90),
                           fontSize: 11,
                         ),
                       ),
@@ -81,27 +82,28 @@ class DacGlobalGainCard extends StatelessWidget {
 
                 // Readout Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: clampedGain > 0
-                        ? colorScheme.tertiaryContainer
-                        : colorScheme.surfaceContainerHighest,
+                        ? const Color(0xFF2A2416)
+                        : const Color(0xFF1E212B),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: clampedGain > 0
-                          ? colorScheme.tertiary.withValues(alpha: 0.5)
-                          : colorScheme.outlineVariant.withValues(alpha: 0.3),
+                          ? const Color(0xFFF59E0B)
+                          : const Color(0xFF262936),
+                      width: 0.8,
                     ),
                   ),
                   child: Text(
                     '${clampedGain >= 0 ? '+' : ''}${clampedGain.toStringAsFixed(1)} dB',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                    style: TextStyle(
                       color: clampedGain > 0
-                          ? colorScheme.onTertiaryContainer
-                          : colorScheme.onSurface,
+                          ? const Color(0xFFFBBF24)
+                          : Colors.white,
                       fontFeatures: const [FontFeature.tabularFigures()],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
                     ),
                   ),
                 ),
@@ -110,18 +112,15 @@ class DacGlobalGainCard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // Slider Row
+            // Slider & Range Labels
             Row(
               children: [
-                SizedBox(
-                  width: 42,
-                  child: Text(
-                    'GAIN',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 10,
-                    ),
+                const Text(
+                  '-18 dB',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF8A9A90),
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
                 Expanded(
@@ -129,89 +128,26 @@ class DacGlobalGainCard extends StatelessWidget {
                     value: clampedGain,
                     min: -18.0,
                     max: 3.0,
-                    divisions: 14, // 1.5 dB step intervals
+                    divisions: 42, // 0.5 dB steps
                     onChanged: isConnected
                         ? (val) {
-                            final snapped = (val / 1.5).round() * 1.5;
-                            onChanged(snapped);
+                            final rounded = (val * 2).round() / 2.0;
+                            onChanged(rounded);
                           }
                         : null,
                   ),
                 ),
-                SizedBox(
-                  width: 60,
-                  child: Text(
-                    '${clampedGain >= 0 ? '+' : ''}${clampedGain.toStringAsFixed(1)} dB',
-                    textAlign: TextAlign.end,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11,
-                    ),
+                const Text(
+                  '+3 dB',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF8A9A90),
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: 8),
-
-            // Quick Preset Chips (Matching hardware 1.5 dB steps)
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                _buildQuickGainChip(context, label: '-12.0 dB', value: -12.0),
-                _buildQuickGainChip(context, label: '-6.0 dB', value: -6.0),
-                _buildQuickGainChip(context, label: '-4.5 dB', value: -4.5),
-                _buildQuickGainChip(context, label: '-3.0 dB', value: -3.0),
-                _buildQuickGainChip(context, label: '-1.5 dB', value: -1.5),
-                _buildQuickGainChip(context, label: '0.0 dB (Unity)', value: 0.0),
-                _buildQuickGainChip(context, label: '+1.5 dB', value: 1.5),
-                _buildQuickGainChip(context, label: '+3.0 dB', value: 3.0),
-              ],
-            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickGainChip(
-    BuildContext context, {
-    required String label,
-    required double value,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isSelected = (globalGainDb - value).abs() < 0.1;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(6),
-      onTap: isConnected ? () => onChanged(value) : null,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? colorScheme.primary
-              : colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isSelected
-                ? colorScheme.primary
-                : colorScheme.outlineVariant.withValues(alpha: 0.3),
-          ),
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: isSelected
-                ? colorScheme.onPrimary
-                : colorScheme.onSurfaceVariant,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            fontSize: 10,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
         ),
       ),
     );

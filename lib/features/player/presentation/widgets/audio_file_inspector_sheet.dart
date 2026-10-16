@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -71,8 +71,8 @@ class AudioFileInspectorSheet extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedAudioWaveform,
+                    Icon(
+                      LucideIcons.audioLines,
                       size: 20,
                       color: primary,
                     ),
@@ -122,8 +122,8 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                       message: 'Edit Metadata Tags',
                       child: M3EIconButton(
                         variant: M3EIconButtonVariant.tonal,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedEdit02,
+                        icon: Icon(
+                          LucideIcons.pencil,
                           size: 16,
                           color: primary,
                         ),
@@ -181,8 +181,8 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   M3EButton.tonal(
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedEdit02,
+                    icon: Icon(
+                      LucideIcons.pencil,
                       size: 14,
                       color: primary,
                     ),
@@ -236,8 +236,8 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                         // ─── METADATA TAGS SECTION ───
                         Row(
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedTag01,
+                            Icon(
+                              LucideIcons.tag,
                               size: 14,
                               color: primary,
                             ),
@@ -260,7 +260,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Title',
                           track.title,
                           'Track Name',
-                          HugeIcons.strokeRoundedMusicNote01,
+                          LucideIcons.music,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -269,7 +269,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Artist',
                           track.artist,
                           'Performer / Band',
-                          HugeIcons.strokeRoundedUser,
+                          LucideIcons.user,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -278,7 +278,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Album',
                           track.album,
                           'Release Collection',
-                          HugeIcons.strokeRoundedAlbum01,
+                          LucideIcons.disc,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -287,7 +287,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Genre & Year',
                           '${track.genre ?? "Unknown Genre"}${track.year != null ? " • ${track.year}" : ""}',
                           'Musical Classification',
-                          HugeIcons.strokeRoundedSparkles,
+                          LucideIcons.sparkles,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -296,15 +296,15 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Duration & Track #',
                           '${track.duration.inMinutes}:${(track.duration.inSeconds % 60).toString().padLeft(2, '0')}${track.trackNumber != null ? " • Track #${track.trackNumber}" : ""}',
                           'Playback Length',
-                          HugeIcons.strokeRoundedClock01,
+                          LucideIcons.clock,
                         ),
                         const SizedBox(height: 16),
 
                         // ─── TECHNICAL SPECS SECTION ───
                         Row(
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedCpu,
+                            Icon(
+                              LucideIcons.cpu,
                               size: 14,
                               color: const Color(0xFF00E5FF),
                             ),
@@ -327,7 +327,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Container / Codec',
                           data.containerFormat,
                           data.codecProfile,
-                          HugeIcons.strokeRoundedAlbum01,
+                          LucideIcons.disc,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -336,7 +336,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Sample Rate',
                           '${data.sampleRate} Hz (${(data.sampleRate / 1000).toStringAsFixed(1)} kHz)',
                           data.sampleRate >= 88200 ? 'Studio Master Hi-Res' : 'CD Quality Baseline',
-                          HugeIcons.strokeRoundedAudioWaveform,
+                          LucideIcons.audioLines,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -345,7 +345,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Bit Depth & Channels',
                           '${data.bitDepth}-bit • ${data.channels == 2 ? "Stereo (2.0)" : "Mono (1.0)"}',
                           '${data.bitDepth * 6.02} dB Dynamic Range',
-                          HugeIcons.strokeRoundedSlidersVertical,
+                          LucideIcons.sliders,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -354,7 +354,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Estimated Bitrate',
                           '${data.bitrateKbps} kbps',
                           data.isHiRes ? 'Hi-Res Lossless Audio' : 'Standard Lossy / Lossless Stream',
-                          HugeIcons.strokeRoundedZap,
+                          LucideIcons.zap,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -363,7 +363,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'File Size',
                           data.formattedFileSize,
                           data.isLocal ? 'Local Storage File' : 'Remote Network Stream',
-                          HugeIcons.strokeRoundedFolder01,
+                          LucideIcons.folder,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(
@@ -372,7 +372,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           'Magic Bytes Header',
                           data.magicBytesHex,
                           'ASCII: [${data.magicBytesAscii}]',
-                          HugeIcons.strokeRoundedCpu,
+                          LucideIcons.cpu,
                         ),
                         if (data.md5Checksum != null) ...[
                           const SizedBox(height: 8),
@@ -381,7 +381,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                             isSolid,
                             'MD5 Checksum',
                             data.md5Checksum!,
-                            HugeIcons.strokeRoundedShieldEnergy,
+                            LucideIcons.shieldCheck,
                           ),
                         ],
                         const SizedBox(height: 8),
@@ -390,7 +390,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                           isSolid,
                           'Location / File Path',
                           data.location,
-                          HugeIcons.strokeRoundedCompass01,
+                          LucideIcons.compass,
                         ),
                         const SizedBox(height: 16),
                       ],
@@ -411,7 +411,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
     String title,
     String value,
     String subtitle,
-    dynamic icon,
+    IconData icon,
   ) {
     final theme = Theme.of(context);
     return Container(
@@ -429,7 +429,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
               color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: HugeIcon(icon: icon, size: 16, color: const Color(0xFF00E5FF)),
+            child: Icon(icon, size: 16, color: const Color(0xFF00E5FF)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -475,7 +475,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
     bool isSolid,
     String title,
     String value,
-    dynamic icon,
+    IconData icon,
   ) {
     final theme = Theme.of(context);
     return Container(
@@ -493,7 +493,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
               color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: HugeIcon(icon: icon, size: 16, color: const Color(0xFFFFB74D)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFFB74D)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -526,8 +526,8 @@ class AudioFileInspectorSheet extends ConsumerWidget {
           ),
           M3EIconButton(
             variant: M3EIconButtonVariant.standard,
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedCopy01,
+            icon: Icon(
+              LucideIcons.copy,
               size: 20,
               color: theme.colorScheme.onSurfaceVariant,
             ),

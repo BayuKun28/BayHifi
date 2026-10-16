@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -157,8 +157,8 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                     ),
                   ),
                   M3EIconButton(
-                    icon: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                    icon: const Icon(
+                      LucideIcons.slidersHorizontal,
                       size: 20,
                       color: Colors.grey,
                     ),
@@ -194,12 +194,12 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    HugeIcon(
-                      icon: isPinned
-                          ? HugeIcons.strokeRoundedPin
+                    Icon(
+                      isPinned
+                          ? LucideIcons.pin
                           : (resolution.source == DspResolutionSource.genreAuto
-                              ? HugeIcons.strokeRoundedSparkles
-                              : HugeIcons.strokeRoundedSlidersVertical),
+                              ? LucideIcons.sparkles
+                              : LucideIcons.sliders),
                       size: 20,
                       color: isPinned ? primary : theme.colorScheme.secondary,
                     ),
@@ -237,8 +237,8 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                     if (isPinned)
                       M3EButton.outlined(
                         label: const Text('UNPIN', style: TextStyle(fontSize: 11)),
-                        icon: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedCancel01,
+                        icon: const Icon(
+                          LucideIcons.x,
                           size: 14,
                           color: Colors.redAccent,
                         ),
@@ -264,7 +264,7 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                   _buildSectionHeader(
                     context,
                     title: 'GENRE-OPTIMIZED PRESETS',
-                    icon: HugeIcons.strokeRoundedSparkles,
+                    icon: LucideIcons.sparkles,
                     color: theme.colorScheme.primary,
                   ),
                   const SizedBox(height: 6),
@@ -285,7 +285,7 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                   _buildSectionHeader(
                     context,
                     title: 'STUDIO REFERENCE PRESETS',
-                    icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                    icon: LucideIcons.slidersHorizontal,
                     color: theme.colorScheme.secondary,
                   ),
                   const SizedBox(height: 6),
@@ -306,7 +306,7 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                     _buildSectionHeader(
                       context,
                       title: 'CUSTOM USER PROFILES',
-                      icon: HugeIcons.strokeRoundedUser,
+                      icon: LucideIcons.user,
                       color: theme.colorScheme.tertiary,
                     ),
                     const SizedBox(height: 6),
@@ -333,13 +333,13 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
   Widget _buildSectionHeader(
     BuildContext context, {
     required String title,
-    required dynamic icon,
+    required IconData icon,
     required Color color,
   }) {
     return Row(
       children: [
-        HugeIcon(
-          icon: icon,
+        Icon(
+          icon,
           size: 14,
           color: color,
         ),
@@ -390,12 +390,12 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                HugeIcon(
-                  icon: isPinned
-                      ? HugeIcons.strokeRoundedPin
+                Icon(
+                  isPinned
+                      ? LucideIcons.pin
                       : (isSelected
-                          ? HugeIcons.strokeRoundedCheckmarkCircle02
-                          : HugeIcons.strokeRoundedCircle),
+                          ? LucideIcons.circleCheck
+                          : LucideIcons.circle),
                   size: 18,
                   color: isSelected ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 ),

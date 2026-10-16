@@ -40,7 +40,7 @@ void main() {
       addTearDown(container.dispose);
 
       final notifier = container.read(themeControllerProvider.notifier);
-      expect(container.read(themeControllerProvider).surfaceFillStyle, SurfaceFillStyle.translucent);
+      expect(container.read(themeControllerProvider).surfaceFillStyle, SurfaceFillStyle.solid);
 
       notifier.setSurfaceFillStyle(SurfaceFillStyle.solid);
       expect(container.read(themeControllerProvider).surfaceFillStyle, SurfaceFillStyle.solid);
@@ -124,8 +124,8 @@ void main() {
     });
   });
 
-  group('Phase 31.5: ThemingSettingsScreen Surface Fill Style Selector', () {
-    testWidgets('Renders SURFACE & COMPONENT FILL STYLE selector', (tester) async {
+  group('Phase 31.5: ThemingSettingsScreen Surface Fill Style Enforcement', () {
+    testWidgets('Enforces solid surfaces and removes obsolete translucent toggle', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -138,15 +138,9 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('SURFACE & COMPONENT FILL STYLE'), findsOneWidget);
-      expect(find.text('Translucent Soft Tint'), findsOneWidget);
-      expect(find.text('Pure Solid M3'), findsOneWidget);
-
-      await tester.tap(find.text('Pure Solid M3'));
-      await tester.pumpAndSettle();
-
-      final saved = LocalPersistenceService.instance.getThemeSettings();
-      expect(saved['surface_fill_style'], 'solid');
+      expect(find.text('SURFACE & COMPONENT FILL STYLE'), findsNothing);
+      expect(find.text('Translucent Soft Tint'), findsNothing);
+      expect(find.text('THEME MODE'), findsOneWidget);
     });
   });
 }

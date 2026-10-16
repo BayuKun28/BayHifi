@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -70,8 +70,8 @@ class GenreRulesConfigModal extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedSparkles,
+                  Icon(
+                    LucideIcons.sparkles,
                     size: 20,
                     color: primary,
                   ),
@@ -88,8 +88,8 @@ class GenreRulesConfigModal extends ConsumerWidget {
                   ),
                   M3EIconButton(
                     variant: M3EIconButtonVariant.standard,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
+                    icon: Icon(
+                      LucideIcons.x,
                       size: 22,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -230,10 +230,10 @@ class GenreRulesConfigModal extends ConsumerWidget {
                                       value: preset,
                                       child: Row(
                                         children: [
-                                          HugeIcon(
-                                            icon: isSelected
-                                                ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                                : HugeIcons.strokeRoundedCircle,
+                                          Icon(
+                                            isSelected
+                                                ? LucideIcons.circleCheck
+                                                : LucideIcons.circle,
                                             size: 16,
                                             color: isSelected ? primary : Colors.grey,
                                           ),
@@ -277,8 +277,8 @@ class GenreRulesConfigModal extends ConsumerWidget {
                                         ),
                                       ),
                                       const SizedBox(width: 4),
-                                      HugeIcon(
-                                        icon: HugeIcons.strokeRoundedArrowDown01,
+                                      Icon(
+                                        LucideIcons.chevronDown,
                                         size: 12,
                                         color: primary,
                                       ),

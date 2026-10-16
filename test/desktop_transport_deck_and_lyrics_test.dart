@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/core/desktop/desktop_bottom_master_transport_deck.dart';
@@ -69,7 +69,7 @@ void main() {
 
       // Verify Play icon is rendered and visible inside the prominent 42px squircle button
       final playIconFinder = find.byWidgetPredicate(
-        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedPlay,
+        (w) => w is Icon && w.icon == LucideIcons.play,
       );
       expect(playIconFinder, findsOneWidget);
 
@@ -83,7 +83,7 @@ void main() {
       // Re-pump to update icon to Pause
       await tester.pump();
       final pauseIconFinder = find.byWidgetPredicate(
-        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedPause,
+        (w) => w is Icon && w.icon == LucideIcons.pause,
       );
       expect(pauseIconFinder, findsOneWidget);
     });
@@ -187,7 +187,7 @@ void main() {
 
       // Verify RepeatOne icon is rendered
       final repeatOneIcon = find.byWidgetPredicate(
-        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedRepeatOne01,
+        (w) => w is Icon && w.icon == LucideIcons.repeat1,
       );
       expect(repeatOneIcon, findsOneWidget);
     });

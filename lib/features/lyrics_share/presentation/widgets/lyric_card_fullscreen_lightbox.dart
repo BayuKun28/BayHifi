@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../domain/models/lyric_card_theme.dart';
@@ -226,8 +226,8 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                           AppHaptics.lightImpact();
                           Navigator.of(context).pop();
                         },
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedCancel01,
+                        icon: Icon(
+                          LucideIcons.x,
                           size: 22,
                           color: Colors.white.withValues(alpha: 0.9),
                         ),
@@ -248,8 +248,8 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedAspectRatio,
+                            Icon(
+                              LucideIcons.proportions,
                               size: 13,
                               color: theme.colorScheme.primary,
                             ),
@@ -273,8 +273,8 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                         variant: M3EIconButtonVariant.standard,
                         tooltip: 'Reset Zoom (Double-Tap)',
                         onPressed: _resetZoom,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedEye,
+                        icon: Icon(
+                          LucideIcons.eye,
                           size: 22,
                           color: Colors.white.withValues(alpha: 0.9),
                         ),
@@ -315,8 +315,8 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                                 flex: 2,
                                 child: M3EButton.outlined(
                                   onPressed: _isRendering ? null : _handleSave,
-                                  icon: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedDownload04,
+                                  icon: Icon(
+                                    LucideIcons.download,
                                     size: 16,
                                     color: theme.colorScheme.primary,
                                   ),
@@ -338,8 +338,8 @@ class _LyricCardFullScreenLightboxState extends State<LyricCardFullScreenLightbo
                                             color: Colors.white,
                                           ),
                                         )
-                                      : HugeIcon(
-                                          icon: HugeIcons.strokeRoundedShare08,
+                                      : Icon(
+                                          LucideIcons.share2,
                                           size: 16,
                                           color: theme.colorScheme.onPrimary,
                                         ),

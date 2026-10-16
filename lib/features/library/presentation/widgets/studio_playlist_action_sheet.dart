@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -212,14 +212,14 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
                       ),
                     ),
                     child: Center(
-                      child: HugeIcon(
-                        icon: smartPlaylist != null
-                            ? HugeIcons.strokeRoundedFilterHorizontal
+                      child: Icon(
+                        smartPlaylist != null
+                            ? LucideIcons.slidersHorizontal
                             : (playlist?.id == 'favorites'
-                                ? HugeIcons.strokeRoundedFavourite
+                                ? LucideIcons.heart
                                 : (playlist?.id == 'hires_master'
-                                    ? HugeIcons.strokeRoundedSparkles
-                                    : HugeIcons.strokeRoundedPlaylist01)),
+                                    ? LucideIcons.sparkles
+                                    : LucideIcons.listMusic)),
                         size: 22,
                         color: smartPlaylist != null
                             ? primary
@@ -293,7 +293,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
             // Action Items
             _buildActionTile(
               context,
-              icon: HugeIcons.strokeRoundedPlay,
+              icon: LucideIcons.play,
               title: 'Play Now',
               subtitle: 'Replace active queue and start playback',
               color: primary,
@@ -306,7 +306,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
             ),
             _buildActionTile(
               context,
-              icon: HugeIcons.strokeRoundedShuffle,
+              icon: LucideIcons.shuffle,
               title: 'Shuffle Play',
               subtitle: 'Play all tracks in randomized studio order',
               onTap: () {
@@ -319,7 +319,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
             ),
             _buildActionTile(
               context,
-              icon: HugeIcons.strokeRoundedPlayList,
+              icon: LucideIcons.listPlus,
               title: 'Add to Queue',
               subtitle: 'Append tracks to end of active queue',
               onTap: () {
@@ -336,7 +336,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
             if (smartPlaylist != null)
               _buildActionTile(
                 context,
-                icon: HugeIcons.strokeRoundedEdit02,
+                icon: LucideIcons.slidersHorizontal,
                 title: 'Edit Smart Rules',
                 subtitle: 'Modify matching conditions, logic, and limits',
                 onTap: () {
@@ -347,7 +347,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
             else if (playlist != null && playlist!.isCustom)
               _buildActionTile(
                 context,
-                icon: HugeIcons.strokeRoundedEdit02,
+                icon: LucideIcons.filePen,
                 title: 'Rename / Edit Details',
                 subtitle: 'Update playlist title and description',
                 onTap: () {
@@ -359,7 +359,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
             if (smartPlaylist != null)
               _buildActionTile(
                 context,
-                icon: HugeIcons.strokeRoundedCopy01,
+                icon: LucideIcons.copy,
                 title: 'Duplicate Smart Playlist',
                 subtitle: 'Create a cloned smart playlist rule set',
                 onTap: () {
@@ -370,7 +370,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
 
             _buildActionTile(
               context,
-              icon: HugeIcons.strokeRoundedShare01,
+              icon: LucideIcons.share2,
               title: 'Export M3U8 Archive',
               subtitle: 'Export tracks as standard M3U8 playlist',
               onTap: () {
@@ -383,7 +383,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
               const SizedBox(height: 6),
               _buildActionTile(
                 context,
-                icon: HugeIcons.strokeRoundedDelete02,
+                icon: LucideIcons.trash2,
                 title: 'Delete Playlist',
                 subtitle: 'Permanently remove from library',
                 color: const Color(0xFFFF453A),
@@ -401,7 +401,7 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
 
   Widget _buildActionTile(
     BuildContext context, {
-    required dynamic icon,
+    required IconData icon,
     required String title,
     required String subtitle,
     Color? color,
@@ -420,8 +420,8 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
             color: (color ?? theme.colorScheme.surfaceContainerHighest).withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: HugeIcon(
-            icon: icon,
+          child: Icon(
+            icon,
             size: 18,
             color: iconColor,
           ),

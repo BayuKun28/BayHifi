@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../controllers/cloud_auth_controller.dart';
@@ -91,8 +91,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
           backgroundColor: Theme.of(context).colorScheme.errorContainer,
           content: Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedAlertCircle,
+              Icon(
+                LucideIcons.alertCircle,
                 size: 18,
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -148,8 +148,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     alignment: Alignment.center,
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedLockKey,
+                    child: Icon(
+                      LucideIcons.lock,
                       size: 22,
                       color: theme.colorScheme.onPrimaryContainer,
                     ),
@@ -194,8 +194,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   ),
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedAlertCircle,
+                      Icon(
+                        LucideIcons.alertCircle,
                         size: 18,
                         color: theme.colorScheme.error,
                       ),
@@ -227,8 +227,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedLockKey,
+                    child: Icon(
+                      LucideIcons.lock,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -241,10 +241,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                       AppHaptics.selectionClick();
                       setState(() => _obscureOld = !_obscureOld);
                     },
-                    icon: HugeIcon(
-                      icon: _obscureOld
-                          ? HugeIcons.strokeRoundedViewOffSlash
-                          : HugeIcons.strokeRoundedView,
+                    icon: Icon(
+                      _obscureOld
+                          ? LucideIcons.eyeOff
+                          : LucideIcons.eye,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -270,8 +270,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedLockKey,
+                    child: Icon(
+                      LucideIcons.lock,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -284,10 +284,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                       AppHaptics.selectionClick();
                       setState(() => _obscureNew = !_obscureNew);
                     },
-                    icon: HugeIcon(
-                      icon: _obscureNew
-                          ? HugeIcons.strokeRoundedViewOffSlash
-                          : HugeIcons.strokeRoundedView,
+                    icon: Icon(
+                      _obscureNew
+                          ? LucideIcons.eyeOff
+                          : LucideIcons.eye,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -313,8 +313,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedLockKey,
+                    child: Icon(
+                      LucideIcons.lock,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -327,10 +327,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                       AppHaptics.selectionClick();
                       setState(() => _obscureConfirm = !_obscureConfirm);
                     },
-                    icon: HugeIcon(
-                      icon: _obscureConfirm
-                          ? HugeIcons.strokeRoundedViewOffSlash
-                          : HugeIcons.strokeRoundedView,
+                    icon: Icon(
+                      _obscureConfirm
+                          ? LucideIcons.eyeOff
+                          : LucideIcons.eye,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -350,8 +350,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                 children: [
                   Expanded(
                     child: M3EButton.outlined(
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCancel01,
+                      icon: Icon(
+                        LucideIcons.x,
                         size: 16,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -389,8 +389,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     child: M3EButton.filled(
                       icon: _isLoading
                           ? null
-                          : HugeIcon(
-                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                          : Icon(
+                              LucideIcons.circleCheck,
                               size: 16,
                               color: theme.colorScheme.onPrimary,
                             ),

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../app/theme/app_haptics.dart';
@@ -46,105 +46,123 @@ class StudioDesktopTitleBar extends ConsumerWidget implements PreferredSizeWidge
           ),
         ),
       ),
-      child: Row(
-        children: [
-          // ─── 1. Left: Studio Branding & Format Pill ────────────────────
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onDoubleTap: () => DesktopWindowService.instance.toggleMaximize(),
-            child: DragToMoveArea(
-              child: Container(
-                height: height,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedAudioWave01,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'BAYDEV HiFi',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    if (currentTrack != null) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          currentTrack.format.name.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.onPrimaryContainer,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final showLayoutSwitcher = constraints.maxWidth >= 600;
+          final showCenterTitle = constraints.maxWidth >= 450;
 
-          // ─── 2. Center: Draggable Title Area ───────────────────────────
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onDoubleTap: () => DesktopWindowService.instance.toggleMaximize(),
-              child: DragToMoveArea(
-                child: Container(
-                  height: height,
-                  alignment: Alignment.center,
-                  child: currentTrack != null
-                      ? Text(
-                          '${currentTrack.title} — ${currentTrack.artist}',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : Text(
-                          'Studio Audiophile Workstation',
+          return Row(
+            children: [
+              // ─── 1. Left: Studio Branding & Format Pill ────────────────────
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onDoubleTap: () => DesktopWindowService.instance.toggleMaximize(),
+                child: DragToMoveArea(
+                  child: Container(
+                    height: height,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.audioLines,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'BAYDEV HiFi',
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.8,
-                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
+                        if (currentTrack != null) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              currentTrack.format.name.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.onPrimaryContainer,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
 
-          // ─── 2.5 Center-Right: Responsive Layout Mode Shortcuts ───────────
-          const _DesktopLayoutSwitcherPill(),
-          const SizedBox(width: 8),
+              // ─── 2. Center: Draggable Title Area ───────────────────────────
+              if (showCenterTitle)
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onDoubleTap: () => DesktopWindowService.instance.toggleMaximize(),
+                    child: DragToMoveArea(
+                      child: Container(
+                        height: height,
+                        alignment: Alignment.center,
+                        child: currentTrack != null
+                            ? Text(
+                                '${currentTrack.title} — ${currentTrack.artist}',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : Text(
+                                'Studio Audiophile Workstation',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.8,
+                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onDoubleTap: () => DesktopWindowService.instance.toggleMaximize(),
+                    child: const DragToMoveArea(
+                      child: SizedBox.expand(),
+                    ),
+                  ),
+                ),
 
-          // ─── 3. Right: Studio Window Controls (3 Essential Buttons) ──
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+              // ─── 2.5 Center-Right: Responsive Layout Mode Shortcuts ───────────
+              if (showLayoutSwitcher) ...[
+                const _DesktopLayoutSwitcherPill(),
+                const SizedBox(width: 8),
+              ],
+
+              // ─── 3. Right: Studio Window Controls (3 Essential Buttons) ──
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
               // Minimize Button
               _StudioTitleBarButton(
                 tooltip: 'Minimize',
-                icon: HugeIcons.strokeRoundedMinusSign,
+                icon: LucideIcons.minus,
                 onTap: () => DesktopWindowService.instance.minimize(),
               ),
 
@@ -155,8 +173,8 @@ class StudioDesktopTitleBar extends ConsumerWidget implements PreferredSizeWidge
                   return _StudioTitleBarButton(
                     tooltip: isMaximized ? 'Restore' : 'Maximize',
                     icon: isMaximized
-                        ? HugeIcons.strokeRoundedCopy01
-                        : HugeIcons.strokeRoundedSquare,
+                        ? LucideIcons.minimize2
+                        : LucideIcons.square,
                     onTap: () => DesktopWindowService.instance.toggleMaximize(),
                   );
                 },
@@ -165,15 +183,17 @@ class StudioDesktopTitleBar extends ConsumerWidget implements PreferredSizeWidge
               // Close Button (Studio Red on Hover)
               _StudioTitleBarButton(
                 tooltip: 'Close',
-                icon: HugeIcons.strokeRoundedCancel01,
+                icon: LucideIcons.x,
                 isCloseButton: true,
                 onTap: () => DesktopWindowService.instance.close(),
               ),
             ],
           ),
         ],
-      ),
-    );
+      );
+    },
+  ),
+);
   }
 }
 
@@ -205,7 +225,7 @@ class _DesktopLayoutSwitcherPill extends ConsumerWidget {
             context: context,
             ref: ref,
             mode: DesktopLayoutMode.mobile,
-            icon: HugeIcons.strokeRoundedSmartPhone01,
+            icon: LucideIcons.smartphone,
             tooltip: 'Mobile Layout (430px)',
             isActive: activeMode == DesktopLayoutMode.mobile,
             primary: primary,
@@ -214,7 +234,7 @@ class _DesktopLayoutSwitcherPill extends ConsumerWidget {
             context: context,
             ref: ref,
             mode: DesktopLayoutMode.tablet,
-            icon: HugeIcons.strokeRoundedTablet01,
+            icon: LucideIcons.tablet,
             tooltip: 'Tablet Layout (780px)',
             isActive: activeMode == DesktopLayoutMode.tablet,
             primary: primary,
@@ -223,7 +243,7 @@ class _DesktopLayoutSwitcherPill extends ConsumerWidget {
             context: context,
             ref: ref,
             mode: DesktopLayoutMode.desktop,
-            icon: HugeIcons.strokeRoundedComputer,
+            icon: LucideIcons.monitor,
             tooltip: 'Desktop Workstation (1280px)',
             isActive: activeMode == DesktopLayoutMode.desktop,
             primary: primary,
@@ -232,7 +252,7 @@ class _DesktopLayoutSwitcherPill extends ConsumerWidget {
             context: context,
             ref: ref,
             mode: DesktopLayoutMode.auto,
-            icon: HugeIcons.strokeRoundedLayers01,
+            icon: LucideIcons.layers,
             tooltip: 'Auto Responsive (Follow Window Width)',
             isActive: activeMode == DesktopLayoutMode.auto,
             primary: primary,
@@ -280,8 +300,8 @@ class _DesktopLayoutSwitcherPill extends ConsumerWidget {
                 : null,
           ),
           child: Center(
-            child: HugeIcon(
-              icon: icon,
+            child: Icon(
+              icon as IconData,
               size: 13,
               color: isActive ? primary : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
@@ -345,8 +365,8 @@ class _StudioTitleBarButtonState extends State<_StudioTitleBarButton> {
             height: 38,
             color: backgroundColor,
             alignment: Alignment.center,
-            child: HugeIcon(
-              icon: widget.icon,
+            child: Icon(
+              widget.icon as IconData,
               size: 15,
               color: iconColor,
             ),

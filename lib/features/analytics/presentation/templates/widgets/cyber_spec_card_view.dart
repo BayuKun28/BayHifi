@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -37,13 +37,9 @@ class CyberSpecCardView extends StatelessWidget {
         border: Border.all(color: const Color(0xFF1E2638), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: cyanAccent.withValues(alpha: 0.15),
-            blurRadius: 36,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
             color: Colors.black.withValues(alpha: 0.8),
             blurRadius: 28,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -138,8 +134,8 @@ class CyberSpecCardView extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const HugeIcon(
-                            icon: HugeIcons.strokeRoundedCpu,
+                          const Icon(
+                            LucideIcons.cpu,
                             size: 16,
                             color: cyanAccent,
                           ),
@@ -226,7 +222,7 @@ class CyberSpecCardView extends StatelessWidget {
                               width: 60,
                               height: 60,
                               borderRadius: BorderRadius.circular(30),
-                              fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                              fallbackIcon: LucideIcons.music,
                               fallbackIconSize: 26,
                               backgroundColor: const Color(0xFF0A0C10),
                             ),

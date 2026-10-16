@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -60,8 +60,8 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                   AppHaptics.lightImpact();
                   Navigator.of(context).pop();
                 },
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowLeft01,
+                icon: Icon(
+                  LucideIcons.arrowLeft,
                   size: 20,
                   color: theme.colorScheme.onSurface,
                 ),
@@ -98,8 +98,8 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                       MaterialPageRoute(builder: (_) => const StudioWrappedStoryScreen()),
                     );
                   },
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedSparkles,
+                  icon: Icon(
+                    LucideIcons.sparkles,
                     size: 20,
                     color: primary,
                   ),
@@ -113,8 +113,8 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                       MaterialPageRoute(builder: (_) => StudioWrappedExportHub()),
                     );
                   },
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedShare01,
+                  icon: Icon(
+                    LucideIcons.share2,
                     size: 20,
                     color: secondary,
                   ),
@@ -259,13 +259,6 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
         color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: accentColor.withValues(alpha: 0.12),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,8 +276,8 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedAward01,
+                    Icon(
+                      LucideIcons.award,
                       size: 13,
                       color: accentColor,
                     ),
@@ -398,7 +391,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                     context: context,
                     label: 'TIMBRAL TONE',
                     value: profile.timbralSignature,
-                    icon: HugeIcons.strokeRoundedAudioWaveform,
+                    icon: LucideIcons.audioWaveform,
                     color: accentColor,
                   ),
                 ),
@@ -412,7 +405,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                     context: context,
                     label: 'PEAK WINDOW',
                     value: profile.peakTimeWindow,
-                    icon: HugeIcons.strokeRoundedClock01,
+                    icon: LucideIcons.clock,
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
@@ -428,7 +421,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
     required BuildContext context,
     required String label,
     required String value,
-    required dynamic icon,
+    required IconData icon,
     required Color color,
   }) {
     final theme = Theme.of(context);
@@ -439,7 +432,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              HugeIcon(icon: icon, size: 11, color: theme.colorScheme.onSurfaceVariant),
+              Icon(icon, size: 11, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
@@ -484,7 +477,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               child: _buildTelemetryTile(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedClock01,
+                icon: LucideIcons.clock,
                 label: 'TOTAL TIME',
                 value: _formatMinutes(data.totalMinutes),
                 accentColor: StudioCategoryColors.statistics,
@@ -495,7 +488,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               child: _buildTelemetryTile(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedMusicNote01,
+                icon: LucideIcons.music,
                 label: 'TRACKS PLAYED',
                 value: '${data.totalTracksPlayed}',
                 accentColor: StudioCategoryColors.themingPalettes,
@@ -510,7 +503,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               child: _buildTelemetryTile(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedUserSquare,
+                icon: LucideIcons.user,
                 label: 'UNIQUE ARTISTS',
                 value: '${data.uniqueArtistsCount}',
                 accentColor: StudioCategoryColors.hiResGold,
@@ -521,7 +514,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               child: _buildTelemetryTile(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedAlbum02,
+                icon: LucideIcons.disc,
                 label: 'UNIQUE ALBUMS',
                 value: '${data.uniqueAlbumsCount}',
                 accentColor: StudioCategoryColors.proQEqualizer,
@@ -536,7 +529,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
   Widget _buildTelemetryTile({
     required BuildContext context,
     required bool isSolid,
-    required dynamic icon,
+    required IconData icon,
     required String label,
     required String value,
     required Color accentColor,
@@ -556,7 +549,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              HugeIcon(icon: icon, size: 14, color: accentColor),
+              Icon(icon, size: 14, color: accentColor),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -613,7 +606,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
       children: [
         _buildSectionHeader(
           context: context,
-          icon: HugeIcons.strokeRoundedMusicNote03,
+          icon: LucideIcons.music,
           title: 'TOP 10 TRACKS',
           badge: '${topTracks.length} TRACKS RECORDED',
           badgeColor: primary,
@@ -639,7 +632,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                     width: 64,
                     height: 64,
                     borderRadius: BorderRadius.circular(12),
-                    fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                    fallbackIcon: LucideIcons.music,
                     fallbackIconSize: 24,
                   ),
                   Positioned(
@@ -757,8 +750,8 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlay,
+                    child: Icon(
+                      LucideIcons.play,
                       size: 16,
                       color: primary,
                     ),
@@ -822,7 +815,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                       width: 38,
                       height: 38,
                       borderRadius: BorderRadius.circular(8),
-                      fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                      fallbackIcon: LucideIcons.music,
                       fallbackIconSize: 16,
                     ),
                     const SizedBox(width: 10),
@@ -905,7 +898,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
       children: [
         _buildSectionHeader(
           context: context,
-          icon: HugeIcons.strokeRoundedUserSquare,
+          icon: LucideIcons.user,
           title: 'TOP ARTISTS',
           badge: '${data.uniqueArtistsCount} TOTAL EXPLORED',
           badgeColor: secondary,
@@ -943,7 +936,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                           width: 46,
                           height: 46,
                           borderRadius: BorderRadius.circular(23),
-                          fallbackIcon: HugeIcons.strokeRoundedMic01,
+                          fallbackIcon: LucideIcons.mic,
                           fallbackIconSize: 20,
                         ),
                         Positioned(
@@ -1018,7 +1011,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
       children: [
         _buildSectionHeader(
           context: context,
-          icon: HugeIcons.strokeRoundedAlbum02,
+          icon: LucideIcons.disc,
           title: 'TOP ALBUMS',
           badge: '${data.uniqueAlbumsCount} IN ROTATION',
           badgeColor: tertiary,
@@ -1047,7 +1040,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
                     width: 44,
                     height: 44,
                     borderRadius: BorderRadius.circular(8),
-                    fallbackIcon: HugeIcons.strokeRoundedAlbum01,
+                    fallbackIcon: LucideIcons.disc,
                     fallbackIconSize: 20,
                   ),
                   const SizedBox(width: 12),
@@ -1135,7 +1128,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
       children: [
         _buildSectionHeader(
           context: context,
-          icon: HugeIcons.strokeRoundedSlidersVertical,
+          icon: LucideIcons.sliders,
           title: 'GENRE SPECTRUM',
           badge: '${topGenres.length} SIGNATURE GENRES',
           badgeColor: StudioCategoryColors.proQEqualizer,
@@ -1212,7 +1205,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
       children: [
         _buildSectionHeader(
           context: context,
-          icon: HugeIcons.strokeRoundedShieldEnergy,
+          icon: LucideIcons.shieldCheck,
           title: 'SIGNAL CHAIN PURITY',
           badge: purity.purityBadge,
           badgeColor: gold,
@@ -1372,7 +1365,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
       children: [
         _buildSectionHeader(
           context: context,
-          icon: HugeIcons.strokeRoundedCpu,
+          icon: LucideIcons.cpu,
           title: 'HARDWARE & DSP TELEMETRY',
           badge: 'STUDIO CHAIN ACTIVE',
           badgeColor: primary,
@@ -1391,7 +1384,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
             children: [
               _buildHardwareRow(
                 context: context,
-                icon: HugeIcons.strokeRoundedHeadphones,
+                icon: LucideIcons.headphones,
                 title: 'AutoEQ Tuning Target',
                 subtitle: '${data.favoriteHeadphoneProfile} • ${data.topAutoEqTarget}',
                 trailing: '${data.autoEqHours}h active',
@@ -1400,7 +1393,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               const Divider(height: 18),
               _buildHardwareRow(
                 context: context,
-                icon: HugeIcons.strokeRoundedRadio,
+                icon: LucideIcons.radio,
                 title: 'DSP Saturation Engine',
                 subtitle: data.favoriteDspModule,
                 trailing: '${data.dspHours}h tuned',
@@ -1409,7 +1402,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               const Divider(height: 18),
               _buildHardwareRow(
                 context: context,
-                icon: HugeIcons.strokeRoundedUsb,
+                icon: LucideIcons.cable,
                 title: 'Hardware DAC Bridge',
                 subtitle: data.favoriteDacDevice,
                 trailing: '${data.totalDacBridgeHours}h bridged',
@@ -1424,7 +1417,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
 
   Widget _buildHardwareRow({
     required BuildContext context,
-    required dynamic icon,
+    required IconData icon,
     required String title,
     required String subtitle,
     required String trailing,
@@ -1433,7 +1426,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 18, color: accentColor),
+        Icon(icon, size: 18, color: accentColor),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -1502,7 +1495,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  HugeIcon(icon: HugeIcons.strokeRoundedSparkles, size: 16, color: primary),
+                  Icon(LucideIcons.sparkles, size: 16, color: primary),
                   const SizedBox(width: 8),
                   Text(
                     'Interactive Story',
@@ -1538,8 +1531,8 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedShare01,
+                  Icon(
+                    LucideIcons.share2,
                     size: 16,
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
@@ -1566,7 +1559,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
   // ───────────────────────────────────────────────────────────────────────────
   Widget _buildSectionHeader({
     required BuildContext context,
-    required dynamic icon,
+    required IconData icon,
     required String title,
     required String badge,
     required Color badgeColor,
@@ -1577,7 +1570,7 @@ class StudioListeningStatsDetailScreen extends ConsumerWidget {
       children: [
         Row(
           children: [
-            HugeIcon(icon: icon, size: 16, color: badgeColor),
+            Icon(icon, size: 16, color: badgeColor),
             const SizedBox(width: 8),
             Text(
               title,

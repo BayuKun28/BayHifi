@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:baydev_hifi/features/dsp_rack/presentation/dsp_rack_screen.dart';
 import 'package:baydev_hifi/features/player/presentation/now_playing_screen.dart';
@@ -34,7 +34,7 @@ void main() {
       expect(find.textContaining('AutoEQ'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
-            (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedHeadphones),
+            (w) => w is Icon && w.icon == LucideIcons.headphones),
         findsOneWidget,
       );
 
@@ -42,7 +42,7 @@ void main() {
       expect(find.textContaining('DSP'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
-            (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedSlidersVertical),
+            (w) => w is Icon && w.icon == LucideIcons.slidersVertical),
         findsOneWidget,
       );
     });
@@ -99,9 +99,9 @@ void main() {
       expect(find.byType(DspRackScreen), findsOneWidget);
     });
 
-    testWidgets('NowPlayingScreen displays streamlined StudioDspBentoCapsule slim chips',
+    testWidgets('NowPlayingScreen displays streamlined StudioDspBentoCapsule slim chips in landscape',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(400, 850);
+      tester.view.physicalSize = const Size(900, 500);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
 
@@ -119,9 +119,14 @@ void main() {
 
       // Verify StudioDspBentoCapsule is present inside NowPlayingScreen
       expect(find.byType(StudioDspBentoCapsule), findsOneWidget);
-      expect(find.text('NOW PLAYING'), findsOneWidget);
       expect(find.textContaining('AutoEQ'), findsOneWidget);
-      expect(find.textContaining('DSP'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(StudioDspBentoCapsule),
+          matching: find.textContaining('DSP'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

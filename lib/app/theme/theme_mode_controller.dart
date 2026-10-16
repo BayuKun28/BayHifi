@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:palette_generator/palette_generator.dart';
 import '../../core/database/local_persistence_service.dart';
@@ -12,36 +12,36 @@ import 'app_typography.dart';
 
 /// App Theme Mode Selection
 enum AppThemeMode {
-  system(ThemeMode.system, 'System', 'Follows operating system preferences', HugeIcons.strokeRoundedComputer),
-  light(ThemeMode.light, 'Light', 'Studio Clean Light Champagne', HugeIcons.strokeRoundedSun01),
-  dark(ThemeMode.dark, 'Dark', 'Studio Dark Obsidian / OLED', HugeIcons.strokeRoundedMoon02);
+  system(ThemeMode.system, 'System', 'Follows operating system preferences', LucideIcons.laptop),
+  light(ThemeMode.light, 'Light', 'Studio Clean Light Champagne', LucideIcons.sun),
+  dark(ThemeMode.dark, 'Dark', 'Studio Dark Obsidian / OLED', LucideIcons.moon);
 
   final ThemeMode mode;
   final String label;
   final String description;
-  final dynamic icon;
+  final IconData icon;
   const AppThemeMode(this.mode, this.label, this.description, this.icon);
 }
 
 /// Surface and component fill style (translucent soft tint vs pure solid M3)
 enum SurfaceFillStyle {
-  translucent('Translucent Soft Tint', 'Subtle transparent tint for cards and surfaces', HugeIcons.strokeRoundedLayers01),
-  solid('Pure Solid M3', '100% solid filled colors for all cards, containers and buttons', HugeIcons.strokeRoundedSquare);
+  translucent('Translucent Soft Tint', 'Subtle transparent tint for cards and surfaces', LucideIcons.layers),
+  solid('Pure Solid M3', '100% solid filled colors for all cards, containers and buttons', LucideIcons.square);
 
   final String label;
   final String description;
-  final dynamic icon;
+  final IconData icon;
   const SurfaceFillStyle(this.label, this.description, this.icon);
 }
 
 /// Scope for wallpaper background rendering
 enum WallpaperScope {
-  appWide('App-Wide Ground', 'Wallpaper applied across all screens and tabs', HugeIcons.strokeRoundedLayers01),
-  dashboardAndPlayer('Dashboard & Player Only', 'Wallpaper applied only to main screen and player', HugeIcons.strokeRoundedPlaySquare);
+  appWide('App-Wide Ground', 'Wallpaper applied across all screens and tabs', LucideIcons.layers),
+  dashboardAndPlayer('Dashboard & Player Only', 'Wallpaper applied only to main screen and player', LucideIcons.playSquare);
 
   final String label;
   final String description;
-  final dynamic icon;
+  final IconData icon;
   const WallpaperScope(this.label, this.description, this.icon);
 }
 
@@ -285,16 +285,16 @@ class AppPalette {
 
   static const AppPalette simpleAsF = AppPalette(
     id: 'simple_as_f',
-    name: 'Simple as F*** (Obsidian Emerald)',
-    description: 'Ultra-minimalist obsidian forest deep dark with vibrant organic emerald mint accents (Dribbble 27089924)',
-    primary: Color(0xFF2EE672),
-    secondary: Color(0xFF4ADE80),
-    accent: Color(0xFF2EE672),
-    backgroundDark: Color(0xFF0B110E),
+    name: 'Simple as F*** (Matte Obsidian)',
+    description: 'Ultra-minimalist matte obsidian dark with clean studio emerald mint accents',
+    primary: Color(0xFF10B981),
+    secondary: Color(0xFF34D399),
+    accent: Color(0xFF10B981),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF1F8F4),
-    surfaceDark: Color(0xFF101914),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF7FBF9),
-    surfaceContainerDark: Color(0xFF16241C),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFE2F5EA),
   );
 
@@ -618,13 +618,13 @@ class ThemeSettingsState {
   final SurfaceFillStyle? surfaceFillStyle;
   final WallpaperSettings wallpaperSettings;
 
-  SurfaceFillStyle get effectiveSurfaceFillStyle => surfaceFillStyle ?? SurfaceFillStyle.solid;
-  bool get isSolidStyle => effectiveSurfaceFillStyle == SurfaceFillStyle.solid;
+  SurfaceFillStyle get effectiveSurfaceFillStyle => SurfaceFillStyle.solid;
+  bool get isSolidStyle => true;
 
   const ThemeSettingsState({
     this.themeMode = AppThemeMode.dark,
     this.currentPalette = AppPalette.simpleAsF,
-    this.customAccentColor = const Color(0xFF2EE672),
+    this.customAccentColor = const Color(0xFF10B981),
     this.dynamicAlbumArtEnabled = false,
     this.surfaceFillStyle = SurfaceFillStyle.solid,
     this.wallpaperSettings = const WallpaperSettings(),
@@ -1227,29 +1227,29 @@ class AppThemeBuilder {
     final textPrimary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
-    // Soft Studio Card Boundaries & Outlines (harmonized with palette)
+    // Solid Studio Card Boundaries & Outlines (clean neutral charcoal, zero green tint)
     final outlineVariant = isDark
         ? (palette.isOledBlack
             ? const Color(0xFF1E1E1E)
-            : Color.alphaBlend(palette.primary.withValues(alpha: 0.08), const Color(0xFF1E293B)))
-        : Color.alphaBlend(palette.primary.withValues(alpha: 0.06), const Color(0xFFE2E8F0));
+            : const Color(0xFF262936))
+        : const Color(0xFFE2E8F0);
 
     final outline = isDark
         ? (palette.isOledBlack
             ? const Color(0xFF2A2A2A)
-            : Color.alphaBlend(palette.primary.withValues(alpha: 0.15), const Color(0xFF334155)))
-        : Color.alphaBlend(palette.primary.withValues(alpha: 0.12), const Color(0xFFCBD5E1));
+            : const Color(0xFF323647))
+        : const Color(0xFFCBD5E1);
 
     final surfaceContainerHigh = isDark
         ? (palette.isOledBlack
             ? const Color(0xFF1C1C1C)
-            : Color.alphaBlend(palette.primary.withValues(alpha: 0.08), surfaceContainer))
+            : const Color(0xFF1E212B))
         : Color.alphaBlend(palette.primary.withValues(alpha: 0.05), surfaceContainer);
 
     final surfaceContainerHighest = isDark
         ? (palette.isOledBlack
             ? const Color(0xFF242424)
-            : Color.alphaBlend(palette.primary.withValues(alpha: 0.15), surfaceContainer))
+            : const Color(0xFF252834))
         : Color.alphaBlend(palette.primary.withValues(alpha: 0.10), surfaceContainer);
 
     final surfaceContainerLow = isDark

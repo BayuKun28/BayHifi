@@ -1,41 +1,42 @@
-import 'package:hugeicons/hugeicons.dart';
+import 'package:flutter/widgets.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// 6 Curated Studio Layout Templates for Baydev HiFi Lyric Cards
 enum LyricCardLayoutStyle {
   classicMinimal(
     'Classic Studio',
     'Clean floating lyrics with dynamic album backdrop and telemetry badge',
-    HugeIcons.strokeRoundedLayers01,
+    LucideIcons.layers,
   ),
   polaroidFrame(
     'Polaroid Frame',
     'Framed vintage album art with quote, date stamp & caption below',
-    HugeIcons.strokeRoundedImage01,
+    LucideIcons.image,
   ),
   cassetteJCard(
     'Cassette J-Card',
     'Analog magnetic tape insert with Type II stamp & credits',
-    HugeIcons.strokeRoundedAlbum01,
+    LucideIcons.disc,
   ),
   waveformQuote(
     'Waveform Timeline',
     'Studio audio amplitude bars with start/end duration time pill',
-    HugeIcons.strokeRoundedAudioWave01,
+    LucideIcons.activity,
   ),
   cyberHUD(
     'CyberSpec HUD',
     'Tokyo studio tech wireframe with telemetry matrix & brackets',
-    HugeIcons.strokeRoundedCpu,
+    LucideIcons.cpu,
   ),
   abstractAura(
     'Abstract Aura',
     'Harmonic acoustic color mesh with high-contrast text backing',
-    HugeIcons.strokeRoundedSun03,
+    LucideIcons.sun,
   );
 
   final String label;
   final String description;
-  final dynamic icon;
+  final IconData icon;
 
   String get subtitle => description;
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../app/theme/studio_surface_theme.dart';
@@ -79,7 +79,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: HugeIcon(icon: HugeIcons.strokeRoundedPlaylist01, size: 18, color: primary),
+                  child: Icon(LucideIcons.listMusic, size: 18, color: primary),
                 ),
                 title: const Text('New Custom Playlist', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                 subtitle: const Text('Curate individual tracks from your library', style: TextStyle(fontSize: 11)),
@@ -96,7 +96,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.secondary, isSolid: isSolid, translucentAlpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: HugeIcon(icon: HugeIcons.strokeRoundedFilterHorizontal, size: 18, color: theme.colorScheme.secondary),
+                  child: Icon(LucideIcons.slidersHorizontal, size: 18, color: theme.colorScheme.secondary),
                 ),
                 title: const Text('New Dynamic Smart Playlist', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                 subtitle: const Text('Rules auto-update based on audio codec, rating & metadata', style: TextStyle(fontSize: 11)),
@@ -113,7 +113,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                     color: StudioSurfaceTheme.tintedContainer(context, const Color(0xFF1DB954), isSolid: isSolid, translucentAlpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const HugeIcon(icon: HugeIcons.strokeRoundedLink01, size: 18, color: Color(0xFF1DB954)),
+                  child: const Icon(LucideIcons.link, size: 18, color: Color(0xFF1DB954)),
                 ),
                 title: const Text('Import from Spotify & YouTube', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                 subtitle: const Text('Paste link to stream immediately or download for offline', style: TextStyle(fontSize: 11)),
@@ -161,9 +161,8 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
           fontSize: 18,
         ),
         actions: [
-          M3EIconButton(
-            variant: M3EIconButtonVariant.standard,
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 22, color: primary),
+          IconButton(
+            icon: const Icon(LucideIcons.plus, size: 20, color: Colors.white),
             tooltip: 'Create Playlist Options',
             onPressed: () => _showCreateOptionsSheet(context),
           ),
@@ -194,7 +193,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
               builder: (context, constraints) {
                 final favCard = _buildCollectionPillCard(
                   context: context,
-                  icon: HugeIcons.strokeRoundedFavourite,
+                  icon: LucideIcons.heart,
                   title: favPlaylist.name,
                   subtitle: '${favPlaylist.trackCount} Tracks',
                   accentColor: primary,
@@ -213,7 +212,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
 
                 final hiresCard = _buildCollectionPillCard(
                   context: context,
-                  icon: HugeIcons.strokeRoundedSparkles,
+                  icon: LucideIcons.disc3,
                   title: hiresPlaylist.name,
                   subtitle: '${hiresPlaylist.trackCount} Tracks',
                   accentColor: theme.colorScheme.secondary,
@@ -232,7 +231,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
 
                 final smartCard = _buildCollectionPillCard(
                   context: context,
-                  icon: HugeIcons.strokeRoundedFilterHorizontal,
+                  icon: LucideIcons.slidersHorizontal,
                   title: 'Smart Rules',
                   subtitle: '${smartPlaylists.length} Rules Active',
                   accentColor: theme.colorScheme.tertiary,
@@ -314,21 +313,25 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
                 decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid, translucentAlpha: 0.3),
-                  borderRadius: BorderRadius.circular(20),
+                  color: const Color(0xFF16181F),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: const Color(0xFF262936),
+                    width: 0.8,
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlaylist01,
+                    const Icon(
+                      LucideIcons.listMusic,
                       size: 36,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      color: Color(0xFF64748B),
                     ),
                     const SizedBox(height: 12),
                     const Text(
                       'NO CUSTOM PLAYLISTS',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Colors.white),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -336,14 +339,40 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 11.5,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    M3EButton.tonal(
-                      onPressed: () => CreateCustomPlaylistModal.show(context),
-                      icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 16, color: primary),
-                      label: const Text('CREATE PLAYLIST'),
+                    InkWell(
+                      onTap: () => CreateCustomPlaylistModal.show(context),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF252834),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF383D50),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(LucideIcons.plus, size: 14, color: Colors.white),
+                            SizedBox(width: 7),
+                            Text(
+                              'CREATE PLAYLIST',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -385,10 +414,10 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Center(
-                                child: HugeIcon(
-                                  icon: p.sourceType == 'spotify' || p.sourceType == 'youtube'
-                                      ? HugeIcons.strokeRoundedLink01
-                                      : HugeIcons.strokeRoundedPlaylist01,
+                                child: Icon(
+                                  p.sourceType == 'spotify' || p.sourceType == 'youtube'
+                                      ? LucideIcons.link
+                                      : LucideIcons.listMusic,
                                   color: primary,
                                   size: 20,
                                 ),
@@ -439,9 +468,9 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                         children: [
                           M3EIconButton(
                             variant: M3EIconButtonVariant.standard,
-                            icon: HugeIcon(
-                              icon: HugeIcons.strokeRoundedMoreVertical,
-                              size: 22,
+                            icon: Icon(
+                              LucideIcons.moreVertical,
+                              size: 20,
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
                             onPressed: () {
@@ -449,8 +478,8 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                             },
                             tooltip: 'Playlist Actions',
                           ),
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedArrowRight01,
+                          Icon(
+                            LucideIcons.chevronRight,
                             size: 16,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                           ),
@@ -475,7 +504,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
 
   Widget _buildCollectionPillCard({
     required BuildContext context,
-    required dynamic icon,
+    required IconData icon,
     required String title,
     required String subtitle,
     required Color accentColor,
@@ -483,15 +512,13 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
     required VoidCallback onTap,
     required VoidCallback onMoreTap,
   }) {
-    final theme = Theme.of(context);
-
     return Container(
       width: 146,
       decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+        color: const Color(0xFF16181F),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: accentColor.withValues(alpha: 0.25),
+          color: const Color(0xFF262936),
           width: 0.8,
         ),
       ),
@@ -513,22 +540,26 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(10),
+                        color: const Color(0xFF20232E),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFF2E3242),
+                          width: 0.8,
+                        ),
                       ),
                       child: Center(
-                        child: HugeIcon(icon: icon, color: accentColor, size: 16),
+                        child: Icon(icon, color: Colors.white, size: 16),
                       ),
                     ),
                     InkWell(
                       onTap: onMoreTap,
                       borderRadius: BorderRadius.circular(6),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedMoreVertical,
+                      child: const Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(
+                          LucideIcons.ellipsisVertical,
                           size: 15,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                          color: Color(0xFF94A3B8),
                         ),
                       ),
                     ),
@@ -540,16 +571,16 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: Colors.white),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 10.5,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Color(0xFF94A3B8),
                         fontFeatures: AppTypography.audioFigures,
                       ),
                       maxLines: 1,

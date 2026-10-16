@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -120,10 +120,10 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid, translucentAlpha: 0.5)),
                   ),
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowLeft01,
+                  child: Icon(
+                    LucideIcons.arrowLeft,
                     size: 18,
-                    color: null,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
@@ -138,8 +138,8 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid, translucentAlpha: 0.5)),
                     ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedEdit02,
+                    child: Icon(
+                      LucideIcons.pencil,
                       size: 18,
                       color: primary,
                     ),
@@ -199,8 +199,8 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                                     ),
                                   ),
                                   child: Center(
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedFolder01,
+                                    child: Icon(
+                                      LucideIcons.folder,
                                       size: 42,
                                       color: primary,
                                     ),
@@ -299,8 +299,8 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                                     ),
                                   ),
                                   child: Center(
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedFolder01,
+                                    child: Icon(
+                                      LucideIcons.folder,
                                       size: 16,
                                       color: primary,
                                     ),
@@ -385,8 +385,8 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                                     ),
                                   ),
                                 )
-                              : HugeIcon(
-                                  icon: isCurrentFolderPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                              : Icon(
+                                  isCurrentFolderPlaying ? LucideIcons.pause : LucideIcons.play,
                                   size: 18,
                                   color: isHeaderActive ? theme.colorScheme.onPrimary : theme.colorScheme.onPrimaryContainer,
                                 ),
@@ -417,8 +417,8 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                                   );
                             }
                           },
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedShuffle,
+                          icon: Icon(
+                            LucideIcons.shuffle,
                             size: 18,
                             color: primary,
                           ),
@@ -478,8 +478,8 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                                           ),
                                         )
                                       : (isTrackPlaying
-                                          ? HugeIcon(
-                                              icon: HugeIcons.strokeRoundedAudioWaveform,
+                                          ? Icon(
+                                              LucideIcons.audioLines,
                                               size: 15,
                                               color: primary,
                                             )
@@ -536,8 +536,8 @@ class _FolderDetailScreenState extends ConsumerState<FolderDetailScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedMoreVertical,
+                                icon: Icon(
+                                  LucideIcons.moreVertical,
                                   size: 18,
                                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                 ),

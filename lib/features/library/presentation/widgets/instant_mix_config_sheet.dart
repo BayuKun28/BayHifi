@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/app_haptics.dart';
@@ -126,8 +126,8 @@ class _InstantMixConfigSheetState extends ConsumerState<InstantMixConfigSheet> {
               // 2. Title & Badge
               Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedSparkles,
+                  Icon(
+                    LucideIcons.sparkles,
                     size: 22,
                     color: primary,
                   ),
@@ -266,25 +266,25 @@ class _InstantMixConfigSheetState extends ConsumerState<InstantMixConfigSheet> {
                 children: [
                   _buildCriteriaChip(
                     label: 'Genre',
-                    icon: HugeIcons.strokeRoundedGuitar,
+                    icon: LucideIcons.guitar,
                     criteria: InstantMixCriteria.genre,
                   ),
                   const SizedBox(width: 8),
                   _buildCriteriaChip(
                     label: 'Mood',
-                    icon: HugeIcons.strokeRoundedSparkles,
+                    icon: LucideIcons.sparkles,
                     criteria: InstantMixCriteria.mood,
                   ),
                   const SizedBox(width: 8),
                   _buildCriteriaChip(
                     label: 'Artist & Era',
-                    icon: HugeIcons.strokeRoundedMic01,
+                    icon: LucideIcons.mic,
                     criteria: InstantMixCriteria.artistAndEra,
                   ),
                   const SizedBox(width: 8),
                   _buildCriteriaChip(
                     label: 'Random',
-                    icon: HugeIcons.strokeRoundedShuffle,
+                    icon: LucideIcons.shuffle,
                     criteria: InstantMixCriteria.smartRandom,
                   ),
                 ],
@@ -423,8 +423,8 @@ class _InstantMixConfigSheetState extends ConsumerState<InstantMixConfigSheet> {
               // 6. Launch Button
               M3EButton.filled(
                 label: Text('START INSTANT MIX (${_selectedCount + 1} TRACKS)'),
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlay,
+                icon: const Icon(
+                  LucideIcons.play,
                   size: 18,
                 ),
                 onPressed: _executeMix,
@@ -438,7 +438,7 @@ class _InstantMixConfigSheetState extends ConsumerState<InstantMixConfigSheet> {
 
   Widget _buildCriteriaChip({
     required String label,
-    required dynamic icon,
+    required IconData icon,
     required InstantMixCriteria criteria,
   }) {
     final theme = Theme.of(context);
@@ -470,8 +470,8 @@ class _InstantMixConfigSheetState extends ConsumerState<InstantMixConfigSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              HugeIcon(
-                icon: icon,
+              Icon(
+                icon,
                 size: 18,
                 color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
               ),

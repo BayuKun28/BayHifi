@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
 /// Dedicated Focus Card 3: Genre & Sonic Spectrum Card
@@ -41,13 +41,9 @@ class GenreSpectrumCardView extends StatelessWidget {
         border: Border.all(color: const Color(0xFF22283A), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withValues(alpha: 0.18),
-            blurRadius: 36,
-            offset: const Offset(0, 12),
-          ),
-          BoxShadow(
             color: Colors.black.withValues(alpha: 0.75),
             blurRadius: 28,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -58,9 +54,9 @@ class GenreSpectrumCardView extends StatelessWidget {
           // ─── 1. HEADER HUD ─────────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF161A26),
-              border: const Border(
+            decoration: const BoxDecoration(
+              color: Color(0xFF161A26),
+              border: Border(
                 bottom: BorderSide(color: Color(0xFF252C3E), width: 1),
               ),
             ),
@@ -71,8 +67,8 @@ class GenreSpectrumCardView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedSlidersVertical,
+                      Icon(
+                        LucideIcons.sliders,
                         size: 16,
                         color: Color(0xFF38BDF8),
                       ),
@@ -322,7 +318,7 @@ class GenreSpectrumCardView extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(icon: persona.icon, size: 14, color: accentColor),
+                            Icon(persona.icon, size: 14, color: accentColor),
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(

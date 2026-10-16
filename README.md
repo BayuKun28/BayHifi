@@ -1,6 +1,6 @@
 # Baydev HiFi — Studio Audiophile Music Player
 
-**Baydev HiFi** is a state-of-the-art audiophile music player built with Flutter, powered by the high-performance **`flutter_soloud` C++ audio engine** and styled with a **100% Pure Material 3 Expressive** UI architecture via the official [`material_3_expressive`](https://pub.dev/packages/material_3_expressive) package.
+**Baydev HiFi** is a state-of-the-art audiophile music player built with Flutter, powered by the high-performance **`flutter_soloud` C++ audio engine** and styled with a bespoke **Simple-As-F Minimalist Architecture** (Dribbble 27089924 reference) featuring pure solid audiophile dark surfaces and Lucide iconography.
 
 ---
 
@@ -27,8 +27,7 @@ Baydev HiFi mandates 100% adoption of `material_3_expressive`:
 - **Inputs**: `M3ESlider` (continuous, discrete, wavy), `M3ESwitch`, `M3ECheckbox`, `M3EChip`, `M3ETextField`.
 - **Navigation**: `M3ENavigationBar`, `M3EAppBar`, `M3ESearchBar`, `M3EToolbar`, `M3ETabBar`.
 - **Feedback**: `M3EBadge`, `M3EProgressIndicator`, `M3ELoadingIndicator`, `M3ESnackbar`, `M3ETooltip`.
-- **Motion & Physics**: Spring simulations via `motor` and shape morphing via `material_new_shapes`.
-- **Iconography**: Unified `hugeicons` with zero-emoji policy.
+- **Iconography**: Unified vector stroke iconography via `lucide_icons_flutter` (`LucideIcons.*`) with strict zero-emoji policy.
 
 ---
 

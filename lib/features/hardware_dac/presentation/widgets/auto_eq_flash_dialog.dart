@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../pro_q_studio/domain/eq_band.dart';
 import '../../domain/models/dac_device.dart';
@@ -86,8 +86,8 @@ class _AutoEqFlashDialogState extends State<AutoEqFlashDialog> {
                       color: colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCpu,
+                    child: Icon(
+                      LucideIcons.cpu,
                       color: colorScheme.onPrimaryContainer,
                       size: 20,
                     ),
@@ -113,7 +113,7 @@ class _AutoEqFlashDialogState extends State<AutoEqFlashDialog> {
                     ),
                   ),
                   M3EIconButton(
-                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20),
+                    icon: const Icon(LucideIcons.x, size: 20),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -180,8 +180,8 @@ class _AutoEqFlashDialogState extends State<AutoEqFlashDialog> {
               // Safe Preamp Info Note
               Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedShield01,
+                  Icon(
+                    LucideIcons.shieldCheck,
                     size: 16,
                     color: colorScheme.primary,
                   ),
@@ -210,8 +210,8 @@ class _AutoEqFlashDialogState extends State<AutoEqFlashDialog> {
                   ),
                   const SizedBox(width: 8),
                   M3EButton.filled(
-                    icon: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedFloppyDisk,
+                    icon: const Icon(
+                      LucideIcons.save,
                       size: 18,
                     ),
                     label: const Text('Flash to Hardware'),

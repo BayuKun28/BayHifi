@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -49,8 +49,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
         title: const Text('LIBRARY SCANNER & SLEEP TIMER'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -65,19 +65,19 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
           const SizedBox(height: 18),
 
           // ─── 2. MUSIC SOURCE FOLDERS ────────────────────────────────────────
-          _buildSectionHeader(context, 'MUSIC SOURCE FOLDERS', HugeIcons.strokeRoundedFolderLibrary),
+          _buildSectionHeader(context, 'MUSIC SOURCE FOLDERS', LucideIcons.folder),
           const SizedBox(height: 8),
           _buildSourceFoldersCard(context, isSolid),
           const SizedBox(height: 20),
 
           // ─── 3. SMART SLEEP TIMER ───────────────────────────────────────────
-          _buildSectionHeader(context, 'SMART SLEEP TIMER', HugeIcons.strokeRoundedHourglass),
+          _buildSectionHeader(context, 'SMART SLEEP TIMER', LucideIcons.hourglass),
           const SizedBox(height: 8),
           _buildSleepTimerCard(context, isSolid),
           const SizedBox(height: 20),
 
           // ─── 4. LIBRARY SCANNER RULES ───────────────────────────────────────
-          _buildSectionHeader(context, 'LIBRARY SCANNER RULES', HugeIcons.strokeRoundedFolder01),
+          _buildSectionHeader(context, 'LIBRARY SCANNER RULES', LucideIcons.folder),
           const SizedBox(height: 8),
           _buildLibraryRulesCard(context, isSolid),
         ],
@@ -118,8 +118,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFolderLibrary,
+                child: Icon(
+                  LucideIcons.folder,
                   size: 18,
                   color: primary,
                 ),
@@ -217,11 +217,11 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,
@@ -258,8 +258,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             children: [
               Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedHourglass,
+                  Icon(
+                    LucideIcons.hourglass,
                     size: 16,
                     color: timerState.isActive ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
@@ -386,7 +386,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       AppHaptics.lightImpact();
                       timerNotifier.extendTimer(15);
                     },
-                    icon: HugeIcon(icon: HugeIcons.strokeRoundedClock01, size: 14, color: primary),
+                    icon: Icon(LucideIcons.clock, size: 14, color: primary),
                     label: Text(
                       '+15m Extend',
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: primary),
@@ -400,7 +400,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                       AppHaptics.lightImpact();
                       timerNotifier.cancelTimer();
                     },
-                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 14, color: Color(0xFFFF3B30)),
+                    icon: const Icon(LucideIcons.x, size: 14, color: Color(0xFFFF3B30)),
                     label: const Text(
                       'Cancel Timer',
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFFF3B30)),
@@ -450,7 +450,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             child: M3EButton(
               style: M3EButtonStyle.text,
               onPressed: () => SleepTimerSheet.show(context),
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedSlidersHorizontal, size: 14, color: primary),
+              icon: Icon(LucideIcons.slidersHorizontal, size: 14, color: primary),
               label: Text(
                 'Open Full Sleep Timer Sheet',
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: primary),
@@ -526,7 +526,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                 ),
                 child: Row(
                   children: [
-                    HugeIcon(icon: HugeIcons.strokeRoundedFolder01, size: 18, color: primary),
+                    Icon(LucideIcons.folder, size: 18, color: primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -538,7 +538,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                     ),
                     M3EIconButton(
                       variant: M3EIconButtonVariant.standard,
-                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 20, color: Color(0xFFFF453A)),
+                      icon: const Icon(LucideIcons.trash2, size: 20, color: Color(0xFFFF453A)),
                       tooltip: 'Remove Folder',
                       onPressed: () {
                         AppHaptics.lightImpact();
@@ -599,7 +599,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                           AppHaptics.mediumImpact();
                           controller.pickAndScanDirectory();
                         },
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 16, color: theme.colorScheme.onPrimary),
+                  icon: Icon(LucideIcons.plus, size: 16, color: theme.colorScheme.onPrimary),
                   label: const Text('Add Music Folder', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                 ),
               ),
@@ -611,7 +611,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                         AppHaptics.lightImpact();
                         controller.rescanSavedFolders();
                       },
-                icon: HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 16, color: primary),
+                icon: Icon(LucideIcons.refreshCw, size: 16, color: primary),
                 label: Text(
                   libraryState.isScanning ? 'Scanning...' : 'Rescan',
                   style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: primary),
@@ -647,7 +647,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             itemDescription: (sec) => sec == 0
                 ? 'Include all short audio clips, ringtones, and sound effects in library'
                 : 'Automatically hide ringtones, alarms, and short recordings under $sec s',
-            itemIcon: (sec) => sec == 0 ? HugeIcons.strokeRoundedVolumeHigh : HugeIcons.strokeRoundedFilter,
+            itemIcon: (sec) => sec == 0 ? LucideIcons.volume2 : LucideIcons.filter,
             onChanged: (val) {
               if (val != null) {
                 AppHaptics.selectionClick();
@@ -707,7 +707,7 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
     required List<T> items,
     required String Function(T) itemLabel,
     required String Function(T) itemDescription,
-    required dynamic Function(T) itemIcon,
+    required IconData Function(T) itemIcon,
     required ValueChanged<T?> onChanged,
     required bool isSolid,
   }) {
@@ -740,8 +740,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
             child: DropdownButton<T>(
               value: currentValue,
               isExpanded: true,
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowDown01,
+              icon: Icon(
+                LucideIcons.chevronDown,
                 size: 15,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -755,8 +755,8 @@ class _LibraryScannerSettingsScreenState extends ConsumerState<LibraryScannerSet
                   value: item,
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: itemIcon(item),
+                      Icon(
+                        itemIcon(item),
                         size: 16,
                         color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../audio_engine/audio_cache_service.dart';
@@ -80,8 +80,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
                   else
                     ...playlists.map(
                       (p) => ListTile(
-                        leading: HugeIcon(
-                          icon: HugeIcons.strokeRoundedPlayList,
+                        leading: Icon(
+                          LucideIcons.listMusic,
                           size: 20,
                           color: theme.colorScheme.primary,
                         ),
@@ -281,8 +281,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
               // ─── ACTION MENU ITEMS ──────────────────────────────────────────
               // 1. Play Next
               ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedNext,
+                leading: Icon(
+                  LucideIcons.stepForward,
                   size: 20,
                   color: primary,
                 ),
@@ -303,8 +303,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
               // 2. Add to Queue
               ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlaylist01,
+                leading: Icon(
+                  LucideIcons.listPlus,
                   size: 20,
                   color: theme.colorScheme.onSurface,
                 ),
@@ -325,8 +325,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
               // 3. Instant Mix
               ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedSparkles,
+                leading: Icon(
+                  LucideIcons.sparkles,
                   size: 20,
                   color: primary,
                 ),
@@ -347,8 +347,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
               // 2.1 Download Track
               if (track.filePath == null || track.filePath!.isEmpty || track.remoteUrl != null)
                 ListTile(
-                  leading: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedDownload01,
+                  leading: const Icon(
+                    LucideIcons.download,
                     size: 20,
                     color: Color(0xFF10B981),
                   ),
@@ -373,8 +373,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
               // 3. Add to Playlist
               ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedAddCircleHalfDot,
+                leading: Icon(
+                  LucideIcons.plusCircle,
                   size: 20,
                   color: theme.colorScheme.onSurface,
                 ),
@@ -388,8 +388,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
               // 4. Go to Album
               if (track.album.isNotEmpty && track.album != 'Unknown Album')
                 ListTile(
-                  leading: HugeIcon(
-                    icon: HugeIcons.strokeRoundedAlbum01,
+                  leading: Icon(
+                    LucideIcons.disc,
                     size: 20,
                     color: theme.colorScheme.onSurface,
                   ),
@@ -404,8 +404,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
               // 5. Go to Artist
               if (track.artist.isNotEmpty && track.artist != 'Unknown Artist')
                 ListTile(
-                  leading: HugeIcon(
-                    icon: HugeIcons.strokeRoundedUser,
+                  leading: Icon(
+                    LucideIcons.user,
                     size: 20,
                     color: theme.colorScheme.onSurface,
                   ),
@@ -419,8 +419,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
               // 6. Add to / Remove from Favorites
               ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFavourite,
+                leading: Icon(
+                  LucideIcons.heart,
                   size: 22,
                   color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurface,
                 ),
@@ -438,8 +438,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
               // 7. Download for Offline (if remote)
               if (isRemote && !isCached)
                 ListTile(
-                  leading: HugeIcon(
-                    icon: HugeIcons.strokeRoundedDownload04,
+                  leading: Icon(
+                    LucideIcons.cloudDownload,
                     size: 20,
                     color: theme.colorScheme.primary,
                   ),
@@ -459,12 +459,12 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
               // 7.5 DSP Mastering Preset
               ListTile(
-                leading: HugeIcon(
-                  icon: isDspPinned
-                      ? HugeIcons.strokeRoundedPin
+                leading: Icon(
+                  isDspPinned
+                      ? LucideIcons.pin
                       : (dspResolution.source == DspResolutionSource.genreAuto
-                          ? HugeIcons.strokeRoundedSparkles
-                          : HugeIcons.strokeRoundedSlidersHorizontal),
+                          ? LucideIcons.sparkles
+                          : LucideIcons.slidersHorizontal),
                   size: 20,
                   color: isDspPinned ? primary : theme.colorScheme.onSurface,
                 ),
@@ -500,8 +500,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
               // 8. Edit Metadata Tags
               ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedEdit02,
+                leading: Icon(
+                  LucideIcons.pencil,
                   size: 20,
                   color: theme.colorScheme.onSurface,
                 ),
@@ -514,8 +514,8 @@ class StudioTrackActionSheet extends ConsumerWidget {
 
               // 9. Inspect Audio File Specs
               ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedInformationCircle,
+                leading: Icon(
+                  LucideIcons.info,
                   size: 20,
                   color: theme.colorScheme.onSurface,
                 ),

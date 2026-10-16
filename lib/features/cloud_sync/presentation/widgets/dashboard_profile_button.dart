@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../controllers/cloud_auth_controller.dart';
 import 'cloud_auth_dialog.dart';
@@ -62,8 +62,8 @@ class DashboardProfileButton extends ConsumerWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     )
-                  : HugeIcon(
-                      icon: HugeIcons.strokeRoundedUser,
+                  : Icon(
+                      LucideIcons.user,
                       size: 13,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

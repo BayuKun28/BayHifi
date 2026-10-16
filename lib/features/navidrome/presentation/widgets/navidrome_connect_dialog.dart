@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/subsonic_models.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
@@ -79,7 +79,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, color: primaryColor, size: 24),
+                    child: Icon(LucideIcons.cloud, color: primaryColor, size: 24),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -105,7 +105,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                     ),
                   ),
                   IconButton(
-                    icon: HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20, color: theme.colorScheme.onSurfaceVariant),
+                    icon: Icon(LucideIcons.x, size: 20, color: theme.colorScheme.onSurfaceVariant),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -123,8 +123,8 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                 ),
                 child: Row(
                   children: [
-                    HugeIcon(
-                      icon: isConnected ? HugeIcons.strokeRoundedCloudCheck : HugeIcons.strokeRoundedCloudOff,
+                    Icon(
+                      isConnected ? LucideIcons.cloud : LucideIcons.cloudOff,
                       size: 16,
                       color: isConnected ? const Color(0xFF00E676) : Colors.orangeAccent,
                     ),
@@ -157,7 +157,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                   prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedServer, size: 18, color: theme.colorScheme.onSurfaceVariant),
+                    child: Icon(LucideIcons.server, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -176,7 +176,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                   prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 18, color: theme.colorScheme.onSurfaceVariant),
+                    child: Icon(LucideIcons.user, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -196,11 +196,11 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                   prefixIconConstraints: const BoxConstraints(minWidth: 42, minHeight: 42),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedLockPassword, size: 18, color: theme.colorScheme.onSurfaceVariant),
+                    child: Icon(LucideIcons.lock, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   ),
                   suffixIcon: IconButton(
-                    icon: HugeIcon(
-                      icon: _obscurePassword ? HugeIcons.strokeRoundedViewOffSlash : HugeIcons.strokeRoundedView,
+                    icon: Icon(
+                      _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
                       size: 18,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -258,7 +258,7 @@ class _NavidromeConnectDialogState extends ConsumerState<NavidromeConnectDialog>
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const HugeIcon(icon: HugeIcons.strokeRoundedLink01, size: 18, color: Colors.black),
+                          : const Icon(LucideIcons.link, size: 18, color: Colors.black),
                       label: Text(isConnecting ? 'Connecting...' : (isConnected ? 'Re-Sync' : 'Connect')),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,

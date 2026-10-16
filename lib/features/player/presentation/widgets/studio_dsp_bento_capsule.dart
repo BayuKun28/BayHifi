@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -172,8 +172,8 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedHeadphones,
+                        Icon(
+                          LucideIcons.headphones,
                           size: 11.5,
                           color: isAutoActive
                               ? primary
@@ -245,8 +245,8 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedSlidersVertical,
+                        Icon(
+                          LucideIcons.sliders,
                           size: 11.5,
                           color: isDspActive ? primary : colorScheme.onSurfaceVariant,
                         ),
@@ -329,8 +329,8 @@ class _StudioDspBentoCapsuleState extends ConsumerState<StudioDspBentoCapsule>
                           ),
                           const SizedBox(width: 4),
                         ] else ...[
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedUsb,
+                          Icon(
+                            LucideIcons.usb,
                             size: 11.5,
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -379,8 +379,8 @@ class _AnimatedSignalConnector extends StatelessWidget {
     if (!isPlaying) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3.0),
-        child: HugeIcon(
-          icon: HugeIcons.strokeRoundedArrowRight01,
+        child: Icon(
+          LucideIcons.chevronRight,
           size: 10,
           color: color.withValues(alpha: 0.35),
         ),
@@ -402,8 +402,8 @@ class _AnimatedSignalConnector extends StatelessWidget {
 
               return Opacity(
                 opacity: alpha,
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowRight01,
+                child: Icon(
+                  LucideIcons.chevronRight,
                   size: 9.0,
                   color: color,
                 ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../app/theme/app_haptics.dart';
 import '../../audio_engine/virtual_dsp_service.dart';
 import '../../features/library/presentation/controllers/library_controller.dart';
@@ -11,7 +10,8 @@ import 'desktop_shortcuts_dispatcher.dart';
 /// State provider to track whether the desktop sidebar is collapsed (compact mode).
 final desktopSidebarCollapsedProvider = StateProvider<bool>((ref) => false);
 
-/// Studio Sidebar Navigation Rail khusus tampilan Desktop (layar lebar $\ge 960$px).
+/// Studio Sidebar Navigation Rail for Desktop & Tablet layouts.
+/// Solid matte obsidian aesthetic matching the new dockbar and taste-skill design mandate.
 class DesktopStudioSidebar extends ConsumerWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -28,7 +28,6 @@ class DesktopStudioSidebar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final isStateCollapsed = ref.watch(desktopSidebarCollapsedProvider);
     final effectiveIsCompact = isCompact ?? isStateCollapsed;
     final effectiveOnToggle = onToggleCompact ??
@@ -43,28 +42,28 @@ class DesktopStudioSidebar extends ConsumerWidget {
     final isDspActive = dspState.eqEnabled || dspState.bassBoostEnabled || dspState.compressorEnabled;
 
     final destinations = [
-      _NavDestination(
-        icon: HugeIcons.strokeRoundedDashboardSquare01,
-        label: 'Dashboard',
+      const _NavDestination(
+        icon: LucideIcons.house,
+        label: 'Home',
       ),
-      _NavDestination(
-        icon: HugeIcons.strokeRoundedSlidersVertical,
+      const _NavDestination(
+        icon: LucideIcons.sliders,
         label: 'DSP Rack',
       ),
-      _NavDestination(
-        icon: HugeIcons.strokeRoundedMusicNote01,
+      const _NavDestination(
+        icon: LucideIcons.library,
         label: 'Library',
       ),
-      _NavDestination(
-        icon: HugeIcons.strokeRoundedPlayList,
+      const _NavDestination(
+        icon: LucideIcons.listMusic,
         label: 'Playlists',
       ),
-      _NavDestination(
-        icon: HugeIcons.strokeRoundedYoutube,
+      const _NavDestination(
+        icon: LucideIcons.playSquare,
         label: 'YouTube',
       ),
-      _NavDestination(
-        icon: HugeIcons.strokeRoundedSettings01,
+      const _NavDestination(
+        icon: LucideIcons.settings,
         label: 'Settings',
       ),
     ];
@@ -74,11 +73,11 @@ class DesktopStudioSidebar extends ConsumerWidget {
       curve: Curves.easeInOutCubic,
       clipBehavior: Clip.hardEdge,
       width: effectiveIsCompact ? 76 : 220,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0D0E12),
         border: Border(
           right: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
+            color: Color(0xFF262936),
             width: 1.0,
           ),
         ),
@@ -92,321 +91,351 @@ class DesktopStudioSidebar extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          // ─── Header: App Branding & Expand/Collapse Toggle ──────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            child: effectiveIsCompact
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                            width: 1.0,
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(7),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: Image.asset(
-                            'assets/images/baydev_logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Tooltip(
-                        message: 'Expand sidebar (Ctrl+B)',
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(8),
-                          onTap: () {
-                            AppHaptics.selectionClick();
-                            effectiveOnToggle();
-                          },
-                          child: Container(
-                            width: 38,
-                            height: 28,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedArrowRight01,
-                              size: 15,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                            width: 1.0,
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(6),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: Image.asset(
-                            'assets/images/baydev_logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Baydev HiFi',
-                              style: TextStyle(
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.2,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              'STUDIO MASTER',
-                              style: TextStyle(
-                                fontSize: 8.5,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.1,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Tooltip(
-                        message: 'Collapse sidebar (Ctrl+B)',
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(8),
-                          onTap: () {
-                            AppHaptics.selectionClick();
-                            effectiveOnToggle();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedArrowLeft01,
-                              size: 15,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-
-          Divider(height: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25)),
-          const SizedBox(height: 10),
-
-          // ─── Navigation Items ──────────────────────────────
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: effectiveIsCompact ? 8 : 12),
-              itemCount: destinations.length,
-              itemBuilder: (context, index) {
-                final item = destinations[index];
-                final isSelected = selectedIndex == index;
-
-                final destinationTile = Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      AppHaptics.selectionClick();
-                      onDestinationSelected(index);
-                    },
-                    child: Container(
-                      height: 44,
-                      padding: EdgeInsets.symmetric(horizontal: effectiveIsCompact ? 14 : 16),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? theme.colorScheme.primary.withValues(alpha: 0.14)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        border: isSelected
-                            ? Border.all(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                                width: 1.0,
-                              )
-                            : null,
-                      ),
-                      child: Row(
-                        mainAxisAlignment:
-                            effectiveIsCompact ? MainAxisAlignment.center : MainAxisAlignment.start,
+              // ─── Header: App Branding & Expand/Collapse Toggle ──────
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                child: effectiveIsCompact
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          HugeIcon(
-                            icon: item.icon,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.65),
-                            size: 20,
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF16181F),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFF262936),
+                                width: 1.0,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(7),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.asset(
+                                'assets/images/baydev_logo.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
                           ),
-                          if (!effectiveIsCompact) ...[
-                            const SizedBox(width: 14),
+                          const SizedBox(height: 10),
+                          Tooltip(
+                            message: 'Expand sidebar (Ctrl+B)',
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () {
+                                AppHaptics.selectionClick();
+                                effectiveOnToggle();
+                              },
+                              child: Container(
+                                width: 38,
+                                height: 28,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1E212B),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: const Color(0xFF262936),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  LucideIcons.panelLeftOpen,
+                                  size: 14,
+                                  color: Color(0xFFA1B2A7),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF16181F),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFF262936),
+                                width: 1.0,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(6),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.asset(
+                                'assets/images/baydev_logo.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Baydev HiFi',
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.2,
+                                    color: Colors.white,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'STUDIO MASTER',
+                                  style: TextStyle(
+                                    fontSize: 8.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.1,
+                                    color: Color(0xFF10B981),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Tooltip(
+                            message: 'Collapse sidebar (Ctrl+B)',
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () {
+                                AppHaptics.selectionClick();
+                                effectiveOnToggle();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1E212B),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: const Color(0xFF262936),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  LucideIcons.panelLeftClose,
+                                  size: 14,
+                                  color: Color(0xFFA1B2A7),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+
+              const Divider(height: 1, color: Color(0xFF262936)),
+              const SizedBox(height: 10),
+
+              // ─── Navigation Items ──────────────────────────────
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: effectiveIsCompact ? 8 : 12),
+                  itemCount: destinations.length,
+                  itemBuilder: (context, index) {
+                    final item = destinations[index];
+                    final isSelected = selectedIndex == index;
+
+                    final destinationTile = Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          AppHaptics.selectionClick();
+                          onDestinationSelected(index);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          curve: Curves.easeOutCubic,
+                          height: 44,
+                          padding: EdgeInsets.symmetric(horizontal: effectiveIsCompact ? 14 : 14),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFF222532)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                            border: isSelected
+                                ? Border.all(
+                                    color: const Color(0xFF383D50),
+                                    width: 0.8,
+                                  )
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisAlignment:
+                                effectiveIsCompact ? MainAxisAlignment.center : MainAxisAlignment.start,
+                            children: [
+                              Icon(
+                                item.icon,
+                                color: isSelected
+                                    ? Colors.white
+                                    : const Color(0xFF8A9A90),
+                                size: 18,
+                              ),
+                              if (!effectiveIsCompact) ...[
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    item.label,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFFA1B2A7),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (index == 1 && isDspActive)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1E212B),
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: const Color(0xFF262936),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'ACTIVE',
+                                      style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF10B981),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.5),
+                      child: effectiveIsCompact
+                          ? Tooltip(
+                              message: item.label,
+                              preferBelow: false,
+                              child: destinationTile,
+                            )
+                          : destinationTile,
+                    );
+                  },
+                ),
+              ),
+
+              // ─── Footer: Telemetry & Shortcuts ──────────────────
+              const Divider(height: 1, color: Color(0xFF262936)),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: effectiveIsCompact ? 8 : 14,
+                  vertical: 12,
+                ),
+                child: Column(
+                  children: [
+                    if (!effectiveIsCompact)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isNavidromeConnected
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFF64748B),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                item.label,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                  color: isSelected
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                                isNavidromeConnected ? 'Navidrome Sync' : 'Local Storage',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF8A9A90),
+                                  fontWeight: FontWeight.w500,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (index == 1 && isDspActive)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.tertiary.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  'ACTIVE',
-                                  style: TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w800,
-                                    color: theme.colorScheme.tertiary,
-                                  ),
-                                ),
-                              ),
                           ],
-                        ],
+                        ),
+                      ),
+                    InkWell(
+                      onTap: () {
+                        AppHaptics.selectionClick();
+                        showDesktopShortcutsCheatsheet(context);
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF16181F),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF262936),
+                            width: 0.8,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: effectiveIsCompact
+                            ? const Tooltip(
+                                message: 'Studio Shortcuts',
+                                child: Icon(
+                                  LucideIcons.keyboard,
+                                  color: Color(0xFFA1B2A7),
+                                  size: 16,
+                                ),
+                              )
+                            : const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    LucideIcons.keyboard,
+                                    color: Color(0xFFA1B2A7),
+                                    size: 15,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Shortcuts',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFFA1B2A7),
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
-                  ),
-                );
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3.0),
-                  child: effectiveIsCompact
-                      ? Tooltip(
-                          message: item.label,
-                          preferBelow: false,
-                          child: destinationTile,
-                        )
-                      : destinationTile,
-                );
-              },
-            ),
-          ),
-
-          // ─── Footer: Telemetry & Shortcuts ──────────────────
-          Divider(height: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25)),
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: effectiveIsCompact ? 8 : 16,
-              vertical: 12,
-            ),
-            child: Column(
-              children: [
-                if (!effectiveIsCompact)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isNavidromeConnected ? const Color(0xFF10B981) : Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            isNavidromeConnected ? 'Navidrome Sync' : 'Local Storage',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                M3EButton(
-                  label: effectiveIsCompact
-                      ? Tooltip(
-                          message: 'Studio Shortcuts',
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedKeyboard,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                            size: 18,
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedKeyboard,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            const Text('Shortcuts', style: TextStyle(fontSize: 12)),
-                          ],
-                        ),
-                  style: M3EButtonStyle.tonal,
-                  onPressed: () => showDesktopShortcutsCheatsheet(context),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
 
 class _NavDestination {
-  final dynamic icon;
+  final IconData icon;
   final String label;
 
   const _NavDestination({

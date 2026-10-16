@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -27,8 +27,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
         title: const Text('VISUAL DYNAMICS & DISPLAY'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -46,7 +46,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildBentoDropdownSelector<NowPlayingBackdropMode>(
             context: context,
             sectionTitle: 'NOW PLAYING BACKDROP PRESENTATION',
-            sectionIcon: HugeIcons.strokeRoundedLayers01,
+            sectionIcon: LucideIcons.layers,
             currentValue: settings.backdropMode,
             items: NowPlayingBackdropMode.values,
             itemLabel: (b) => b.label,
@@ -66,7 +66,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildBentoDropdownSelector<AlbumArtStyle>(
             context: context,
             sectionTitle: 'ALBUM ART & COVER STYLE',
-            sectionIcon: HugeIcons.strokeRoundedAlbum01,
+            sectionIcon: LucideIcons.disc,
             currentValue: settings.albumArtStyle,
             items: AlbumArtStyle.values,
             itemLabel: (s) => s.label,
@@ -90,7 +90,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildBentoDropdownSelector<ProQRtaStyle>(
             context: context,
             sectionTitle: 'PRO-Q STUDIO REALTIME SPECTRUM GRAPH',
-            sectionIcon: HugeIcons.strokeRoundedSlidersVertical,
+            sectionIcon: LucideIcons.sliders,
             currentValue: settings.proQRtaStyle,
             items: ProQRtaStyle.values,
             itemLabel: (s) => s.label,
@@ -111,7 +111,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildBentoDropdownSelector<TimeBarStyle>(
             context: context,
             sectionTitle: 'TIME BAR & SEEKBAR STYLE',
-            sectionIcon: HugeIcons.strokeRoundedSlidersVertical,
+            sectionIcon: LucideIcons.clock,
             currentValue: settings.timeBarStyle,
             items: TimeBarStyle.values,
             itemLabel: (s) => s.label,
@@ -131,7 +131,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildBentoDropdownSelector<PerformanceMode>(
             context: context,
             sectionTitle: 'ADAPTIVE PERFORMANCE PROFILE',
-            sectionIcon: HugeIcons.strokeRoundedCpuCharge,
+            sectionIcon: LucideIcons.zap,
             currentValue: settings.performanceMode,
             items: PerformanceMode.values,
             itemLabel: (m) => m.label,
@@ -151,7 +151,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildSectionHeader(
             context,
             '3D PARALLAX MOTION & BREATHING PULSE',
-            HugeIcons.strokeRoundedLayers01,
+            LucideIcons.layers,
           ),
           const SizedBox(height: 8),
           _buildParallaxCard(context, theme, primary, settings, controller, isSolid),
@@ -161,7 +161,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
           _buildSectionHeader(
             context,
             'DYNAMIC BACKDROP BLUR & AMBIENT GLOW',
-            HugeIcons.strokeRoundedSparkles,
+            LucideIcons.sparkles,
           ),
           const SizedBox(height: 8),
           _buildBlurGlowCard(context, theme, primary, settings, controller, isSolid),
@@ -201,8 +201,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedSparkles,
+                child: Icon(
+                  LucideIcons.sparkles,
                   size: 18,
                   color: primary,
                 ),
@@ -316,11 +316,11 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,
@@ -339,12 +339,12 @@ class VisualizerSettingsScreen extends ConsumerWidget {
   Widget _buildBentoDropdownSelector<T>({
     required BuildContext context,
     required String sectionTitle,
-    required dynamic sectionIcon,
+    required IconData sectionIcon,
     required T currentValue,
     required List<T> items,
     required String Function(T) itemLabel,
     required String Function(T) itemDescription,
-    required dynamic Function(T) itemIcon,
+    required IconData Function(T) itemIcon,
     required ValueChanged<T?> onChanged,
     required bool isSolid,
   }) {
@@ -363,7 +363,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              HugeIcon(icon: sectionIcon, size: 15, color: primary),
+              Icon(sectionIcon, size: 15, color: primary),
               const SizedBox(width: 8),
               Text(
                 sectionTitle,
@@ -391,8 +391,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
               child: DropdownButton<T>(
                 value: currentValue,
                 isExpanded: true,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowDown01,
+                icon: Icon(
+                  LucideIcons.chevronDown,
                   size: 16,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -406,8 +406,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                     value: item,
                     child: Row(
                       children: [
-                        HugeIcon(
-                          icon: itemIcon(item),
+                        Icon(
+                          itemIcon(item),
                           size: 18,
                           color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                         ),
@@ -471,7 +471,7 @@ class VisualizerSettingsScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 15, color: primary),
+              Icon(LucideIcons.audioLines, size: 15, color: primary),
               const SizedBox(width: 8),
               Text(
                 'RTA SPECTRUM VISUALIZER',
@@ -499,8 +499,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
               child: DropdownButton<SpectrumStyle>(
                 value: settings.spectrumStyle,
                 isExpanded: true,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowDown01,
+                icon: Icon(
+                  LucideIcons.chevronDown,
                   size: 16,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -514,8 +514,8 @@ class VisualizerSettingsScreen extends ConsumerWidget {
                     value: style,
                     child: Row(
                       children: [
-                        HugeIcon(
-                          icon: _getSpectrumStyleIcon(style),
+                        Icon(
+                          _getSpectrumStyleIcon(style),
                           size: 18,
                           color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                         ),
@@ -822,103 +822,103 @@ class VisualizerSettingsScreen extends ConsumerWidget {
     );
   }
 
-  dynamic _getPerfModeIcon(PerformanceMode mode) {
+  IconData _getPerfModeIcon(PerformanceMode mode) {
     switch (mode) {
       case PerformanceMode.studioHiFi:
-        return HugeIcons.strokeRoundedCpuCharge;
+        return LucideIcons.zap;
       case PerformanceMode.balanced:
-        return HugeIcons.strokeRoundedActivity01;
+        return LucideIcons.activity;
       case PerformanceMode.batterySaver:
-        return HugeIcons.strokeRoundedBatteryCharging01;
+        return LucideIcons.batteryCharging;
       case PerformanceMode.custom:
-        return HugeIcons.strokeRoundedSlidersVertical;
+        return LucideIcons.sliders;
     }
   }
 
-  dynamic _getAlbumStyleIcon(AlbumArtStyle style) {
+  IconData _getAlbumStyleIcon(AlbumArtStyle style) {
     switch (style) {
       case AlbumArtStyle.squircle:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
       case AlbumArtStyle.square:
-        return HugeIcons.strokeRoundedGridTable;
+        return LucideIcons.grid;
       case AlbumArtStyle.disc:
-        return HugeIcons.strokeRoundedDisc;
+        return LucideIcons.disc;
       case AlbumArtStyle.vinyl:
-        return HugeIcons.strokeRoundedAlbum01;
+        return LucideIcons.disc2;
       case AlbumArtStyle.turntable:
-        return HugeIcons.strokeRoundedDisc;
+        return LucideIcons.disc3;
       case AlbumArtStyle.cassette:
-        return HugeIcons.strokeRoundedRadio;
+        return LucideIcons.radio;
       case AlbumArtStyle.cdJewel:
-        return HugeIcons.strokeRoundedSquareLock02;
+        return LucideIcons.square;
     }
   }
 
-  dynamic _getSpectrumStyleIcon(SpectrumStyle style) {
+  IconData _getSpectrumStyleIcon(SpectrumStyle style) {
     switch (style) {
       case SpectrumStyle.m3Expressive:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
       case SpectrumStyle.bars:
-        return HugeIcons.strokeRoundedAudioWaveform;
+        return LucideIcons.audioLines;
       case SpectrumStyle.wave:
-        return HugeIcons.strokeRoundedActivity01;
+        return LucideIcons.activity;
       case SpectrumStyle.dots:
-        return HugeIcons.strokeRoundedGrid;
+        return LucideIcons.grid;
       case SpectrumStyle.beam:
-        return HugeIcons.strokeRoundedMinusSign;
+        return LucideIcons.minus;
       case SpectrumStyle.mirrorWave:
-        return HugeIcons.strokeRoundedLayers01;
+        return LucideIcons.layers;
       case SpectrumStyle.vuMeter:
-        return HugeIcons.strokeRoundedDashboardSpeed01;
+        return LucideIcons.gauge;
       case SpectrumStyle.circular:
-        return HugeIcons.strokeRoundedCompass01;
+        return LucideIcons.compass;
     }
   }
 
-  dynamic _getBackdropModeIcon(NowPlayingBackdropMode mode) {
+  IconData _getBackdropModeIcon(NowPlayingBackdropMode mode) {
     switch (mode) {
       case NowPlayingBackdropMode.albumArtGlow:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
       case NowPlayingBackdropMode.studioWallpaper:
-        return HugeIcons.strokeRoundedImage01;
+        return LucideIcons.image;
       case NowPlayingBackdropMode.pureBlackOled:
-        return HugeIcons.strokeRoundedMoon02;
+        return LucideIcons.moon;
     }
   }
 
-  dynamic _getTimeBarStyleIcon(TimeBarStyle style) {
+  IconData _getTimeBarStyleIcon(TimeBarStyle style) {
     switch (style) {
       case TimeBarStyle.slim:
-        return HugeIcons.strokeRoundedSlidersVertical;
+        return LucideIcons.sliders;
       case TimeBarStyle.wavy:
-        return HugeIcons.strokeRoundedAudioWaveform;
+        return LucideIcons.audioLines;
       case TimeBarStyle.capsule:
-        return HugeIcons.strokeRoundedClock01;
+        return LucideIcons.clock;
       case TimeBarStyle.segmented:
-        return HugeIcons.strokeRoundedVolumeHigh;
+        return LucideIcons.volume2;
       case TimeBarStyle.waveform:
-        return HugeIcons.strokeRoundedAudioWaveform;
+        return LucideIcons.audioLines;
       case TimeBarStyle.ruler:
-        return HugeIcons.strokeRoundedRuler;
+        return LucideIcons.ruler;
       case TimeBarStyle.glowingPill:
-        return HugeIcons.strokeRoundedSquare;
+        return LucideIcons.square;
     }
   }
 
-  dynamic _getProQRtaStyleIcon(ProQRtaStyle style) {
+  IconData _getProQRtaStyleIcon(ProQRtaStyle style) {
     switch (style) {
       case ProQRtaStyle.bars:
-        return HugeIcons.strokeRoundedSlidersVertical;
+        return LucideIcons.sliders;
       case ProQRtaStyle.filledCurve:
-        return HugeIcons.strokeRoundedAudioWaveform;
+        return LucideIcons.audioLines;
       case ProQRtaStyle.wireframe:
-        return HugeIcons.strokeRoundedActivity01;
+        return LucideIcons.activity;
       case ProQRtaStyle.m3Pillars:
-        return HugeIcons.strokeRoundedLayers01;
+        return LucideIcons.layers;
       case ProQRtaStyle.peakDots:
-        return HugeIcons.strokeRoundedGrid;
+        return LucideIcons.grid;
       case ProQRtaStyle.laserBeam:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
     }
   }
 }

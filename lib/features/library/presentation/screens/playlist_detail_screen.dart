@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -162,9 +162,9 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
               surfaceTintColor: Colors.transparent,
               leading: M3EIconButton(
                 variant: M3EIconButtonVariant.standard,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowLeft01,
-                  size: 22,
+                icon: Icon(
+                  LucideIcons.arrowLeft,
+                  size: 20,
                   color: theme.colorScheme.onSurface,
                 ),
                 onPressed: () => Navigator.of(context).pop(),
@@ -172,9 +172,9 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
               actions: [
                 M3EIconButton(
                   variant: M3EIconButtonVariant.standard,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedMoreVertical,
-                    size: 22,
+                  icon: Icon(
+                    LucideIcons.moreVertical,
+                    size: 20,
                     color: theme.colorScheme.onSurface,
                   ),
                   onPressed: () {
@@ -260,12 +260,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                                           width: 72,
                                           height: 72,
                                           fallbackIcon: isSmart
-                                              ? HugeIcons.strokeRoundedFilterHorizontal
+                                              ? LucideIcons.slidersHorizontal
                                               : (currentPlaylist?.id == 'favorites'
-                                                  ? HugeIcons.strokeRoundedFavourite
+                                                  ? LucideIcons.heart
                                                   : (currentPlaylist?.id == 'hires_master'
-                                                      ? HugeIcons.strokeRoundedSparkles
-                                                      : HugeIcons.strokeRoundedPlaylist01)),
+                                                      ? LucideIcons.sparkles
+                                                      : LucideIcons.listMusic)),
                                           fallbackIconSize: 32,
                                           fallbackColor: accentColor,
                                           backgroundColor: StudioSurfaceTheme.tintedContainer(
@@ -506,8 +506,8 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                               ref.read(playerControllerProvider.notifier).setQueue(tracks, initialIndex: 0);
                             }
                           },
-                          icon: const HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlay,
+                          icon: const Icon(
+                            LucideIcons.play,
                             size: 18,
                             color: Colors.black,
                           ),
@@ -522,8 +522,8 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                             ref.read(playerControllerProvider.notifier).setQueue(list, initialIndex: 0);
                           }
                         },
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedShuffle,
+                        icon: Icon(
+                          LucideIcons.shuffle,
                           size: 16,
                           color: accentColor,
                         ),
@@ -532,7 +532,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       const SizedBox(width: 8),
                       M3EIconButton(
                         variant: M3EIconButtonVariant.tonal,
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedDownload01, size: 20, color: accentColor),
+                        icon: Icon(LucideIcons.download, size: 20, color: accentColor),
                         tooltip: 'Download All Tracks',
                         onPressed: () {
                           if (tracks.isNotEmpty) {
@@ -551,21 +551,21 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       if (isSmart)
                         M3EIconButton(
                           variant: M3EIconButtonVariant.tonal,
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedEdit02, size: 20, color: accentColor),
+                          icon: Icon(LucideIcons.pencil, size: 20, color: accentColor),
                           tooltip: 'Edit Rules',
                           onPressed: () => CreateSmartPlaylistDialog.show(context, initialPlaylist: currentSmartPlaylist),
                         )
                       else if (currentPlaylist?.isCustom == true)
                         M3EIconButton(
                           variant: M3EIconButtonVariant.tonal,
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedEdit02, size: 20, color: accentColor),
+                          icon: Icon(LucideIcons.pencil, size: 20, color: accentColor),
                           tooltip: 'Edit Details',
                           onPressed: () => CreateCustomPlaylistModal.show(context, initialPlaylist: currentPlaylist),
                         ),
                       const SizedBox(width: 4),
                       M3EIconButton(
                         variant: M3EIconButtonVariant.tonal,
-                        icon: HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 20, color: accentColor),
+                        icon: Icon(LucideIcons.share2, size: 20, color: accentColor),
                         tooltip: 'Export M3U8',
                         onPressed: () => _exportM3u8(context, title, tracks),
                       ),
@@ -592,10 +592,10 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          HugeIcon(
-                            icon: isSmart
-                                ? HugeIcons.strokeRoundedFilterHorizontal
-                                : HugeIcons.strokeRoundedPlaylist01,
+                          Icon(
+                            isSmart
+                                ? LucideIcons.slidersHorizontal
+                                : LucideIcons.listMusic,
                             size: 36,
                             color: theme.dividerColor,
                           ),

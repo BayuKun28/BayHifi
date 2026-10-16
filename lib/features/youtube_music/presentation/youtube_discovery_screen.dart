@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../app/theme/app_haptics.dart';
@@ -44,14 +44,14 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     return '$m:$s';
   }
 
-  static final List<({String label, dynamic icon})> _quickFilters = [
-    (label: 'All', icon: HugeIcons.strokeRoundedSparkles),
-    (label: 'Top 100 Charts', icon: HugeIcons.strokeRoundedChartHistogram),
-    (label: 'Audiophile Masters', icon: HugeIcons.strokeRoundedDisc),
-    (label: 'Acoustic Live', icon: HugeIcons.strokeRoundedMic01),
-    (label: 'Hi-Res Mixes', icon: HugeIcons.strokeRoundedSlidersVertical),
-    (label: 'Lofi & Chill', icon: HugeIcons.strokeRoundedCoffee01),
-    (label: 'Bass & EDM', icon: HugeIcons.strokeRoundedVolumeHigh),
+  static final List<({String label, IconData icon})> _quickFilters = [
+    (label: 'All', icon: LucideIcons.sparkles),
+    (label: 'Top 100 Charts', icon: LucideIcons.barChart2),
+    (label: 'Audiophile Masters', icon: LucideIcons.disc),
+    (label: 'Acoustic Live', icon: LucideIcons.mic),
+    (label: 'Hi-Res Mixes', icon: LucideIcons.sliders),
+    (label: 'Lofi & Chill', icon: LucideIcons.coffee),
+    (label: 'Bass & EDM', icon: LucideIcons.volume2),
   ];
 
   @override
@@ -121,8 +121,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   child: Row(
                     children: [
                       const SizedBox(width: 12),
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedSearch01,
+                      Icon(
+                        LucideIcons.search,
                         size: 18,
                         color: _searchFocusNode.hasFocus
                             ? primary
@@ -158,8 +158,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       if (_searchController.text.isNotEmpty)
                         M3EIconButton(
                           variant: M3EIconButtonVariant.standard,
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCancel01,
+                          icon: Icon(
+                            LucideIcons.x,
                             size: 20,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -193,8 +193,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Center(
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedPlayList,
+                      child: Icon(
+                        LucideIcons.listMusic,
                         size: 20,
                         color: primary,
                       ),
@@ -220,8 +220,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               final accent = primary;
               return ChoiceChip(
                 showCheckmark: false,
-                avatar: HugeIcon(
-                  icon: filter.icon,
+                avatar: Icon(
+                  filter.icon,
                   size: 14,
                   color: isSelected ? accent : theme.colorScheme.onSurfaceVariant,
                 ),
@@ -292,8 +292,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         leading: Navigator.of(context).canPop()
             ? M3EIconButton(
                 variant: M3EIconButtonVariant.standard,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowLeft01,
+                icon: Icon(
+                  LucideIcons.arrowLeft,
                   size: 22,
                   color: theme.colorScheme.onSurface,
                 ),
@@ -309,8 +309,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlayList,
+                  child: Icon(
+                    LucideIcons.listMusic,
                     size: 18,
                     color: primary,
                   ),
@@ -356,8 +356,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         actions: [
           M3EIconButton(
             variant: M3EIconButtonVariant.standard,
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedSlidersHorizontal,
+            icon: Icon(
+              LucideIcons.slidersHorizontal,
               size: 22,
               color: primary,
             ),
@@ -366,8 +366,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           ),
           M3EIconButton(
             variant: M3EIconButtonVariant.standard,
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedPlayList,
+            icon: Icon(
+              LucideIcons.listMusic,
               size: 22,
               color: primary,
             ),
@@ -430,8 +430,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedSearch01,
+              Icon(
+                LucideIcons.search,
                 size: 40,
                 color: theme.dividerColor,
               ),
@@ -494,8 +494,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedPlay,
+                            Icon(
+                              LucideIcons.play,
                               size: 12,
                               color: primary,
                             ),
@@ -532,8 +532,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedShuffle,
+                            Icon(
+                              LucideIcons.shuffle,
                               size: 12,
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
                             ),
@@ -623,8 +623,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedPlay,
+                            Icon(
+                              LucideIcons.play,
                               size: 13,
                               color: primary,
                             ),
@@ -644,8 +644,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                   const SizedBox(width: 6),
                   M3EIconButton(
                     variant: M3EIconButtonVariant.standard,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedRefresh,
+                    icon: Icon(
+                      LucideIcons.refreshCw,
                       size: 20,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -698,8 +698,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       AppHaptics.selectionClick();
                       ytController.fetchTrending(force: true);
                     },
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedRefresh,
+                    icon: Icon(
+                      LucideIcons.refreshCw,
                       size: 14,
                       color: primary,
                     ),
@@ -807,8 +807,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                               color: primary,
                             ),
                           )
-                        : HugeIcon(
-                            icon: HugeIcons.strokeRoundedAudioWave01,
+                        : Icon(
+                            LucideIcons.audioLines,
                             size: 20,
                             color: primary,
                           ),
@@ -873,8 +873,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               // Start Radio Button
               M3EIconButton(
                 variant: M3EIconButtonVariant.standard,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedRadio,
+                icon: Icon(
+                  LucideIcons.radio,
                   size: 22,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -893,8 +893,8 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               // Unified Track Action Sheet
               M3EIconButton(
                 variant: M3EIconButtonVariant.standard,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedMoreVertical,
+                icon: Icon(
+                  LucideIcons.moreVertical,
                   size: 22,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

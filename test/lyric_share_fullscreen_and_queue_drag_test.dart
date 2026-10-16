@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/features/lyrics_share/presentation/widgets/lyric_share_sheet.dart';
 import 'package:baydev_hifi/features/player/domain/lyrics_line.dart';
@@ -130,8 +130,8 @@ void main() {
       // Verify ReorderableDragStartListener dedicated handles exist on both items
       expect(find.byType(ReorderableDragStartListener), findsNWidgets(2));
 
-      // Verify HugeIcons.strokeRoundedDragDropVertical is present
-      expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedDragDropVertical), findsNWidgets(2));
+      // Verify LucideIcons.gripVertical is present
+      expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.gripVertical), findsNWidgets(2));
     });
 
     testWidgets('DualPaneWorkstationPane queue wraps items in ReorderableDelayedDragStartListener and renders strokeRoundedDragDropVertical handle', (tester) async {
@@ -176,8 +176,8 @@ void main() {
       // Verify ReorderableDragStartListener dedicated handles exist on both items
       expect(find.byType(ReorderableDragStartListener), findsNWidgets(2));
 
-      // Verify HugeIcons.strokeRoundedDragDropVertical is present
-      expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedDragDropVertical), findsNWidgets(2));
+      // Verify LucideIcons.gripVertical is present
+      expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.gripVertical), findsNWidgets(2));
     });
   });
 }

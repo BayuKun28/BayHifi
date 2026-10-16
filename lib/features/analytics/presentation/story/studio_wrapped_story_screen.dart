@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../data/playback_analytics_service.dart';
@@ -192,8 +192,8 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedSparkles,
+                              Icon(
+                                LucideIcons.sparkles,
                                 size: 11,
                                 color: theme.colorScheme.primary,
                               ),
@@ -213,7 +213,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         const Spacer(),
                         // Open Gallery / Export Hub Button
                         IconButton(
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 18, color: Colors.white),
+                          icon: const Icon(LucideIcons.share2, size: 18, color: Colors.white),
                           tooltip: 'Recap Templates & Share',
                           onPressed: () {
                             _pauseStory();
@@ -224,7 +224,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         ),
                         // Close Story Button
                         IconButton(
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20, color: Colors.white),
+                          icon: const Icon(LucideIcons.x, size: 20, color: Colors.white),
                           tooltip: 'Close Story',
                           onPressed: () => Navigator.of(context).pop(),
                         ),
@@ -273,17 +273,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
             shape: BoxShape.circle,
             color: theme.colorScheme.primary.withValues(alpha: 0.12),
             border: Border.all(color: theme.colorScheme.primary, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                blurRadius: 28,
-                spreadRadius: 2,
-              ),
-            ],
           ),
           child: Center(
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedHeadphones,
+            child: Icon(
+              LucideIcons.headphones,
               size: 42,
               color: theme.colorScheme.primary,
             ),
@@ -348,9 +341,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildStatPill('TRACKS', '${data.totalTracksPlayed}', HugeIcons.strokeRoundedMusicNote01, theme),
-                  _buildStatPill('ARTISTS', '${data.totalUniqueArtists}', HugeIcons.strokeRoundedUserGroup, theme),
-                  _buildStatPill('DAYS ACTIVE', '${data.activeListeningDays}', HugeIcons.strokeRoundedCalendar03, theme),
+                  _buildStatPill('TRACKS', '${data.totalTracksPlayed}', LucideIcons.music, theme),
+                  _buildStatPill('ARTISTS', '${data.totalUniqueArtists}', LucideIcons.users, theme),
+                  _buildStatPill('DAYS ACTIVE', '${data.activeListeningDays}', LucideIcons.calendar, theme),
                 ],
               ),
             ],
@@ -367,7 +360,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
       children: [
         Row(
           children: [
-            HugeIcon(icon: HugeIcons.strokeRoundedMusicNote03, size: 20, color: theme.colorScheme.primary),
+            Icon(LucideIcons.music, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'TOP TRACKS OF 2026',
@@ -438,7 +431,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                       width: isNumberOne ? 40 : 36,
                       height: isNumberOne ? 40 : 36,
                       borderRadius: BorderRadius.circular(isNumberOne ? 10 : 8),
-                      fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                      fallbackIcon: LucideIcons.music,
                       fallbackIconSize: 18,
                     ),
                     const SizedBox(width: 12),
@@ -528,8 +521,8 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedAward01,
+                  Icon(
+                    LucideIcons.award,
                     size: 13,
                     color: theme.colorScheme.primary,
                   ),
@@ -544,8 +537,8 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                     ),
                   ),
                   const SizedBox(width: 4),
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowRight01,
+                  Icon(
+                    LucideIcons.arrowRight,
                     size: 11,
                     color: theme.colorScheme.primary,
                   ),
@@ -565,7 +558,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
       children: [
         Row(
           children: [
-            HugeIcon(icon: HugeIcons.strokeRoundedUserGroup, size: 20, color: theme.colorScheme.primary),
+            Icon(LucideIcons.users, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'SONIC INSPIRATIONS',
@@ -601,7 +594,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                   width: 52,
                   height: 52,
                   borderRadius: BorderRadius.circular(26),
-                  fallbackIcon: HugeIcons.strokeRoundedUser,
+                  fallbackIcon: LucideIcons.user,
                   fallbackIconSize: 24,
                   backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
                 ),
@@ -676,7 +669,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                       width: 32,
                       height: 32,
                       borderRadius: BorderRadius.circular(16),
-                      fallbackIcon: HugeIcons.strokeRoundedUser,
+                      fallbackIcon: LucideIcons.user,
                       fallbackIconSize: 16,
                       backgroundColor: Colors.white10,
                     ),
@@ -757,8 +750,8 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedMic01,
+                    Icon(
+                      LucideIcons.mic,
                       size: 12,
                       color: theme.colorScheme.primary,
                     ),
@@ -799,8 +792,8 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedSlidersVertical,
+                    Icon(
+                      LucideIcons.sliders,
                       size: 12,
                       color: Colors.white70,
                     ),
@@ -834,7 +827,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
       children: [
         Row(
           children: [
-            HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 20, color: theme.colorScheme.primary),
+            Icon(LucideIcons.audioWaveform, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'SIGNAL INTEGRITY & PURITY',
@@ -913,10 +906,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
             childAspectRatio: 1.6,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              _buildMetricCard('BIT-PERFECT HOURS', '${purity.bitPerfectHours}h', HugeIcons.strokeRoundedCheckmarkCircle02, theme, isSolid),
-              _buildMetricCard('HIGHEST SAMPLE RATE', purity.highestSampleRate, HugeIcons.strokeRoundedCpuCharge, theme, isSolid),
-              _buildMetricCard('MASTER 192/24 TRACKS', '${purity.master24BitTracks}', HugeIcons.strokeRoundedAward01, theme, isSolid),
-              _buildMetricCard('STREAMING LOSSLESS', '${(purity.opusHighQualityRatio * 100).toInt()}%', HugeIcons.strokeRoundedAudioWave01, theme, isSolid),
+              _buildMetricCard('BIT-PERFECT HOURS', '${purity.bitPerfectHours}h', LucideIcons.circleCheck, theme, isSolid),
+              _buildMetricCard('HIGHEST SAMPLE RATE', purity.highestSampleRate, LucideIcons.cpu, theme, isSolid),
+              _buildMetricCard('MASTER 192/24 TRACKS', '${purity.master24BitTracks}', LucideIcons.award, theme, isSolid),
+              _buildMetricCard('STREAMING LOSSLESS', '${(purity.opusHighQualityRatio * 100).toInt()}%', LucideIcons.audioWaveform, theme, isSolid),
             ],
           ),
         ),
@@ -931,7 +924,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
       children: [
         Row(
           children: [
-            HugeIcon(icon: HugeIcons.strokeRoundedSlidersVertical, size: 20, color: theme.colorScheme.primary),
+            Icon(LucideIcons.sliders, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'DSP & ACOUSTIC TUNING',
@@ -965,7 +958,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
             children: [
               Row(
                 children: [
-                  HugeIcon(icon: HugeIcons.strokeRoundedTarget01, size: 16, color: theme.colorScheme.primary),
+                  Icon(LucideIcons.target, size: 16, color: theme.colorScheme.primary),
                   const SizedBox(width: 6),
                   Text(
                     'MOST USED AUTOEQ TARGET',
@@ -1000,7 +993,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               _buildDspStatRow(
                 'ANALOG TUBE WARMTH SATURATION',
                 '${data.tubeWarmthHours} Hours Engaged',
-                HugeIcons.strokeRoundedEnergy,
+                LucideIcons.zap,
                 theme,
                 isSolid,
               ),
@@ -1008,7 +1001,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               _buildDspStatRow(
                 'PARAMETRIC EQ BANDS CALIBRATED',
                 '${data.peqBandsEngaged} Active Filter Nodes',
-                HugeIcons.strokeRoundedSettings01,
+                LucideIcons.settings,
                 theme,
                 isSolid,
               ),
@@ -1016,7 +1009,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               _buildDspStatRow(
                 'IMMERSIVE CROSSFEED / SPATIAL',
                 '${data.crossfeedListeningHours} Hours Active',
-                HugeIcons.strokeRoundedLayers01,
+                LucideIcons.layers,
                 theme,
                 isSolid,
               ),
@@ -1034,7 +1027,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
       children: [
         Row(
           children: [
-            HugeIcon(icon: HugeIcons.strokeRoundedUsb, size: 20, color: theme.colorScheme.primary),
+            Icon(LucideIcons.cable, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'HARDWARE & DAC BRIDGE',
@@ -1073,7 +1066,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: HugeIcon(icon: HugeIcons.strokeRoundedCpuCharge, size: 30, color: theme.colorScheme.primary),
+                  child: Icon(LucideIcons.cpu, size: 30, color: theme.colorScheme.primary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1119,7 +1112,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           ),
           child: Row(
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedHeadphones, size: 22, color: theme.colorScheme.primary),
+              Icon(LucideIcons.headphones, size: 22, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -1180,17 +1173,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               shape: BoxShape.circle,
               color: theme.colorScheme.primary.withValues(alpha: 0.15),
               border: Border.all(color: theme.colorScheme.primary, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                  blurRadius: 30,
-                  spreadRadius: 2,
-                ),
-              ],
             ),
             child: Center(
-              child: HugeIcon(
-                icon: persona.icon,
+              child: Icon(
+                persona.icon,
                 size: 38,
                 color: theme.colorScheme.primary,
               ),
@@ -1293,7 +1279,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  HugeIcon(icon: HugeIcons.strokeRoundedUser, size: 14, color: theme.colorScheme.primary),
+                  Icon(LucideIcons.user, size: 14, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
                     'EXPORT PERSONA MASTER CARD',
@@ -1305,7 +1291,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                     ),
                   ),
                   const SizedBox(width: 6),
-                  HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 12, color: theme.colorScheme.primary),
+                  Icon(LucideIcons.arrowRight, size: 12, color: theme.colorScheme.primary),
                 ],
               ),
             ),
@@ -1328,7 +1314,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: Row(
                     children: [
-                      const HugeIcon(icon: HugeIcons.strokeRoundedSparkles, size: 13, color: Colors.white70),
+                      const Icon(LucideIcons.sparkles, size: 13, color: Colors.white70),
                       const SizedBox(width: 6),
                       const Text(
                         'CHOOSE EXPORT STYLE (12 TEMPLATES)',
@@ -1393,8 +1379,8 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              HugeIcon(
-                                icon: style.icon,
+                              Icon(
+                                style.icon,
                                 size: 16,
                                 color: isFocus ? theme.colorScheme.primary : Colors.white,
                               ),
@@ -1447,7 +1433,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                   MaterialPageRoute(builder: (_) => const StudioWrappedExportHub()),
                 );
               },
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 18, color: Colors.black),
+              icon: const Icon(LucideIcons.share2, size: 18, color: Colors.black),
               label: const Text(
                 'OPEN FULL EXPORT GALLERY',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.0),
@@ -1465,7 +1451,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               _progressController.reset();
               _progressController.forward();
             },
-            icon: const HugeIcon(icon: HugeIcons.strokeRoundedRepeat, size: 14, color: Colors.white60),
+            icon: const Icon(LucideIcons.repeat, size: 14, color: Colors.white60),
             label: const Text(
               'REPLAY RECAP STORY',
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white60, letterSpacing: 1.0),
@@ -1477,10 +1463,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   }
 
   // ─── HELPER WIDGETS ────────────────────────────────────────────────────────
-  Widget _buildStatPill(String label, String value, dynamic icon, ThemeData theme) {
+  Widget _buildStatPill(String label, String value, IconData icon, ThemeData theme) {
     return Column(
       children: [
-        HugeIcon(icon: icon, size: 16, color: theme.colorScheme.primary),
+        Icon(icon, size: 16, color: theme.colorScheme.primary),
         const SizedBox(height: 4),
         Text(
           value,
@@ -1504,7 +1490,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
     );
   }
 
-  Widget _buildMetricCard(String label, String value, dynamic icon, ThemeData theme, bool isSolid) {
+  Widget _buildMetricCard(String label, String value, IconData icon, ThemeData theme, bool isSolid) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1518,7 +1504,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
         children: [
           Row(
             children: [
-              HugeIcon(icon: icon, size: 14, color: theme.colorScheme.primary),
+              Icon(icon, size: 14, color: theme.colorScheme.primary),
               const Spacer(),
             ],
           ),
@@ -1549,7 +1535,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
     );
   }
 
-  Widget _buildDspStatRow(String title, String subtitle, dynamic icon, ThemeData theme, bool isSolid) {
+  Widget _buildDspStatRow(String title, String subtitle, IconData icon, ThemeData theme, bool isSolid) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -1559,7 +1545,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
       ),
       child: Row(
         children: [
-          HugeIcon(icon: icon, size: 18, color: theme.colorScheme.primary),
+          Icon(icon, size: 18, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

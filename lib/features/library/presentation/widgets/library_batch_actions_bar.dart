@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -68,8 +68,8 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                   AppHaptics.selectionClick();
                   onClose();
                 },
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedCancel01,
+                icon: Icon(
+                  LucideIcons.x,
                   size: 20,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -102,7 +102,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedPlay,
+                icon: LucideIcons.play,
                 tooltip: 'Play Next',
                 onTap: onPlayNext,
                 theme: theme,
@@ -112,7 +112,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedPlaylist01,
+                icon: LucideIcons.listMusic,
                 tooltip: 'Add to Queue',
                 onTap: onAddToQueue,
                 theme: theme,
@@ -122,7 +122,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedFolderAdd,
+                icon: LucideIcons.folderPlus,
                 tooltip: 'Add to Playlist',
                 onTap: onAddToPlaylist,
                 theme: theme,
@@ -132,7 +132,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
               _buildActionButton(
                 context: context,
                 isSolid: isSolid,
-                icon: HugeIcons.strokeRoundedTextFont,
+                icon: LucideIcons.type,
                 tooltip: 'Batch Edit Tags',
                 onTap: onBatchEditTags,
                 theme: theme,
@@ -143,8 +143,8 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                 context: context,
                 isSolid: isSolid,
                 icon: isAllSelected
-                    ? HugeIcons.strokeRoundedCheckmarkCircle02
-                    : HugeIcons.strokeRoundedCheckmarkSquare02,
+                    ? LucideIcons.circleCheck
+                    : LucideIcons.checkSquare,
                 tooltip: isAllSelected ? 'Deselect All' : 'Select All',
                 onTap: isAllSelected ? onDeselectAll : onSelectAll,
                 theme: theme,
@@ -161,7 +161,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
   Widget _buildActionButton({
     required BuildContext context,
     required bool isSolid,
-    required dynamic icon,
+    required IconData icon,
     required String tooltip,
     required VoidCallback onTap,
     required ThemeData theme,
@@ -174,8 +174,8 @@ class LibraryBatchActionsBar extends ConsumerWidget {
         AppHaptics.lightImpact();
         onTap();
       },
-      icon: HugeIcon(
-        icon: icon,
+      icon: Icon(
+        icon,
         size: 20,
         color: isActive ? primary : theme.colorScheme.onSurface,
       ),

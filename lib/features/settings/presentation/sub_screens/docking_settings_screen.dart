@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -43,8 +43,8 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
         title: const Text('STUDIO WORKSTATION & DOCKING'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -63,7 +63,7 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
             _buildSectionHeader(
               context,
               'DESKTOP & SYSTEM TRAY INTEGRATION',
-              HugeIcons.strokeRoundedSlidersHorizontal,
+              LucideIcons.slidersHorizontal,
             ),
             const SizedBox(height: 8),
             _buildDesktopTrayCard(context, theme, primary, storage, isSolid),
@@ -71,13 +71,13 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
           ],
 
           // ─── 3. DOCKING MODE OVERVIEW ───────────────────────────────────────
-          _buildSectionHeader(context, 'DOCKING MODE LAUNCHER', HugeIcons.strokeRoundedCar01),
+          _buildSectionHeader(context, 'DOCKING MODE LAUNCHER', LucideIcons.car),
           const SizedBox(height: 8),
           _buildDeskDockingCard(context, isSolid, isDesktop),
           const SizedBox(height: 20),
 
           // ─── 4. DISPLAY BEHAVIOR & FEATURES ─────────────────────────────────
-          _buildSectionHeader(context, 'DISPLAY BEHAVIOR & FEATURES', HugeIcons.strokeRoundedTv01),
+          _buildSectionHeader(context, 'DISPLAY BEHAVIOR & FEATURES', LucideIcons.tv),
           const SizedBox(height: 8),
           _buildFeaturesCard(context, isSolid),
         ],
@@ -116,8 +116,8 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedComputer,
+                child: Icon(
+                  LucideIcons.monitor,
                   size: 18,
                   color: primary,
                 ),
@@ -218,11 +218,11 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,
@@ -412,8 +412,8 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedCar01,
+                child: const Icon(
+                  LucideIcons.car,
                   size: 22,
                   color: Color(0xFFFF9F0A),
                 ),
@@ -461,8 +461,8 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedMaximize01,
+              icon: Icon(
+                LucideIcons.maximize2,
                 size: 18,
                 color: theme.colorScheme.onPrimary,
               ),
@@ -493,21 +493,21 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
         children: [
           _buildFeatureRow(
             context,
-            icon: HugeIcons.strokeRoundedClock01,
+            icon: LucideIcons.clock,
             title: 'High-Contrast Studio Clock',
             subtitle: 'Large digital clock with seconds precision for studio desks and vehicle docks.',
           ),
           const Divider(height: 20),
           _buildFeatureRow(
             context,
-            icon: HugeIcons.strokeRoundedAudioWaveform,
+            icon: LucideIcons.audioLines,
             title: 'Dual Analog VU Meters',
             subtitle: 'Real-time ballistic needle response for Left & Right audio channels.',
           ),
           const Divider(height: 20),
           _buildFeatureRow(
             context,
-            icon: HugeIcons.strokeRoundedPlayCircle,
+            icon: LucideIcons.playCircle,
             title: 'Extra-Large Touch Targets',
             subtitle: 'Oversized playback controls optimized for quick tap interactions.',
           ),
@@ -518,7 +518,7 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
 
   Widget _buildFeatureRow(
     BuildContext context, {
-    required dynamic icon,
+    required IconData icon,
     required String title,
     required String subtitle,
   }) {
@@ -540,7 +540,7 @@ class _DockingSettingsScreenState extends ConsumerState<DockingSettingsScreen> {
             ),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: HugeIcon(icon: icon, size: 16, color: primary),
+          child: Icon(icon, size: 16, color: primary),
         ),
         const SizedBox(width: 12),
         Expanded(

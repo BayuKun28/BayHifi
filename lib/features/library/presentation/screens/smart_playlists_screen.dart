@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -88,9 +88,9 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
         title: const Text('DYNAMIC SMART PLAYLISTS'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 22,
+          icon: Icon(
+            LucideIcons.arrowLeft,
+            size: 20,
             color: theme.colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).pop(),
@@ -98,9 +98,9 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
         actions: [
           M3EIconButton(
             variant: M3EIconButtonVariant.standard,
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedRefresh,
-              size: 22,
+            icon: Icon(
+              LucideIcons.refreshCw,
+              size: 20,
               color: theme.colorScheme.onSurfaceVariant,
             ),
             tooltip: 'Restore Default Presets',
@@ -108,9 +108,9 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
           ),
           M3EIconButton(
             variant: M3EIconButtonVariant.standard,
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedAddCircle,
-              size: 22,
+            icon: Icon(
+              LucideIcons.plusCircle,
+              size: 20,
               color: primary,
             ),
             tooltip: 'Create Smart Rule',
@@ -150,8 +150,8 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedFilterHorizontal,
+                      child: Icon(
+                        LucideIcons.slidersHorizontal,
                         size: 22,
                         color: primary,
                       ),
@@ -184,7 +184,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                   ),
                   M3EButton.tonal(
                     onPressed: () => CreateSmartPlaylistDialog.show(context),
-                    icon: HugeIcon(icon: HugeIcons.strokeRoundedAddCircle, size: 14, color: primary),
+                    icon: Icon(LucideIcons.plusCircle, size: 14, color: primary),
                     label: const Text('Add Rule', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                   ),
                 ],
@@ -215,8 +215,8 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedFilterHorizontal,
+                    Icon(
+                      LucideIcons.slidersHorizontal,
                       size: 36,
                       color: theme.dividerColor,
                     ),
@@ -237,7 +237,7 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                     const SizedBox(height: 16),
                     M3EButton.tonal(
                       onPressed: _restorePresets,
-                      icon: HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 15, color: primary),
+                      icon: Icon(LucideIcons.refreshCw, size: 15, color: primary),
                       label: const Text('RESTORE PRESETS'),
                     ),
                   ],
@@ -272,8 +272,8 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Center(
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedFilterHorizontal,
+                          child: Icon(
+                            LucideIcons.slidersHorizontal,
                             color: primary,
                             size: 20,
                           ),
@@ -325,9 +325,9 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                         children: [
                           M3EIconButton(
                             variant: M3EIconButtonVariant.standard,
-                            icon: HugeIcon(
-                              icon: HugeIcons.strokeRoundedMoreVertical,
-                              size: 22,
+                            icon: Icon(
+                              LucideIcons.moreVertical,
+                              size: 20,
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
                             onPressed: () {
@@ -338,8 +338,8 @@ class _SmartPlaylistsScreenState extends ConsumerState<SmartPlaylistsScreen> {
                               );
                             },
                           ),
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedArrowRight01,
+                          Icon(
+                            LucideIcons.chevronRight,
                             size: 16,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                           ),

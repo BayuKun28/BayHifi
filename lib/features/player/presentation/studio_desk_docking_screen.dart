@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
@@ -19,12 +19,12 @@ import 'widgets/parallax_artwork_card.dart';
 import 'widgets/spectrum_visualizer.dart';
 
 enum DeskVisualMode {
-  artwork('ARTWORK', HugeIcons.strokeRoundedAlbum01),
-  vuMeters('VU METERS', HugeIcons.strokeRoundedSlidersVertical),
-  spectrum('SPECTRUM', HugeIcons.strokeRoundedAudioWaveform);
+  artwork('ARTWORK', LucideIcons.disc),
+  vuMeters('VU METERS', LucideIcons.sliders),
+  spectrum('SPECTRUM', LucideIcons.audioLines);
 
   final String label;
-  final dynamic icon;
+  final IconData icon;
   const DeskVisualMode(this.label, this.icon);
 }
 
@@ -211,8 +211,8 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedMinimize01,
+                  Icon(
+                    LucideIcons.minimize2,
                     size: 14,
                     color: theme.colorScheme.secondary,
                   ),
@@ -299,8 +299,8 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: _visualMode.icon,
+                      Icon(
+                        _visualMode.icon,
                         size: 13,
                         color: primary,
                       ),
@@ -700,8 +700,8 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               AppHaptics.selectionClick();
               playerNotifier.toggleShuffle();
             },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedShuffle,
+            icon: Icon(
+              LucideIcons.shuffle,
               size: 22,
               color: playback.isShuffle ? primary : theme.colorScheme.onSurfaceVariant,
             ),
@@ -723,8 +723,8 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               AppHaptics.lightImpact();
               playerNotifier.skipPrevious();
             },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedPrevious,
+            icon: Icon(
+              LucideIcons.skipBack,
               size: 24,
               color: theme.colorScheme.onSurface,
             ),
@@ -732,21 +732,13 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           ),
         ),
 
-        // Massive Glowing Centerpiece Play/Pause
+        // Solid Centerpiece Play/Pause
         Container(
           width: 68,
           height: 68,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: primary,
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: isSolid ? 0.35 : 0.5),
-                blurRadius: 20,
-                spreadRadius: 1,
-                offset: const Offset(0, 3),
-              ),
-            ],
           ),
           child: M3EIconButton(
             variant: M3EIconButtonVariant.standard,
@@ -763,8 +755,8 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
                       color: theme.colorScheme.onPrimary,
                     ),
                   )
-                : HugeIcon(
-                    icon: playback.isPlaying ? HugeIcons.strokeRoundedPause : HugeIcons.strokeRoundedPlay,
+                : Icon(
+                    playback.isPlaying ? LucideIcons.pause : LucideIcons.play,
                     color: theme.colorScheme.onPrimary,
                     size: 30,
                   ),
@@ -786,8 +778,8 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               AppHaptics.lightImpact();
               playerNotifier.skipNext();
             },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedNext,
+            icon: Icon(
+              LucideIcons.skipForward,
               size: 24,
               color: theme.colorScheme.onSurface,
             ),
@@ -811,10 +803,10 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
               AppHaptics.selectionClick();
               playerNotifier.toggleRepeatMode();
             },
-            icon: HugeIcon(
-              icon: playback.repeatMode == PlaybackRepeatMode.one
-                  ? HugeIcons.strokeRoundedRepeatOne01
-                  : HugeIcons.strokeRoundedRepeat,
+            icon: Icon(
+              playback.repeatMode == PlaybackRepeatMode.one
+                  ? LucideIcons.repeat1
+                  : LucideIcons.repeat,
               size: 22,
               color: playback.repeatMode != PlaybackRepeatMode.off ? primary : theme.colorScheme.onSurfaceVariant,
             ),
@@ -848,7 +840,7 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedSlidersVertical, size: 13, color: primary),
+              Icon(LucideIcons.sliders, size: 13, color: primary),
               const SizedBox(width: 4),
               Text(
                 'DSP',
@@ -902,8 +894,8 @@ class _StudioDeskDockingScreenState extends ConsumerState<StudioDeskDockingScree
           ),
           const SizedBox(width: 8),
           // Quick Volume Slider
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedVolumeHigh,
+          Icon(
+            LucideIcons.volume2,
             size: 15,
             color: theme.colorScheme.onSurfaceVariant,
           ),

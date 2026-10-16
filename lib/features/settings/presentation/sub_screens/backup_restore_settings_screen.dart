@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -118,7 +118,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, size: 20, color: primary),
+                      Icon(LucideIcons.refreshCw, size: 20, color: primary),
                       const SizedBox(width: 8),
                       Text(
                         'RESTORE FROM BACKUP',
@@ -165,8 +165,8 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                               children: [
                                 Row(
                                   children: [
-                                    HugeIcon(
-                                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                                    Icon(
+                                      LucideIcons.checkCircle2,
                                       size: 16,
                                       color: primary,
                                     ),
@@ -265,8 +265,8 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
         title: const Text('BACKUP & RESTORE'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -281,13 +281,13 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
           const SizedBox(height: 18),
 
           // ─── 2. CREATE SNAPSHOT ARCHIVE ─────────────────────────────────────
-          _buildSectionHeader(context, 'CREATE SNAPSHOT ARCHIVE', HugeIcons.strokeRoundedCloudDownload),
+          _buildSectionHeader(context, 'CREATE SNAPSHOT ARCHIVE', LucideIcons.download),
           const SizedBox(height: 8),
           _buildExportCard(context, theme, primary, isSolid),
           const SizedBox(height: 20),
 
           // ─── 3. RESTORE FROM SNAPSHOT ───────────────────────────────────────
-          _buildSectionHeader(context, 'RESTORE FROM SNAPSHOT', HugeIcons.strokeRoundedCloudSync),
+          _buildSectionHeader(context, 'RESTORE FROM SNAPSHOT', LucideIcons.refreshCw),
           const SizedBox(height: 8),
           _buildRestoreCard(context, theme, primary, isSolid),
         ],
@@ -349,7 +349,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
               Expanded(
                 child: M3EButton.outlined(
                   onPressed: _copyBackupJson,
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 14, color: primary),
+                  icon: Icon(LucideIcons.copy, size: 14, color: primary),
                   label: Text('Copy JSON', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: primary)),
                 ),
               ),
@@ -357,7 +357,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
               Expanded(
                 child: M3EButton.filled(
                   onPressed: _exportBackupFile,
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCloudDownload, size: 14, color: theme.colorScheme.onPrimary),
+                  icon: Icon(LucideIcons.download, size: 14, color: theme.colorScheme.onPrimary),
                   label: Text('Save .bayhifi File', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: theme.colorScheme.onPrimary)),
                 ),
               ),
@@ -402,7 +402,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(icon: HugeIcons.strokeRoundedCloudSync, size: 24, color: primary),
+                child: Icon(LucideIcons.refreshCw, size: 24, color: primary),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -425,7 +425,7 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                   ],
                 ),
               ),
-              HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 16, color: theme.colorScheme.onSurfaceVariant),
+              Icon(LucideIcons.chevronRight, size: 16, color: theme.colorScheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -503,8 +503,8 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDatabase,
+                child: Icon(
+                  LucideIcons.database,
                   size: 18,
                   color: primary,
                 ),
@@ -594,11 +594,11 @@ class _BackupRestoreSettingsScreenState extends ConsumerState<BackupRestoreSetti
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,

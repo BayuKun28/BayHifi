@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../controllers/eq_controller.dart';
@@ -77,8 +77,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
             // Header
             Row(
               children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedSparkles,
+                Icon(
+                  LucideIcons.sparkles,
                   size: 16,
                   color: theme.colorScheme.primary,
                 ),
@@ -102,8 +102,8 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   borderRadius: BorderRadius.circular(4),
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
+                    child: Icon(
+                      LucideIcons.x,
                       size: 16,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -217,7 +217,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
               onPressed: () {
                 _importTextController.text = _demoSquiglinkText;
               },
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedFile01, size: 13, color: theme.colorScheme.onSurfaceVariant),
+              icon: Icon(LucideIcons.fileText, size: 13, color: theme.colorScheme.onSurfaceVariant),
               label: const Text(
                 'LOAD DEMO',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -232,7 +232,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   });
                 }
               },
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedClipboard, size: 13, color: theme.colorScheme.primary),
+              icon: Icon(LucideIcons.clipboard, size: 13, color: theme.colorScheme.primary),
               label: const Text(
                 'PASTE',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -263,7 +263,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   );
                 }
               },
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle02, size: 14, color: theme.colorScheme.onPrimary),
+              icon: Icon(LucideIcons.circleCheck, size: 14, color: theme.colorScheme.onPrimary),
               label: const Text(
                 'APPLY FILTERS',
                 style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w900),
@@ -316,7 +316,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   ),
                 );
               },
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedCopy01, size: 13, color: theme.colorScheme.onPrimary),
+              icon: Icon(LucideIcons.copy, size: 13, color: theme.colorScheme.onPrimary),
               label: const Text(
                 'COPY SQUIGLINK',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
@@ -333,7 +333,7 @@ Filter 10: ON PK Fc 16000 Hz Gain -1.0 dB Q 1.414''';
                   ),
                 );
               },
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedAudioWaveform, size: 13, color: theme.colorScheme.secondary),
+              icon: Icon(LucideIcons.audioWaveform, size: 13, color: theme.colorScheme.secondary),
               label: const Text(
                 'COPY WAVELET',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -45,8 +45,8 @@ class LibraryDownloadsTab extends ConsumerWidget {
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDownload01,
+                child: Icon(
+                  LucideIcons.download,
                   size: 36,
                   color: primary,
                 ),
@@ -75,7 +75,7 @@ class LibraryDownloadsTab extends ConsumerWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 ),
-                icon: const HugeIcon(icon: HugeIcons.strokeRoundedLink01, size: 16, color: Colors.white),
+                icon: const Icon(LucideIcons.link, size: 16, color: Colors.white),
                 label: const Text('Import from Link', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
                 onPressed: () {
                   AppHaptics.lightImpact();
@@ -307,8 +307,8 @@ class LibraryDownloadsTab extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedCancel01,
+                icon: const Icon(
+                  LucideIcons.x,
                   size: 16,
                   color: Colors.grey,
                 ),
@@ -415,8 +415,8 @@ class LibraryDownloadsTab extends ConsumerWidget {
             ),
           ),
           IconButton(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedReload,
+            icon: Icon(
+              LucideIcons.rotateCw,
               size: 16,
               color: theme.colorScheme.primary,
             ),
@@ -424,8 +424,8 @@ class LibraryDownloadsTab extends ConsumerWidget {
             tooltip: 'Retry Download',
           ),
           IconButton(
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedCancel01,
+            icon: const Icon(
+              LucideIcons.x,
               size: 16,
               color: Colors.grey,
             ),
@@ -514,8 +514,8 @@ class LibraryDownloadsTab extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlay,
+                icon: Icon(
+                  LucideIcons.play,
                   size: 18,
                   color: theme.colorScheme.primary,
                 ),
@@ -529,8 +529,8 @@ class LibraryDownloadsTab extends ConsumerWidget {
                 tooltip: 'Play Now',
               ),
               IconButton(
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedMoreVertical,
+                icon: Icon(
+                  LucideIcons.moreVertical,
                   size: 18,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),

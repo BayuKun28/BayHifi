@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../controllers/cloud_auth_controller.dart';
@@ -80,8 +80,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
         SnackBar(
           content: Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+              Icon(
+                LucideIcons.circleCheck,
                 size: 18,
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -105,8 +105,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
           backgroundColor: Theme.of(context).colorScheme.errorContainer,
           content: Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedAlertCircle,
+              Icon(
+                LucideIcons.alertCircle,
                 size: 18,
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -165,8 +165,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCloudCheck,
+                    child: Icon(
+                      LucideIcons.cloud,
                       size: 20,
                       color: primary,
                     ),
@@ -197,8 +197,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
+                    icon: Icon(
+                      LucideIcons.x,
                       size: 18,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -213,8 +213,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   Expanded(
                     child: _isRegister
                         ? M3EButton.outlined(
-                            icon: HugeIcon(
-                              icon: HugeIcons.strokeRoundedLogin01,
+                            icon: Icon(
+                              LucideIcons.logIn,
                               size: 16,
                               color: theme.colorScheme.primary,
                             ),
@@ -227,8 +227,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                                   },
                           )
                         : M3EButton.filled(
-                            icon: HugeIcon(
-                              icon: HugeIcons.strokeRoundedLogin01,
+                            icon: Icon(
+                              LucideIcons.logIn,
                               size: 16,
                               color: theme.colorScheme.onPrimary,
                             ),
@@ -245,8 +245,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   Expanded(
                     child: _isRegister
                         ? M3EButton.filled(
-                            icon: HugeIcon(
-                              icon: HugeIcons.strokeRoundedUserAdd01,
+                            icon: Icon(
+                              LucideIcons.userPlus,
                               size: 16,
                               color: theme.colorScheme.onPrimary,
                             ),
@@ -259,8 +259,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                                   },
                           )
                         : M3EButton.outlined(
-                            icon: HugeIcon(
-                              icon: HugeIcons.strokeRoundedUserAdd01,
+                            icon: Icon(
+                              LucideIcons.userPlus,
                               size: 16,
                               color: theme.colorScheme.primary,
                             ),
@@ -288,8 +288,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedServer,
+                    child: Icon(
+                      LucideIcons.server,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -314,8 +314,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedUser,
+                    child: Icon(
+                      LucideIcons.user,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -341,8 +341,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedLockKey,
+                    child: Icon(
+                      LucideIcons.lock,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -355,8 +355,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                       AppHaptics.selectionClick();
                       setState(() => _obscurePassword = !_obscurePassword);
                     },
-                    icon: HugeIcon(
-                      icon: _obscurePassword ? HugeIcons.strokeRoundedViewOffSlash : HugeIcons.strokeRoundedView,
+                    icon: Icon(
+                      _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -382,8 +382,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                     prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
                     prefixIcon: Padding(
                       padding: const EdgeInsets.only(left: 14, right: 8),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedMail01,
+                      child: Icon(
+                        LucideIcons.mail,
                         size: 15,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -413,8 +413,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                   ),
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedAlertCircle,
+                      Icon(
+                        LucideIcons.alertCircle,
                         size: 16,
                         color: theme.colorScheme.error,
                       ),
@@ -449,8 +449,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                                 color: theme.colorScheme.onPrimary,
                               ),
                             )
-                          : HugeIcon(
-                              icon: HugeIcons.strokeRoundedUserAdd01,
+                          : Icon(
+                              LucideIcons.userPlus,
                               size: 18,
                               color: theme.colorScheme.onPrimary,
                             ),
@@ -467,8 +467,8 @@ class _CloudAuthDialogState extends ConsumerState<CloudAuthDialog> {
                                 color: theme.colorScheme.onPrimary,
                               ),
                             )
-                          : HugeIcon(
-                              icon: HugeIcons.strokeRoundedLogin01,
+                          : Icon(
+                              LucideIcons.logIn,
                               size: 18,
                               color: theme.colorScheme.onPrimary,
                             ),

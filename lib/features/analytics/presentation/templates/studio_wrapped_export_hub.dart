@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../data/playback_analytics_service.dart';
 import '../../data/wrapped_image_exporter.dart';
@@ -33,12 +33,12 @@ extension WrappedTemplateCategoryExt on WrappedTemplateCategory {
     }
   }
 
-  dynamic get icon {
+  IconData get icon {
     switch (this) {
       case WrappedTemplateCategory.allInOne:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
       case WrappedTemplateCategory.dedicatedFocus:
-        return HugeIcons.strokeRoundedTarget01;
+        return LucideIcons.target;
     }
   }
 }
@@ -109,32 +109,32 @@ extension WrappedTemplateStyleExt on WrappedTemplateStyle {
     }
   }
 
-  dynamic get icon {
+  IconData get icon {
     switch (this) {
       case WrappedTemplateStyle.receipt:
-        return HugeIcons.strokeRoundedInvoice01;
+        return LucideIcons.receipt;
       case WrappedTemplateStyle.stickers:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
       case WrappedTemplateStyle.bento:
-        return HugeIcons.strokeRoundedGrid;
+        return LucideIcons.layoutGrid;
       case WrappedTemplateStyle.cassette:
-        return HugeIcons.strokeRoundedDisc;
+        return LucideIcons.disc;
       case WrappedTemplateStyle.abstractAura:
-        return HugeIcons.strokeRoundedAudioWave01;
+        return LucideIcons.audioWaveform;
       case WrappedTemplateStyle.vinylGatefold:
-        return HugeIcons.strokeRoundedRecord;
+        return LucideIcons.disc3;
       case WrappedTemplateStyle.concertTicket:
-        return HugeIcons.strokeRoundedTicket01;
+        return LucideIcons.ticket;
       case WrappedTemplateStyle.cyberSpec:
-        return HugeIcons.strokeRoundedCpu;
+        return LucideIcons.cpu;
       case WrappedTemplateStyle.personaCard:
-        return HugeIcons.strokeRoundedUser;
+        return LucideIcons.user;
       case WrappedTemplateStyle.lineupPoster:
-        return HugeIcons.strokeRoundedMic01;
+        return LucideIcons.mic;
       case WrappedTemplateStyle.genreSpectrum:
-        return HugeIcons.strokeRoundedSlidersVertical;
+        return LucideIcons.sliders;
       case WrappedTemplateStyle.topTracksChart:
-        return HugeIcons.strokeRoundedAward01;
+        return LucideIcons.award;
     }
   }
 }
@@ -182,7 +182,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 20, color: Colors.white),
+          icon: const Icon(LucideIcons.arrowLeft, size: 20, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Column(
@@ -210,7 +210,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
         actions: [
           // Time Filter Dropdown / Menu
           PopupMenuButton<RecapTimeFilter>(
-            icon: const HugeIcon(icon: HugeIcons.strokeRoundedCalendar03, size: 18, color: Colors.white),
+            icon: const Icon(LucideIcons.calendar, size: 18, color: Colors.white),
             tooltip: 'Select Time Range',
             onSelected: (filter) {
               ref.read(studioWrappedFilterProvider.notifier).state = filter;
@@ -272,8 +272,8 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            HugeIcon(
-                              icon: cat.icon,
+                            Icon(
+                              cat.icon,
                               size: 14,
                               color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                             ),
@@ -336,8 +336,8 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: style.icon,
+                            Icon(
+                              style.icon,
                               size: 13,
                               color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                             ),
@@ -394,8 +394,8 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                         _isReceiptDark = !_isReceiptDark;
                       });
                     },
-                    icon: HugeIcon(
-                      icon: _isReceiptDark ? HugeIcons.strokeRoundedSun01 : HugeIcons.strokeRoundedMoon,
+                    icon: Icon(
+                      _isReceiptDark ? LucideIcons.sun : LucideIcons.moon,
                       size: 20,
                       color: theme.colorScheme.primary,
                     ),
@@ -424,7 +424,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                             )
-                          : const HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 18, color: Colors.black),
+                          : const Icon(LucideIcons.share2, size: 18, color: Colors.black),
                       label: Text(
                         _isExporting ? 'GENERATING HD CARD...' : 'SHARE RECAP STORY',
                         style: const TextStyle(

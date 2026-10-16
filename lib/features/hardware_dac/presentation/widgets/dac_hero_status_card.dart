@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../domain/models/dac_device.dart';
 import '../controllers/dac_bridge_state.dart';
 
-/// Pure Material 3 Expressive Hero Card displaying the connected USB DAC status,
+/// Solid Matte Hero Card displaying the connected USB DAC status,
 /// hardware chipset capabilities, and real-time EQ bypass toggle.
 class DacHeroStatusCard extends StatelessWidget {
   const DacHeroStatusCard({
@@ -31,19 +31,17 @@ class DacHeroStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final isConnected = device != null && status != DacBridgeStatus.disconnected;
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
+        color: const Color(0xFF16181F),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: hasUnsavedChanges
-              ? colorScheme.tertiary.withValues(alpha: 0.8)
-              : colorScheme.outlineVariant.withValues(alpha: 0.5),
-          width: hasUnsavedChanges ? 1.5 : 1.0,
+              ? const Color(0xFFF59E0B)
+              : const Color(0xFF262936),
+          width: hasUnsavedChanges ? 1.4 : 1.0,
         ),
       ),
       child: Padding(
@@ -55,20 +53,22 @@ class DacHeroStatusCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
                     color: isConnected
-                        ? colorScheme.primaryContainer
-                        : colorScheme.surfaceContainerHighest,
+                        ? const Color(0xFF222532)
+                        : const Color(0xFF1E212B),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isConnected ? const Color(0xFF383D50) : const Color(0xFF262936),
+                      width: 0.8,
+                    ),
                   ),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedUsb,
-                    color: isConnected
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurfaceVariant,
-                    size: 22,
+                  child: Icon(
+                    LucideIcons.usb,
+                    color: isConnected ? Colors.white : const Color(0xFF8A9A90),
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -78,32 +78,34 @@ class DacHeroStatusCard extends StatelessWidget {
                     children: [
                       Text(
                         device?.formattedTitle ?? 'No DAC Connected',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 3),
                       Row(
                         children: [
                           Container(
-                            width: 8,
-                            height: 8,
+                            width: 7,
+                            height: 7,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isConnected
-                                  ? const Color(0xFF10B981) // Precision Mint
-                                  : colorScheme.outline,
+                                  ? const Color(0xFF10B981) // Studio Mint
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             isConnected ? 'Active USB HID Connection' : 'Ready to Connect',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 12,
+                            style: const TextStyle(
+                              color: Color(0xFF8A9A90),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -111,58 +113,83 @@ class DacHeroStatusCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                M3EIconButton(
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedRefresh,
-                    size: 20,
+                Tooltip(
+                  message: 'Sync with Hardware',
+                  child: InkWell(
+                    onTap: onRefresh,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E212B),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF262936), width: 0.8),
+                      ),
+                      child: const Icon(
+                        LucideIcons.refreshCw,
+                        size: 15,
+                        color: Color(0xFFA1B2A7),
+                      ),
+                    ),
                   ),
-                  tooltip: 'Sync with Hardware',
-                  onPressed: onRefresh,
                 ),
               ],
             ),
 
             if (kIsWeb && !isConnected) ...[
               const SizedBox(height: 14),
-              M3EButton.filled(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedUsb,
-                  size: 18,
+              SizedBox(
+                height: 38,
+                child: ElevatedButton.icon(
+                  onPressed: onConnectWebHid,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF252834),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Color(0xFF2E3242), width: 1),
+                    ),
+                  ),
+                  icon: const Icon(LucideIcons.usb, size: 16),
+                  label: const Text(
+                    'PAIR PHYSICAL USB DAC (WEBHID)',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                  ),
                 ),
-                label: const Text('PAIR PHYSICAL USB DAC (WEBHID)'),
-                onPressed: onConnectWebHid,
               ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // Row 2: Badges (Chipset, Resolution, Flash status)
             Wrap(
-              spacing: 8,
+              spacing: 6,
               runSpacing: 6,
               children: [
                 _buildBadge(
                   context,
                   label: device?.chipset.displayName ?? 'Universal DSP',
-                  icon: HugeIcons.strokeRoundedCpu,
+                  icon: LucideIcons.cpu,
                 ),
                 _buildBadge(
                   context,
                   label: device?.audioCapabilityString ?? '32-bit / 384kHz',
-                  icon: HugeIcons.strokeRoundedSlidersVertical,
+                  icon: LucideIcons.sliders,
                 ),
                 if (hasUnsavedChanges)
                   _buildBadge(
                     context,
                     label: 'Unsaved Flash Changes',
-                    icon: HugeIcons.strokeRoundedAlertCircle,
+                    icon: LucideIcons.alertCircle,
                     isHighlight: true,
                   ),
               ],
             ),
 
             const SizedBox(height: 14),
-            const Divider(height: 1),
+            const Divider(height: 1, color: Color(0xFF262936)),
             const SizedBox(height: 14),
 
             // Row 3: Hardware EQ Switch & Preamp info
@@ -172,17 +199,19 @@ class DacHeroStatusCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Hardware DSP Processing',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       isEqEnabled ? '5-Band PEQ Active on Hardware' : 'Hardware EQ Bypassed',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      style: const TextStyle(
+                        color: Color(0xFF8A9A90),
                         fontSize: 11,
                       ),
                     ),
@@ -203,43 +232,42 @@ class DacHeroStatusCard extends StatelessWidget {
   Widget _buildBadge(
     BuildContext context, {
     required String label,
-    required dynamic icon,
+    required IconData icon,
     bool isHighlight = false,
   }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: isHighlight
-            ? colorScheme.tertiaryContainer.withValues(alpha: 0.6)
-            : colorScheme.surfaceContainerHighest,
+            ? const Color(0xFF2A2416)
+            : const Color(0xFF1E212B),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isHighlight
-              ? colorScheme.tertiary
-              : colorScheme.outlineVariant.withValues(alpha: 0.4),
+              ? const Color(0xFFF59E0B)
+              : const Color(0xFF262936),
+          width: 0.8,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          HugeIcon(
-            icon: icon,
-            size: 14,
+          Icon(
+            icon,
+            size: 13,
             color: isHighlight
-                ? colorScheme.onTertiaryContainer
-                : colorScheme.onSurfaceVariant,
+                ? const Color(0xFFFBBF24)
+                : const Color(0xFFA1B2A7),
           ),
           const SizedBox(width: 6),
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: TextStyle(
               color: isHighlight
-                  ? colorScheme.onTertiaryContainer
-                  : colorScheme.onSurfaceVariant,
-              fontWeight: isHighlight ? FontWeight.bold : FontWeight.w500,
+                  ? const Color(0xFFFBBF24)
+                  : const Color(0xFFA1B2A7),
+              fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
+              fontSize: 11,
             ),
           ),
         ],

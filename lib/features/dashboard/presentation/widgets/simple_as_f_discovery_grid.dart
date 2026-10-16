@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
@@ -39,8 +39,8 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(13),
               ),
               child: const Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedMusicNote01,
+                child: Icon(
+                  LucideIcons.music,
                   size: 20,
                   color: SimpleAsFTheme.emeraldMint,
                 ),
@@ -75,19 +75,37 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
       );
     }
 
-    final displayAlbums = albums.take(6).toList();
+    final displayAlbums = albums.take(10).toList();
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.78,
-      ),
-      itemCount: displayAlbums.length,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final int crossAxisCount;
+        if (width >= 1200) {
+          crossAxisCount = 5;
+        } else if (width >= 900) {
+          crossAxisCount = 4;
+        } else if (width >= 600) {
+          crossAxisCount = 3;
+        } else {
+          crossAxisCount = 2;
+        }
+
+        final count = crossAxisCount == 2
+            ? (displayAlbums.length > 6 ? 6 : displayAlbums.length)
+            : displayAlbums.length;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.78,
+          ),
+          itemCount: count,
       itemBuilder: (context, index) {
         final album = displayAlbums[index];
         final firstTrack = album.tracks.isNotEmpty ? album.tracks.first : null;
@@ -134,15 +152,15 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
                             width: double.infinity,
                             height: double.infinity,
                             borderRadius: BorderRadius.circular(19),
-                            fallbackIcon: HugeIcons.strokeRoundedAlbum02,
+                            fallbackIcon: LucideIcons.disc,
                             fallbackIconSize: 32,
                           )
                         else
                           Container(
                             color: const Color(0xFF14221A),
                             child: const Center(
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedAlbum02,
+                              child: Icon(
+                                LucideIcons.disc,
                                 size: 32,
                                 color: SimpleAsFTheme.sageSlate,
                               ),
@@ -178,8 +196,8 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
                                 ],
                               ),
                               child: Center(
-                                child: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedPlay,
+                                child: Icon(
+                                  LucideIcons.play,
                                   size: 16,
                                   color: Theme.of(context).colorScheme.onPrimary,
                                 ),
@@ -221,6 +239,8 @@ class SimpleAsFDiscoveryGrid extends ConsumerWidget {
             ],
           ),
         );
+      },
+    );
       },
     );
   }

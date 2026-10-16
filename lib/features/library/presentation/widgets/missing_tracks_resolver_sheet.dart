@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../player/domain/track.dart';
@@ -149,8 +149,8 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
             // Header
             Row(
               children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedFolderSync,
+                Icon(
+                  LucideIcons.folderSync,
                   size: 20,
                   color: primary,
                 ),
@@ -181,8 +181,8 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
                 ),
                 IconButton(
                   onPressed: _scanForMissingTracks,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedRefresh,
+                  icon: Icon(
+                    LucideIcons.refreshCw,
                     size: 18,
                     color: primary,
                   ),
@@ -207,8 +207,8 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      Icon(
+                        LucideIcons.circleCheck,
                         size: 44,
                         color: const Color(0xFF00E676),
                       ),
@@ -244,8 +244,8 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
                 ),
                 child: Row(
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedAlert02,
+                    Icon(
+                      LucideIcons.alertTriangle,
                       size: 16,
                       color: const Color(0xFFFF9F0A),
                     ),
@@ -290,10 +290,10 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
                                   .withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: HugeIcon(
-                              icon: match != null
-                                  ? HugeIcons.strokeRoundedFolderSync
-                                  : HugeIcons.strokeRoundedFileRemove,
+                            child: Icon(
+                              match != null
+                                  ? LucideIcons.folderSync
+                                  : LucideIcons.fileX,
                               size: 16,
                               color: match != null ? primary : theme.colorScheme.error,
                             ),
@@ -357,8 +357,8 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _removeMissingTracks,
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedDelete02,
+                      icon: Icon(
+                        LucideIcons.trash2,
                         size: 14,
                         color: theme.colorScheme.error,
                       ),
@@ -382,8 +382,8 @@ class _MissingTracksResolverSheetState extends ConsumerState<MissingTracksResolv
                     Expanded(
                       child: FilledButton.icon(
                         onPressed: _relinkMatchedTracks,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedLink01,
+                        icon: Icon(
+                          LucideIcons.link,
                           size: 14,
                           color: theme.colorScheme.onPrimary,
                         ),

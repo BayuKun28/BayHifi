@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_haptics.dart';
@@ -83,12 +83,7 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
         );
         break;
       case ArtworkGestureAction.openQueue:
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => const NowPlayingQueueSheet(),
-        );
+        NowPlayingQueueSheet.show(context);
         break;
       case ArtworkGestureAction.viewFullArtwork:
         if (track != null) {
@@ -311,8 +306,8 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedFavourite,
+                              Icon(
+                                LucideIcons.heart,
                                 color: isFav
                                     ? const Color(0xFFFF2D55)
                                     : theme.colorScheme.onSurfaceVariant,
@@ -390,8 +385,8 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                HugeIcon(
-                                  icon: HugeIcons.strokeRoundedShuffle,
+                                Icon(
+                                  LucideIcons.shuffle,
                                   color: playback.isShuffle
                                       ? theme.colorScheme.primary
                                       : theme.colorScheme.onSurface.withValues(alpha: 0.55),
@@ -420,8 +415,8 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                     // Previous
                     M3EIconButton(
                       variant: M3EIconButtonVariant.standard,
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedPrevious,
+                      icon: Icon(
+                        LucideIcons.skipBack,
                         color: theme.colorScheme.onSurface,
                         size: 22,
                       ),
@@ -436,8 +431,7 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                     Material(
                       color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(14),
-                      elevation: 2,
-                      shadowColor: theme.colorScheme.primary.withValues(alpha: 0.35),
+                      elevation: 0,
                       child: InkWell(
                         onTap: () {
                           AppHaptics.lightImpact();
@@ -457,10 +451,10 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                                       color: theme.colorScheme.onPrimary,
                                     ),
                                   )
-                                : HugeIcon(
-                                    icon: playback.isPlaying
-                                        ? HugeIcons.strokeRoundedPause
-                                        : HugeIcons.strokeRoundedPlay,
+                                : Icon(
+                                    playback.isPlaying
+                                        ? LucideIcons.pause
+                                        : LucideIcons.play,
                                     color: theme.colorScheme.onPrimary,
                                     size: 22,
                                   ),
@@ -473,8 +467,8 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                     // Next
                     M3EIconButton(
                       variant: M3EIconButtonVariant.standard,
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedNext,
+                      icon: Icon(
+                        LucideIcons.skipForward,
                         color: theme.colorScheme.onSurface,
                         size: 22,
                       ),
@@ -526,10 +520,10 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                HugeIcon(
-                                  icon: playback.repeatMode == PlaybackRepeatMode.one
-                                      ? HugeIcons.strokeRoundedRepeatOne01
-                                      : HugeIcons.strokeRoundedRepeat,
+                                Icon(
+                                  playback.repeatMode == PlaybackRepeatMode.one
+                                      ? LucideIcons.repeat1
+                                      : LucideIcons.repeat,
                                   color: playback.repeatMode != PlaybackRepeatMode.off
                                       ? theme.colorScheme.primary
                                       : theme.colorScheme.onSurface.withValues(alpha: 0.55),
@@ -670,8 +664,8 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                       message: 'Audio Specs Inspector',
                       child: M3EIconButton(
                         variant: M3EIconButtonVariant.standard,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedInformationCircle,
+                        icon: Icon(
+                          LucideIcons.info,
                           color: theme.colorScheme.onSurfaceVariant,
                           size: 20,
                         ),
@@ -689,8 +683,8 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                       message: 'Synchronized Lyrics',
                       child: M3EIconButton(
                         variant: M3EIconButtonVariant.standard,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedMusicNote01,
+                        icon: Icon(
+                          LucideIcons.alignLeft,
                           color: theme.colorScheme.onSurfaceVariant,
                           size: 20,
                         ),
@@ -704,21 +698,15 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                     // Up Next Queue
                     Tooltip(
                       message: 'Up Next Queue',
-                      child: M3EIconButton(
-                        variant: M3EIconButtonVariant.standard,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedQueue01,
-                          color: theme.colorScheme.onSurfaceVariant,
+                      child: IconButton(
+                        icon: const Icon(
+                          LucideIcons.listMusic,
+                          color: Color(0xFF8A9A90),
                           size: 20,
                         ),
                         onPressed: () {
                           AppHaptics.selectionClick();
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (_) => const NowPlayingQueueSheet(),
-                          );
+                          NowPlayingQueueSheet.show(context);
                         },
                       ),
                     ),
@@ -728,8 +716,8 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                       message: 'Pro-Q Studio Parametric EQ',
                       child: M3EIconButton(
                         variant: M3EIconButtonVariant.standard,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedSlidersVertical,
+                        icon: Icon(
+                          LucideIcons.sliders,
                           color: theme.colorScheme.onSurfaceVariant,
                           size: 20,
                         ),
@@ -752,12 +740,12 @@ class DesktopBottomMasterTransportDeck extends ConsumerWidget {
                         children: [
                           M3EIconButton(
                             variant: M3EIconButtonVariant.standard,
-                            icon: HugeIcon(
-                              icon: playback.volume == 0.0
-                                  ? HugeIcons.strokeRoundedVolumeOff
+                            icon: Icon(
+                              playback.volume == 0.0
+                                  ? LucideIcons.volumeX
                                   : (playback.volume < 0.5
-                                      ? HugeIcons.strokeRoundedVolumeLow
-                                      : HugeIcons.strokeRoundedVolumeHigh),
+                                      ? LucideIcons.volume1
+                                      : LucideIcons.volume2),
                               color: theme.colorScheme.onSurfaceVariant,
                               size: 20,
                             ),
@@ -1473,8 +1461,8 @@ class _DesktopDspSignalCapsule extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                    Icon(
+                      LucideIcons.slidersHorizontal,
                       color: isAutoActive
                           ? theme.colorScheme.primary
                           : theme.colorScheme.onSurfaceVariant,
@@ -1502,7 +1490,7 @@ class _DesktopDspSignalCapsule extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Icon(
-              Icons.chevron_right_rounded,
+              LucideIcons.chevronRight,
               size: 12,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
             ),
@@ -1542,8 +1530,8 @@ class _DesktopDspSignalCapsule extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                    Icon(
+                      LucideIcons.slidersHorizontal,
                       color: isDspActive
                           ? theme.colorScheme.tertiary
                           : theme.colorScheme.onSurfaceVariant,
@@ -1571,7 +1559,7 @@ class _DesktopDspSignalCapsule extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Icon(
-              Icons.chevron_right_rounded,
+              LucideIcons.chevronRight,
               size: 12,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
             ),
@@ -1611,8 +1599,8 @@ class _DesktopDspSignalCapsule extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedUsb,
+                    Icon(
+                      LucideIcons.usb,
                       color: isDacConnected
                           ? const Color(0xFF10B981)
                           : theme.colorScheme.onSurfaceVariant,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -106,8 +106,8 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
         title: const Text('STORAGE & CACHE QUOTA'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -120,8 +120,8 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
               AppHaptics.lightImpact();
               _loadStorageSummary(showLoading: true);
             },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedRefresh,
+            icon: Icon(
+              LucideIcons.refreshCw,
               size: 22,
               color: primary,
             ),
@@ -139,14 +139,14 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 const SizedBox(height: 18),
 
                 // ─── 2. CACHE BREAKDOWN & RECLAMATION ─────────────────────────────
-                _buildSectionHeader(context, 'CACHE BREAKDOWN & RECLAMATION', HugeIcons.strokeRoundedDatabase),
+                _buildSectionHeader(context, 'CACHE BREAKDOWN & RECLAMATION', LucideIcons.database),
                 const SizedBox(height: 8),
 
                 _buildCacheItemCard(
                   title: 'Album Artwork Cache',
                   subtitle: 'Thumbnail covers cached from local files & Navidrome',
                   sizeText: _summary?.formattedArtworkCache ?? '0 B',
-                  icon: HugeIcons.strokeRoundedAlbum01,
+                  icon: LucideIcons.disc,
                   onClear: _clearArtworkCache,
                   theme: theme,
                   primary: primary,
@@ -158,7 +158,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   title: 'Lyrics & LRCLIB Cache',
                   subtitle: 'Cached plain and synchronized LRC lyrics files',
                   sizeText: _summary?.formattedLyricsCache ?? '0 B',
-                  icon: HugeIcons.strokeRoundedTextFont,
+                  icon: LucideIcons.type,
                   onClear: _clearLyricsCache,
                   theme: theme,
                   primary: primary,
@@ -170,7 +170,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   title: 'Playback History & Statistics',
                   subtitle: '${_summary?.playbackHistoryCount ?? 0} logged playback sessions',
                   sizeText: '${_summary?.playbackHistoryCount ?? 0} tracks',
-                  icon: HugeIcons.strokeRoundedClock01,
+                  icon: LucideIcons.clock,
                   onClear: _clearPlaybackHistory,
                   theme: theme,
                   primary: primary,
@@ -179,13 +179,13 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 const SizedBox(height: 20),
 
                 // ─── 3. LIBRARY INDEXER & INTEGRITY ───────────────────────────────
-                _buildSectionHeader(context, 'LIBRARY INDEXER & INTEGRITY', HugeIcons.strokeRoundedFolderSync),
+                _buildSectionHeader(context, 'LIBRARY INDEXER & INTEGRITY', LucideIcons.folderSync),
                 const SizedBox(height: 8),
 
                 _buildActionCard(
                   title: 'Missing Tracks Resolver',
                   subtitle: 'Locate moved files and repair dead library references',
-                  icon: HugeIcons.strokeRoundedFolderSync,
+                  icon: LucideIcons.folderSync,
                   actionLabel: 'Scan Missing',
                   onTap: () => MissingTracksResolverSheet.show(context),
                   theme: theme,
@@ -197,7 +197,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                 _buildActionCard(
                   title: 'Duplicate Tracks Resolver',
                   subtitle: 'Scan and deduplicate audio files favoring Hi-Res masters',
-                  icon: HugeIcons.strokeRoundedLayers01,
+                  icon: LucideIcons.layers,
                   actionLabel: 'Scan Duplicates',
                   onTap: () => DuplicateTracksResolverModal.show(context),
                   theme: theme,
@@ -212,8 +212,8 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                     AppHaptics.heavyImpact();
                     _clearAllCaches();
                   },
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedDelete02,
+                  icon: Icon(
+                    LucideIcons.trash2,
                     size: 16,
                     color: theme.colorScheme.onError,
                   ),
@@ -256,8 +256,8 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDatabase,
+                child: Icon(
+                  LucideIcons.database,
                   size: 18,
                   color: primary,
                 ),
@@ -328,7 +328,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
     required String title,
     required String subtitle,
     required String sizeText,
-    required dynamic icon,
+    required IconData icon,
     required VoidCallback onClear,
     required ThemeData theme,
     required Color primary,
@@ -344,7 +344,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
       ),
       child: Row(
         children: [
-          HugeIcon(icon: icon, size: 20, color: primary),
+          Icon(icon, size: 20, color: primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -388,7 +388,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           M3EIconButton(
             variant: M3EIconButtonVariant.standard,
             onPressed: onClear,
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedDelete02, size: 20, color: theme.colorScheme.error),
+            icon: Icon(LucideIcons.trash2, size: 20, color: theme.colorScheme.error),
             tooltip: 'Clear',
           ),
         ],
@@ -399,7 +399,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
   Widget _buildActionCard({
     required String title,
     required String subtitle,
-    required dynamic icon,
+    required IconData icon,
     required String actionLabel,
     required VoidCallback onTap,
     required ThemeData theme,
@@ -424,7 +424,7 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
           ),
           child: Row(
             children: [
-              HugeIcon(icon: icon, size: 20, color: primary),
+              Icon(icon, size: 20, color: primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -466,11 +466,11 @@ class _StorageCacheSettingsScreenState extends ConsumerState<StorageCacheSetting
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,

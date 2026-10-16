@@ -1,12 +1,11 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../app/theme/app_haptics.dart';
 import '../../app/theme/studio_surface_theme.dart';
 
 /// Studio Floating Rounded Dock Navigation Bar
-/// Clean, ergonomic, anti-AI-slop floating capsule dock with HugeIcons.
+/// Clean, ergonomic, anti-AI-slop floating capsule dock with LucideIcons and solid matte styling.
 class FloatingRoundedDock extends ConsumerWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
@@ -20,132 +19,121 @@ class FloatingRoundedDock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
 
     final items = [
       _DockItemData(
-        title: 'Dashboard',
-        icon: HugeIcons.strokeRoundedDashboardSquare01,
-        selectedIcon: HugeIcons.strokeRoundedDashboardSquare01,
+        title: 'Home',
+        icon: LucideIcons.house,
       ),
       _DockItemData(
         title: 'DSP Rack',
-        icon: HugeIcons.strokeRoundedSlidersVertical,
-        selectedIcon: HugeIcons.strokeRoundedSlidersVertical,
+        icon: LucideIcons.sliders,
       ),
       _DockItemData(
         title: 'Library',
-        icon: HugeIcons.strokeRoundedMusicNote01,
-        selectedIcon: HugeIcons.strokeRoundedMusicNote01,
+        icon: LucideIcons.library,
       ),
       _DockItemData(
         title: 'Playlists',
-        icon: HugeIcons.strokeRoundedPlayList,
-        selectedIcon: HugeIcons.strokeRoundedPlayList,
+        icon: LucideIcons.listMusic,
       ),
       _DockItemData(
         title: 'Settings',
-        icon: HugeIcons.strokeRoundedSettings01,
-        selectedIcon: HugeIcons.strokeRoundedSettings01,
+        icon: LucideIcons.settings,
       ),
     ];
 
     return SafeArea(
       top: false,
       child: Container(
-        margin: const EdgeInsets.fromLTRB(4, 0, 4, 6),
-        height: 66,
+        margin: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+        height: 64,
         decoration: BoxDecoration(
           color: isSolid
-              ? StudioSurfaceTheme.surfaceContainer(context, isSolid: true)
-              : theme.colorScheme.surface.withValues(alpha: 0.94),
-          borderRadius: BorderRadius.circular(28),
+              ? const Color(0xFF12141A)
+              : StudioSurfaceTheme.surfaceContainer(context, isSolid: true),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: const Color(0xFF262936),
+            width: 0.8,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.28),
-              blurRadius: 18,
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 16,
               offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: BackdropFilter(
-            filter: isSolid
-                ? ImageFilter.blur(sigmaX: 0, sigmaY: 0)
-                : ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(items.length, (index) {
-                  final item = items[index];
-                  final isSelected = selectedIndex == index;
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(items.length, (index) {
+              final item = items[index];
+              final isSelected = selectedIndex == index;
 
-                  return Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        if (!isSelected) {
-                          AppHaptics.selectionClick();
-                          onItemSelected(index);
-                        }
-                      },
-                      borderRadius: BorderRadius.circular(20),
-                      splashColor: primary.withValues(alpha: 0.1),
-                      highlightColor: Colors.transparent,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOutCubic,
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? (isSolid
-                                  ? theme.colorScheme.surfaceContainerHighest
-                                  : StudioSurfaceTheme.tintedContainer(
-                                      context,
-                                      primary,
-                                      isSolid: false,
-                                      translucentAlpha: 0.16,
-                                    ))
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            HugeIcon(
-                              icon: isSelected ? item.selectedIcon : item.icon,
-                              color: isSelected
-                                  ? primary
-                                  : theme.colorScheme.onSurfaceVariant,
-                              size: 20,
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              item.title,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w500,
-                                color: isSelected
-                                    ? primary
-                                    : theme.colorScheme.onSurfaceVariant,
-                                letterSpacing: 0.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
+              return Expanded(
+                child: InkWell(
+                  onTap: () {
+                    if (!isSelected) {
+                      AppHaptics.selectionClick();
+                      onItemSelected(index);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(18),
+                  splashColor: Colors.white.withValues(alpha: 0.05),
+                  highlightColor: Colors.transparent,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF222532)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(18),
+                      border: isSelected
+                          ? Border.all(
+                              color: const Color(0xFF383D50),
+                              width: 0.8,
+                            )
+                          : null,
                     ),
-                  );
-                }),
-              ),
-            ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          item.icon,
+                          color: isSelected
+                              ? Colors.white
+                              : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                          size: 19,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          item.title,
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
+                                : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            letterSpacing: 0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
           ),
         ),
       ),
@@ -155,12 +143,10 @@ class FloatingRoundedDock extends ConsumerWidget {
 
 class _DockItemData {
   final String title;
-  final dynamic icon;
-  final dynamic selectedIcon;
+  final IconData icon;
 
   _DockItemData({
     required this.title,
     required this.icon,
-    required this.selectedIcon,
   });
 }

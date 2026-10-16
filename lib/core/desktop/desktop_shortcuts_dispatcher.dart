@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../features/player/presentation/controllers/player_controller.dart';
 import '../../features/player/presentation/widgets/now_playing_queue_sheet.dart';
@@ -159,12 +159,7 @@ class _DesktopShortcutsDispatcherState extends ConsumerState<DesktopShortcutsDis
 
     // 10. KEY Q: Toggle Up Next Queue Modal
     if (key == LogicalKeyboardKey.keyQ) {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => const NowPlayingQueueSheet(),
-      );
+      NowPlayingQueueSheet.show(context);
       return KeyEventResult.handled;
     }
 
@@ -246,8 +241,8 @@ void showDesktopShortcutsCheatsheet(BuildContext context) {
               color: theme.colorScheme.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedKeyboard,
+            child: Icon(
+              LucideIcons.keyboard,
               color: theme.colorScheme.primary,
               size: 20,
             ),

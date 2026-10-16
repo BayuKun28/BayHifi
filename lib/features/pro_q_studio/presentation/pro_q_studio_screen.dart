@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/two_tone_header.dart';
 import '../../settings/presentation/controllers/player_customization_controller.dart';
@@ -117,8 +117,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                 ),
               ),
               child: Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowLeft01,
+                child: Icon(
+                  LucideIcons.arrowLeft,
                   size: 15,
                   color: primary,
                 ),
@@ -129,8 +129,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedSlidersVertical,
+              Icon(
+                LucideIcons.sliders,
                 size: 15,
                 color: primary,
               ),
@@ -153,8 +153,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                       width: 1,
                     ),
                   ),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedHelpCircle,
+                  child: Icon(
+                    LucideIcons.helpCircle,
                     size: 9.0,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -235,7 +235,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   // [AUTO EQ] Button
                   _buildToolbarButton(
                     context: context,
-                    icon: HugeIcons.strokeRoundedSparkles,
+                    icon: LucideIcons.sparkles,
                     label: 'AUTO EQ •',
                     color: const Color(0xFF00E676),
                     isActive: true,
@@ -248,7 +248,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   // [CLOUD DB] Button
                   _buildToolbarButton(
                     context: context,
-                    icon: HugeIcons.strokeRoundedCloudDownload,
+                    icon: LucideIcons.cloudDownload,
                     label: 'CLOUD DB',
                     color: const Color(0xFF00E5FF),
                     isActive: true,
@@ -261,7 +261,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   // [A/B] Quick Comparison Button
                   _buildToolbarButton(
                     context: context,
-                    icon: HugeIcons.strokeRoundedExchange01,
+                    icon: LucideIcons.arrowLeftRight,
                     label: state.abMode == AbComparisonMode.aRaw ? 'A: RAW' : 'B: ACTIVE',
                     color: state.abMode == AbComparisonMode.aRaw
                         ? const Color(0xFF29B6F6)
@@ -296,7 +296,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   // [RESET] Button
                   _buildToolbarButton(
                     context: context,
-                    icon: HugeIcons.strokeRoundedRefresh,
+                    icon: LucideIcons.refreshCw,
                     label: 'RESET',
                     color: theme.colorScheme.error,
                     isActive: false,
@@ -341,8 +341,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedFloppyDisk,
+                      Icon(
+                        LucideIcons.save,
                         size: 14,
                         color: Color(0xFF00E676),
                       ),
@@ -380,8 +380,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                     ),
                   ),
                   child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedAdd01,
+                    child: Icon(
+                      LucideIcons.plus,
                       size: 15,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -420,8 +420,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   ),
                 ),
                 child: Center(
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedPower,
+                  child: Icon(
+                    LucideIcons.power,
                     size: 16,
                     color: state.isEnabled
                         ? primary
@@ -483,10 +483,10 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
             value: p,
             child: Row(
               children: [
-                HugeIcon(
-                  icon: isCurr
-                      ? HugeIcons.strokeRoundedCheckmarkCircle02
-                      : HugeIcons.strokeRoundedCircle,
+                Icon(
+                  isCurr
+                      ? LucideIcons.checkCircle2
+                      : LucideIcons.circle,
                   size: 13,
                   color: isCurr ? primary : theme.colorScheme.onSurfaceVariant,
                 ),
@@ -526,10 +526,10 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
               value: p,
               child: Row(
                 children: [
-                  HugeIcon(
-                    icon: isCurr
-                        ? HugeIcons.strokeRoundedCheckmarkCircle02
-                        : HugeIcons.strokeRoundedFloppyDisk,
+                  Icon(
+                    isCurr
+                        ? LucideIcons.checkCircle2
+                        : LucideIcons.save,
                     size: 13,
                     color: isCurr ? primary : theme.colorScheme.onSurfaceVariant,
                   ),
@@ -552,8 +552,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedDelete02,
+                      child: Icon(
+                        LucideIcons.trash2,
                         size: 13,
                         color: theme.colorScheme.error.withValues(alpha: 0.7),
                       ),
@@ -569,7 +569,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
       },
       child: _buildToolbarButton(
         context: context,
-        icon: HugeIcons.strokeRoundedBookmark02,
+        icon: LucideIcons.bookmark,
         label: 'PRESETS',
         color: primary,
         isActive: false,
@@ -708,7 +708,7 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
 
   Widget _buildToolbarButton({
     required BuildContext context,
-    required dynamic icon,
+    required IconData icon,
     required String label,
     required Color color,
     required bool isActive,
@@ -737,20 +737,12 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                 : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
             width: 1.0,
           ),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: isSolid ? 0.15 : 0.25),
-                    blurRadius: 6,
-                  ),
-                ]
-              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HugeIcon(
-              icon: icon,
+            Icon(
+              icon,
               size: 12,
               color: color,
             ),
@@ -799,14 +791,6 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
               : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
           width: 1.0,
         ),
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: rtaCyan.withValues(alpha: isSolid ? 0.15 : 0.25),
-                  blurRadius: 6,
-                ),
-              ]
-            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -820,8 +804,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedAudioWaveform,
+                  Icon(
+                    LucideIcons.audioLines,
                     size: 11.5,
                     color: isActive ? rtaCyan : theme.colorScheme.onSurfaceVariant,
                   ),
@@ -886,9 +870,9 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                   value: s,
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: isCurr
-                            ? HugeIcons.strokeRoundedCheckmarkCircle02
+                      Icon(
+                        isCurr
+                            ? LucideIcons.checkCircle2
                             : _getProQRtaIcon(s),
                         size: 13,
                         color: isCurr ? rtaCyan : theme.colorScheme.onSurfaceVariant,
@@ -940,8 +924,8 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
                     ),
                   ),
                   const SizedBox(width: 2),
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowDown01,
+                  Icon(
+                    LucideIcons.chevronDown,
                     size: 10,
                     color: isActive ? rtaCyan : theme.colorScheme.onSurfaceVariant,
                   ),
@@ -971,20 +955,20 @@ class _ProQStudioScreenState extends ConsumerState<ProQStudioScreen> {
     }
   }
 
-  dynamic _getProQRtaIcon(ProQRtaStyle style) {
+  IconData _getProQRtaIcon(ProQRtaStyle style) {
     switch (style) {
       case ProQRtaStyle.bars:
-        return HugeIcons.strokeRoundedSlidersVertical;
+        return LucideIcons.sliders;
       case ProQRtaStyle.filledCurve:
-        return HugeIcons.strokeRoundedAudioWaveform;
+        return LucideIcons.audioLines;
       case ProQRtaStyle.wireframe:
-        return HugeIcons.strokeRoundedActivity01;
+        return LucideIcons.activity;
       case ProQRtaStyle.m3Pillars:
-        return HugeIcons.strokeRoundedLayers01;
+        return LucideIcons.layers;
       case ProQRtaStyle.peakDots:
-        return HugeIcons.strokeRoundedGrid;
+        return LucideIcons.grid;
       case ProQRtaStyle.laserBeam:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
     }
   }
 }
@@ -1034,8 +1018,8 @@ class _FullscreenPresetNamePageState extends State<_FullscreenPresetNamePage> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedCancel01,
+          icon: Icon(
+            LucideIcons.x,
             size: 20,
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -1044,10 +1028,10 @@ class _FullscreenPresetNamePageState extends State<_FullscreenPresetNamePage> {
         ),
         title: Row(
           children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedFloppyDisk,
+            const Icon(
+              LucideIcons.save,
               size: 18,
-              color: const Color(0xFF00E676),
+              color: Color(0xFF00E676),
             ),
             const SizedBox(width: 10),
             Text(
@@ -1134,8 +1118,8 @@ class _FullscreenPresetNamePageState extends State<_FullscreenPresetNamePage> {
                 ),
                 prefixIcon: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedText,
+                  child: Icon(
+                    LucideIcons.type,
                     size: 18,
                     color: Color(0xFF00E676),
                   ),

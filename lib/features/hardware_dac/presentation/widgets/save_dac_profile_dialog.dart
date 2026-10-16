@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../controllers/dac_bridge_controller.dart';
 
@@ -78,8 +77,6 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final dacState = ref.watch(dacBridgeControllerProvider);
 
     return Dialog(
@@ -88,15 +85,15 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 420),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xFF16181F),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: const Color(0xFF262936),
             width: 1.0,
           ),
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,37 +102,38 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
               Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(14),
+                      color: const Color(0xFF1E212B),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFF262936)),
                     ),
                     alignment: Alignment.center,
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedBookmark02,
-                      size: 22,
-                      color: colorScheme.onPrimaryContainer,
+                    child: const Icon(
+                      LucideIcons.bookmark,
+                      size: 20,
+                      color: Color(0xFF4ADE80),
                     ),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
+                  const SizedBox(width: 12),
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Save DAC Profile',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: colorScheme.onSurface,
+                            color: Colors.white,
                           ),
                         ),
                         Text(
                           'Save current hardware tuning to your profile library',
                           style: TextStyle(
-                            fontSize: 12,
-                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 11.5,
+                            color: Color(0xFF8A9A90),
                           ),
                         ),
                       ],
@@ -143,17 +141,15 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
               // Tuning snapshot capsule
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.4),
-                  ),
+                  color: const Color(0xFF1E212B),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF262936)),
                 ),
                 child: Row(
                   children: [
@@ -161,23 +157,20 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                       child: _buildSnapshotItem(
                         label: 'BANDS',
                         value: '${dacState.bands.length}',
-                        colorScheme: colorScheme,
                       ),
                     ),
-                    Container(width: 1, height: 24, color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                    Container(width: 1, height: 22, color: const Color(0xFF262936)),
                     Expanded(
                       child: _buildSnapshotItem(
                         label: 'PREAMP',
                         value: '${dacState.globalGainDb >= 0 ? "+" : ""}${dacState.globalGainDb.toStringAsFixed(1)} dB',
-                        colorScheme: colorScheme,
                       ),
                     ),
-                    Container(width: 1, height: 24, color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                    Container(width: 1, height: 22, color: const Color(0xFF262936)),
                     Expanded(
                       child: _buildSnapshotItem(
                         label: 'CHIPSET',
                         value: dacState.device?.chipset.displayName ?? 'KT0211L',
-                        colorScheme: colorScheme,
                       ),
                     ),
                   ],
@@ -190,24 +183,24 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: colorScheme.errorContainer.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: colorScheme.error.withValues(alpha: 0.5)),
+                    color: const Color(0xFF381E24),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFF87171).withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedAlertCircle,
-                        size: 18,
-                        color: colorScheme.error,
+                      const Icon(
+                        LucideIcons.alertCircle,
+                        size: 16,
+                        color: Color(0xFFF87171),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            color: colorScheme.onErrorContainer,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFFFCA5A5),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -215,75 +208,97 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
               ],
 
               // Profile Name Field
               TextField(
                 controller: _nameController,
                 autofocus: true,
+                style: const TextStyle(color: Colors.white, fontSize: 13.5),
                 decoration: InputDecoration(
                   labelText: 'Profile Name',
+                  labelStyle: const TextStyle(color: Color(0xFF8A9A90), fontSize: 12),
                   hintText: 'e.g. Warm Vocal Studio / Harman IEM',
+                  hintStyle: const TextStyle(color: Color(0xFF555D6E), fontSize: 12),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedBookmark02,
+                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 20),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 12, right: 8),
+                    child: Icon(
+                      LucideIcons.bookmark,
                       size: 15,
-                      color: colorScheme.onSurfaceVariant,
+                      color: Color(0xFF8A9A90),
                     ),
                   ),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  fillColor: const Color(0xFF1E212B),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF262936)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF4ADE80)),
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
               // Description Field (Optional)
               TextField(
                 controller: _descController,
+                style: const TextStyle(color: Colors.white, fontSize: 13.5),
                 decoration: InputDecoration(
                   labelText: 'Description (Optional)',
+                  labelStyle: const TextStyle(color: Color(0xFF8A9A90), fontSize: 12),
                   hintText: 'e.g. Tuned for Kiwi Ears with punchy sub-bass',
+                  hintStyle: const TextStyle(color: Color(0xFF555D6E), fontSize: 12),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 20),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 14, right: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedNote,
+                  prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 20),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 12, right: 8),
+                    child: Icon(
+                      LucideIcons.fileText,
                       size: 15,
-                      color: colorScheme.onSurfaceVariant,
+                      color: Color(0xFF8A9A90),
                     ),
                   ),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  fillColor: const Color(0xFF1E212B),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF262936)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF4ADE80)),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
               // Actions
               Row(
                 children: [
                   Expanded(
-                    child: M3EButton.outlined(
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCancel01,
-                        size: 16,
-                        color: colorScheme.onSurface,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(
+                        LucideIcons.x,
+                        size: 15,
+                        color: Color(0xFF8A9A90),
                       ),
-                      label: const Text('CANCEL'),
+                      label: const Text(
+                        'CANCEL',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF8A9A90)),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF262936)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                      ),
                       onPressed: _isSaving
                           ? null
                           : () {
@@ -292,22 +307,28 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                             },
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: M3EButton.filled(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF4ADE80),
+                        foregroundColor: const Color(0xFF0B110E),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                      ),
                       onPressed: _isSaving ? null : _submit,
                       child: _isSaving
-                          ? SizedBox(
+                          ? const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: colorScheme.onPrimary,
+                                color: Color(0xFF0B110E),
                               ),
                             )
                           : const Text(
                               'SAVE PROFILE',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, letterSpacing: 0.4),
                             ),
                     ),
                   ),
@@ -323,27 +344,26 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
   Widget _buildSnapshotItem({
     required String label,
     required String value,
-    required ColorScheme colorScheme,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 9.5,
+          style: const TextStyle(
+            fontSize: 9,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.5,
-            color: colorScheme.onSurfaceVariant,
+            color: Color(0xFF8A9A90),
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 13,
+          style: const TextStyle(
+            fontSize: 12.5,
             fontWeight: FontWeight.w800,
-            color: colorScheme.onSurface,
+            color: Colors.white,
           ),
         ),
       ],

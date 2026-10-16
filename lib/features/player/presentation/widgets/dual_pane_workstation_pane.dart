@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -13,12 +13,12 @@ import 'add_tracks_to_queue_sheet.dart';
 import 'synchronized_lyrics_view.dart';
 
 enum WorkstationTab {
-  queue('UP NEXT', HugeIcons.strokeRoundedPlaylist01),
-  lyrics('LYRICS', HugeIcons.strokeRoundedTextFont),
-  dspRack('DSP RACK', HugeIcons.strokeRoundedCpu);
+  queue('UP NEXT', LucideIcons.listMusic),
+  lyrics('LYRICS', LucideIcons.type),
+  dspRack('DSP RACK', LucideIcons.cpu);
 
   final String label;
-  final dynamic icon;
+  final IconData icon;
   const WorkstationTab(this.label, this.icon);
 }
 
@@ -116,8 +116,8 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    HugeIcon(
-                                      icon: tab.icon,
+                                    Icon(
+                                      tab.icon,
                                       size: 13,
                                       color: isSel ? primary : theme.colorScheme.onSurfaceVariant,
                                     ),
@@ -177,8 +177,8 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                       AppHaptics.lightImpact();
                       AddTracksToQueueSheet.show(context);
                     },
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlayList,
+                    icon: Icon(
+                      LucideIcons.listPlus,
                       size: 18,
                       color: primary,
                     ),
@@ -191,8 +191,8 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                       AppHaptics.selectionClick();
                       playerNotifier.toggleShuffle();
                     },
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedShuffle,
+                    icon: Icon(
+                      LucideIcons.shuffle,
                       size: 18,
                       color: playback.isShuffle ? primary : theme.colorScheme.onSurfaceVariant,
                     ),
@@ -205,10 +205,10 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                       AppHaptics.selectionClick();
                       playerNotifier.toggleRepeatMode();
                     },
-                    icon: HugeIcon(
-                      icon: playback.repeatMode == PlaybackRepeatMode.one
-                          ? HugeIcons.strokeRoundedRepeatOne01
-                          : HugeIcons.strokeRoundedRepeat,
+                    icon: Icon(
+                      playback.repeatMode == PlaybackRepeatMode.one
+                          ? LucideIcons.repeat1
+                          : LucideIcons.repeat,
                       size: 18,
                       color: playback.repeatMode != PlaybackRepeatMode.off
                           ? primary
@@ -254,8 +254,8 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlaylist01,
+                  Icon(
+                    LucideIcons.listMusic,
                     size: 40,
                     color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
@@ -274,8 +274,8 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                       AppHaptics.lightImpact();
                       AddTracksToQueueSheet.show(context);
                     },
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlayList,
+                    icon: Icon(
+                      LucideIcons.listPlus,
                       size: 15,
                       color: theme.colorScheme.onPrimary,
                     ),
@@ -322,8 +322,8 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
                   color: theme.colorScheme.error.withValues(alpha: 0.2),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedDelete02,
+                  child: Icon(
+                    LucideIcons.trash2,
                     size: 18,
                     color: theme.colorScheme.error,
                   ),
@@ -362,7 +362,7 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                             width: 24,
                             alignment: Alignment.center,
                             child: isCur
-                                ? HugeIcon(icon: HugeIcons.strokeRoundedVolumeHigh, size: 14, color: primary)
+                                ? Icon(LucideIcons.volume2, size: 14, color: primary)
                                 : Text(
                                     '${idx + 1}',
                                     style: TextStyle(
@@ -410,8 +410,8 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                               constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                               child: Center(
-                                child: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedDragDropVertical,
+                                child: Icon(
+                                  LucideIcons.gripVertical,
                                   size: 18,
                                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                                 ),

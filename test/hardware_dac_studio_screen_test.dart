@@ -35,8 +35,9 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // 1. Verify App Bar
-      expect(find.text('Hardware DAC Studio'), findsOneWidget);
+      // 1. Verify App Bar Two-Tone Header
+      expect(find.textContaining('HARDWARE'), findsWidgets);
+      expect(find.textContaining('DAC STUDIO'), findsWidgets);
 
       // 2. Verify Hero Status Card
       expect(find.byType(DacHeroStatusCard), findsOneWidget);
@@ -61,6 +62,35 @@ void main() {
 
       // 6. Verify 5 Band Slider Tiles
       expect(find.byType(DacBandSliderTile), findsNWidgets(5));
+    });
+
+    testWidgets('Renders Responsive Dual-Pane Workstation on Desktop & Tablet', (tester) async {
+      tester.view.physicalSize = const Size(1280, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dacTransportProvider.overrideWithValue(MockDacTransport()),
+          ],
+          child: MaterialApp(
+            theme: AppThemeBuilder.buildTheme(AppPalette.namidaCyan, isDark: true),
+            home: const HardwareDacStudioScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Wide layout displays 5-Band Biquad Registers header tag
+      expect(find.text('5-BAND BIQUAD REGISTERS'), findsOneWidget);
+      expect(find.text('HARDWARE FILTER BANDS'), findsOneWidget);
+      expect(find.byType(DacBandSliderTile), findsNWidgets(5));
+      expect(find.byType(HardwareCurveVisualizer), findsOneWidget);
     });
 
     testWidgets('Toggles Hardware EQ switch on Hero Card', (tester) async {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../data/auto_eq_cloud_service.dart';
@@ -127,8 +127,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           color: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.4),
                         ),
                       ),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCloudDownload,
+                      child: Icon(
+                        LucideIcons.cloudDownload,
                         size: 18,
                         color: theme.colorScheme.primary,
                       ),
@@ -165,8 +165,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                     M3EIconButton(
                       variant: M3EIconButtonVariant.standard,
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCancel01,
+                      icon: Icon(
+                        LucideIcons.x,
                         size: 22,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -201,8 +201,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
                     child: Row(
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedSearch01,
+                        Icon(
+                          LucideIcons.search,
                           size: 15,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -240,8 +240,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                             },
                             child: Padding(
                               padding: const EdgeInsets.only(left: 4),
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedCancel01,
+                              child: Icon(
+                                LucideIcons.x,
                                 size: 13,
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -324,8 +324,8 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedSearch01,
+                              Icon(
+                                LucideIcons.search,
                                 size: 30,
                                 color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                               ),
@@ -365,10 +365,10 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                         );
                                       }
                                     },
-                                    icon: HugeIcon(
-                                      icon: isSelectedAsTarget
-                                          ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                          : HugeIcons.strokeRoundedTarget02,
+                                    icon: Icon(
+                                      isSelectedAsTarget
+                                          ? LucideIcons.circleCheck
+                                          : LucideIcons.crosshair,
                                       size: 13,
                                       color: isSelectedAsTarget ? theme.colorScheme.onPrimary : Colors.black,
                                     ),
@@ -393,10 +393,10 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                         );
                                       }
                                     },
-                                    icon: HugeIcon(
-                                      icon: isSelectedAsDriver
-                                          ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                          : HugeIcons.strokeRoundedHeadphones,
+                                    icon: Icon(
+                                      isSelectedAsDriver
+                                          ? LucideIcons.circleCheck
+                                          : LucideIcons.headphones,
                                       size: 13,
                                       color: isSelectedAsDriver ? theme.colorScheme.onPrimary : theme.colorScheme.onSecondary,
                                     ),
@@ -495,12 +495,12 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                             ),
                                           ),
                                           child: Center(
-                                            child: HugeIcon(
-                                              icon: isTarget
-                                                  ? HugeIcons.strokeRoundedTarget02
+                                            child: Icon(
+                                              isTarget
+                                                  ? LucideIcons.crosshair
                                                   : (item.category == AutoEqCloudCategory.headphone
-                                                      ? HugeIcons.strokeRoundedHeadphones
-                                                      : HugeIcons.strokeRoundedAudioWaveform),
+                                                      ? LucideIcons.headphones
+                                                      : LucideIcons.audioWaveform),
                                               size: 16,
                                               color: isTarget ? targetColor : driverColor,
                                             ),
@@ -609,12 +609,12 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                       ),
                                     ),
                                     child: Center(
-                                      child: HugeIcon(
-                                        icon: isTarget
-                                            ? HugeIcons.strokeRoundedTarget02
+                                      child: Icon(
+                                        isTarget
+                                            ? LucideIcons.crosshair
                                             : (item.category == AutoEqCloudCategory.headphone
-                                                ? HugeIcons.strokeRoundedHeadphones
-                                                : HugeIcons.strokeRoundedAudioWaveform),
+                                                ? LucideIcons.headphones
+                                                : LucideIcons.audioWaveform),
                                         size: 18,
                                         color: isTarget ? targetColor : driverColor,
                                       ),
@@ -790,8 +790,8 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
         elevation: 0,
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -860,8 +860,8 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
             ),
             prefixIcon: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedSearch01,
+              child: Icon(
+                LucideIcons.search,
                 size: 20,
                 color: theme.colorScheme.primary,
               ),
@@ -873,8 +873,8 @@ class _FullscreenCloudSearchPageState extends State<_FullscreenCloudSearchPage> 
                   ? const SizedBox.shrink()
                   : M3EIconButton(
                       variant: M3EIconButtonVariant.standard,
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCancel01,
+                      icon: Icon(
+                        LucideIcons.x,
                         size: 20,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

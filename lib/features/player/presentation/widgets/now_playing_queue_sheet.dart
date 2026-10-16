@@ -1,24 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/playback_state.dart';
 import '../../domain/track.dart';
 import '../controllers/player_controller.dart';
 import 'add_tracks_to_queue_sheet.dart';
 
 class NowPlayingQueueSheet extends ConsumerStatefulWidget {
-  const NowPlayingQueueSheet({super.key});
+  final bool isDialog;
+
+  const NowPlayingQueueSheet({
+    super.key,
+    this.isDialog = false,
+  });
 
   static Future<void> show(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 650) {
+      return showDialog(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.65),
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520, maxHeight: 680),
+              child: const NowPlayingQueueSheet(isDialog: true),
+            ),
+          ),
+        ),
+      );
+    }
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const NowPlayingQueueSheet(),
+      builder: (_) => const NowPlayingQueueSheet(isDialog: false),
     );
   }
 
@@ -34,7 +55,6 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
     super.initState();
     _scrollController = ScrollController();
     _scrollToActiveTrack(animate: false, delayMs: 150);
-    _scrollToActiveTrack(animate: false, delayMs: 350);
   }
 
   @override
@@ -50,8 +70,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
       final index = playback.queueIndex;
       if (index < 0 || index >= playback.queue.length) return;
 
-      // Estimated item tile height: container (54px) + margin (7px) + border = ~62px
-      const double estimatedItemHeight = 62.0;
+      const double estimatedItemHeight = 60.0;
       final viewportHeight = _scrollController.position.viewportDimension;
       final targetOffset = (index * estimatedItemHeight) - (viewportHeight / 2) + (estimatedItemHeight / 2);
       final maxExtent = _scrollController.position.maxScrollExtent;
@@ -63,7 +82,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
       if (animate && _scrollController.hasClients) {
         _scrollController.animateTo(
           clampedOffset,
-          duration: const Duration(milliseconds: 350),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
         );
       } else if (_scrollController.hasClients) {
@@ -84,7 +103,6 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // Automatically auto-center active track when queue index advances
     ref.listen<int>(
       playerControllerProvider.select((s) => s.queueIndex),
       (prev, next) {
@@ -96,47 +114,43 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
 
     final playback = ref.watch(playerControllerProvider);
     final controller = ref.read(playerControllerProvider.notifier);
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final isSolid = ref.isSolidStyle;
+    final isDialog = widget.isDialog;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
+      height: isDialog ? 640 : MediaQuery.of(context).size.height * 0.75,
       decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        color: const Color(0xFF16181F),
+        borderRadius: isDialog
+            ? BorderRadius.circular(24)
+            : const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
-          width: 1.2,
+          color: const Color(0xFF262936),
+          width: 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: theme.brightness == Brightness.dark ? 0.35 : 0.08,
-            ),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
-          ),
-        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // ─── 1. TOP DRAG HANDLE & HEADER ─────────────────────────────────
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: 38,
-              height: 4.5,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(3),
+          // ─── 1. TOP DRAG HANDLE (Mobile only) ───────────────────────────
+          if (!isDialog) ...[
+            const SizedBox(height: 12),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2E3242),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 14),
+            const SizedBox(height: 10),
+          ] else
+            const SizedBox(height: 16),
 
+          // ─── 2. HEADER & ACTIONS ─────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 18.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -148,15 +162,20 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                         Container(
                           width: 7,
                           height: 7,
-                          decoration: BoxDecoration(
-                            color: primary,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF10B981),
                             shape: BoxShape.circle,
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Text(
+                        const Text(
                           'UP NEXT QUEUE',
-                          style: AppTypography.badge(color: primary),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                            color: Color(0xFF10B981),
+                          ),
                         ),
                       ],
                     ),
@@ -165,10 +184,11 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                       playback.queue.isNotEmpty
                           ? '${playback.queueIndex + 1} of ${playback.queue.length} Tracks'
                           : 'Queue Empty',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: Color(0xFF8A9A90),
                         fontWeight: FontWeight.w600,
+                        fontFeatures: AppTypography.audioFigures,
                       ),
                     ),
                   ],
@@ -176,150 +196,127 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
 
                 Row(
                   children: [
-                    // Add Tracks to Queue (Namida Style)
-                    M3EIconButton(
-                      variant: M3EIconButtonVariant.standard,
-                      onPressed: () {
-                        AddTracksToQueueSheet.show(context);
-                      },
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedPlayList,
-                        size: 22,
-                        color: primary,
-                      ),
+                    // Add Tracks to Queue
+                    _buildActionButton(
+                      icon: LucideIcons.listPlus,
                       tooltip: 'Add Tracks to Queue',
+                      onPressed: () => AddTracksToQueueSheet.show(context),
                     ),
+                    const SizedBox(width: 4),
                     // Shuffle Toggle
-                    M3EIconButton(
-                      variant: M3EIconButtonVariant.standard,
+                    _buildActionButton(
+                      icon: LucideIcons.shuffle,
+                      tooltip: 'Shuffle Queue',
+                      isActive: playback.isShuffle,
                       onPressed: () {
                         AppHaptics.selectionClick();
                         controller.toggleShuffle();
                       },
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedShuffle,
-                        size: 22,
-                        color: playback.isShuffle
-                            ? primary
-                            : theme.colorScheme.onSurfaceVariant,
-                      ),
-                      tooltip: 'Shuffle Queue',
                     ),
+                    const SizedBox(width: 4),
                     // Repeat Mode Toggle
-                    M3EIconButton(
-                      variant: M3EIconButtonVariant.standard,
+                    _buildActionButton(
+                      icon: playback.repeatMode == PlaybackRepeatMode.one
+                          ? LucideIcons.repeat1
+                          : LucideIcons.repeat,
+                      tooltip: 'Repeat Mode',
+                      isActive: playback.repeatMode != PlaybackRepeatMode.off,
                       onPressed: () {
                         AppHaptics.selectionClick();
                         controller.toggleRepeatMode();
                       },
-                      icon: HugeIcon(
-                        icon: playback.repeatMode == PlaybackRepeatMode.one
-                            ? HugeIcons.strokeRoundedRepeatOne01
-                            : HugeIcons.strokeRoundedRepeat,
-                        size: 22,
-                        color: playback.repeatMode != PlaybackRepeatMode.off
-                            ? primary
-                            : theme.colorScheme.onSurfaceVariant,
-                      ),
-                      tooltip: 'Repeat Mode',
                     ),
                     // Clear Queue
-                    if (playback.queue.isNotEmpty)
-                      M3EIconButton(
-                        variant: M3EIconButtonVariant.standard,
+                    if (playback.queue.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      _buildActionButton(
+                        icon: LucideIcons.trash2,
+                        tooltip: 'Clear Queue',
+                        iconColor: const Color(0xFFEF4444),
                         onPressed: () {
                           AppHaptics.mediumImpact();
                           controller.clearQueue();
                         },
-                        icon: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedDelete02,
-                          size: 22,
-                          color: Color(0xFFFF3B30),
-                        ),
-                        tooltip: 'Clear Queue',
                       ),
+                    ],
+                    if (isDialog) ...[
+                      const SizedBox(width: 4),
+                      _buildActionButton(
+                        icon: LucideIcons.x,
+                        tooltip: 'Close Dialog',
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
                   ],
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 8),
-          Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4), height: 1),
+          const SizedBox(height: 12),
+          const Divider(color: Color(0xFF262936), height: 1),
 
-          // ─── 2. REORDERABLE QUEUE LIST WITH SCROLLBAR & AUTO-CENTERING ────
+          // ─── 3. REORDERABLE QUEUE LIST ──────────────────────────────────
           Expanded(
             child: playback.queue.isEmpty
-                ? Center(
+                ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const HugeIcon(
-                          icon: HugeIcons.strokeRoundedPlaylist01,
-                          size: 54,
-                          color: Color(0xFF334155),
+                        Icon(
+                          LucideIcons.listMusic,
+                          size: 48,
+                          color: Color(0xFF2E3242),
                         ),
-                        const SizedBox(height: 12),
-                        const Text(
+                        SizedBox(height: 12),
+                        Text(
                           'No Tracks in Queue',
                           style: TextStyle(
-                            color: Color(0xFFE2E8F0),
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
+                        SizedBox(height: 4),
+                        Text(
                           'Add songs from Library or Playlists to stream',
                           style: TextStyle(
-                            color: Color(0xFF64748B),
-                            fontSize: 12,
+                            color: Color(0xFF8A9A90),
+                            fontSize: 11.5,
                           ),
                         ),
                       ],
                     ),
                   )
-                : Theme(
-                    data: theme.copyWith(
-                      scrollbarTheme: ScrollbarThemeData(
-                        thumbColor: WidgetStatePropertyAll(primary.withValues(alpha: 0.5)),
-                        trackColor: WidgetStatePropertyAll(Colors.white.withValues(alpha: 0.04)),
-                        trackBorderColor: const WidgetStatePropertyAll(Colors.transparent),
-                        radius: const Radius.circular(8),
-                        thickness: const WidgetStatePropertyAll(4.5),
-                        minThumbLength: 36,
+                : Scrollbar(
+                    controller: _scrollController,
+                    thumbVisibility: true,
+                    child: ReorderableListView.builder(
+                      buildDefaultDragHandles: false,
+                      scrollController: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
                       ),
-                    ),
-                    child: Scrollbar(
-                      controller: _scrollController,
-                      thumbVisibility: true,
-                      interactive: true,
-                      child: ReorderableListView.builder(
-                        buildDefaultDragHandles: false,
-                        scrollController: _scrollController,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        itemCount: playback.queue.length,
-                        // ignore: deprecated_member_use
-                        onReorder: (oldIdx, newIdx) {
-                          AppHaptics.selectionClick();
-                          controller.reorderQueue(oldIdx, newIdx);
-                        },
-                        itemBuilder: (context, index) {
-                          final track = playback.queue[index];
-                          final isCurrent = index == playback.queueIndex;
-                          final isBuffering = isCurrent && playback.isLoading;
+                      itemCount: playback.queue.length,
+                      // ignore: deprecated_member_use
+                      onReorder: (oldIdx, newIdx) {
+                        AppHaptics.selectionClick();
+                        controller.reorderQueue(oldIdx, newIdx);
+                      },
+                      itemBuilder: (context, index) {
+                        final track = playback.queue[index];
+                        final isCurrent = index == playback.queueIndex;
+                        final isBuffering = isCurrent && playback.isLoading;
 
-                          return _QueueTrackTile(
-                            key: ValueKey('queue_track_${track.id}_$index'),
+                        return ReorderableDelayedDragStartListener(
+                          key: ValueKey('queue_track_${track.id}_$index'),
+                          index: index,
+                          child: _QueueTrackTile(
                             index: index,
                             track: track,
                             isCurrent: isCurrent,
                             isBuffering: isBuffering,
-                            primaryColor: primary,
-                            isSolid: isSolid,
                             onTap: () {
                               AppHaptics.lightImpact();
                               controller.skipToQueueIndex(index);
@@ -328,13 +325,48 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                               AppHaptics.lightImpact();
                               controller.removeFromQueue(index);
                             },
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+    bool isActive = false,
+    Color? iconColor,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF222532) : const Color(0xFF1E212B),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isActive ? const Color(0xFF383D50) : const Color(0xFF262936),
+              width: 0.8,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            size: 15,
+            color: iconColor ??
+                (isActive ? const Color(0xFF10B981) : const Color(0xFFA1B2A7)),
+          ),
+        ),
       ),
     );
   }
@@ -345,19 +377,14 @@ class _QueueTrackTile extends StatelessWidget {
   final Track track;
   final bool isCurrent;
   final bool isBuffering;
-  final Color primaryColor;
-  final bool isSolid;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
   const _QueueTrackTile({
-    super.key,
     required this.index,
     required this.track,
     required this.isCurrent,
     this.isBuffering = false,
-    required this.primaryColor,
-    required this.isSolid,
     required this.onTap,
     required this.onRemove,
   });
@@ -370,176 +397,140 @@ class _QueueTrackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ReorderableDelayedDragStartListener(
-      index: index,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 3.5),
-        decoration: BoxDecoration(
-          color: isCurrent
-              ? StudioSurfaceTheme.tintedContainer(
-                  context,
-                  primaryColor,
-                  isSolid: isSolid,
-                )
-              : StudioSurfaceTheme.surfaceContainerLow(
-                  context,
-                  isSolid: isSolid,
-                ),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isCurrent
-                ? primaryColor.withValues(alpha: isSolid ? 0.8 : 0.5)
-                : StudioSurfaceTheme.subtleOutline(
-                    context,
-                    isSolid: isSolid,
-                  ),
-            width: isCurrent ? 1.2 : 0.8,
-          ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 3.0),
+      decoration: BoxDecoration(
+        color: isCurrent ? const Color(0xFF20232E) : const Color(0xFF12141A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isCurrent ? const Color(0xFF383D50) : const Color(0xFF262936),
+          width: isCurrent ? 1.0 : 0.8,
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            onTap: onTap,
-            leading: Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: isCurrent
-                    ? (isSolid
-                        ? primaryColor.withValues(alpha: 0.25)
-                        : primaryColor.withValues(alpha: 0.2))
-                    : StudioSurfaceTheme.surfaceContainer(
-                        context,
-                        isSolid: isSolid,
-                      ),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isCurrent
-                      ? primaryColor.withValues(alpha: isSolid ? 0.7 : 0.6)
-                      : StudioSurfaceTheme.outline(
-                          context,
-                          isSolid: isSolid,
-                        ),
-                  width: 0.8,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              children: [
+                // Playing indicator / Track Index
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isCurrent
+                        ? const Color(0xFF252834)
+                        : const Color(0xFF16181F),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isCurrent
+                          ? const Color(0xFF383D50)
+                          : const Color(0xFF262936),
+                      width: 0.8,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: isBuffering
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.8,
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                          ),
+                        )
+                      : (isCurrent
+                          ? const Icon(
+                              LucideIcons.audioLines,
+                              size: 15,
+                              color: Color(0xFF10B981),
+                            )
+                          : Text(
+                              (index + 1).toString().padLeft(2, '0'),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF8A9A90),
+                                fontFeatures: [FontFeature.tabularFigures()],
+                              ),
+                            )),
                 ),
-              ),
-              child: Center(
-                child: isBuffering
-                    ? SizedBox(
-                        width: 15,
-                        height: 15,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.8,
-                          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                const SizedBox(width: 12),
+
+                // Track Title & Artist
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        track.title.isNotEmpty ? track.title : 'Unknown Title',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                          color: isCurrent ? Colors.white : const Color(0xFFE6EAE7),
                         ),
-                      )
-                    : (isCurrent
-                        ? HugeIcon(
-                            icon: HugeIcons.strokeRoundedAudioWaveform,
-                            size: 16,
-                            color: primaryColor,
-                          )
-                        : Text(
-                            (index + 1).toString().padLeft(2, '0'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              track.artist.isNotEmpty ? track.artist : 'Unknown Artist',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF8A9A90),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _formatDuration(track.duration),
                             style: const TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF64748B),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF8A9A90),
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),
-                          )),
-              ),
-            ),
-            title: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    track.title,
-                    style: TextStyle(
-                      color: isCurrent ? primaryColor : theme.colorScheme.onSurface,
-                      fontSize: 13,
-                      fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (track.isHiRes) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF9F0A).withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: const Color(0xFFFF9F0A).withValues(alpha: 0.6),
-                        width: 0.6,
+                          ),
+                        ],
                       ),
-                    ),
-                    child: const Text(
-                      'Hi-Res',
-                      style: TextStyle(
-                        color: Color(0xFFFF9F0A),
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            subtitle: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${track.artist} • ${track.album}',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    ],
                   ),
                 ),
-                if (track.duration > Duration.zero)
-                  Text(
-                    _formatDuration(track.duration),
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                const SizedBox(width: 8),
+
+                // Remove Track Button
+                InkWell(
+                  onTap: onRemove,
+                  borderRadius: BorderRadius.circular(6),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(
+                      LucideIcons.x,
+                      size: 14,
+                      color: Color(0xFF8A9A90),
                     ),
                   ),
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedCancel01,
-                    size: 20,
-                    color: Color(0xFFFF3B30),
-                  ),
-                  onPressed: onRemove,
-                  tooltip: 'Remove from Queue',
                 ),
+                const SizedBox(width: 4),
+
+                // Drag Handle
                 ReorderableDragStartListener(
                   index: index,
-                  child: Container(
-                    color: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                    child: Center(
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedDragDropVertical,
-                        size: 20,
-                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                      ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(
+                      LucideIcons.gripVertical,
+                      size: 16,
+                      color: Color(0xFF8A9A90),
                     ),
                   ),
                 ),

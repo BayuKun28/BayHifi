@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/lyrics/east_asian_romanizer.dart';
 import '../../../player/domain/lyrics_line.dart';
@@ -202,8 +202,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               color: theme.colorScheme.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedShare08,
+            child: Icon(
+              LucideIcons.share2,
               size: 20,
               color: theme.colorScheme.primary,
             ),
@@ -237,8 +237,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               AppHaptics.lightImpact();
               Navigator.of(context).pop();
             },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedCancel01,
+            icon: Icon(
+              LucideIcons.x,
               size: 20,
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -252,10 +252,10 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
     final selectedCount = state.config.selectedLines.length;
 
     final tabs = [
-      (0, 'Studio', HugeIcons.strokeRoundedImage01),
-      (1, 'Lines ($selectedCount/6)', HugeIcons.strokeRoundedTextFont),
-      (2, 'Telemetry', HugeIcons.strokeRoundedSlidersHorizontal),
-      (3, 'Style', HugeIcons.strokeRoundedPaintBoard),
+      (0, 'Studio', LucideIcons.image),
+      (1, 'Lines ($selectedCount/6)', LucideIcons.type),
+      (2, 'Telemetry', LucideIcons.slidersHorizontal),
+      (3, 'Style', LucideIcons.palette),
     ];
 
     return Padding(
@@ -286,8 +286,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: tab.$3,
+                      Icon(
+                        tab.$3,
                         size: 14,
                         color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                       ),
@@ -425,8 +425,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedMaximize02,
+                        Icon(
+                          LucideIcons.maximize2,
                           size: 12,
                           color: theme.colorScheme.primary,
                         ),
@@ -453,7 +453,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'LAYOUT TEMPLATES (6 STYLES)',
-            icon: HugeIcons.strokeRoundedLayout01,
+            icon: LucideIcons.layoutGrid,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -477,7 +477,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'ASPECT RATIO',
-            icon: HugeIcons.strokeRoundedAspectRatio,
+            icon: LucideIcons.proportions,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -504,13 +504,13 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'QUICK BADGES',
-            icon: HugeIcons.strokeRoundedSparkles,
+            icon: LucideIcons.sparkles,
             child: Row(
               children: [
                 Expanded(
                   child: _buildQuickToggleCard(
                     title: 'Branding',
-                    icon: HugeIcons.strokeRoundedSparkles,
+                    icon: LucideIcons.sparkles,
                     isActive: state.config.showBranding,
                     theme: theme,
                     onTap: () {
@@ -523,7 +523,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 Expanded(
                   child: _buildQuickToggleCard(
                     title: 'Telemetry',
-                    icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                    icon: LucideIcons.slidersHorizontal,
                     isActive: state.config.audiophileStamp.enabled,
                     theme: theme,
                     onTap: () {
@@ -536,7 +536,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 Expanded(
                   child: _buildQuickToggleCard(
                     title: 'QR Link',
-                    icon: HugeIcons.strokeRoundedQrCode,
+                    icon: LucideIcons.qrCode,
                     isActive: state.config.showQrCode,
                     theme: theme,
                     onTap: () {
@@ -563,20 +563,20 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   ) {
     final isSelected = style == currentStyle;
 
-    dynamic getStyleIcon() {
+    IconData getStyleIcon() {
       switch (style) {
         case LyricCardLayoutStyle.classicMinimal:
-          return HugeIcons.strokeRoundedLayout01;
+          return LucideIcons.layoutTemplate;
         case LyricCardLayoutStyle.polaroidFrame:
-          return HugeIcons.strokeRoundedImage01;
+          return LucideIcons.image;
         case LyricCardLayoutStyle.cassetteJCard:
-          return HugeIcons.strokeRoundedAlbum01;
+          return LucideIcons.disc;
         case LyricCardLayoutStyle.waveformQuote:
-          return HugeIcons.strokeRoundedAudioWaveform;
+          return LucideIcons.audioWaveform;
         case LyricCardLayoutStyle.cyberHUD:
-          return HugeIcons.strokeRoundedComputer;
+          return LucideIcons.terminal;
         case LyricCardLayoutStyle.abstractAura:
-          return HugeIcons.strokeRoundedSparkles;
+          return LucideIcons.sparkles;
       }
     }
 
@@ -605,8 +605,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: HugeIcon(
-                icon: getStyleIcon(),
+              child: Icon(
+                getStyleIcon(),
                 size: 16,
                 color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
               ),
@@ -642,7 +642,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
 
   Widget _buildQuickToggleCard({
     required String title,
-    required dynamic icon,
+    required IconData icon,
     required bool isActive,
     required ThemeData theme,
     required VoidCallback onTap,
@@ -664,8 +664,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            HugeIcon(
-              icon: icon,
+            Icon(
+              icon,
               size: 14,
               color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
             ),
@@ -714,8 +714,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                   color: theme.colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedTextFont,
+                child: Icon(
+                  LucideIcons.type,
                   size: 16,
                   color: theme.colorScheme.primary,
                 ),
@@ -804,10 +804,10 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(top: 2),
-                              child: HugeIcon(
-                                icon: isSelected
-                                    ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                    : HugeIcons.strokeRoundedCircle,
+                              child: Icon(
+                                isSelected
+                                    ? LucideIcons.circleCheck
+                                    : LucideIcons.circle,
                                 size: 18,
                                 color: isSelected
                                     ? theme.colorScheme.primary
@@ -878,7 +878,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'SIGNAL CHAIN TELEMETRY STAMP',
-            icon: HugeIcons.strokeRoundedSlidersHorizontal,
+            icon: LucideIcons.slidersHorizontal,
             child: Column(
               children: [
                 _buildToggleRow(
@@ -958,7 +958,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'STUDIO STICKERS & STAMPS (MAX 3)',
-            icon: HugeIcons.strokeRoundedAward01,
+            icon: LucideIcons.award,
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -985,8 +985,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        HugeIcon(
-                          icon: type.icon,
+                        Icon(
+                          type.icon,
                           size: 14,
                           color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                         ),
@@ -1013,7 +1013,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'PERSONAL NOTE / CAPTION',
-            icon: HugeIcons.strokeRoundedEdit02,
+            icon: LucideIcons.filePen,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1067,7 +1067,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'TYPOGRAPHY & FONT WEIGHT',
-            icon: HugeIcons.strokeRoundedTextFont,
+            icon: LucideIcons.type,
             child: _buildTypographySection(theme, state, controller),
           ),
 
@@ -1077,7 +1077,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'TEXT STYLES & HIGHLIGHTS',
-            icon: HugeIcons.strokeRoundedPaintBoard,
+            icon: LucideIcons.palette,
             child: _buildHighlightAndStyleSection(theme, state, controller),
           ),
 
@@ -1087,7 +1087,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           _buildBentoSection(
             theme: theme,
             title: 'BACKGROUND & PALETTE',
-            icon: HugeIcons.strokeRoundedColorPicker,
+            icon: LucideIcons.pipette,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1107,7 +1107,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   Widget _buildBentoSection({
     required ThemeData theme,
     required String title,
-    required dynamic icon,
+    required IconData icon,
     required Widget child,
   }) {
     return Container(
@@ -1122,8 +1122,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
         children: [
           Row(
             children: [
-              HugeIcon(
-                icon: icon,
+              Icon(
+                icon,
                 size: 14,
                 color: theme.colorScheme.primary,
               ),
@@ -1231,7 +1231,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
               child: Row(
                 children: [
                   _buildIconToggle(
-                    icon: HugeIcons.strokeRoundedTextAlignLeft,
+                    icon: LucideIcons.alignLeft,
                     isSelected: config.textAlign == TextAlign.left,
                     theme: theme,
                     onTap: () {
@@ -1240,7 +1240,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     },
                   ),
                   _buildIconToggle(
-                    icon: HugeIcons.strokeRoundedTextAlignCenter,
+                    icon: LucideIcons.alignCenter,
                     isSelected: config.textAlign == TextAlign.center,
                     theme: theme,
                     onTap: () {
@@ -1249,7 +1249,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     },
                   ),
                   _buildIconToggle(
-                    icon: HugeIcons.strokeRoundedTextAlignRight,
+                    icon: LucideIcons.alignRight,
                     isSelected: config.textAlign == TextAlign.right,
                     theme: theme,
                     onTap: () {
@@ -1269,7 +1269,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: _buildIconToggle(
-                icon: HugeIcons.strokeRoundedTextItalic,
+                icon: LucideIcons.italic,
                 isSelected: config.isItalic,
                 theme: theme,
                 onTap: () {
@@ -1296,8 +1296,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(6),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedMinusSign,
+                      child: Icon(
+                        LucideIcons.minus,
                         size: 14,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -1322,8 +1322,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(6),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedPlusSign,
+                      child: Icon(
+                        LucideIcons.plus,
                         size: 14,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -1372,8 +1372,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        HugeIcon(
-                          icon: _getHighlightIcon(style),
+                        Icon(
+                          _getHighlightIcon(style),
                           size: 14,
                           color: config.highlightStyle == style
                               ? theme.colorScheme.primary
@@ -1527,16 +1527,16 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
     );
   }
 
-  dynamic _getHighlightIcon(LyricCardHighlightStyle? style) {
+  IconData _getHighlightIcon(LyricCardHighlightStyle? style) {
     switch (style ?? LyricCardHighlightStyle.none) {
       case LyricCardHighlightStyle.none:
-        return HugeIcons.strokeRoundedTextFont;
+        return LucideIcons.type;
       case LyricCardHighlightStyle.stroke:
-        return HugeIcons.strokeRoundedPaintBoard;
+        return LucideIcons.palette;
       case LyricCardHighlightStyle.highlighterPill:
-        return HugeIcons.strokeRoundedBookmark02;
+        return LucideIcons.bookmark;
       case LyricCardHighlightStyle.dropShadow:
-        return HugeIcons.strokeRoundedSparkles;
+        return LucideIcons.sparkles;
     }
   }
 
@@ -1571,7 +1571,7 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
   }
 
   Widget _buildIconToggle({
-    required dynamic icon,
+    required IconData icon,
     required bool isSelected,
     required ThemeData theme,
     required VoidCallback onTap,
@@ -1585,8 +1585,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
           color: isSelected ? theme.colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(7),
         ),
-        child: HugeIcon(
-          icon: icon,
+        child: Icon(
+          icon,
           size: 16,
           color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
         ),
@@ -1890,20 +1890,11 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             color: isSelected ? theme.colorScheme.primary : Colors.white.withValues(alpha: 0.3),
             width: isSelected ? 2.5 : 1.0,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.4),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                  )
-                ]
-              : null,
         ),
         child: isSelected
-            ? const Center(
+            ? Center(
                 child: Icon(
-                  Icons.check,
+                  LucideIcons.check,
                   size: 16,
                   color: Colors.white,
                 ),
@@ -1932,20 +1923,11 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
             color: isSelected ? theme.colorScheme.primary : Colors.white.withValues(alpha: 0.25),
             width: isSelected ? 2.5 : 1.0,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.4),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                  )
-                ]
-              : null,
         ),
         child: isSelected
-            ? const Center(
+            ? Center(
                 child: Icon(
-                  Icons.check,
+                  LucideIcons.check,
                   size: 16,
                   color: Colors.white,
                 ),
@@ -2147,8 +2129,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                         _showFeedbackSnackbar(context, 'Saved to Gallery: $path');
                       }
                     },
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedDownload04,
+              icon: Icon(
+                LucideIcons.download,
                 size: 18,
                 color: theme.colorScheme.primary,
               ),
@@ -2192,8 +2174,8 @@ class _LyricShareSheetState extends ConsumerState<LyricShareSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : HugeIcon(
-                      icon: HugeIcons.strokeRoundedShare08,
+                  : Icon(
+                      LucideIcons.share2,
                       size: 18,
                       color: theme.colorScheme.onPrimary,
                     ),

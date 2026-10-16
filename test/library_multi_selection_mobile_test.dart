@@ -7,7 +7,7 @@ import 'package:baydev_hifi/features/library/presentation/controllers/library_se
 import 'package:baydev_hifi/features/library/presentation/unified_library_screen.dart';
 import 'package:baydev_hifi/features/library/presentation/widgets/library_batch_actions_bar.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -166,7 +166,7 @@ void main() {
 
       // Tap cancel button in batch actions bar
       final cancelButton = find.byWidgetPredicate(
-        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedCancel01,
+        (w) => w is Icon && w.icon == LucideIcons.x,
       );
       expect(cancelButton, findsOneWidget);
       await tester.tap(cancelButton);

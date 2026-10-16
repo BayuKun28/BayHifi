@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../domain/fr_curve_data.dart';
@@ -201,8 +201,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedFolderLibrary,
+                  child: Icon(
+                    LucideIcons.folder,
                     size: 20,
                     color: colorScheme.onPrimaryContainer,
                   ),
@@ -233,8 +233,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
                 ),
                 M3EIconButton(
                   variant: M3EIconButtonVariant.tonal,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedCancel01,
+                  icon: Icon(
+                    LucideIcons.x,
                     size: 22,
                     color: colorScheme.onSurface,
                   ),
@@ -258,7 +258,7 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
                 Expanded(
                   child: _buildCategoryTab(
                     label: 'Drivers / IEMs',
-                    icon: HugeIcons.strokeRoundedHeadphones,
+                    icon: LucideIcons.headphones,
                     count: eqState.availableDrivers.length,
                     isSelected: _activeCategory == 'driver',
                     onTap: () {
@@ -271,7 +271,7 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
                 Expanded(
                   child: _buildCategoryTab(
                     label: 'Target Curves',
-                    icon: HugeIcons.strokeRoundedTarget02,
+                    icon: LucideIcons.target,
                     count: eqState.availableTargets.length,
                     isSelected: _activeCategory == 'target',
                     onTap: () {
@@ -303,8 +303,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
                       prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 20),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.only(left: 12, right: 8),
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedSearch01,
+                        child: Icon(
+                          LucideIcons.search,
                           size: 15,
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -316,8 +316,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
                               padding: const EdgeInsets.only(right: 4),
                               child: M3EIconButton(
                                 variant: M3EIconButtonVariant.standard,
-                                icon: HugeIcon(
-                                  icon: HugeIcons.strokeRoundedCancel01,
+                                icon: Icon(
+                                  LucideIcons.x,
                                   size: 16,
                                   color: colorScheme.onSurface,
                                 ),
@@ -338,8 +338,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
                 ),
                 const SizedBox(width: 8),
                 M3EButton.filled(
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedAdd01,
+                  icon: const Icon(
+                    LucideIcons.plus,
                     size: 16,
                   ),
                   label: const Text('IMPORT'),
@@ -382,7 +382,7 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
 
   Widget _buildCategoryTab({
     required String label,
-    required dynamic icon,
+    required IconData icon,
     required int count,
     required bool isSelected,
     required VoidCallback onTap,
@@ -408,8 +408,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            HugeIcon(
-              icon: icon,
+            Icon(
+              icon,
               size: 16,
               color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
             ),
@@ -481,10 +481,10 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: HugeIcon(
-              icon: _activeCategory == 'target'
-                  ? HugeIcons.strokeRoundedTarget02
-                  : HugeIcons.strokeRoundedHeadphones,
+            child: Icon(
+              _activeCategory == 'target'
+                  ? LucideIcons.target
+                  : LucideIcons.headphones,
               size: 18,
               color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
             ),
@@ -554,8 +554,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
               // Export button
               M3EIconButton(
                 variant: M3EIconButtonVariant.standard,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDownload01,
+                icon: Icon(
+                  LucideIcons.download,
                   size: 16,
                   color: colorScheme.onSurface,
                 ),
@@ -567,8 +567,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
               if (!isDefault)
                 M3EIconButton(
                   variant: M3EIconButtonVariant.standard,
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedDelete02,
+                  icon: Icon(
+                    LucideIcons.trash2,
                     size: 16,
                     color: colorScheme.error,
                   ),
@@ -614,8 +614,8 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedFolder01,
+          Icon(
+            LucideIcons.folder,
             size: 40,
             color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),

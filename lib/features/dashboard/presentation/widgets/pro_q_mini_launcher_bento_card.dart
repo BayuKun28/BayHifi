@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -63,8 +63,8 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                     color: StudioCategoryColors.proQEqualizer.withValues(alpha: isSolid ? 0.18 : 0.14),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedSlidersVertical,
+                  child: const Icon(
+                    LucideIcons.slidersVertical,
                     size: 15,
                     color: StudioCategoryColors.proQEqualizer,
                   ),
@@ -89,8 +89,8 @@ class ProQMiniLauncherBentoCard extends ConsumerWidget {
                     color: StudioCategoryColors.proQEqualizer.withValues(alpha: isSolid ? 0.18 : 0.14),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedMaximize01,
+                  child: const Icon(
+                    LucideIcons.maximize2,
                     size: 13,
                     color: StudioCategoryColors.proQEqualizer,
                   ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -79,8 +79,8 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                       color: primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedDashboardSpeed01,
+                    child: Icon(
+                      LucideIcons.gauge,
                       size: 20,
                       color: primary,
                     ),
@@ -112,8 +112,8 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
               M3EIconButton(
                 variant: M3EIconButtonVariant.standard,
                 onPressed: () => Navigator.of(context).pop(),
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedCancel01,
+                icon: Icon(
+                  LucideIcons.x,
                   size: 22,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -141,8 +141,8 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedDashboardSpeed01,
+                        Icon(
+                          LucideIcons.gauge,
                           size: 16,
                           color: primary,
                         ),
@@ -245,8 +245,8 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedMusicNote01,
+                        Icon(
+                          LucideIcons.music,
                           size: 16,
                           color: theme.colorScheme.secondary,
                         ),
@@ -344,8 +344,8 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedLink01,
+                      Icon(
+                        LucideIcons.link,
                         size: 16,
                         color: isLinked ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -77,8 +77,8 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
               children: [
                 Row(
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedMoon,
+                    Icon(
+                      LucideIcons.moon,
                       size: 20,
                       color: primary,
                     ),
@@ -186,8 +186,8 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                     timerController.cancelTimer();
                     Navigator.of(context).pop();
                   },
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedCancel01,
+                  icon: Icon(
+                    LucideIcons.x,
                     size: 18,
                     color: AppColors.crimsonAlert,
                   ),
@@ -309,7 +309,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                 isSolid: isSolid,
                 title: 'Stop at End of Track',
                 subtitle: 'Finishes playing active song before stopping',
-                icon: HugeIcons.strokeRoundedMusicNote01,
+                icon: LucideIcons.music,
                 value: _stopAtEndOfTrack,
                 primaryColor: primary,
                 onChanged: (val) => setState(() => _stopAtEndOfTrack = val),
@@ -322,7 +322,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                 isSolid: isSolid,
                 title: '15s Gentle Fade-Out',
                 subtitle: 'Gradually lowers volume smoothly to avoid jarring stops',
-                icon: HugeIcons.strokeRoundedVolumeLow,
+                icon: LucideIcons.volume1,
                 value: _enableFadeOut,
                 primaryColor: primary,
                 onChanged: (val) => setState(() => _enableFadeOut = val),
@@ -343,8 +343,8 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
                     );
                     Navigator.of(context).pop();
                   },
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlay,
+                  icon: const Icon(
+                    LucideIcons.play,
                     size: 18,
                     color: Colors.black,
                   ),
@@ -406,7 +406,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
     required bool isSolid,
     required String title,
     required String subtitle,
-    required dynamic icon,
+    required IconData icon,
     required bool value,
     required Color primaryColor,
     required ValueChanged<bool> onChanged,
@@ -424,7 +424,7 @@ class _SleepTimerSheetState extends ConsumerState<SleepTimerSheet> {
       ),
       child: Row(
         children: [
-          HugeIcon(icon: icon, size: 18, color: primaryColor),
+          Icon(icon, size: 18, color: primaryColor),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

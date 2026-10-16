@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
@@ -154,8 +154,8 @@ class UserProfileSheet extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedServer,
+                    Icon(
+                      LucideIcons.server,
                       size: 16,
                       color: theme.colorScheme.primary,
                     ),
@@ -208,8 +208,8 @@ class UserProfileSheet extends ConsumerWidget {
 
           // Change Password Button
           M3EButton.tonal(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedLockKey,
+            icon: Icon(
+              LucideIcons.lock,
               size: 18,
               color: theme.colorScheme.onSecondaryContainer,
             ),
@@ -245,8 +245,8 @@ class UserProfileSheet extends ConsumerWidget {
               Expanded(
                 flex: 2,
                 child: M3EButton.filled(
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedCloudSync,
+                  icon: Icon(
+                    LucideIcons.cloud,
                     size: 18,
                     color: theme.colorScheme.onPrimary,
                   ),
@@ -280,8 +280,8 @@ class UserProfileSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: M3EButton.outlined(
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedLogout01,
+                  icon: Icon(
+                    LucideIcons.logOut,
                     size: 18,
                     color: theme.colorScheme.error,
                   ),

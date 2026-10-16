@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../app/theme/app_haptics.dart';
 import '../../app/theme/app_typography.dart';
@@ -185,8 +185,8 @@ class _StudioArtworkLightboxState extends State<StudioArtworkLightbox>
                       M3EIconButton(
                         variant: M3EIconButtonVariant.standard,
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedCancel01,
+                        icon: Icon(
+                          LucideIcons.x,
                           size: 22,
                           color: theme.colorScheme.onSurface,
                         ),
@@ -323,8 +323,8 @@ class _StudioArtworkLightboxState extends State<StudioArtworkLightbox>
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedImage01,
+                        Icon(
+                          LucideIcons.image,
                           size: 14,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

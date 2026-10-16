@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:baydev_hifi/features/library/domain/genre_icon_helper.dart';
 import 'package:baydev_hifi/features/library/presentation/widgets/artist_avatar_widget.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
@@ -10,29 +10,29 @@ import 'package:baydev_hifi/features/player/presentation/widgets/audio_file_insp
 
 void main() {
   group('GenreIconHelper Tests', () {
-    test('Correctly maps rock and metal genres to guitar icon', () {
-      expect(GenreIconHelper.getGenreIcon('Progressive Rock'), HugeIcons.strokeRoundedGuitar);
-      expect(GenreIconHelper.getGenreIcon('Heavy Metal'), HugeIcons.strokeRoundedGuitar);
-      expect(GenreIconHelper.getGenreIcon('Punk Rock'), HugeIcons.strokeRoundedGuitar);
+    test('Correctly maps rock and metal genres to flame icon', () {
+      expect(GenreIconHelper.getGenreIcon('Progressive Rock'), LucideIcons.flame);
+      expect(GenreIconHelper.getGenreIcon('Heavy Metal'), LucideIcons.flame);
+      expect(GenreIconHelper.getGenreIcon('Punk Rock'), LucideIcons.flame);
     });
 
     test('Correctly maps jazz and blues genres to note icon', () {
-      expect(GenreIconHelper.getGenreIcon('Smooth Jazz'), HugeIcons.strokeRoundedMusicNote02);
-      expect(GenreIconHelper.getGenreIcon('Blues Rock'), HugeIcons.strokeRoundedGuitar); // rock matches first
-      expect(GenreIconHelper.getGenreIcon('Delta Blues'), HugeIcons.strokeRoundedMusicNote02);
-      expect(GenreIconHelper.getGenreIcon('Neo Soul'), HugeIcons.strokeRoundedMusicNote02);
+      expect(GenreIconHelper.getGenreIcon('Smooth Jazz'), LucideIcons.music2);
+      expect(GenreIconHelper.getGenreIcon('Blues Rock'), LucideIcons.flame); // rock matches first
+      expect(GenreIconHelper.getGenreIcon('Delta Blues'), LucideIcons.music2);
+      expect(GenreIconHelper.getGenreIcon('Neo Soul'), LucideIcons.music2);
     });
 
     test('Correctly maps classical and acoustic genres', () {
-      expect(GenreIconHelper.getGenreIcon('Classical Symphony'), HugeIcons.strokeRoundedMusicNote03);
-      expect(GenreIconHelper.getGenreIcon('Acoustic Piano'), HugeIcons.strokeRoundedMusicNote03);
+      expect(GenreIconHelper.getGenreIcon('Classical Symphony'), LucideIcons.music);
+      expect(GenreIconHelper.getGenreIcon('Acoustic Piano'), LucideIcons.music);
     });
 
     test('Correctly maps electronic, hip-hop, pop, and studio master', () {
-      expect(GenreIconHelper.getGenreIcon('EDM Electronic'), HugeIcons.strokeRoundedAudioWaveform);
-      expect(GenreIconHelper.getGenreIcon('Hip Hop Rap'), HugeIcons.strokeRoundedMic01);
-      expect(GenreIconHelper.getGenreIcon('Pop Hits'), HugeIcons.strokeRoundedHeadphones);
-      expect(GenreIconHelper.getGenreIcon('Hi-Res Lossless Master'), HugeIcons.strokeRoundedSparkles);
+      expect(GenreIconHelper.getGenreIcon('EDM Electronic'), LucideIcons.audioLines);
+      expect(GenreIconHelper.getGenreIcon('Hip Hop Rap'), LucideIcons.mic);
+      expect(GenreIconHelper.getGenreIcon('Pop Hits'), LucideIcons.headphones);
+      expect(GenreIconHelper.getGenreIcon('Hi-Res Lossless Master'), LucideIcons.sparkles);
     });
 
     test('Deterministic hash fallback maps random/unrecognized genre names reliably', () {

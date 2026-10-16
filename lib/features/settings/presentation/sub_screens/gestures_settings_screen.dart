@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -24,8 +24,8 @@ class GesturesSettingsScreen extends ConsumerWidget {
         title: const Text('GESTURES & TRACK TILES'),
         leading: M3EIconButton(
           variant: M3EIconButtonVariant.standard,
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
+          icon: Icon(
+            LucideIcons.arrowLeft,
             size: 22,
             color: theme.colorScheme.onSurface,
           ),
@@ -43,7 +43,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
           _buildSectionHeader(
             context,
             'NOW PLAYING ARTWORK GESTURES',
-            HugeIcons.strokeRoundedActivity01,
+            LucideIcons.activity,
           ),
           const SizedBox(height: 8),
           _buildArtworkGesturesCard(context, settings, controller, isSolid),
@@ -53,7 +53,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
           _buildSectionHeader(
             context,
             'TRACK TILE DISPLAY & METADATA',
-            HugeIcons.strokeRoundedMusicNote01,
+            LucideIcons.music,
           ),
           const SizedBox(height: 8),
           _buildTrackTileLayoutCard(context, theme, primary, settings, controller, isSolid),
@@ -63,7 +63,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
           _buildSectionHeader(
             context,
             'TRACK LIST SWIPE ACTIONS',
-            HugeIcons.strokeRoundedSlidersVertical,
+            LucideIcons.sliders,
           ),
           const SizedBox(height: 8),
           _buildTrackTileSwipeCard(context, settings, controller, isSolid),
@@ -104,8 +104,8 @@ class GesturesSettingsScreen extends ConsumerWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedTouch01,
+                child: Icon(
+                  LucideIcons.hand,
                   size: 18,
                   color: primary,
                 ),
@@ -203,11 +203,11 @@ class GesturesSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, dynamic icon) {
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 15, color: theme.colorScheme.primary),
+        Icon(icon, size: 15, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,
@@ -446,7 +446,7 @@ class GesturesSettingsScreen extends ConsumerWidget {
     required List<T> items,
     required String Function(T) itemLabel,
     required String Function(T) itemDescription,
-    required dynamic Function(T) itemIcon,
+    required IconData Function(T) itemIcon,
     required ValueChanged<T> onChanged,
     required bool isSolid,
   }) {
@@ -479,8 +479,8 @@ class GesturesSettingsScreen extends ConsumerWidget {
             child: DropdownButton<T>(
               value: currentValue,
               isExpanded: true,
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowDown01,
+              icon: Icon(
+                LucideIcons.chevronDown,
                 size: 15,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -494,8 +494,8 @@ class GesturesSettingsScreen extends ConsumerWidget {
                   value: item,
                   child: Row(
                     children: [
-                      HugeIcon(
-                        icon: itemIcon(item),
+                      Icon(
+                        itemIcon(item),
                         size: 16,
                         color: isSelected ? primary : theme.colorScheme.onSurfaceVariant,
                       ),
@@ -538,41 +538,41 @@ class GesturesSettingsScreen extends ConsumerWidget {
     );
   }
 
-  dynamic _getGestureActionIcon(ArtworkGestureAction action) {
+  IconData _getGestureActionIcon(ArtworkGestureAction action) {
     switch (action) {
       case ArtworkGestureAction.toggleLyrics:
-        return HugeIcons.strokeRoundedText;
+        return LucideIcons.alignLeft;
       case ArtworkGestureAction.togglePlayPause:
-        return HugeIcons.strokeRoundedPlayCircle;
+        return LucideIcons.playCircle;
       case ArtworkGestureAction.toggleFavorite:
-        return HugeIcons.strokeRoundedFavourite;
+        return LucideIcons.heart;
       case ArtworkGestureAction.openInspector:
-        return HugeIcons.strokeRoundedInformationCircle;
+        return LucideIcons.info;
       case ArtworkGestureAction.openProQStudio:
-        return HugeIcons.strokeRoundedSlidersHorizontal;
+        return LucideIcons.slidersHorizontal;
       case ArtworkGestureAction.openDspRack:
-        return HugeIcons.strokeRoundedAudioBook04;
+        return LucideIcons.sliders;
       case ArtworkGestureAction.openQueue:
-        return HugeIcons.strokeRoundedPlaylist01;
+        return LucideIcons.listMusic;
       case ArtworkGestureAction.viewFullArtwork:
-        return HugeIcons.strokeRoundedImage02;
+        return LucideIcons.image;
       case ArtworkGestureAction.none:
-        return HugeIcons.strokeRoundedCancel01;
+        return LucideIcons.x;
     }
   }
 
-  dynamic _getSwipeActionIcon(TrackTileSwipeAction action) {
+  IconData _getSwipeActionIcon(TrackTileSwipeAction action) {
     switch (action) {
       case TrackTileSwipeAction.addToQueue:
-        return HugeIcons.strokeRoundedPlaylist01;
+        return LucideIcons.listMusic;
       case TrackTileSwipeAction.playNext:
-        return HugeIcons.strokeRoundedNext;
+        return LucideIcons.skipForward;
       case TrackTileSwipeAction.toggleFavorite:
-        return HugeIcons.strokeRoundedFavourite;
+        return LucideIcons.heart;
       case TrackTileSwipeAction.addToPlaylist:
-        return HugeIcons.strokeRoundedFolderPlus;
+        return LucideIcons.folderPlus;
       case TrackTileSwipeAction.none:
-        return HugeIcons.strokeRoundedCancel01;
+        return LucideIcons.x;
     }
   }
 }

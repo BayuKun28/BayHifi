@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../dsp_rack/presentation/dsp_rack_screen.dart';
@@ -41,8 +41,8 @@ class MasteringDspBentoCard extends ConsumerWidget {
                     color: StudioCategoryColors.dspMastering.withValues(alpha: isSolid ? 0.18 : 0.14),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedCpu,
+                  child: const Icon(
+                    LucideIcons.cpu,
                     size: 15,
                     color: StudioCategoryColors.dspMastering,
                   ),
@@ -129,8 +129,8 @@ class MasteringDspBentoCard extends ConsumerWidget {
                     ),
                   ),
                   SizedBox(width: 3),
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowRight01,
+                  Icon(
+                    LucideIcons.arrowRight,
                     size: 11,
                     color: StudioCategoryColors.dspMastering,
                   ),

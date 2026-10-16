@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/simple_as_f_theme.dart';
@@ -102,7 +102,7 @@ class TrackTile extends ConsumerWidget {
 
     Widget tileContent = Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isTileActive ? 2 : 0,
+        horizontal: isTileActive ? 4 : 2,
         vertical: isTileActive ? 4 : 1,
       ),
       decoration: BoxDecoration(
@@ -125,9 +125,11 @@ class TrackTile extends ConsumerWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         child: ListTile(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: isTileActive ? 12 : 8,
-            vertical: 2,
+          contentPadding: EdgeInsets.only(
+            left: isTileActive ? 12 : 8,
+            right: isTileActive ? 10 : 6,
+            top: isTileActive ? 6 : 2,
+            bottom: isTileActive ? 8 : 4,
           ),
           onTap: onTap,
           onLongPress: onLongPress,
@@ -139,7 +141,7 @@ class TrackTile extends ConsumerWidget {
                 width: 46,
                 height: 46,
                 borderRadius: BorderRadius.circular(12),
-                fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                fallbackIcon: LucideIcons.music,
                 fallbackIconSize: 22,
               ),
               if (isMultiSelecting)
@@ -153,10 +155,10 @@ class TrackTile extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: HugeIcon(
-                      icon: isSelected
-                          ? HugeIcons.strokeRoundedCheckmarkSquare02
-                          : HugeIcons.strokeRoundedSquare,
+                    child: Icon(
+                      isSelected
+                          ? LucideIcons.checkSquare
+                          : LucideIcons.square,
                       color: isSelected ? const Color(0xFF0B110E) : Colors.white,
                       size: 20,
                     ),
@@ -180,8 +182,8 @@ class TrackTile extends ConsumerWidget {
                               valueColor: AlwaysStoppedAnimation<Color>(SimpleAsFTheme.accent(context)),
                             ),
                           )
-                        : HugeIcon(
-                            icon: HugeIcons.strokeRoundedAudioWaveform,
+                        : Icon(
+                            LucideIcons.audioLines,
                             color: SimpleAsFTheme.accent(context),
                             size: 22,
                           ),
@@ -212,7 +214,7 @@ class TrackTile extends ConsumerWidget {
                   color: SimpleAsFTheme.sageSlate,
                 ),
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 4),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -254,9 +256,9 @@ class TrackTile extends ConsumerWidget {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              size: 9,
+                            Icon(
+                              LucideIcons.checkCircle2,
+                              size: 10,
                               color: StudioCategoryColors.bitPerfect,
                             ),
                             SizedBox(width: 2),
@@ -298,6 +300,7 @@ class TrackTile extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 2),
             ],
           ),
           trailing: Row(
@@ -305,10 +308,10 @@ class TrackTile extends ConsumerWidget {
             children: [
               if (settings.trackShowDirectFav)
                 IconButton(
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedFavourite,
+                  icon: Icon(
+                    LucideIcons.heart,
                     color: isFav ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
-                    size: 20,
+                    size: 19,
                   ),
                   tooltip: isFav ? 'Remove Favorite' : 'Favorite Track',
                   onPressed: () {
@@ -317,10 +320,10 @@ class TrackTile extends ConsumerWidget {
                   },
                 ),
               IconButton(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedMoreVertical,
+                icon: const Icon(
+                  LucideIcons.moreVertical,
                   color: SimpleAsFTheme.sageSlate,
-                  size: 20,
+                  size: 19,
                 ),
                 tooltip: 'Track Options',
                 onPressed: () => StudioTrackActionSheet.show(context, track),
@@ -396,7 +399,7 @@ class TrackTile extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          HugeIcon(icon: icon, color: color, size: 20),
+          Icon(icon, color: color, size: 18),
           const SizedBox(width: 6),
           Text(
             action.label,
@@ -426,18 +429,18 @@ class TrackTile extends ConsumerWidget {
     }
   }
 
-  dynamic _getActionIcon(TrackTileSwipeAction action) {
+  IconData _getActionIcon(TrackTileSwipeAction action) {
     switch (action) {
       case TrackTileSwipeAction.addToQueue:
-        return HugeIcons.strokeRoundedPlaylist01;
+        return LucideIcons.listPlus;
       case TrackTileSwipeAction.playNext:
-        return HugeIcons.strokeRoundedNext;
+        return LucideIcons.stepForward;
       case TrackTileSwipeAction.toggleFavorite:
-        return HugeIcons.strokeRoundedFavourite;
+        return LucideIcons.heart;
       case TrackTileSwipeAction.addToPlaylist:
-        return HugeIcons.strokeRoundedAddCircleHalfDot;
+        return LucideIcons.plusCircle;
       case TrackTileSwipeAction.none:
-        return HugeIcons.strokeRoundedCancel01;
+        return LucideIcons.x;
     }
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -36,13 +36,9 @@ class ArtistLineupPosterView extends StatelessWidget {
         border: Border.all(color: const Color(0xFF262B3D), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: cyanAccent.withValues(alpha: 0.15),
-            blurRadius: 36,
-            offset: const Offset(0, 12),
-          ),
-          BoxShadow(
             color: Colors.black.withValues(alpha: 0.75),
             blurRadius: 28,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -71,8 +67,8 @@ class ArtistLineupPosterView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedMic01,
+                      Icon(
+                        LucideIcons.mic,
                         size: 16,
                         color: cyanAccent,
                       ),
@@ -145,7 +141,7 @@ class ArtistLineupPosterView extends StatelessWidget {
                               width: 62,
                               height: 62,
                               borderRadius: BorderRadius.circular(31),
-                              fallbackIcon: HugeIcons.strokeRoundedUser,
+                              fallbackIcon: LucideIcons.user,
                               fallbackIconSize: 30,
                               backgroundColor: const Color(0xFF11131A),
                             ),
@@ -253,7 +249,7 @@ class ArtistLineupPosterView extends StatelessWidget {
                               width: 38,
                               height: 38,
                               borderRadius: BorderRadius.circular(19),
-                              fallbackIcon: HugeIcons.strokeRoundedUser,
+                              fallbackIcon: LucideIcons.user,
                               fallbackIconSize: 18,
                               backgroundColor: const Color(0xFF11131A),
                             ),

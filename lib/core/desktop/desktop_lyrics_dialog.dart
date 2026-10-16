@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../app/theme/app_haptics.dart';
 import '../../features/dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import '../../features/hardware_dac/presentation/controllers/dac_bridge_controller.dart';
@@ -108,10 +107,10 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                       color: theme.colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedMusicNote01,
+                    child: Icon(
+                      LucideIcons.music,
                       color: theme.colorScheme.primary,
-                      size: 20,
+                      size: 18,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -142,12 +141,11 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                   if (_lyricsResult.lines.isNotEmpty) ...[
                     Tooltip(
                       message: 'Share Lyric Card',
-                      child: M3EIconButton(
-                        variant: M3EIconButtonVariant.standard,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedShare08,
+                      child: IconButton(
+                        icon: Icon(
+                          LucideIcons.share2,
                           color: theme.colorScheme.onSurface,
-                          size: 22,
+                          size: 18,
                         ),
                         onPressed: () {
                           if (currentTrack != null && _lyricsResult.lines.isNotEmpty) {
@@ -179,12 +177,11 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                     ),
                     const SizedBox(width: 4),
                   ],
-                  M3EIconButton(
-                    variant: M3EIconButtonVariant.standard,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedRefresh,
+                  IconButton(
+                    icon: Icon(
+                      LucideIcons.refreshCw,
                       color: theme.colorScheme.onSurfaceVariant,
-                      size: 22,
+                      size: 18,
                     ),
                     onPressed: () {
                       if (currentTrack != null) {
@@ -193,12 +190,11 @@ class _DesktopLyricsDialogState extends ConsumerState<DesktopLyricsDialog> {
                     },
                   ),
                   const SizedBox(width: 4),
-                  M3EIconButton(
-                    variant: M3EIconButtonVariant.standard,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
+                  IconButton(
+                    icon: Icon(
+                      LucideIcons.x,
                       color: theme.colorScheme.onSurfaceVariant,
-                      size: 22,
+                      size: 18,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),

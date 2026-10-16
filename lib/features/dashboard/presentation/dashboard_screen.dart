@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/simple_as_f_theme.dart';
 import '../../../core/widgets/meta_tracking_label.dart';
@@ -13,6 +13,7 @@ import '../../library/presentation/widgets/download_toggle_row.dart';
 import '../../library/presentation/widgets/track_tile.dart';
 import '../../player/presentation/controllers/player_controller.dart';
 import 'widgets/simple_as_f_discovery_grid.dart';
+import 'widgets/studio_wrapped_bento_banner.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   final VoidCallback? onNavigateToPlayer;
@@ -98,8 +99,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               ),
                             ),
                             SizedBox(width: 2),
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedArrowRight01,
+                            Icon(
+                              LucideIcons.chevronRight,
                               size: 14,
                               color: SimpleAsFTheme.sageSlate,
                             ),
@@ -112,6 +113,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               const SizedBox(height: 14),
 
               const SimpleAsFDiscoveryGrid(),
+
+              const SizedBox(height: 24),
+
+              // ─── 2.5 STUDIO WRAPPED & AUDIOPHILE PERSONA RECAP ───────────────
+              const StudioWrappedBentoBanner(),
 
               const SizedBox(height: 26),
 

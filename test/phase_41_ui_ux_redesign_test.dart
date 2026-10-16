@@ -1,6 +1,6 @@
 import 'package:baydev_hifi/features/dashboard/presentation/dashboard_screen.dart';
-import 'package:baydev_hifi/features/dashboard/presentation/widgets/recent_sessions_bento_carousel.dart';
-import 'package:baydev_hifi/features/dashboard/presentation/widgets/studio_hero_showcase_carousel.dart';
+import 'package:baydev_hifi/features/dashboard/presentation/widgets/simple_as_f_discovery_grid.dart';
+import 'package:baydev_hifi/features/dashboard/presentation/widgets/studio_wrapped_bento_banner.dart';
 import 'package:baydev_hifi/features/library/domain/library_collection_models.dart';
 import 'package:baydev_hifi/features/library/presentation/controllers/library_controller.dart';
 import 'package:baydev_hifi/features/library/presentation/screens/album_detail_screen.dart';
@@ -126,7 +126,7 @@ void main() {
       expect(find.text('Landscape (16:9)'), findsOneWidget);
     });
 
-    testWidgets('2. Dashboard places Recent Lossless Sessions under Dynamic Studio Mixes', (tester) async {
+    testWidgets('2. Dashboard places Studio Wrapped Banner under Recently Played Discovery Grid', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -140,13 +140,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(StudioHeroShowcaseCarousel), findsOneWidget);
-      expect(find.byType(RecentSessionsBentoCarousel), findsOneWidget);
+      expect(find.byType(SimpleAsFDiscoveryGrid), findsOneWidget);
+      expect(find.byType(StudioWrappedBentoBanner), findsOneWidget);
 
-      final heroTop = tester.getTopLeft(find.byType(StudioHeroShowcaseCarousel)).dy;
-      final sessionsTop = tester.getTopLeft(find.byType(RecentSessionsBentoCarousel)).dy;
+      final gridTop = tester.getTopLeft(find.byType(SimpleAsFDiscoveryGrid)).dy;
+      final wrappedTop = tester.getTopLeft(find.byType(StudioWrappedBentoBanner)).dy;
 
-      expect(sessionsTop, greaterThan(heroTop));
+      expect(wrappedTop, greaterThan(gridTop));
     });
 
     testWidgets('3. Library defaults to Grid Mode for Albums and Artists', (tester) async {
@@ -253,16 +253,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify both Category FAB and Shuffle FAB are visible on Tracks tab
-      final categoryFab = find.byTooltip('Switch Library Category');
+      // Verify both Source Filter FAB and Shuffle FAB are visible on Tracks tab
+      final sourceFilterFab = find.byTooltip('Filter Audio Source');
       final shuffleFab = find.byTooltip('Shuffle All Tracks');
-      expect(categoryFab, findsOneWidget);
+      expect(sourceFilterFab, findsOneWidget);
       expect(shuffleFab, findsOneWidget);
 
-      // Verify vertical positioning: Shuffle FAB must be above Category FAB
-      final categoryFabTop = tester.getTopLeft(categoryFab).dy;
+      // Verify vertical positioning: Shuffle FAB must be above Source Filter FAB
+      final sourceFilterFabTop = tester.getTopLeft(sourceFilterFab).dy;
       final shuffleFabTop = tester.getTopLeft(shuffleFab).dy;
-      expect(shuffleFabTop, lessThan(categoryFabTop));
+      expect(shuffleFabTop, lessThan(sourceFilterFabTop));
 
       // Tap Shuffle FAB
       await tester.tap(shuffleFab);
@@ -275,9 +275,9 @@ void main() {
       libraryController.setTab(CollectionTab.albums);
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Shuffle FAB should not be visible on Albums tab, while Category FAB remains
+      // Shuffle FAB should not be visible on Albums tab, while Source Filter FAB remains
       expect(find.byTooltip('Shuffle All Tracks'), findsNothing);
-      expect(find.byTooltip('Switch Library Category'), findsOneWidget);
+      expect(find.byTooltip('Filter Audio Source'), findsOneWidget);
     });
   });
 }

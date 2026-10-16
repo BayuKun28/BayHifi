@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/now_playing_queue_sheet.dart';
 
 void main() {
@@ -217,7 +217,7 @@ void main() {
 
       // Tap Shuffle button in Queue Sheet
       final shuffleFinder = find.byWidgetPredicate(
-        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedShuffle,
+        (w) => w is Icon && w.icon == LucideIcons.shuffle,
       );
       expect(shuffleFinder, findsOneWidget);
 

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../domain/models/dac_peq_profile.dart';
 import 'dac_profile_manager_modal.dart';
 import 'save_dac_profile_dialog.dart';
 
-/// Pure Material 3 Expressive Action Toolbar for Hardware DAC operations:
+/// Solid Matte Action Toolbar for Hardware DAC operations:
 /// Flashing to EEPROM, Reading from DAC, Preset Selection, and Factory Reset.
 class DacActionToolbar extends StatelessWidget {
   const DacActionToolbar({
@@ -33,15 +32,12 @@ class DacActionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        color: const Color(0xFF16181F),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF262936), width: 1.0),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -49,17 +45,19 @@ class DacActionToolbar extends StatelessWidget {
           // Row 1: Preset Quick Selection
           Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedBookmark02,
-                size: 18,
-                color: colorScheme.onSurfaceVariant,
+              const Icon(
+                LucideIcons.bookmark,
+                size: 15,
+                color: Color(0xFF8A9A90),
               ),
               const SizedBox(width: 8),
-              Text(
-                'Hardware Presets:',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurfaceVariant,
+              const Text(
+                'PRESETS:',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: Color(0xFF8A9A90),
                 ),
               ),
               const SizedBox(width: 8),
@@ -71,19 +69,50 @@ class DacActionToolbar extends StatelessWidget {
                       ...presets.map((preset) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 6.0),
-                          child: M3EChip(
-                            label: preset.name,
-                            onPressed: isConnected && !isBusy
-                                ? () => onSelectPreset(preset)
-                                : null,
+                          child: InkWell(
+                            onTap: isConnected && !isBusy ? () => onSelectPreset(preset) : null,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E212B),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFF262936), width: 0.8),
+                              ),
+                              child: Text(
+                                preset.name,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFE6EAE7),
+                                ),
+                              ),
+                            ),
                           ),
                         );
                       }),
                       Padding(
                         padding: const EdgeInsets.only(right: 6.0),
-                        child: M3EChip(
-                          label: 'MANAGE ALL',
-                          onPressed: () => DacProfileManagerModal.show(context),
+                        child: InkWell(
+                          onTap: () => DacProfileManagerModal.show(context),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF252834),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFF383D50), width: 0.8),
+                            ),
+                            child: const Text(
+                              'MANAGE ALL',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                                color: Color(0xFF10B981),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -94,7 +123,7 @@ class DacActionToolbar extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1),
+          const Divider(height: 1, color: Color(0xFF262936)),
           const SizedBox(height: 12),
 
           // Row 2: Action Buttons
@@ -104,57 +133,80 @@ class DacActionToolbar extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: [
               // Burn to Flash (Primary Action)
-              M3EButton.filled(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedFloppyDisk,
-                  size: 18,
-                ),
-                label: const Text('Burn to Flash'),
+              _buildButton(
+                label: 'Burn to Flash',
+                icon: LucideIcons.save,
+                isPrimary: true,
                 onPressed: isConnected && !isBusy ? onBurnToFlash : null,
               ),
 
               // Save Current Tuning as Named Profile
-              M3EButton.tonal(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedBookmark02,
-                  size: 18,
-                ),
-                label: const Text('Save Profile'),
+              _buildButton(
+                label: 'Save Profile',
+                icon: LucideIcons.bookmarkPlus,
                 onPressed: isConnected && !isBusy ? () => SaveDacProfileDialog.show(context) : null,
               ),
 
-              // Import AutoEQ / Pro-Q
-              M3EButton.tonal(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedCloudDownload,
-                  size: 18,
-                ),
-                label: const Text('AutoEQ Import'),
+              // Import AutoEQ
+              _buildButton(
+                label: 'AutoEQ Import',
+                icon: LucideIcons.download,
                 onPressed: isConnected && !isBusy ? onImportAutoEq : null,
               ),
 
               // Sync / Read from Hardware
-              M3EButton.elevated(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedDownload01,
-                  size: 18,
-                ),
-                label: const Text('Read DAC'),
+              _buildButton(
+                label: 'Read DAC',
+                icon: LucideIcons.refreshCw,
                 onPressed: isConnected && !isBusy ? onReadFromHardware : null,
               ),
 
               // Factory Reset
-              M3EButton.outlined(
-                icon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedRefresh,
-                  size: 18,
-                ),
-                label: const Text('Reset Flat'),
+              _buildButton(
+                label: 'Reset Flat',
+                icon: LucideIcons.rotateCcw,
                 onPressed: isConnected && !isBusy ? onResetDefault : null,
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    bool isPrimary = false,
+  }) {
+    return SizedBox(
+      height: 36,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isPrimary ? const Color(0xFF252834) : const Color(0xFF1E212B),
+          foregroundColor: isPrimary ? const Color(0xFF10B981) : Colors.white,
+          disabledBackgroundColor: const Color(0xFF16181F),
+          disabledForegroundColor: const Color(0xFF4B5563),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: isPrimary ? const Color(0xFF383D50) : const Color(0xFF262936),
+              width: 0.8,
+            ),
+          ),
+        ),
+        icon: Icon(icon, size: 14),
+        label: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isPrimary ? FontWeight.w800 : FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

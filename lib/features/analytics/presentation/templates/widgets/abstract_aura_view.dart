@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -136,22 +136,15 @@ class AbstractSoundwaveAuraView extends StatelessWidget {
                       Container(
                         width: 96,
                         height: 96,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: auraColor.withValues(alpha: 0.5),
-                              blurRadius: 28,
-                              spreadRadius: 2,
-                            ),
-                          ],
                         ),
                         child: StudioArtworkWidget(
                           url: topTrack?.albumArtUri,
                           width: 96,
                           height: 96,
                           borderRadius: BorderRadius.circular(48),
-                          fallbackIcon: HugeIcons.strokeRoundedDisc,
+                          fallbackIcon: LucideIcons.disc,
                           fallbackIconSize: 40,
                           backgroundColor: const Color(0xFF1E2230),
                         ),
@@ -277,7 +270,7 @@ class AbstractSoundwaveAuraView extends StatelessWidget {
                               width: 28,
                               height: 28,
                               borderRadius: BorderRadius.circular(14),
-                              fallbackIcon: HugeIcons.strokeRoundedUser,
+                              fallbackIcon: LucideIcons.user,
                               fallbackIconSize: 14,
                             ),
                             const SizedBox(width: 8),
@@ -352,7 +345,7 @@ class AbstractSoundwaveAuraView extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(icon: persona.icon, size: 14, color: auraColor),
+                            Icon(persona.icon, size: 14, color: auraColor),
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(

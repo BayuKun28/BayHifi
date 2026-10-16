@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Enum representing the 6 distinct Audiophile Persona Archetypes
 enum AudiophilePersonaType {
@@ -28,7 +28,7 @@ class AudiophilePersona {
   final String quote;
   final Color primaryColor;
   final Color secondaryColor;
-  final dynamic icon;
+  final IconData icon;
 
   const AudiophilePersona({
     required this.type,
@@ -51,7 +51,7 @@ class AudiophilePersona {
     quote: 'Sound is not meant to be measured; it is meant to be felt in every warm harmonic ripple.',
     primaryColor: Color(0xFFF59E0B), // Warm Amber
     secondaryColor: Color(0xFFD97706),
-    icon: HugeIcons.strokeRoundedEnergy,
+    icon: LucideIcons.zap,
   );
 
   static const analyticalPurist = AudiophilePersona(
@@ -63,7 +63,7 @@ class AudiophilePersona {
     quote: 'Bit-perfect accuracy is the only bridge between the master recording console and the ears.',
     primaryColor: Color(0xFF38BDF8), // Obsidian Sky
     secondaryColor: Color(0xFF0284C7),
-    icon: HugeIcons.strokeRoundedSlidersVertical,
+    icon: LucideIcons.slidersVertical,
   );
 
   static const subBassExplorer = AudiophilePersona(
@@ -75,7 +75,7 @@ class AudiophilePersona {
     quote: 'Low frequencies define the physical foundation of music while wide soundstages set it free.',
     primaryColor: Color(0xFFA855F7), // Holographic Violet
     secondaryColor: Color(0xFF7C3AED),
-    icon: HugeIcons.strokeRoundedAudioWaveform,
+    icon: LucideIcons.audioWaveform,
   );
 
   static const midnightListener = AudiophilePersona(
@@ -87,7 +87,7 @@ class AudiophilePersona {
     quote: 'Music sounds truest when the rest of the world has fallen completely silent.',
     primaryColor: Color(0xFF06B6D4), // Muted Cyan
     secondaryColor: Color(0xFF0891B2),
-    icon: HugeIcons.strokeRoundedMoon,
+    icon: LucideIcons.moon,
   );
 
   static const dacArtisan = AudiophilePersona(
@@ -99,7 +99,7 @@ class AudiophilePersona {
     quote: 'A dedicated signal path makes the subtle textures of high-resolution audio come alive.',
     primaryColor: Color(0xFF10B981), // Precision Mint
     secondaryColor: Color(0xFF059669),
-    icon: HugeIcons.strokeRoundedUsb,
+    icon: LucideIcons.usb,
   );
 
   static const studioVirtuoso = AudiophilePersona(
@@ -111,7 +111,7 @@ class AudiophilePersona {
     quote: 'Perfection is achieved when every frequency aligns seamlessly with the target curve.',
     primaryColor: Color(0xFFEC4899), // Rose Studio
     secondaryColor: Color(0xFFDB2777),
-    icon: HugeIcons.strokeRoundedHeadphones,
+    icon: LucideIcons.headphones,
   );
 
   List<String> get soundSignatureTags {

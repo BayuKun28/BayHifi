@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/audiophile_persona.dart';
 import '../../../domain/studio_wrapped_data.dart';
@@ -124,7 +124,7 @@ class StickerCollageView extends StatelessWidget {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  HugeIcon(icon: HugeIcons.strokeRoundedMusicNote03, size: 12, color: Color(0xFF38BDF8)),
+                  Icon(LucideIcons.music, size: 12, color: Color(0xFF38BDF8)),
                   SizedBox(width: 6),
                   Flexible(
                     child: Text(
@@ -213,7 +213,7 @@ class StickerCollageView extends StatelessWidget {
         children: [
           const Row(
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedAward01, size: 12, color: Colors.white),
+              Icon(LucideIcons.award, size: 12, color: Colors.white),
               SizedBox(width: 4),
               Text(
                 '#1 ARTIST',
@@ -229,7 +229,7 @@ class StickerCollageView extends StatelessWidget {
                 width: 28,
                 height: 28,
                 borderRadius: BorderRadius.circular(14),
-                fallbackIcon: HugeIcons.strokeRoundedUser,
+                fallbackIcon: LucideIcons.user,
                 fallbackIconSize: 14,
                 backgroundColor: Colors.white24,
               ),
@@ -287,7 +287,7 @@ class StickerCollageView extends StatelessWidget {
         children: [
           const Row(
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedDisc, size: 12, color: Colors.white),
+              Icon(LucideIcons.disc, size: 12, color: Colors.white),
               SizedBox(width: 4),
               Text(
                 'TOP TRACK',
@@ -303,7 +303,7 @@ class StickerCollageView extends StatelessWidget {
                 width: 30,
                 height: 30,
                 borderRadius: BorderRadius.circular(6),
-                fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                fallbackIcon: LucideIcons.music,
                 fallbackIconSize: 16,
                 backgroundColor: Colors.white24,
               ),
@@ -423,7 +423,7 @@ class StickerCollageView extends StatelessWidget {
         children: [
           const Row(
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedSparkles, size: 12, color: Colors.white),
+              Icon(LucideIcons.sparkles, size: 12, color: Colors.white),
               SizedBox(width: 4),
               Text(
                 'AUDIO PURITY',
@@ -474,7 +474,7 @@ class StickerCollageView extends StatelessWidget {
         children: [
           const Row(
             children: [
-              HugeIcon(icon: HugeIcons.strokeRoundedHeadphones, size: 12, color: Colors.white),
+              Icon(LucideIcons.headphones, size: 12, color: Colors.white),
               SizedBox(width: 4),
               Text(
                 'STUDIO GEAR',
@@ -522,7 +522,7 @@ class StickerCollageView extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: persona.primaryColor.withValues(alpha: 0.4),
+            color: Colors.black.withValues(alpha: 0.35),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -533,7 +533,7 @@ class StickerCollageView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              HugeIcon(icon: persona.icon, size: 14, color: Colors.white),
+              Icon(persona.icon, size: 14, color: Colors.white),
               const SizedBox(width: 6),
               const Text(
                 'AUDIOPHILE PERSONA',

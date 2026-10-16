@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../database/local_persistence_service.dart';
 import '../../features/player/domain/track.dart';
 
@@ -16,7 +16,7 @@ class StudioArtworkWidget extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double? width;
   final double? height;
-  final dynamic fallbackIcon;
+  final IconData fallbackIcon;
   final double fallbackIconSize;
   final Color? fallbackColor;
   final Color? backgroundColor;
@@ -30,7 +30,7 @@ class StudioArtworkWidget extends StatelessWidget {
     this.borderRadius,
     this.width,
     this.height,
-    this.fallbackIcon = HugeIcons.strokeRoundedAlbum01,
+    this.fallbackIcon = LucideIcons.disc,
     this.fallbackIconSize = 24.0,
     this.fallbackColor,
     this.backgroundColor,
@@ -182,12 +182,7 @@ class StudioArtworkWidget extends StatelessWidget {
   }
 
   Widget _buildFallback(ThemeData theme, Color primary) {
-    return Center(
-      child: HugeIcon(
-        icon: fallbackIcon,
-        size: fallbackIconSize,
-        color: fallbackColor ?? primary.withValues(alpha: 0.7),
-      ),
-    );
+    final color = fallbackColor ?? primary.withValues(alpha: 0.7);
+    return Center(child: Icon(fallbackIcon, size: fallbackIconSize, color: color));
   }
 }

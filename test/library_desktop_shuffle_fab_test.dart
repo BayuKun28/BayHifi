@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:baydev_hifi/features/library/domain/library_collection_models.dart';
 import 'package:baydev_hifi/features/library/presentation/controllers/library_controller.dart';
 import 'package:baydev_hifi/features/library/presentation/controllers/library_selection_controller.dart';
@@ -88,7 +88,7 @@ void main() {
         find.descendant(
           of: desktopFabByKey,
           matching: find.byWidgetPredicate(
-            (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedShuffle,
+            (w) => w is Icon && w.icon == LucideIcons.shuffle,
           ),
         ),
         findsOneWidget,

@@ -10,93 +10,93 @@ class StudioSurfaceTheme {
   /// Resolves the primary container color (for cards, bento modules, sheets).
   static Color surfaceContainer(
     BuildContext context, {
-    bool isSolid = false,
+    bool isSolid = true,
     double translucentAlpha = 0.85,
   }) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return isSolid
-        ? theme.colorScheme.surfaceContainer
-        : theme.colorScheme.surfaceContainer.withValues(alpha: translucentAlpha);
+        ? scheme.surfaceContainer
+        : scheme.surfaceContainer.withValues(alpha: translucentAlpha);
   }
 
   /// Resolves a higher elevation container color (for nested cards, input fields).
   static Color surfaceContainerHigh(
     BuildContext context, {
-    bool isSolid = false,
+    bool isSolid = true,
     double translucentAlpha = 0.90,
   }) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return isSolid
-        ? theme.colorScheme.surfaceContainerHighest
-        : theme.colorScheme.surfaceContainerHighest.withValues(alpha: translucentAlpha);
+        ? scheme.surfaceContainerHighest
+        : scheme.surfaceContainerHighest.withValues(alpha: translucentAlpha);
   }
 
   /// Resolves a lower elevation container color (for inner sub-cards, nested lists).
   static Color surfaceContainerLow(
     BuildContext context, {
-    bool isSolid = false,
+    bool isSolid = true,
     double translucentAlpha = 0.70,
   }) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return isSolid
-        ? theme.colorScheme.surfaceContainerLow
-        : theme.colorScheme.surfaceContainerLow.withValues(alpha: translucentAlpha);
+        ? scheme.surfaceContainerLow
+        : scheme.surfaceContainerLow.withValues(alpha: translucentAlpha);
   }
 
   /// Resolves the base surface color (e.g. for modal sheets, dialog backgrounds).
   static Color surface(
     BuildContext context, {
-    bool isSolid = false,
+    bool isSolid = true,
     double translucentAlpha = 0.90,
   }) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return isSolid
-        ? theme.colorScheme.surface
-        : theme.colorScheme.surface.withValues(alpha: translucentAlpha);
+        ? scheme.surface
+        : scheme.surface.withValues(alpha: translucentAlpha);
   }
 
   /// Resolves an accent-tinted container color (for badges, active pills, indicators).
-  /// In Solid mode: blends [tintColor] into [surfaceContainer] with rich tonal depth (100% opaque).
-  /// In Translucent mode: returns a subtle transparent [tintColor] with [translucentAlpha].
+  /// Returns a pure solid tonal blend (100% opaque, zero alpha/translucency) when isSolid is true.
   static Color tintedContainer(
     BuildContext context,
     Color tintColor, {
-    bool isSolid = false,
+    bool isSolid = true,
     double translucentAlpha = 0.14,
-    double solidBlendAlpha = 0.20,
+    double solidBlendAlpha = 0.18,
   }) {
     final theme = Theme.of(context);
-    if (!isSolid) {
+    if (isSolid) {
+      return Color.alphaBlend(
+        tintColor.withValues(alpha: solidBlendAlpha),
+        theme.colorScheme.surfaceContainer,
+      );
+    } else {
       return tintColor.withValues(alpha: translucentAlpha);
     }
-    return Color.alphaBlend(
-      tintColor.withValues(alpha: solidBlendAlpha),
-      theme.colorScheme.surfaceContainer,
-    );
   }
 
   /// Resolves border outline color (soft studio card boundary).
   static Color outline(
     BuildContext context, {
-    bool isSolid = false,
+    bool isSolid = true,
     double translucentAlpha = 0.5,
   }) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return isSolid
-        ? theme.colorScheme.outlineVariant
-        : theme.colorScheme.outlineVariant.withValues(alpha: translucentAlpha);
+        ? scheme.outlineVariant
+        : scheme.outlineVariant.withValues(alpha: translucentAlpha);
   }
 
   /// Resolves subtle border outline color for nested containers.
   static Color subtleOutline(
     BuildContext context, {
-    bool isSolid = false,
+    bool isSolid = true,
     double translucentAlpha = 0.35,
   }) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return isSolid
-        ? theme.colorScheme.outlineVariant.withValues(alpha: 0.6)
-        : theme.colorScheme.outlineVariant.withValues(alpha: translucentAlpha);
+        ? scheme.outlineVariant.withValues(alpha: 0.6)
+        : scheme.outlineVariant.withValues(alpha: translucentAlpha);
   }
 
   /// Standard card box decoration helper conforming to M3 Expressive Studio Bento layout.
@@ -196,10 +196,8 @@ class StudioCategoryColors {
 
 /// Convenience extension on [WidgetRef] to check if solid style is active.
 extension SurfaceStyleRefExtension on WidgetRef {
-  bool get isSolidStyle =>
-      watch(themeControllerProvider.select((s) => s.isSolidStyle));
+  bool get isSolidStyle => true;
 
-  SurfaceFillStyle get surfaceFillStyle =>
-      watch(themeControllerProvider.select((s) => s.effectiveSurfaceFillStyle));
+  SurfaceFillStyle get surfaceFillStyle => SurfaceFillStyle.solid;
 }
 

@@ -1,16 +1,17 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Layout mode selection on Desktop (Responsive Shortcut Switcher)
 enum DesktopLayoutMode {
-  auto('Auto Layout', 'Responsive to desktop window width', HugeIcons.strokeRoundedLayers01),
-  mobile('Mobile Phone', 'Single-column with bottom dock (430px)', HugeIcons.strokeRoundedSmartPhone01),
-  tablet('Tablet Mode', 'Dual-pane with compact studio rail (780px)', HugeIcons.strokeRoundedTablet01),
-  desktop('Desktop Studio', 'Full-width master layout with transport deck (1280px)', HugeIcons.strokeRoundedComputer);
+  auto('Auto Layout', 'Responsive to desktop window width', LucideIcons.layers),
+  mobile('Mobile Phone', 'Single-column with bottom dock (430px)', LucideIcons.smartphone),
+  tablet('Tablet Mode', 'Dual-pane with compact studio rail (780px)', LucideIcons.tablet),
+  desktop('Desktop Studio', 'Full-width master layout with transport deck (1280px)', LucideIcons.monitor);
 
   final String label;
   final String description;
-  final dynamic icon;
+  final IconData icon;
   const DesktopLayoutMode(this.label, this.description, this.icon);
 }
 

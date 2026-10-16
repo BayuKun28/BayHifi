@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -65,8 +65,8 @@ class ConcertTicketView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedTicket01,
+                      Icon(
+                        LucideIcons.ticket,
                         size: 16,
                         color: Colors.black,
                       ),
@@ -153,7 +153,7 @@ class ConcertTicketView extends StatelessWidget {
                           width: 58,
                           height: 58,
                           borderRadius: BorderRadius.circular(12),
-                          fallbackIcon: HugeIcons.strokeRoundedUser,
+                          fallbackIcon: LucideIcons.user,
                           fallbackIconSize: 28,
                           backgroundColor: const Color(0xFF161922),
                         ),
@@ -213,8 +213,8 @@ class ConcertTicketView extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedClock01,
+                      Icon(
+                        LucideIcons.clock,
                         size: 16,
                         color: accentCyan,
                       ),

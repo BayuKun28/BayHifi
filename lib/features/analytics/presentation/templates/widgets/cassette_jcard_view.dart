@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -96,7 +96,7 @@ class CassetteJCardView extends StatelessWidget {
                       width: 42,
                       height: 42,
                       borderRadius: BorderRadius.circular(4),
-                      fallbackIcon: HugeIcons.strokeRoundedAlbum01,
+                      fallbackIcon: LucideIcons.disc,
                       fallbackIconSize: 20,
                       backgroundColor: const Color(0xFFCBD5E1),
                     ),
@@ -169,7 +169,7 @@ class CassetteJCardView extends StatelessWidget {
                           width: 16,
                           height: 16,
                           borderRadius: BorderRadius.circular(3),
-                          fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                          fallbackIcon: LucideIcons.music,
                           fallbackIconSize: 10,
                           backgroundColor: const Color(0xFFCBD5E1),
                         ),

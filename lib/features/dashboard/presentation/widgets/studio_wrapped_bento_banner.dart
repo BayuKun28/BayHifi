@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../app/theme/studio_surface_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../analytics/data/playback_analytics_service.dart';
 import '../../../analytics/presentation/story/studio_wrapped_story_screen.dart';
@@ -15,223 +13,234 @@ class StudioWrappedBentoBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
     final wrappedData = ref.watch(studioWrappedDataProvider);
     final persona = wrappedData.persona;
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+        color: const Color(0xFF16181F),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.4),
-          width: 1.2,
+          color: const Color(0xFF262936),
+          width: 1.0,
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          // Background ambient gradient flare
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.primary.withValues(alpha: 0.12),
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Tag & Sparkle
+            Row(
               children: [
-                // Top Tag & Sparkle
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedSparkles,
-                            size: 11,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'STUDIO WRAPPED 2026',
-                            style: TextStyle(
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w900,
-                              color: theme.colorScheme.primary,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                        ],
-                      ),
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E212B),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFF262936), width: 1),
                     ),
-                    const Spacer(),
-                    Text(
-                      '${wrappedData.totalListeningMinutes} MINS',
-                      style: TextStyle(
-                        fontFeatures: AppTypography.audioFigures,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Main Persona / Artwork Row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      clipBehavior: Clip.none,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        StudioArtworkWidget(
-                          url: wrappedData.topTrack?.albumArtUri,
-                          width: 44,
-                          height: 44,
-                          borderRadius: BorderRadius.circular(10),
-                          fallbackIcon: HugeIcons.strokeRoundedDisc,
-                          fallbackIconSize: 22,
-                          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+                        Icon(
+                          LucideIcons.sparkles,
+                          size: 11,
+                          color: Color(0xFF34D399),
                         ),
-                        Positioned(
-                          right: -4,
-                          bottom: -4,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: theme.colorScheme.surface, width: 1.5),
-                            ),
-                            child: Center(
-                              child: HugeIcon(
-                                icon: persona.icon,
-                                size: 11,
-                                color: theme.colorScheme.onPrimary,
-                              ),
+                        SizedBox(width: 5),
+                        Flexible(
+                          child: Text(
+                            'STUDIO WRAPPED 2026',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFFE6EAE7),
+                              letterSpacing: 0.8,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            persona.title,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                              color: theme.colorScheme.onSurface,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            wrappedData.topTrack != null
-                                ? 'Top Track: ${wrappedData.topTrack!.title} • ${wrappedData.topTrack!.artist}'
-                                : 'Your sound archetype, purity metrics & top tracks are ready.',
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w500,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 14),
-
-                // Action Buttons Row
-                Row(
-                  children: [
-                    // Play Interactive Story Button
-                    Expanded(
-                      flex: 6,
-                      child: SizedBox(
-                        height: 38,
-                        child: M3EButton.filled(
-                          onPressed: () {
-                            AppHaptics.mediumImpact();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const StudioWrappedStoryScreen()),
-                            );
-                          },
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlay,
-                            size: 14,
-                            color: theme.colorScheme.onPrimary,
-                          ),
-                          label: Text(
-                            'PLAY RECAP STORY',
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // Export Hub & Templates Button
-                    Expanded(
-                      flex: 5,
-                      child: SizedBox(
-                        height: 38,
-                        child: M3EButton.outlined(
-                          onPressed: () {
-                            AppHaptics.lightImpact();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const StudioWrappedExportHub()),
-                            );
-                          },
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedInvoice01, size: 13, color: theme.colorScheme.primary),
-                          label: const Text(
-                            'TEMPLATES',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 8),
+                Text(
+                  '${wrappedData.totalListeningMinutes} MINS',
+                  style: const TextStyle(
+                    fontFeatures: AppTypography.audioFigures,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF8A9A90),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+
+            // Main Persona / Artwork Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    StudioArtworkWidget(
+                      url: wrappedData.topTrack?.albumArtUri,
+                      width: 44,
+                      height: 44,
+                      borderRadius: BorderRadius.circular(10),
+                      fallbackIcon: LucideIcons.disc,
+                      fallbackIconSize: 22,
+                      backgroundColor: const Color(0xFF1E212B),
+                    ),
+                    Positioned(
+                      right: -3,
+                      bottom: -3,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF252834),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFF16181F), width: 1.5),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            persona.icon,
+                            size: 10,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        persona.title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        wrappedData.topTrack != null
+                            ? 'Top Track: ${wrappedData.topTrack!.title} • ${wrappedData.topTrack!.artist}'
+                            : 'Your sound archetype, purity metrics & top tracks are ready.',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF8A9A90),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Action Buttons Row
+            Row(
+              children: [
+                // Play Interactive Story Button
+                Expanded(
+                  flex: 6,
+                  child: SizedBox(
+                    height: 38,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        AppHaptics.mediumImpact();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const StudioWrappedStoryScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF252834),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(color: Color(0xFF2E3242), width: 1),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                      icon: const Icon(
+                        LucideIcons.play,
+                        size: 13,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'PLAY RECAP STORY',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Export Hub & Templates Button
+                Expanded(
+                  flex: 5,
+                  child: SizedBox(
+                    height: 38,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        AppHaptics.lightImpact();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const StudioWrappedExportHub()),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: const Color(0xFF12141A),
+                        foregroundColor: const Color(0xFFA1B2A7),
+                        side: const BorderSide(color: Color(0xFF262936), width: 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                      icon: const Icon(
+                        LucideIcons.layoutGrid,
+                        size: 13,
+                        color: Color(0xFFA1B2A7),
+                      ),
+                      label: const Text(
+                        'TEMPLATES',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                          color: Color(0xFFA1B2A7),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

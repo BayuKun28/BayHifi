@@ -3,7 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -334,8 +334,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedEdit02,
+                          Icon(
+                            LucideIcons.filePen,
                             size: 20,
                             color: primary,
                           ),
@@ -371,8 +371,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                HugeIcon(
-                                  icon: HugeIcons.strokeRoundedSparkles,
+                                Icon(
+                                  LucideIcons.sparkles,
                                   size: 13,
                                   color: StudioCategoryColors.warmTubeAmber,
                                 ),
@@ -448,10 +448,10 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                       ),
                       child: Row(
                         children: [
-                          HugeIcon(
-                            icon: _hasManagePermission
-                                ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                : HugeIcons.strokeRoundedAlertCircle,
+                          Icon(
+                            _hasManagePermission
+                                ? LucideIcons.circleCheck
+                                : LucideIcons.alertCircle,
                             size: 15,
                             color: _hasManagePermission ? cs.primary : cs.error,
                           ),
@@ -504,8 +504,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                           ),
                           child: Row(
                             children: [
-                              const HugeIcon(
-                                icon: HugeIcons.strokeRoundedCloudDownload,
+                              const Icon(
+                                LucideIcons.cloudDownload,
                                 size: 20,
                                 color: StudioCategoryColors.warmTubeAmber,
                               ),
@@ -551,7 +551,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                       _buildStudioTextField(
                         controller: _titleController,
                         label: 'TRACK TITLE',
-                        icon: HugeIcons.strokeRoundedMusicNote01,
+                        icon: LucideIcons.music,
                         primaryColor: primary,
                         colorScheme: cs,
                         outline: outline,
@@ -565,7 +565,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _artistController,
                               label: 'TRACK ARTIST',
-                              icon: HugeIcons.strokeRoundedUser,
+                              icon: LucideIcons.user,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -577,7 +577,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _albumArtistController,
                               label: 'ALBUM ARTIST',
-                              icon: HugeIcons.strokeRoundedUserGroup,
+                              icon: LucideIcons.users,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -595,7 +595,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _albumController,
                               label: 'ALBUM NAME',
-                              icon: HugeIcons.strokeRoundedAlbum01,
+                              icon: LucideIcons.disc,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -608,7 +608,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _yearController,
                               label: 'YEAR',
-                              icon: HugeIcons.strokeRoundedCalendar03,
+                              icon: LucideIcons.calendar,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -627,7 +627,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _trackNumController,
                               label: 'TRACK NO.',
-                              icon: HugeIcons.strokeRoundedPlaylist01,
+                              icon: LucideIcons.listMusic,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -640,7 +640,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _trackTotalController,
                               label: 'TOTAL TRACKS',
-                              icon: HugeIcons.strokeRoundedPlaylist01,
+                              icon: LucideIcons.listMusic,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -653,7 +653,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _discNumController,
                               label: 'DISC NO.',
-                              icon: HugeIcons.strokeRoundedAlbum01,
+                              icon: LucideIcons.disc,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -666,7 +666,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             child: _buildStudioTextField(
                               controller: _discTotalController,
                               label: 'TOTAL DISCS',
-                              icon: HugeIcons.strokeRoundedLayers01,
+                              icon: LucideIcons.layers,
                               primaryColor: primary,
                               colorScheme: cs,
                               outline: outline,
@@ -682,7 +682,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                       _buildStudioTextField(
                         controller: _genreController,
                         label: 'GENRE',
-                        icon: HugeIcons.strokeRoundedTag01,
+                        icon: LucideIcons.tag,
                         primaryColor: primary,
                         colorScheme: cs,
                         outline: outline,
@@ -734,7 +734,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                       _buildStudioTextField(
                         controller: _lyricsController,
                         label: 'UNSYNCHRONIZED LYRICS',
-                        icon: HugeIcons.strokeRoundedQuoteDown,
+                        icon: LucideIcons.quote,
                         primaryColor: primary,
                         colorScheme: cs,
                         outline: outline,
@@ -758,8 +758,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                             children: [
                               Row(
                                 children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedFolder01,
+                                  Icon(
+                                    LucideIcons.folder,
                                     size: 14,
                                     color: primary,
                                   ),
@@ -834,8 +834,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                                   color: cs.onPrimary,
                                 ),
                               )
-                            : HugeIcon(
-                                icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                            : Icon(
+                                LucideIcons.circleCheck,
                                 size: 16,
                                 color: cs.onPrimary,
                               ),
@@ -891,8 +891,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                     fit: BoxFit.cover,
                   )
                 : Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedAlbum01,
+                    child: Icon(
+                      LucideIcons.disc,
                       size: 28,
                       color: cs.onSurfaceVariant.withAlpha(120),
                     ),
@@ -941,8 +941,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedImageAdd01,
+                            Icon(
+                              LucideIcons.imagePlus,
                               size: 13,
                               color: primary,
                             ),
@@ -974,8 +974,8 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedDelete02,
+                              Icon(
+                                LucideIcons.trash2,
                                 size: 13,
                                 color: cs.error,
                               ),
@@ -1006,7 +1006,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
   Widget _buildStudioTextField({
     required TextEditingController controller,
     required String label,
-    required dynamic icon,
+    required IconData icon,
     required Color primaryColor,
     required ColorScheme colorScheme,
     required Color outline,
@@ -1047,7 +1047,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               prefixIcon: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: HugeIcon(icon: icon, size: 16, color: primaryColor),
+                child: Icon(icon, size: 16, color: primaryColor),
               ),
               prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 20),
               border: InputBorder.none,

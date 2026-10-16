@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -222,8 +222,8 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedTextFont,
+            Icon(
+              LucideIcons.type,
               size: 40,
               color: theme.dividerColor,
             ),
@@ -243,8 +243,8 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                   AppHaptics.lightImpact();
                   widget.onRefresh!();
                 },
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedSearch01,
+                icon: Icon(
+                  LucideIcons.search,
                   size: 14,
                   color: primary,
                 ),
@@ -587,8 +587,8 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedShare08,
+            Icon(
+              LucideIcons.share2,
               size: 11,
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -662,8 +662,8 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedSlidersHorizontal,
+            Icon(
+              LucideIcons.slidersHorizontal,
               size: 11,
               color: hasOffset ? primary : theme.colorScheme.onSurfaceVariant,
             ),
@@ -722,8 +722,8 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
                       children: [
                         Row(
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedClock01,
+                            Icon(
+                              LucideIcons.clock,
                               size: 18,
                               color: primary,
                             ),
@@ -873,28 +873,28 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
     bool isSolid,
   ) {
     String label;
-    dynamic icon;
+    IconData? icon;
     Color color = primary;
 
     switch (source) {
       case LyricsSource.embedded:
         label = isSynced ? 'EMBEDDED LRC' : 'EMBEDDED TXT';
-        icon = HugeIcons.strokeRoundedSparkles;
+        icon = LucideIcons.sparkles;
         color = const Color(0xFF00E676);
         break;
       case LyricsSource.sidecarFile:
         label = 'SIDECAR .LRC';
-        icon = HugeIcons.strokeRoundedFolder01;
+        icon = LucideIcons.folder;
         color = const Color(0xFF00F0FF);
         break;
       case LyricsSource.onlineLrclib:
         label = isSynced ? 'LRCLIB SYNCED' : 'LRCLIB PLAIN';
-        icon = HugeIcons.strokeRoundedCloudCheck;
+        icon = LucideIcons.cloudCheck;
         color = const Color(0xFFFF9F0A);
         break;
       case LyricsSource.cached:
         label = isSynced ? 'CACHED LRC' : 'CACHED TXT';
-        icon = HugeIcons.strokeRoundedFolder01;
+        icon = LucideIcons.folder;
         color = theme.colorScheme.onSurface.withValues(alpha: 0.7);
         break;
       case LyricsSource.none:
@@ -914,7 +914,7 @@ class _SynchronizedLyricsViewState extends ConsumerState<SynchronizedLyricsView>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          HugeIcon(icon: icon, size: 10, color: color),
+          Icon(icon, size: 10, color: color),
           const SizedBox(width: 4),
           Text(
             label,

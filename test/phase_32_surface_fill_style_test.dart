@@ -182,7 +182,7 @@ void main() {
   });
 
   group('Phase 32.2: Extension and Controller Reactive Selection Tests', () {
-    testWidgets('SurfaceStyleRefExtension reflects ThemeController state', (tester) async {
+    testWidgets('SurfaceStyleRefExtension reflects solid enforcement', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -206,19 +206,17 @@ void main() {
         ),
       );
 
-      expect(find.text('SOLID: false'), findsOneWidget);
-      expect(find.text('STYLE: translucent'), findsOneWidget);
-
-      container.read(themeControllerProvider.notifier).setSurfaceFillStyle(SurfaceFillStyle.solid);
-      await tester.pump();
-
       expect(find.text('SOLID: true'), findsOneWidget);
       expect(find.text('STYLE: solid'), findsOneWidget);
     });
   });
 
   group('Phase 32.3: DashboardScreen SurfaceFillStyle Rendering Tests', () {
-    testWidgets('DashboardScreen renders all Bento Cards seamlessly in Solid and Translucent modes', (tester) async {
+    testWidgets('DashboardScreen renders all Bento Cards seamlessly in Solid mode', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -234,16 +232,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Translucent mode check
-      expect(find.text('C++ SOLOUD AUDIO ENGINE'), findsOneWidget);
-      expect(find.text('AUDIOPHILE LISTENING STATS'), findsOneWidget);
-
-      // Switch to Pure Solid M3 mode
-      container.read(themeControllerProvider.notifier).setSurfaceFillStyle(SurfaceFillStyle.solid);
-      await tester.pumpAndSettle();
-
-      expect(find.text('C++ SOLOUD AUDIO ENGINE'), findsOneWidget);
-      expect(find.text('AUDIOPHILE LISTENING STATS'), findsOneWidget);
+      expect(find.text('WELCOME TO BAYDEV HIFI'), findsOneWidget);
+      expect(find.text('STUDIO WRAPPED 2026'), findsOneWidget);
     });
   });
 

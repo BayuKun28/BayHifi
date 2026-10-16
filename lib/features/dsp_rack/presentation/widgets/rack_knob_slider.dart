@@ -27,7 +27,6 @@ class RackKnobSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = accentColor ?? theme.colorScheme.primary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -52,17 +51,20 @@ class RackKnobSlider extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                color: const Color(0xFF1E212B),
                 borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: const Color(0xFF262936),
+                  width: 0.8,
+                ),
               ),
               child: Text(
                 formattedValue,
-                style: TextStyle(
-                  fontFamily: 'monospace',
+                style: const TextStyle(
                   fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                  color: color,
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                  color: Colors.white,
                 ),
               ),
             ),

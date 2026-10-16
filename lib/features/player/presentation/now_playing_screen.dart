@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
@@ -9,6 +11,8 @@ import '../../../app/theme/simple_as_f_theme.dart';
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/meta_tracking_label.dart';
 import '../../../core/widgets/studio_artwork_lightbox.dart';
+import '../../../core/desktop/desktop_layout_controller.dart';
+import '../../pro_q_studio/presentation/widgets/saved_curves_library_sheet.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../library/domain/library_collection_models.dart';
 import '../../library/presentation/controllers/library_controller.dart';
@@ -292,7 +296,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isLandscape = constraints.maxWidth >= 720 || constraints.maxWidth > constraints.maxHeight;
+                final desktopMode = ref.watch(desktopLayoutModeProvider);
+                final isForcedMobile = desktopMode == DesktopLayoutMode.mobile;
+                final isLandscape = !isForcedMobile &&
+                    (constraints.maxWidth >= 720 || constraints.maxWidth > constraints.maxHeight);
 
                 if (isLandscape) {
                   return _buildLandscapeDualPaneLayout(
@@ -347,8 +354,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         if (widget.onCollapse != null)
           IconButton(
             onPressed: widget.onCollapse,
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowDown01,
+            icon: const Icon(
+              LucideIcons.chevronDown,
               size: 22,
               color: Colors.white,
             ),
@@ -357,8 +364,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         else if (Navigator.canPop(context))
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowLeft01,
+            icon: const Icon(
+              LucideIcons.arrowLeft,
               size: 22,
               color: Colors.white,
             ),
@@ -404,8 +411,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedHourglass,
+                      const Icon(
+                        LucideIcons.timer,
                         size: 14,
                         color: SimpleAsFTheme.emeraldMint,
                       ),
@@ -456,8 +463,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   isLyricsActive: _showLyrics,
                 );
               },
-              icon: const HugeIcon(
-                icon: HugeIcons.strokeRoundedMoreHorizontal,
+              icon: const Icon(
+                LucideIcons.moreVertical,
                 size: 22,
                 color: Colors.white,
               ),
@@ -488,8 +495,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           M3EIconButton(
             variant: M3EIconButtonVariant.standard,
             onPressed: widget.onCollapse,
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowDown01,
+            icon: Icon(
+              LucideIcons.chevronDown,
               size: 22,
               color: theme.colorScheme.onSurface,
             ),
@@ -539,8 +546,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               M3EIconButton(
                 variant: M3EIconButtonVariant.standard,
                 onPressed: _pickAndPlayFile,
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFolder01,
+                icon: Icon(
+                  LucideIcons.folder,
                   size: 22,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -554,8 +561,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   AppHaptics.lightImpact();
                   PlaybackSpeedPitchSheet.show(context);
                 },
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDashboardSpeed01,
+                icon: Icon(
+                  LucideIcons.gauge,
                   size: 22,
                   color: (playback.playbackSpeed != 1.0 || playback.pitchSemitones != 0.0)
                       ? primary
@@ -571,8 +578,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   AppHaptics.lightImpact();
                   StudioDeskDockingScreen.show(context);
                 },
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedCar01,
+                icon: Icon(
+                  LucideIcons.car,
                   size: 22,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -586,8 +593,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   AppHaptics.selectionClick();
                   widget.onOpenProQStudio();
                 },
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedSlidersVertical,
+                icon: Icon(
+                  LucideIcons.sliders,
                   size: 22,
                   color: primary,
                 ),
@@ -602,8 +609,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     AppHaptics.lightImpact();
                     AudioFileInspectorSheet.show(context, track);
                   },
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedInformationCircle,
+                  icon: Icon(
+                    LucideIcons.info,
                     size: 22,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -634,8 +641,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedHourglass,
+                      Icon(
+                        LucideIcons.timer,
                         size: 18,
                         color: sleepTimer.isActive
                             ? primary
@@ -666,13 +673,53 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     AppHaptics.selectionClick();
                     libraryController.toggleFavorite(track.id);
                   },
-                  icon: HugeIcon(
-                    icon: HugeIcons.strokeRoundedFavourite,
+                  icon: Icon(
+                    LucideIcons.heart,
                     color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurfaceVariant,
                     size: 22,
                   ),
                   tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
                 ),
+
+              // 8. Playback Options (3 Dots)
+              IconButton(
+                onPressed: () {
+                  AppHaptics.lightImpact();
+                  NowPlayingOptionsSheet.show(
+                    context: context,
+                    track: track,
+                    onOpenProQStudio: widget.onOpenProQStudio,
+                    onOpenSpeedPitch: () => PlaybackSpeedPitchSheet.show(context),
+                    onOpenDeskMode: () => StudioDeskDockingScreen.show(context),
+                    onOpenSleepTimer: () => SleepTimerSheet.show(context),
+                    onOpenInspector: () {
+                      if (track != null) AudioFileInspectorSheet.show(context, track);
+                    },
+                    onToggleLyrics: () => setState(() => _showLyrics = !_showLyrics),
+                    onOpenFile: _pickAndPlayFile,
+                    onOpenLightbox: () {
+                      if (track != null) {
+                        StudioArtworkLightbox.show(
+                          context,
+                          track: track,
+                          bytes: track.albumArtBytes,
+                          url: track.albumArtUrl,
+                          title: track.title,
+                          subtitle: track.artist,
+                          formatTag: track.format.name.toUpperCase(),
+                        );
+                      }
+                    },
+                    isLyricsActive: _showLyrics,
+                  );
+                },
+                icon: const Icon(
+                  LucideIcons.moreVertical,
+                  size: 22,
+                  color: Colors.white,
+                ),
+                tooltip: 'Playback Options',
+              ),
             ],
           ),
         ),
@@ -698,12 +745,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
   ) {
     final availableHeight = constraints.maxHeight;
     final availableWidth = constraints.maxWidth;
+    final isDesktopPlatform = !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
 
     // Generous squircle artwork prominence (approx 40% height)
     final albumArtSize = (availableHeight * 0.40).clamp(230.0, availableWidth - 44.0);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 20.0),
+      padding: EdgeInsets.fromLTRB(20.0, isDesktopPlatform ? 14.0 : 6.0, 20.0, 20.0),
       child: Column(
         children: [
           // 1. Top Bar with Tracking Label & More Menu
@@ -755,10 +803,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     libraryController.toggleFavorite(track.id);
                   }
                 },
-                icon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFavourite,
+                icon: Icon(
+                  LucideIcons.heart,
                   color: isFav ? SimpleAsFTheme.emeraldMint : Colors.white.withValues(alpha: 0.7),
-                  size: 24,
+                  size: 22,
                 ),
                 tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
               ),
@@ -859,10 +907,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   backgroundColor: primary,
                   textColor: theme.colorScheme.onPrimary,
                   smallSize: 8,
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlaylist01,
-                    size: 24,
-                    color: Colors.white.withValues(alpha: 0.7),
+                  child: const Icon(
+                    LucideIcons.listMusic,
+                    size: 22,
+                    color: Colors.white,
                   ),
                 ),
                 tooltip: 'Up Next Queue',
@@ -905,10 +953,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             AppHaptics.selectionClick();
             ref.read(playerControllerProvider.notifier).toggleShuffle();
           },
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedShuffle,
+          icon: Icon(
+            LucideIcons.shuffle,
             color: playback.isShuffle ? primary : Colors.white.withValues(alpha: 0.6),
-            size: 22,
+            size: 20,
           ),
           tooltip: 'Shuffle Playback',
         ),
@@ -924,16 +972,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               AppHaptics.lightImpact();
               ref.read(playerControllerProvider.notifier).skipPrevious();
             },
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedPrevious,
-              size: 28,
+            icon: const Icon(
+              LucideIcons.stepBack,
+              size: 26,
               color: Colors.white,
             ),
             tooltip: 'Previous Track',
           ),
         ),
 
-        // Play/Pause Centerpiece
+        // Play/Pause Centerpiece (Solid color, zero neon glow)
         GestureDetector(
           onTap: () {
             AppHaptics.mediumImpact();
@@ -945,13 +993,6 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: primary,
-              boxShadow: [
-                BoxShadow(
-                  color: primary.withValues(alpha: 0.35),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Center(
               child: playback.isLoading
@@ -963,12 +1004,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                         color: theme.colorScheme.onPrimary,
                       ),
                     )
-                  : HugeIcon(
-                      icon: playback.isPlaying
-                          ? HugeIcons.strokeRoundedPause
-                          : HugeIcons.strokeRoundedPlay,
+                  : Icon(
+                      playback.isPlaying
+                          ? LucideIcons.pause
+                          : LucideIcons.play,
                       color: theme.colorScheme.onPrimary,
-                      size: 28,
+                      size: 26,
                     ),
             ),
           ),
@@ -985,9 +1026,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               AppHaptics.lightImpact();
               ref.read(playerControllerProvider.notifier).skipNext();
             },
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedNext,
-              size: 28,
+            icon: const Icon(
+              LucideIcons.stepForward,
+              size: 26,
               color: Colors.white,
             ),
             tooltip: 'Next Track',
@@ -1000,14 +1041,14 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             AppHaptics.selectionClick();
             ref.read(playerControllerProvider.notifier).toggleRepeatMode();
           },
-          icon: HugeIcon(
-            icon: playback.repeatMode == PlaybackRepeatMode.one
-                ? HugeIcons.strokeRoundedRepeatOne01
-                : HugeIcons.strokeRoundedRepeat,
+          icon: Icon(
+            playback.repeatMode == PlaybackRepeatMode.one
+                ? LucideIcons.repeat1
+                : LucideIcons.repeat,
             color: playback.repeatMode != PlaybackRepeatMode.off
                 ? primary
                 : Colors.white.withValues(alpha: 0.6),
-            size: 22,
+            size: 20,
           ),
           tooltip: 'Repeat Mode (${playback.repeatMode.name.toUpperCase()})',
         ),
@@ -1022,133 +1063,239 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     EqState eqState,
   ) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Audio Specs Tag
-        if (track != null)
+    final hasDriver = eqState.driverFr != null;
+    final hasTarget = eqState.targetFr != null;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 1. Audio Specs Tag
+          if (track != null) ...[
+            InkWell(
+              onTap: () {
+                AppHaptics.lightImpact();
+                AudioFileInspectorSheet.show(context, track);
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      track.format.name.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: primary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${track.sampleRate != null ? (track.sampleRate! / 1000).toStringAsFixed(1) : '44.1'}kHz',
+                      style: const TextStyle(
+                        fontFeatures: AppTypography.audioFigures,
+                        fontSize: 10,
+                        color: SimpleAsFTheme.sageSlate,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+
+          // 2. Pro-Q EQ Button
           InkWell(
             onTap: () {
-              AppHaptics.lightImpact();
-              AudioFileInspectorSheet.show(context, track);
+              AppHaptics.selectionClick();
+              widget.onOpenProQStudio();
             },
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(16),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(8),
+                color: eqState.isEnabled
+                    ? primary.withValues(alpha: 0.15)
+                    : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: eqState.isEnabled
+                      ? primary.withValues(alpha: 0.3)
+                      : Colors.transparent,
+                  width: 1,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    track.format.name.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: primary,
-                      letterSpacing: 0.5,
-                    ),
+                  Icon(
+                    LucideIcons.sliders,
+                    size: 13,
+                    color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${track.sampleRate != null ? (track.sampleRate! / 1000).toStringAsFixed(1) : '44.1'}kHz',
-                    style: const TextStyle(
-                      fontFeatures: AppTypography.audioFigures,
+                    eqState.isEnabled ? 'EQ ON' : 'EQ',
+                    style: TextStyle(
                       fontSize: 10,
-                      color: SimpleAsFTheme.sageSlate,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
                     ),
                   ),
                 ],
               ),
             ),
-          )
-        else
-          const SizedBox(width: 48),
+          ),
+          const SizedBox(width: 8),
 
-        // Center: Pro-Q EQ Button
-        InkWell(
-          onTap: () {
-            AppHaptics.selectionClick();
-            widget.onOpenProQStudio();
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: eqState.isEnabled
-                  ? primary.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: eqState.isEnabled
-                    ? primary.withValues(alpha: 0.3)
-                    : Colors.transparent,
-                width: 1,
+          // 3. Driver Curve Shortcut Modal
+          InkWell(
+            onTap: () {
+              AppHaptics.selectionClick();
+              SavedCurvesLibrarySheet.show(context, initialCategory: 'driver');
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              decoration: BoxDecoration(
+                color: hasDriver
+                    ? primary.withValues(alpha: 0.15)
+                    : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: hasDriver
+                      ? primary.withValues(alpha: 0.3)
+                      : Colors.transparent,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.headphones,
+                    size: 13,
+                    color: hasDriver ? primary : SimpleAsFTheme.sageSlate,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    hasDriver
+                        ? (eqState.driverFr!.name.length > 9
+                            ? '${eqState.driverFr!.name.substring(0, 9)}..'
+                            : eqState.driverFr!.name)
+                        : 'DRIVER',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: hasDriver ? primary : SimpleAsFTheme.sageSlate,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedSlidersVertical,
-                  size: 14,
-                  color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
+          ),
+          const SizedBox(width: 8),
+
+          // 4. Target Curve Shortcut Modal
+          InkWell(
+            onTap: () {
+              AppHaptics.selectionClick();
+              SavedCurvesLibrarySheet.show(context, initialCategory: 'target');
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              decoration: BoxDecoration(
+                color: hasTarget
+                    ? const Color(0xFFFFB74D).withValues(alpha: 0.15)
+                    : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: hasTarget
+                      ? const Color(0xFFFFB74D).withValues(alpha: 0.3)
+                      : Colors.transparent,
+                  width: 1,
                 ),
-                const SizedBox(width: 5),
-                Text(
-                  eqState.isEnabled ? 'EQ ON' : 'EQ STUDIO',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
-                    color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.target,
+                    size: 13,
+                    color: hasTarget ? const Color(0xFFFFB74D) : SimpleAsFTheme.sageSlate,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 4),
+                  Text(
+                    hasTarget
+                        ? (eqState.targetFr!.name.length > 9
+                            ? '${eqState.targetFr!.name.substring(0, 9)}..'
+                            : eqState.targetFr!.name)
+                        : 'TARGET',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: hasTarget ? const Color(0xFFFFB74D) : SimpleAsFTheme.sageSlate,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(width: 8),
 
-        // Right: Lyrics Toggle
-        InkWell(
-          onTap: () {
-            AppHaptics.lightImpact();
-            setState(() => _showLyrics = !_showLyrics);
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _showLyrics
-                  ? SimpleAsFTheme.emeraldMint.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedTextFont,
-                  size: 14,
-                  color: _showLyrics ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'LYRICS',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
+          // 5. Lyrics Toggle
+          InkWell(
+            onTap: () {
+              AppHaptics.lightImpact();
+              setState(() => _showLyrics = !_showLyrics);
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _showLyrics
+                    ? SimpleAsFTheme.emeraldMint.withValues(alpha: 0.15)
+                    : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.quote,
+                    size: 13,
                     color: _showLyrics ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 4),
+                  Text(
+                    'LYRICS',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: _showLyrics ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

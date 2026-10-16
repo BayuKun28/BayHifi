@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -19,19 +19,17 @@ import 'widgets/rack_unit_card.dart';
 import 'widgets/soundstage_width_visualizer.dart';
 import 'widgets/tube_glow_indicator.dart';
 import 'widgets/vu_level_meter.dart';
-
-import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../../core/widgets/meta_tracking_label.dart';
 
 /// DSP Unit Category Filter for Clean Uncluttered Navigation
 enum DspCategoryFilter {
-  all('All Modules (10)', HugeIcons.strokeRoundedSlidersHorizontal),
-  dynamics('Dynamics', HugeIcons.strokeRoundedAudioWave01),
-  tone('Tone & EQ', HugeIcons.strokeRoundedSlidersVertical),
-  spatial('Spatial & Tube', HugeIcons.strokeRoundedSpeaker);
+  all('All Modules (10)', LucideIcons.slidersHorizontal),
+  dynamics('Dynamics', LucideIcons.audioLines),
+  tone('Tone & EQ', LucideIcons.sliders),
+  spatial('Spatial & Tube', LucideIcons.speaker);
 
   final String label;
-  final dynamic icon;
+  final IconData icon;
   const DspCategoryFilter(this.label, this.icon);
 }
 
@@ -68,8 +66,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
         actions: [
           // Save Custom DSP Profile Button
           IconButton(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedFloppyDisk,
+            icon: Icon(
+              LucideIcons.save,
               size: 20,
               color: primaryColor,
             ),
@@ -78,10 +76,9 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
           ),
           // Reset Rack Button with Confirmation Modal
           IconButton(
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedRefresh,
+            icon: const Icon(
+              LucideIcons.refreshCw,
               size: 20,
-              color: null,
             ),
             tooltip: 'Reset to Flat Reference',
             onPressed: () => _showResetConfirmationDialog(context, controller, isSolid),
@@ -122,10 +119,9 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
               accentColor: primaryColor,
             headerTrailing: TextButton.icon(
               onPressed: () => controller.setPreamp(0.0),
-              icon: const HugeIcon(
-                icon: HugeIcons.strokeRoundedRefresh,
+              icon: const Icon(
+                LucideIcons.refreshCw,
                 size: 14,
-                color: null,
               ),
               label: const Text('0 dB', style: TextStyle(fontSize: 11)),
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
@@ -493,10 +489,9 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
             accentColor: primaryColor,
             headerTrailing: TextButton.icon(
               onPressed: () => controller.setPitchSemitones(0.0),
-              icon: const HugeIcon(
-                icon: HugeIcons.strokeRoundedRefresh,
+              icon: const Icon(
+                LucideIcons.refreshCw,
                 size: 14,
-                color: null,
               ),
               label: const Text('Reset', style: TextStyle(fontSize: 11)),
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
@@ -607,19 +602,12 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
+        color: const Color(0xFF16181F),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: primaryColor.withValues(alpha: 0.16),
-          width: 1.0,
+          color: const Color(0xFF262936),
+          width: 0.8,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isSolid ? 0.2 : 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -663,8 +651,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                             value: '__SAVE_NEW__',
                             child: Row(
                               children: [
-                                HugeIcon(
-                                  icon: HugeIcons.strokeRoundedFloppyDisk,
+                                Icon(
+                                  LucideIcons.save,
                                   size: 14,
                                   color: theme.colorScheme.primary,
                                 ),
@@ -687,8 +675,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                                   child: Text('Custom: ${p.name}', style: const TextStyle(fontSize: 12)),
                                 ),
                                 IconButton(
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedDelete02,
+                                  icon: const Icon(
+                                    LucideIcons.trash2,
                                     size: 13,
                                     color: Colors.redAccent,
                                   ),
@@ -725,8 +713,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedSparkles,
+                            Icon(
+                              LucideIcons.sparkles,
                               size: 13,
                               color: primaryColor,
                             ),
@@ -744,8 +732,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedArrowDown01,
+                            Icon(
+                              LucideIcons.chevronDown,
                               size: 13,
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
@@ -767,27 +755,27 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: state.isBypassed
-                        ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4)
-                        : primaryColor.withValues(alpha: 0.16),
+                        ? const Color(0xFF1E212B)
+                        : const Color(0xFF252834),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: state.isBypassed
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : primaryColor.withValues(alpha: 0.5),
-                      width: 1.0,
+                          ? const Color(0xFF262936)
+                          : const Color(0xFF383D50),
+                      width: 0.8,
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: state.isBypassed
-                            ? HugeIcons.strokeRoundedCancel01
-                            : HugeIcons.strokeRoundedCheckmarkCircle01,
+                      Icon(
+                        state.isBypassed
+                            ? LucideIcons.ban
+                            : LucideIcons.checkCircle2,
                         size: 14,
                         color: state.isBypassed
-                            ? theme.colorScheme.onSurfaceVariant
-                            : primaryColor,
+                            ? const Color(0xFF64748B)
+                            : Colors.white,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -797,8 +785,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
                           color: state.isBypassed
-                              ? theme.colorScheme.onSurfaceVariant
-                              : primaryColor,
+                              ? const Color(0xFF94A3B8)
+                              : Colors.white,
                         ),
                       ),
                     ],
@@ -812,6 +800,7 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
 
           // ── Row 2: Master Wet/Dry Blend Slider & Quick Actions ──
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: RackKnobSlider(
@@ -825,26 +814,31 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              // Genre Rules shortcut
-              Tooltip(
-                message: 'Auto Genre Rules',
-                child: InkWell(
-                  onTap: () => GenreRulesConfigModal.show(context),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
-                        width: 0.8,
+              // Genre Rules shortcut aligned with slider track baseline
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Tooltip(
+                  message: 'Auto Genre Rules',
+                  child: InkWell(
+                    onTap: () => GenreRulesConfigModal.show(context),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+                          width: 0.8,
+                        ),
                       ),
-                    ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedSlidersHorizontal,
-                      size: 15,
-                      color: theme.colorScheme.secondary,
+                      child: Icon(
+                        LucideIcons.slidersHorizontal,
+                        size: 16,
+                        color: theme.colorScheme.secondary,
+                      ),
                     ),
                   ),
                 ),
@@ -863,8 +857,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
               ),
               child: Row(
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedMusicNote01,
+                  Icon(
+                    LucideIcons.music,
                     size: 13,
                     color: primaryColor,
                   ),
@@ -925,25 +919,23 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? primaryColor.withValues(alpha: 0.18)
-                      : (isSolid
-                          ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
-                          : StudioSurfaceTheme.surfaceContainer(context, isSolid: false)),
+                      ? const Color(0xFF252834)
+                      : const Color(0xFF16181F),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
-                        ? primaryColor.withValues(alpha: 0.5)
-                        : Colors.white.withValues(alpha: 0.06),
-                    width: 1,
+                        ? const Color(0xFF383D50)
+                        : const Color(0xFF262936),
+                    width: 0.8,
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    HugeIcon(
-                      icon: filter.icon,
+                    Icon(
+                      filter.icon,
                       size: 13,
-                      color: isSelected ? primaryColor : SimpleAsFTheme.sageSlate,
+                      color: isSelected ? Colors.white : const Color(0xFF94A3B8),
                     ),
                     const SizedBox(width: 5),
                     Text(
@@ -951,7 +943,7 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                        color: isSelected ? primaryColor : SimpleAsFTheme.sageSlate,
+                        color: isSelected ? Colors.white : const Color(0xFF94A3B8),
                       ),
                     ),
                   ],
@@ -975,7 +967,7 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
               context: context,
               title: 'PRO-Q EQ',
               subtitle: '10-Band Parametric',
-              icon: HugeIcons.strokeRoundedSlidersVertical,
+              icon: LucideIcons.sliders,
               accentColor: primaryColor,
               isSolid: isSolid,
               onTap: () {
@@ -992,7 +984,7 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
               context: context,
               title: 'HARDWARE DAC',
               subtitle: 'USB Bridge & Flash',
-              icon: HugeIcons.strokeRoundedUsb,
+              icon: LucideIcons.cpu,
               accentColor: primaryColor,
               isSolid: isSolid,
               onTap: () {
@@ -1012,7 +1004,7 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
     required BuildContext context,
     required String title,
     required String subtitle,
-    required dynamic icon,
+    required IconData icon,
     required Color accentColor,
     required bool isSolid,
     required VoidCallback onTap,
@@ -1043,7 +1035,7 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: HugeIcon(icon: icon, color: accentColor, size: 18),
+                  child: Icon(icon, color: accentColor, size: 18),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1098,8 +1090,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        icon: const HugeIcon(
-          icon: HugeIcons.strokeRoundedAlert02,
+        icon: const Icon(
+          LucideIcons.alertTriangle,
           size: 28,
           color: Color(0xFFFF9500),
         ),
@@ -1244,8 +1236,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedFloppyDisk,
+              child: Icon(
+                LucideIcons.save,
                 size: 18,
                 color: theme.colorScheme.primary,
               ),

@@ -3,46 +3,46 @@ import 'package:flutter/material.dart';
 /// Design tokens and styling constants for the Simple-As-F Minimalist Architecture
 /// Reference: Dribbble 27089924 (Music App by Murat Ak)
 abstract final class SimpleAsFTheme {
-  // ─── Color Palette Tokens ──────────────────────────────────────────────────
-  /// Main application background: Deep obsidian forest dark
-  static const Color forestCanvas = Color(0xFF0B110E);
+  // ─── Color Palette Tokens (Pure Solid Neutral Audiophile Darks) ───────────────
+  /// Main application background: Neutral matte obsidian carbon dark
+  static const Color forestCanvas = Color(0xFF0D0E12);
 
-  /// Secondary dark canvas: Slightly lighter obsidian green for contrast
-  static const Color forestCanvasDark = Color(0xFF0E1713);
+  /// Secondary dark canvas: Pitch black foundation for maximum contrast
+  static const Color forestCanvasDark = Color(0xFF08090B);
 
-  /// Ambient radial glow color: Used in canvas corners for soft organic depth
-  static const Color forestGlow = Color(0xFF12231A);
-  static const Color forestGlowAccent = Color(0xFF162E22);
+  /// Ambient dark tone: Neutral dark depth
+  static const Color forestGlow = Color(0xFF12141A);
+  static const Color forestGlowAccent = Color(0xFF16181F);
 
-  /// Primary vibrant accent: Organic Emerald Mint
-  static const Color emeraldMint = Color(0xFF2EE672);
+  /// Primary restrained accent: Clean Studio Mint
+  static const Color emeraldMint = Color(0xFF10B981);
 
-  /// Lighter tint of Emerald Mint for subtle highlights
-  static const Color emeraldMintLight = Color(0xFF4ADE80);
+  /// Secondary accent for highlights
+  static const Color emeraldMintLight = Color(0xFF34D399);
 
   /// Soft dark capsule container for currently active playing track or selection
-  static const Color surfaceActiveCapsule = Color(0xFF16241C);
+  static const Color surfaceActiveCapsule = Color(0xFF1E212B);
 
   /// Elevated surface for floating capsule dock and dialog cards
-  static const Color surfaceElevated = Color(0xFF141F18);
+  static const Color surfaceElevated = Color(0xFF16181F);
 
   /// Deep container for unselected controls
-  static const Color surfaceMuted = Color(0xFF131D17);
+  static const Color surfaceMuted = Color(0xFF121318);
 
   /// Primary text color: 100% Solid Pure White
   static const Color textWhite = Color(0xFFFFFFFF);
 
-  /// Subtitle & metadata text color: Muted Sage Slate
-  static const Color sageSlate = Color(0xFF8A9A90);
+  /// Subtitle & metadata text color: Neutral Slate Gray
+  static const Color sageSlate = Color(0xFF94A3B8);
 
   /// Dimmer tertiary slate for timestamps and inactive elements
-  static const Color sageSlateDim = Color(0xFF5A6B61);
+  static const Color sageSlateDim = Color(0xFF64748B);
 
   /// Unplayed seekbar bars color
-  static const Color unplayedBar = Color(0xFF23352B);
+  static const Color unplayedBar = Color(0xFF252834);
 
-  /// Ultra-subtle hairline border color
-  static const Color borderSubtle = Color(0x1F2EE672);
+  /// Ultra-subtle hairline border color: Neutral slate charcoal
+  static const Color borderSubtle = Color(0xFF262936);
 
   // ─── Radii & Geometry Tokens ───────────────────────────────────────────────
   /// Album Art on Now Playing Screen
@@ -66,26 +66,20 @@ abstract final class SimpleAsFTheme {
     color: surfaceActiveCapsule,
     borderRadius: capsuleRowRadius,
     border: Border.all(
-      color: emeraldMint.withValues(alpha: 0.15),
-      width: 1.0,
+      color: const Color(0xFF2E3242),
+      width: 0.8,
     ),
   );
 
-  /// Default squircle album art decoration with soft dark drop shadow
+  /// Default squircle album art decoration with clean dark shadow
   static BoxDecoration squircleArtworkDecoration({String? imagePath}) => BoxDecoration(
     borderRadius: squircleArtworkRadius,
     color: surfaceElevated,
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withValues(alpha: 0.5),
-        blurRadius: 32.0,
-        offset: const Offset(0, 16),
-        spreadRadius: -4,
-      ),
-      BoxShadow(
-        color: forestGlow.withValues(alpha: 0.3),
+        color: Colors.black.withValues(alpha: 0.45),
         blurRadius: 24.0,
-        offset: const Offset(0, 8),
+        offset: const Offset(0, 12),
       ),
     ],
   );
@@ -117,30 +111,24 @@ abstract final class SimpleAsFTheme {
 
   /// Dynamic unplayed seekbar bar color
   static Color unplayedBarColor(BuildContext context) =>
-      Color.alphaBlend(
-        Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-        Theme.of(context).scaffoldBackgroundColor,
-      );
+      const Color(0xFF252834);
 
   /// Dynamic subtle hairline border
   static Color subtleBorder(BuildContext context) =>
-      Theme.of(context).colorScheme.primary.withValues(alpha: 0.18);
+      const Color(0xFF262936);
 
-  /// Dynamic ambient radial glow color
+  /// Dynamic ambient dark depth
   static Color ambientGlow(BuildContext context) =>
-      Color.alphaBlend(
-        Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-        Theme.of(context).scaffoldBackgroundColor,
-      );
+      const Color(0xFF12141A);
 
   /// Dynamic active playing track capsule decoration
   static BoxDecoration activeTrackCapsuleDecoration(BuildContext context) =>
       BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: const Color(0xFF1E212B),
         borderRadius: capsuleRowRadius,
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.20),
-          width: 1.0,
+          color: const Color(0xFF2E3242),
+          width: 0.8,
         ),
       );
 
@@ -151,17 +139,10 @@ abstract final class SimpleAsFTheme {
   }) =>
       BoxDecoration(
         borderRadius: radius ?? squircleCardRadius,
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        color: const Color(0xFF16181F),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.25),
-          width: 1.0,
+          color: const Color(0xFF262936),
+          width: 0.8,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16.0,
-            offset: const Offset(0, 8),
-          ),
-        ],
       );
 }

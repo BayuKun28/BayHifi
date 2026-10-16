@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:baydev_hifi/features/player/data/lyrics_service.dart';
 import 'package:baydev_hifi/features/player/domain/playback_state.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/dual_pane_workstation_pane.dart';
@@ -75,9 +75,9 @@ void main() {
 
     // Verify Add Tracks to Queue / Instant Mix button exists
     expect(find.byType(M3EIconButton), findsNWidgets(3));
-    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedPlayList), findsOneWidget);
-    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedShuffle), findsOneWidget);
-    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedRepeat), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.listPlus), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.shuffle), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.repeat), findsOneWidget);
 
     // Verify drag handles (exactly 1 per track tile, not duplicated)
     final dragListeners = find.byType(ReorderableDragStartListener);

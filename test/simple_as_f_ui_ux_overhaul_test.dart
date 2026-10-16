@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:baydev_hifi/app/theme/simple_as_f_theme.dart';
 import 'package:baydev_hifi/app/theme/theme_mode_controller.dart';
 import 'package:baydev_hifi/core/widgets/meta_tracking_label.dart';
@@ -17,18 +17,18 @@ import 'package:baydev_hifi/features/settings/domain/player_playback_settings.da
 void main() {
   group('Simple-As-F UI/UX Overhaul Unit & Widget Tests', () {
     test('1. SimpleAsFTheme tokens match Dribbble 27089924 design reference', () {
-      expect(SimpleAsFTheme.forestCanvas, const Color(0xFF0B110E));
-      expect(SimpleAsFTheme.forestGlow, const Color(0xFF12231A));
-      expect(SimpleAsFTheme.emeraldMint, const Color(0xFF2EE672));
-      expect(SimpleAsFTheme.sageSlate, const Color(0xFF8A9A90));
-      expect(SimpleAsFTheme.surfaceActiveCapsule, const Color(0xFF16241C));
+      expect(SimpleAsFTheme.forestCanvas, const Color(0xFF0D0E12));
+      expect(SimpleAsFTheme.forestGlow, const Color(0xFF12141A));
+      expect(SimpleAsFTheme.emeraldMint, const Color(0xFF10B981));
+      expect(SimpleAsFTheme.sageSlate, const Color(0xFF94A3B8));
+      expect(SimpleAsFTheme.surfaceActiveCapsule, const Color(0xFF1E212B));
       expect(SimpleAsFTheme.textWhite, const Color(0xFFFFFFFF));
     });
 
     test('2. Default AppPalette is simpleAsF and default accent is emerald mint', () {
-      expect(AppPalette.simpleAsF.primary, const Color(0xFF2EE672));
-      expect(AppPalette.simpleAsF.name, 'Simple as F*** (Obsidian Emerald)');
-      expect(AppPalette.allPresets.first.name, 'Simple as F*** (Obsidian Emerald)');
+      expect(AppPalette.simpleAsF.primary, const Color(0xFF10B981));
+      expect(AppPalette.simpleAsF.name, 'Simple as F*** (Matte Obsidian)');
+      expect(AppPalette.allPresets.first.name, 'Simple as F*** (Matte Obsidian)');
     });
 
     test('3. PlayerCustomizationSettings default to squircle and waveform', () {
@@ -136,7 +136,7 @@ void main() {
       );
 
       final waveformFinder = find.byWidgetPredicate(
-        (w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedAudioWaveform,
+        (w) => w is Icon && w.icon == LucideIcons.audioLines,
       );
 
       // Test active playing tile
@@ -315,9 +315,9 @@ void main() {
               expect(accent, sapphireAccent);
               expect(canvas, sapphireCanvas);
               expect(surfaceContainer, sapphireContainer);
-              expect(unplayedBar, Color.alphaBlend(sapphireAccent.withValues(alpha: 0.12), sapphireCanvas));
-              expect(ambientGlow, Color.alphaBlend(sapphireAccent.withValues(alpha: 0.08), sapphireCanvas));
-              expect(capsuleDecoration.color, sapphireContainer);
+              expect(unplayedBar, const Color(0xFF252834));
+              expect(ambientGlow, const Color(0xFF12141A));
+              expect(capsuleDecoration.color, const Color(0xFF1E212B));
 
               return const Scaffold(body: SizedBox());
             },

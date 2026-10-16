@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/widgets/studio_artwork_lightbox.dart';
 import '../../data/artist_metadata_service.dart';
@@ -143,8 +143,8 @@ class _ArtistAvatarWidgetState extends State<ArtistAvatarWidget> {
                 color: primary.withValues(alpha: 0.6),
               ),
             )
-          : HugeIcon(
-              icon: HugeIcons.strokeRoundedUser,
+          : Icon(
+              LucideIcons.user,
               color: primary,
               size: widget.iconSize,
             ),

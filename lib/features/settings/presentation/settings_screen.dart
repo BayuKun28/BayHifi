@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/widgets/two_tone_header.dart';
@@ -15,6 +14,7 @@ import 'sub_screens/playback_engine_settings_screen.dart';
 import 'sub_screens/storage_cache_settings_screen.dart';
 import 'sub_screens/theming_settings_screen.dart';
 import 'sub_screens/visualizer_settings_screen.dart';
+import '../../analytics/presentation/details/studio_listening_stats_detail_screen.dart';
 
 /// Studio Settings & Personalization Screen (Categorized Hub)
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -68,7 +68,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                HugeIcon(icon: HugeIcons.strokeRoundedColorPicker, size: 13, color: primary),
+                Icon(LucideIcons.palette, size: 13, color: primary),
                 const SizedBox(width: 6),
                 Text(
                   themeState.currentPalette.name,
@@ -99,6 +99,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 // ─── 0. CLOUD ACCOUNT & PROFILE CARD ────────────────────────
                 if (_searchQuery.isEmpty) ...[
                   const SettingsAccountCard(),
+                  const SizedBox(height: 10),
+                  _buildCategoryCard(
+                    context,
+                    icon: LucideIcons.sparkles,
+                    accentColor: primary,
+                    title: 'STUDIO WRAPPED & LISTENING STATS',
+                    subtitle: 'Persona archetypes, FLAC purity metrics, interactive recap stories & 8 exportable templates',
+                    badgeText: 'Recap & Telemetry',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const StudioListeningStatsDetailScreen()),
+                      );
+                    },
+                    isSolid: isSolid,
+                  ),
                   const SizedBox(height: 16),
                 ],
 
@@ -109,18 +124,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildSectionHeader(
               context,
               title: 'AESTHETICS & DISPLAY',
-              icon: HugeIcons.strokeRoundedLayers01,
+              icon: LucideIcons.palette,
               color: primary,
             ),
             const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedColorPicker,
+            icon: LucideIcons.paintBucket,
             accentColor: primary,
             title: 'THEMING & COLOR PALETTES',
             subtitle: '19 Studio Palettes, Light/Dark/System Mode, Pure Solid M3 Surface Fills & Monet Dynamic Art',
-            badgeText: '${themeState.currentPalette.name} • ${themeState.isSolidStyle ? "Pure Solid" : "Translucent"}',
+            badgeText: '${themeState.currentPalette.name} • Solid Studio',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ThemingSettingsScreen()),
@@ -132,7 +147,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedAudioWaveform,
+            icon: LucideIcons.audioWaveform,
             accentColor: primary,
             title: 'VISUALIZER & DISPLAY',
             subtitle: 'Turntable Tonearm, Cassette, CD Jewel, Dual VU Meters, Mirror Wave & Precision Studio Ruler',
@@ -148,7 +163,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedCar01,
+            icon: LucideIcons.layoutGrid,
             accentColor: primary,
             title: 'STUDIO WORKSTATION & CAR DOCK',
             subtitle: 'High-contrast studio timecode clock, dual analog VU level dials & large controls for desk stands',
@@ -166,14 +181,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildSectionHeader(
             context,
             title: 'AUDIO ARCHITECTURE & ENGINE',
-            icon: HugeIcons.strokeRoundedCpu,
+            icon: LucideIcons.cpu,
             color: primary,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedCpu,
+            icon: LucideIcons.headphones,
             accentColor: primary,
             title: 'AUDIO HARDWARE & DAC ENGINE',
             subtitle: 'SoLoud C++ Engine, Bit-Perfect Direct Stream Bypass, Output Devices & Latency Buffer Tuning',
@@ -189,7 +204,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedDashboardSpeed01,
+            icon: LucideIcons.activity,
             accentColor: primary,
             title: 'ADVANCED PLAYBACK ENGINE & FADES',
             subtitle: 'Smooth volume fades, headphone unplug guard, speed/pitch semitones, ReplayGain & seek stepper',
@@ -207,14 +222,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildSectionHeader(
             context,
             title: 'MEDIA, STORAGE & VAULT',
-            icon: HugeIcons.strokeRoundedFolder01,
+            icon: LucideIcons.hardDrive,
             color: primary,
           ),
           const SizedBox(height: 10),
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedFolder01,
+            icon: LucideIcons.folderSync,
             accentColor: primary,
             title: 'LIBRARY SCANNER & SLEEP TIMER',
             subtitle: 'Automated 15s/30s volume attenuation sleep timer, startup library scan & audio clip filters',
@@ -230,7 +245,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedDatabase,
+            icon: LucideIcons.database,
             accentColor: primary,
             title: 'STORAGE & CACHE QUOTA',
             subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & database vacuum',
@@ -246,7 +261,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedSettings01,
+            icon: LucideIcons.touchpad,
             accentColor: primary,
             title: 'GESTURES, HOTKEYS & CONTROLS',
             subtitle: 'MiniPlayer swipe gestures, track tile actions, double-tap seek intervals & keyboard shortcuts',
@@ -262,7 +277,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           _buildCategoryCard(
             context,
-            icon: HugeIcons.strokeRoundedCloudCheck,
+            icon: LucideIcons.shieldCheck,
             accentColor: primary,
             title: 'CLOUD VAULT & BACKUP',
             subtitle: 'Export/import library playlists, equalizer curves, hardware DAC profiles & backup archives',
@@ -292,13 +307,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Container(
       key: const ValueKey('settings_search_bar_container'),
       decoration: BoxDecoration(
-        color: isSolid
-            ? theme.colorScheme.surfaceContainerHighest
-            : StudioSurfaceTheme.surfaceContainer(context, isSolid: false),
+        color: const Color(0xFF16181F),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.2),
-          width: 1.0,
+          color: const Color(0xFF262936),
+          width: 0.8,
         ),
       ),
       child: TextField(
@@ -306,22 +319,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         controller: _searchController,
         focusNode: _searchFocusNode,
         onChanged: (val) => setState(() => _searchQuery = val.trim()),
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 13.5,
-          color: theme.colorScheme.onSurface,
+          color: Colors.white,
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
           hintText: 'Search settings, DSP, hardware, theming...',
           hintStyle: TextStyle(
             fontSize: 13,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedSearch01,
-              color: primary,
+          prefixIcon: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Icon(
+              LucideIcons.search,
+              color: Color(0xFF94A3B8),
               size: 18,
             ),
           ),
@@ -329,11 +342,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           suffixIcon: _searchQuery.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.only(right: 4),
-                  child: M3EIconButton(
-                    variant: M3EIconButtonVariant.standard,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  child: IconButton(
+                    icon: const Icon(
+                      LucideIcons.x,
+                      color: Color(0xFF94A3B8),
                       size: 16,
                     ),
                     onPressed: () {
@@ -356,7 +368,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final primary = theme.colorScheme.primary;
     final allItems = [
       (
-        icon: HugeIcons.strokeRoundedColorPicker,
+        icon: LucideIcons.palette,
         accentColor: primary,
         title: 'THEMING & COLOR PALETTES',
         subtitle: '19 Studio Palettes, Light/Dark/System Mode, Pure Solid M3 Surface Fills & Monet Dynamic Art',
@@ -365,7 +377,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const ThemingSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedAudioWaveform,
+        icon: LucideIcons.audioLines,
         accentColor: primary,
         title: 'VISUALIZER & DISPLAY',
         subtitle: 'Turntable Tonearm, Cassette, CD Jewel, Dual VU Meters, Mirror Wave & Precision Studio Ruler',
@@ -374,7 +386,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const VisualizerSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedCar01,
+        icon: LucideIcons.car,
         accentColor: primary,
         title: 'STUDIO WORKSTATION & CAR DOCK',
         subtitle: 'High-contrast studio timecode clock, dual analog VU level dials & large controls for desk stands',
@@ -383,7 +395,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const DockingSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedCpu,
+        icon: LucideIcons.cpu,
         accentColor: primary,
         title: 'AUDIO HARDWARE & DAC ENGINE',
         subtitle: 'SoLoud C++ Engine, Bit-Perfect Direct Stream Bypass, Output Devices & Latency Buffer Tuning',
@@ -392,7 +404,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const AudioHardwareSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedDashboardSpeed01,
+        icon: LucideIcons.gauge,
         accentColor: primary,
         title: 'ADVANCED PLAYBACK ENGINE & FADES',
         subtitle: 'Smooth volume fades, headphone unplug guard, speed/pitch semitones, ReplayGain & seek stepper',
@@ -401,7 +413,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const PlaybackEngineSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedFolder01,
+        icon: LucideIcons.folder,
         accentColor: primary,
         title: 'LIBRARY SCANNER & SLEEP TIMER',
         subtitle: 'Automated 15s/30s volume attenuation sleep timer, startup library scan & audio clip filters',
@@ -410,7 +422,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const LibraryScannerSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedDatabase,
+        icon: LucideIcons.database,
         accentColor: primary,
         title: 'STORAGE & CACHE QUOTA',
         subtitle: 'Disk storage gauge, artwork/lyrics cache cleaner, missing tracks relinker & database vacuum',
@@ -419,7 +431,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const StorageCacheSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedActivity01,
+        icon: LucideIcons.activity,
         accentColor: primary,
         title: 'GESTURES & TRACK TILES',
         subtitle: 'Artwork tap triggers (Lyrics, Fav, Inspector), swipe-to-queue/favorite & track tile layouts',
@@ -428,7 +440,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (BuildContext ctx) => const GesturesSettingsScreen(),
       ),
       (
-        icon: HugeIcons.strokeRoundedCloudSync,
+        icon: LucideIcons.cloud,
         accentColor: primary,
         title: 'BACKUP & RESTORE ARCHIVE',
         subtitle: 'Export and import portable .bayhifi JSON snapshots containing playlists, smart rules & presets',
@@ -452,8 +464,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           alignment: Alignment.center,
           child: Column(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedSearch01,
+              Icon(
+                LucideIcons.search,
                 size: 36,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
               ),
@@ -484,7 +496,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _buildSectionHeader(
         context,
         title: 'MATCHING SETTINGS (${matches.length})',
-        icon: HugeIcons.strokeRoundedSearch01,
+        icon: LucideIcons.search,
         color: theme.colorScheme.primary,
       ),
       const SizedBox(height: 10),
@@ -567,22 +579,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildSectionHeader(
     BuildContext context, {
     required String title,
-    required dynamic icon,
+    required IconData icon,
     required Color color,
   }) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, bottom: 2.0),
       child: Row(
         children: [
-          HugeIcon(icon: icon, size: 14, color: color),
+          Icon(icon, size: 13, color: const Color(0xFF94A3B8)),
           const SizedBox(width: 8),
           Text(
             title,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-              fontSize: 11.5,
-              fontWeight: FontWeight.w900,
+            style: const TextStyle(
+              color: Color(0xFF94A3B8),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
               letterSpacing: 0.8,
             ),
           ),
@@ -593,7 +604,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildCategoryCard(
     BuildContext context, {
-    required dynamic icon,
+    required IconData icon,
     required Color accentColor,
     required String title,
     required String subtitle,
@@ -605,77 +616,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isSolid ? 0.2 : 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: const Color(0xFF16181F),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFF262936),
+            width: 0.8,
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Solid Icon Container with high-contrast framing
+            // Solid Neutral Icon Container
             Container(
-              width: 48,
-              height: 48,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
-                color: isSolid
-                    ? StudioSurfaceTheme.tintedContainer(
-                        context,
-                        accentColor,
-                        isSolid: true,
-                        solidBlendAlpha: 0.22,
-                      )
-                    : theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(14),
+                color: const Color(0xFF20232E),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: accentColor.withValues(alpha: 0.40),
-                  width: 1.2,
+                  color: const Color(0xFF2E3242),
+                  width: 0.8,
                 ),
               ),
-              child: Center(
-                child: HugeIcon(
-                  icon: icon,
-                  size: 22,
-                  color: accentColor,
-                ),
-              ),
+              alignment: Alignment.center,
+              child: Icon(icon, size: 18, color: Colors.white),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.5,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
                       fontSize: 11,
                       height: 1.3,
                     ),
@@ -683,59 +673,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  // Solid Badge Container with high-contrast text
+                  // Solid Neutral Badge Container
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: isSolid
-                          ? theme.colorScheme.surfaceContainerHighest
-                          : StudioSurfaceTheme.tintedContainer(
-                              context,
-                              accentColor,
-                              isSolid: false,
-                              translucentAlpha: 0.14,
-                            ),
+                      color: const Color(0xFF1E212B),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: accentColor.withValues(alpha: 0.35),
-                        width: 1.0,
+                        color: const Color(0xFF262936),
+                        width: 0.8,
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 5,
-                          height: 5,
-                          decoration: BoxDecoration(
-                            color: accentColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            badgeText,
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurface,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      badgeText,
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 10),
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowRight01,
-              size: 18,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+            const Icon(
+              LucideIcons.chevronRight,
+              size: 16,
+              color: Color(0xFF64748B),
             ),
           ],
         ),

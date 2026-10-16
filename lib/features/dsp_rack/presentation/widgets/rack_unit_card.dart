@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
-import '../../../../app/theme/studio_surface_theme.dart';
 
 /// Reusable Studio Rackmount Unit Frame with collapsible minimization
 class RackUnitCard extends ConsumerStatefulWidget {
@@ -61,31 +60,19 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isSolid = ref.isSolidStyle;
     final color = widget.accentColor ?? theme.colorScheme.primary;
 
-    final chassisBg = StudioSurfaceTheme.surface(context, isSolid: isSolid);
+    final chassisBg = const Color(0xFF16181F);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: chassisBg,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: isSolid
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.22),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.14),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+        border: Border.all(
+          color: const Color(0xFF262936),
+          width: 0.8,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -100,7 +87,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+                color: const Color(0xFF1E212B),
                 borderRadius: BorderRadius.vertical(
                   top: const Radius.circular(15),
                   bottom: _isExpanded ? Radius.zero : const Radius.circular(15),
@@ -117,15 +104,15 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: widget.isActive
-                          ? StudioSurfaceTheme.tintedContainer(
-                              context,
-                              color,
-                              isSolid: isSolid,
-                              translucentAlpha: 0.2,
-                              solidBlendAlpha: 0.2,
-                            )
+                          ? const Color(0xFF252834)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(4),
+                      border: widget.isActive
+                          ? Border.all(
+                              color: const Color(0xFF383D50),
+                              width: 0.8,
+                            )
+                          : null,
                     ),
                     child: Text(
                       widget.unitNumber,
@@ -133,7 +120,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                         fontFamily: 'monospace',
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: widget.isActive ? color : (isDark ? Colors.white54 : Colors.black54),
+                        color: widget.isActive ? Colors.white : (isDark ? Colors.white54 : Colors.black54),
                       ),
                     ),
                   ),
@@ -152,7 +139,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.0,
                             color: widget.isActive
-                                ? theme.colorScheme.onSurface
+                                ? Colors.white
                                 : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                           maxLines: 1,
@@ -160,9 +147,9 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                         ),
                         Text(
                           widget.subtitle,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 10,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: Color(0xFF94A3B8),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -185,35 +172,26 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: widget.isActive
-                            ? StudioSurfaceTheme.tintedContainer(
-                                context,
-                                color,
-                                isSolid: isSolid,
-                                translucentAlpha: 0.15,
-                                solidBlendAlpha: 0.2,
-                              )
-                            : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                            ? const Color(0xFF252834)
+                            : const Color(0xFF16181F),
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: widget.isActive
+                              ? const Color(0xFF383D50)
+                              : const Color(0xFF262936),
+                          width: 0.8,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // LED Light
+                          // LED Light (Solid dot, zero neon halo blur)
                           Container(
                             width: 6,
                             height: 6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: widget.isActive ? color : (isDark ? Colors.white24 : Colors.black26),
-                              boxShadow: widget.isActive
-                                  ? [
-                                      BoxShadow(
-                                        color: color.withValues(alpha: 0.8),
-                                        blurRadius: 6,
-                                        spreadRadius: 1,
-                                      )
-                                    ]
-                                  : null,
+                              color: widget.isActive ? color : const Color(0xFF64748B),
                             ),
                           ),
                           const SizedBox(width: 5),
@@ -223,7 +201,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                               fontSize: 9.5,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
-                              color: widget.isActive ? color : (isDark ? Colors.white54 : Colors.black54),
+                              color: widget.isActive ? Colors.white : const Color(0xFF94A3B8),
                             ),
                           ),
                         ],
@@ -234,10 +212,10 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                   const SizedBox(width: 6),
 
                   // Expand / Collapse Chevron Indicator
-                  HugeIcon(
-                    icon: _isExpanded
-                        ? HugeIcons.strokeRoundedArrowUp01
-                        : HugeIcons.strokeRoundedArrowDown01,
+                  Icon(
+                    _isExpanded
+                        ? LucideIcons.chevronUp
+                        : LucideIcons.chevronDown,
                     size: 14,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                   ),

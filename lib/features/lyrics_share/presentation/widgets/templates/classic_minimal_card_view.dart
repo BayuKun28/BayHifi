@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/lyrics/east_asian_romanizer.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../../player/domain/track.dart';
@@ -183,8 +183,8 @@ class ClassicMinimalCardView extends StatelessWidget {
                     border: Border.all(color: colors.borderColor, width: 0.8),
                   ),
                   child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedAudioWave01,
+                    child: Icon(
+                      LucideIcons.audioWaveform,
                       size: 13 * scale,
                       color: colors.accentColor,
                     ),

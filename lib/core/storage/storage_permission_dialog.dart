@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../app/theme/app_haptics.dart';
 import '../../app/theme/app_typography.dart';
@@ -64,8 +64,8 @@ class StoragePermissionDialog extends StatelessWidget {
                       color: cs.primaryContainer,
                       borderRadius: BorderRadius.circular(16.0),
                     ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedFolderSecurity,
+                    child: Icon(
+                      LucideIcons.folderLock,
                       color: cs.onPrimaryContainer,
                       size: 28.0,
                     ),
@@ -106,8 +106,8 @@ class StoragePermissionDialog extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedShieldCheck,
+                    Icon(
+                      LucideIcons.shieldCheck,
                       color: cs.tertiary,
                       size: 20.0,
                     ),

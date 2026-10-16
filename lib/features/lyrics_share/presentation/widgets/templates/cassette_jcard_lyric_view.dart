@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/lyrics/east_asian_romanizer.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/models/lyric_card_theme.dart';
@@ -327,8 +327,8 @@ class CassetteJCardLyricView extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedAlbum01,
+                Icon(
+                  LucideIcons.disc,
                   size: (12 * scale).clamp(10.0, 18.0),
                   color: colors.accentColor,
                 ),

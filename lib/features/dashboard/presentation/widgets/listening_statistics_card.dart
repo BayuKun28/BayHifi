@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -73,8 +73,8 @@ class ListeningStatisticsCard extends ConsumerWidget {
               Expanded(
                 child: Row(
                   children: [
-                    const HugeIcon(
-                      icon: HugeIcons.strokeRoundedAnalytics01,
+                    const Icon(
+                      LucideIcons.chartColumn,
                       size: 16,
                       color: StudioCategoryColors.statistics,
                     ),
@@ -134,8 +134,8 @@ class ListeningStatisticsCard extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: 3),
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedArrowRight01,
+                      Icon(
+                        LucideIcons.arrowRight,
                         size: 12,
                         color: primary,
                       ),
@@ -157,7 +157,7 @@ class ListeningStatisticsCard extends ConsumerWidget {
                   isSolid: isSolid,
                   label: 'Listening Time',
                   value: _formatListeningTime(totalMinutes),
-                  icon: HugeIcons.strokeRoundedClock01,
+                  icon: LucideIcons.clock,
                   accentColor: StudioCategoryColors.statistics,
                 ),
               ),
@@ -168,7 +168,7 @@ class ListeningStatisticsCard extends ConsumerWidget {
                   isSolid: isSolid,
                   label: 'Total Plays',
                   value: '$totalTracks',
-                  icon: HugeIcons.strokeRoundedMusicNote01,
+                  icon: LucideIcons.music,
                   accentColor: StudioCategoryColors.themingPalettes,
                 ),
               ),
@@ -179,7 +179,7 @@ class ListeningStatisticsCard extends ConsumerWidget {
                   isSolid: isSolid,
                   label: 'Lossless Purity',
                   value: '${flacPct.toStringAsFixed(0)}%',
-                  icon: HugeIcons.strokeRoundedShieldEnergy,
+                  icon: LucideIcons.shieldCheck,
                   accentColor: StudioCategoryColors.hiResGold,
                 ),
               ),
@@ -264,7 +264,7 @@ class ListeningStatisticsCard extends ConsumerWidget {
                           width: 28,
                           height: 28,
                           borderRadius: BorderRadius.circular(14),
-                          fallbackIcon: HugeIcons.strokeRoundedMic01,
+                          fallbackIcon: LucideIcons.mic,
                           fallbackIconSize: 14,
                         ),
                         const SizedBox(width: 6),
@@ -368,7 +368,7 @@ class ListeningStatisticsCard extends ConsumerWidget {
                         width: 30,
                         height: 30,
                         borderRadius: BorderRadius.circular(6),
-                        fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                        fallbackIcon: LucideIcons.music,
                         fallbackIconSize: 14,
                       ),
                       const SizedBox(width: 10),
@@ -444,8 +444,8 @@ class ListeningStatisticsCard extends ConsumerWidget {
                             shape: BoxShape.circle,
                           ),
                           child: Center(
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedPlay,
+                            child: Icon(
+                              LucideIcons.play,
                               size: 13,
                               color: primary,
                             ),
@@ -487,8 +487,8 @@ class ListeningStatisticsCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowRight01,
+                  Icon(
+                    LucideIcons.arrowRight,
                     size: 13,
                     color: primary,
                   ),
@@ -506,7 +506,7 @@ class ListeningStatisticsCard extends ConsumerWidget {
     required bool isSolid,
     required String label,
     required String value,
-    required dynamic icon,
+    required IconData icon,
     required Color accentColor,
   }) {
     final theme = Theme.of(context);
@@ -521,8 +521,8 @@ class ListeningStatisticsCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              HugeIcon(
-                icon: icon,
+              Icon(
+                icon,
                 size: 12,
                 color: accentColor,
               ),

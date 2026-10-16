@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Supported studio stamp stickers for decorative audiophile overlays
 enum LyricStickerType {
@@ -7,43 +7,43 @@ enum LyricStickerType {
     'HI-RES LOSSLESS',
     'Certified 24-bit studio resolution',
     Color(0xFFFFB800), // Gold
-    HugeIcons.strokeRoundedShieldEnergy,
+    LucideIcons.shieldCheck,
   ),
   bitPerfect(
     'BIT-PERFECT PURIST',
     'Direct unadulterated audio stream',
     Color(0xFF10B981), // Emerald
-    HugeIcons.strokeRoundedCpu,
+    LucideIcons.cpu,
   ),
   tubeWarmth(
     'WARM TUBE HARMONICS',
     'Analog triode harmonic saturation',
     Color(0xFFF59E0B), // Warm Amber
-    HugeIcons.strokeRoundedSun03,
+    LucideIcons.sun,
   ),
   lateNight(
     'LATE NIGHT VIBES',
     'Deep midnight listening session',
     Color(0xFF8B5CF6), // Violet
-    HugeIcons.strokeRoundedMoon02,
+    LucideIcons.moon,
   ),
   certifiedAudiophile(
     'CERTIFIED AUDIOPHILE',
     'Gold standard critical listening',
     Color(0xFF06B6D4), // Cyan
-    HugeIcons.strokeRoundedAward01,
+    LucideIcons.award,
   ),
   studioMaster(
     'STUDIO MASTER ANTHEM',
     'Heaviest rotation master track',
     Color(0xFFEC4899), // Rose
-    HugeIcons.strokeRoundedStar,
+    LucideIcons.star,
   );
 
   final String label;
   final String description;
   final Color badgeColor;
-  final dynamic icon;
+  final IconData icon;
 
   const LyricStickerType(
     this.label,

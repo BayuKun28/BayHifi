@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 80 Fase (Fase 1–80 Selesai • 100% Passing)
-- **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Obsidian Forest & Emerald Mint Palette (`#0B110E`, `#2EE672`), Two-Tone Typography, Interactive Waveform Seekbar, Uncarded Floating Track Rows, Dynamic Theme Palette Binding, HugeIcons, Zero Emojis (100% English)_
-- **Status Proyek**: _Phase 80: Dynamic Color Palette Adaptation, Dashboard Decluttering & Screen Harmonization Complete_
+- **Total Fase**: 84 Fase (Fase 1–84 Selesai • 100% Passing)
+- **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Neutral Matte Obsidian Carbon Palette (`#0D0E12`, `#16181F`, `#1E212B`, `#252834`), Pure Solid Surfaces (100% Opaque, No Translucent Soft Tint, No Neon Glow Halo Shadows), Lucide Vector Stroke Iconography (`lucide_icons_flutter`), Responsive Workstations (Mobile / Desktop / Tablet Dual-Pane), Two-Tone Typography, Tabular Audio Figures, Zero Emojis (100% English)_
+- **Status Proyek**: _Phase 84: Full Repository Icon Migration to Lucide Icons, Pure Solid & No-Neon Policy Enforcement, Active Track Badge Collision Fix, Desktop Mobile Window CSD Safety, Driver & Target Curves Quick-Access Shortcuts Complete (53/53 Migrated Tests Passing, 0 Lint Warnings, 0 Errors)_
 
 ---
 
@@ -2187,16 +2187,85 @@ Rombak total seluruh screen aplikasi mengikuti referensi Simple-As-F minimalis, 
   - [x] `UnifiedLibraryScreen`: Category tabs pill bar (`Tracks`, `Albums`, `Artists`, `Genres`, `Downloads`, `Folders`, `YouTube`) tampil di semua form factor (mobile, tablet, desktop) dengan pill border radius (`20px`) dan dynamic `primaryColor`.
 - [x] **80.4 Automated Verification & Quality Gate**:
   - [x] 12 unit & widget tests di `test/simple_as_f_ui_ux_overhaul_test.dart` (100% pass).
-  - [x] `flutter analyze` 0 errors, 0 warnings across all files.
+---
 
+## Fase 81: Desktop & Mobile Responsive Grid, Audio Source Filter Dock, Studio Wrapped & DSP Baseline Polish
 
+Rombak layout adaptif untuk Linux desktop, sediakan shortcut switcher mobile/tablet/desktop di custom topbar, perbaiki 3-dots button di Now Playing pada Linux, re-surface Studio Wrapped & Listening Stats, ubah bottom FAB Library menjadi Audio Source Filter Dock, dan sejajarkan seekbar Master Wet/Dry dengan Genre Rules di DSP Rack.
 
+- [x] **81.1 Responsive Discovery Grid (`SimpleAsFDiscoveryGrid`)**:
+  - [x] Ganti fixed 2-kolom dengan `LayoutBuilder` dinamis: 2 kolom (<600px mobile), 3 kolom (600–899px tablet), 4 kolom (900–1199px small desktop), 5 kolom (≥1200px widescreen desktop).
+  - [x] Sediakan hingga 10 album pada layar lebar desktop tanpa kartu berukuran raksasa.
+- [x] **81.2 Now Playing 3-Dots Button Restoration on Linux Desktop (`NowPlayingScreen`)**:
+  - [x] Ganti icon titik horizontal dengan vertical 3-dots crisp (`HugeIcons.strokeRoundedMoreVertical`).
+  - [x] Pasang 3-dots button pada `_buildLandscapeTopBar` agar selalu dapat diakses saat window desktop melebar.
+  - [x] Sinkronkan layout builder dengan `desktopLayoutModeProvider`: paksa portrait layout saat `DesktopLayoutMode.mobile` aktif pada Linux desktop.
+- [x] **81.3 Studio Wrapped & Listening Stats Re-Surfacing**:
+  - [x] Tambahkan kembali `StudioWrappedBentoBanner` di Dashboard (`dashboard_screen.dart`) di bawah Recently Played.
+  - [x] Tambahkan entry card `STUDIO WRAPPED & LISTENING STATS` pada `SettingsScreen` mengarah langsung ke `StudioListeningStatsDetailScreen`.
+- [x] **81.4 Library Bottom FAB Re-purposing into Audio Source Filter Dock**:
+  - [x] Hapus duplikasi kategori tab (Tracks/Albums/Artists) pada bottom FAB karena sudah ada di top chips.
+  - [x] Ubah FAB menjadi Audio Source Filter FAB (`_buildSourceFilterFab`) dengan label dinamis: `ALL`, `OFFLINE`, `CLOUD`, `HI-RES`, `UNTAGGED` dan tooltip `'Filter Audio Source'`.
+  - [x] Buat dock popup mengambang (`_buildFloatingSourceFilterDock`) dengan 5 opsi filter sumber suara, badge jumlah lagu tabular (`totalTracksCount`, `offlineTracksCount`, dll.), visual highlight aktif, serta shortcut Playlists di bagian bawah.
+- [x] **81.5 DSP Rack Master Wet / Dry Seekbar Alignment**:
+  - [x] Ubah Row pada `_buildStreamlinedMasterSection` di `dsp_rack_screen.dart` menjadi `crossAxisAlignment: CrossAxisAlignment.end`.
+  - [x] Bungkus tombol Auto Genre Rules dalam container 38x38 dengan padding bawah `4.0px` agar sejajar dengan baseline track `M3ESlider`.
+- [x] **81.6 Automated Verification & Quality Gate**:
+  - [x] Unit & widget tests di `test/desktop_layout_switcher_and_menu_redesign_test.dart`, `test/phase_41_ui_ux_redesign_test.dart`, dan `test/m3_expressive_enhancements_test.dart` (18/18 passing 100%).
+  - [x] `flutter analyze` 0 errors, 0 warnings across the entire repository.
 
+---
 
+## Fase 82: Total Design Redesign — Pure Solid Surfaces, Neutral Matte Obsidian Palette, Adaptive Desktop/Mobile Source Chips, and Modern Stroke Iconography (taste-skill Anti-Slop)
 
+Rombak total tampilan aplikasi sesuai arahan user dan panduan `taste-skill` / `minimalist-ui`:
+- 100% pure solid colors tanpa gradasi murahan atau efek neon yang menyilaukan.
+- Hapus opsi Translucent Soft Tint vs Pure Solid M3 (semua surface solid dan opaque).
+- Integrasi library icon modern `lucide_icons_flutter` menggantikan icon neon berkotak tebal.
+- Adaptif Library Source Chips: tetap ditampilkan di mode Desktop (karena Desktop tidak memiliki bottom FAB), dan disembunyikan di mode Mobile (karena di-handle oleh FAB dock).
 
+- [x] **82.1 Library Screen Adaptive Audio Source Chips**:
+  - [x] Pertahankan baris chip filter sumber suara (`All Sources`, `Offline Local`, `Cloud Library`, `Hi-Res Lossless`, `Untagged Audio`) di Desktop layout (`width >= 960` dan bukan `DesktopLayoutMode.mobile`).
+  - [x] Sembunyikan baris chip filter sumber suara pada Mobile mode agar layout bersih dan tidak redundan dengan bottom FAB dock.
+  - [x] Desain ulang chip sumber suara dengan solid matte buttons (`#252834` aktif, `#16181F` inaktif, border `#262936`, teks putih/abu-abu slate).
+- [x] **82.2 Theme & Surface Overhaul (100% Pure Solid Architecture)**:
+  - [x] Hapus toggle "SURFACE & COMPONENT FILL STYLE" (`Translucent Soft Tint` vs `Pure Solid M3`) dari `ThemingSettingsScreen`.
+  - [x] Paksa seluruh container dan surface theme (`surfaceContainer`, `surfaceContainerHigh`, `surfaceContainerLow`, `surface`, `outline`) menjadi 100% opaque solid colors.
+  - [x] Set `SurfaceStyleRefExtension.isSolidStyle` selalu `true` dan default `surfaceFillStyle` menjadi `SurfaceFillStyle.solid`.
+- [x] **82.3 De-Neonification & Neutral Matte Obsidian Carbon Palette**:
+  - [x] Ganti canvas background hijau lumpur/neon (`#0B110E`, `#12231A`) menjadi neutral matte obsidian carbon (`#0D0E12`, `#16181F`, `#1E212B`, `#252834`).
+  - [x] Ganti accent mint radioaktif (`#2EE672`) menjadi clean studio emerald (`#10B981` / `#34D399`).
+  - [x] Hapus ambient radial glow hijau di `SimpleAsFScaffold` (`enableAmbientGlow = false`).
+  - [x] Ganti tombol-tombol bernuansa neon menjadi solid industrial buttons (mis. solid `#252834` dengan outline `#2E3242` dan teks putih pekat).
+- [x] **82.4 Modern Stroke Iconography (`lucide_icons_flutter`)**:
+  - [x] Tambahkan `lucide_icons_flutter: ^3.1.25` ke `pubspec.yaml`.
+  - [x] Perbarui icon navigasi di `FloatingRoundedDock` dengan Lucide icons (`layoutDashboard`, `sliders`, `library`, `listMusic`, `settings`) dengan kapsul aktif solid charcoal `#222532`.
+  - [x] Perbarui kartu kategori di `SettingsScreen` dengan Lucide icons dan icon badge solid `#20232E`.
+  - [x] Perbarui `PlaylistsScreen`, `StudioWrappedBentoBanner`, dan dialog dengan Lucide icons yang bersih dan berbobot stroke seragam.
+- [x] **82.5 Anti-AI-Slop Architecture & Quality Gate**:
+  - [x] Pasang skill `taste-skill` dan `minimalist-ui` ke `.agents/skills/`.
+  - [x] Terapkan zero-emoji policy, tabular figures untuk metrik audio, dan hirarki tipografi high-contrast.
+  - [x] Unit & widget tests diperbarui dan diverifikasi: `phase_31_features_test.dart`, `phase_32_surface_fill_style_test.dart`, `desktop_layout_switcher_and_menu_redesign_test.dart`, `phase_41_ui_ux_redesign_test.dart` (100% passing).
+  - [x] `flutter analyze` 0 errors, 0 warnings across the entire repository.
 
+---
 
+## Fase 84: Full Repository Icon Migration to Lucide Icons, No-Neon Solid Standards, Active Track Badge Collision Fix & Desktop Mobile Window CSD Safety
 
-
-
+- [x] **84.1 Active Track Row Padding Collision Fix**:
+  - [x] Di `TrackTile`, perbaiki tata letak dan padding agar kapsul aktif (`surfaceActiveCapsule`) tidak lagi menabrak atau menutupi format badge ("WAV 44.1kHz 03:57") dan timestamp lagu.
+- [x] **84.2 Desktop Mobile Window Mode CSD Safety**:
+  - [x] Di `NowPlayingScreen` header, tambahkan padding atas dinamis (`StudioDesktopTitleBar.barHeight`) yang dilindungi platform guard `isDesktopPlatform` untuk Linux desktop pada layout mobile (<650px), mencegah tabrakan tombol aksi dengan tombol kontrol CSD window desktop.
+  - [x] Lindungi platform Android mobile/tablet agar tetap mempertahankan zero top padding offset (zero regression).
+- [x] **84.3 Now Playing Quick-Access Curves Shortcuts**:
+  - [x] Tambahkan shortcut 1-tap langsung (`SavedCurvesLibrarySheet.show(context, initialCategory: ...)`) untuk Driver Curves dan Target Curves pada auxiliary action row di `NowPlayingScreen`.
+- [x] **84.4 Migrasi Menyeluruh ke Lucide Icons (`lucide_icons_flutter`)**:
+  - [x] Pindai seluruh codebase dan migrasikan 100% icon di `lib/` dan `test/` ke `LucideIcons.*` (termasuk Analytics, DSP Rack, Hardware DAC, Library, Lyrics Share, Now Playing, dan Settings).
+  - [x] 0 kemunculan `HugeIcons` di seluruh kode aplikasi Dart (`lib/` dan `test/`).
+- [x] **84.5 Penegakan Pure Solid & No-Neon Policy**:
+  - [x] Hapus seluruh efek box-shadow neon glow buram di `StudioWrappedStoryScreen`, 11 template analytics visualizer, dan modal sheets.
+  - [x] Terapkan permukaan solid, batas struktural tegas (`Border.all`), dan bayangan gelap lembut (`Colors.black.withValues(alpha: ...)`).
+- [x] **84.6 Dokumentasi Rules & Pengujian Kualitas**:
+  - [x] Perbarui [rules.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/rules.md) dan [GEMINI.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/GEMINI.md) untuk mendokumentasikan sistem ikon Lucide, kebijakan Pure Solid Anti-Neon, dan standar CSD offset desktop.
+  - [x] `flutter analyze`: 0 errors, 0 warnings.
+  - [x] `flutter test`: 100% passing pada seluruh test suite yang dimigrasikan (53 unit & widget tests).

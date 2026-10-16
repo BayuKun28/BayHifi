@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/lyrics/east_asian_romanizer.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/models/lyric_card_theme.dart';
@@ -66,8 +66,8 @@ class AbstractAuraLyricView extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedSun03,
+                          Icon(
+                            LucideIcons.sun,
                             size: 13 * scale,
                             color: colors.accentColor,
                           ),

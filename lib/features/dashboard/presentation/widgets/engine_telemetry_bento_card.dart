@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -56,8 +56,8 @@ class EngineTelemetryBentoCard extends ConsumerWidget {
                           color: StudioCategoryColors.audioEngine.withValues(alpha: isSolid ? 0.18 : 0.14),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedCpu,
+                        child: const Icon(
+                          LucideIcons.cpu,
                           size: 16,
                           color: StudioCategoryColors.audioEngine,
                         ),

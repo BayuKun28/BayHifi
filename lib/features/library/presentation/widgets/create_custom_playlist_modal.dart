@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -130,8 +130,8 @@ class _CreateCustomPlaylistModalState extends ConsumerState<CreateCustomPlaylist
                   ),
                 ),
                 child: Center(
-                  child: HugeIcon(
-                    icon: isEditing ? HugeIcons.strokeRoundedEdit02 : HugeIcons.strokeRoundedPlaylist01,
+                  child: Icon(
+                    isEditing ? LucideIcons.filePen : LucideIcons.listMusic,
                     size: 18,
                     color: primary,
                   ),
@@ -178,8 +178,8 @@ class _CreateCustomPlaylistModalState extends ConsumerState<CreateCustomPlaylist
               hintText: 'e.g. Audiophile Acoustic Sessions',
               prefixIcon: Padding(
                 padding: const EdgeInsets.all(12),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPlaylist01,
+                child: Icon(
+                  LucideIcons.listMusic,
                   size: 18,
                   color: primary,
                 ),
@@ -219,8 +219,8 @@ class _CreateCustomPlaylistModalState extends ConsumerState<CreateCustomPlaylist
               hintText: 'Master quality listening list',
               prefixIcon: Padding(
                 padding: const EdgeInsets.all(12),
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedNote01,
+                child: Icon(
+                  LucideIcons.fileText,
                   size: 18,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
@@ -274,8 +274,8 @@ class _CreateCustomPlaylistModalState extends ConsumerState<CreateCustomPlaylist
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: _submit,
-                  icon: HugeIcon(
-                    icon: isEditing ? HugeIcons.strokeRoundedCheckmarkCircle02 : HugeIcons.strokeRoundedAddCircle,
+                  icon: Icon(
+                    isEditing ? LucideIcons.circleCheck : LucideIcons.circlePlus,
                     size: 18,
                     color: Colors.black,
                   ),

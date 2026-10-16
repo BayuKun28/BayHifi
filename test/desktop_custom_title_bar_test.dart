@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:baydev_hifi/core/desktop/studio_desktop_title_bar.dart';
 import 'package:baydev_hifi/features/player/domain/playback_state.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
@@ -56,10 +56,10 @@ void main() {
     expect(find.text('Time — Pink Floyd'), findsOneWidget);
 
     // 3. Verify Window Control Action Buttons (3 Essential Buttons: Minimize, Maximize, Close)
-    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedMinusSign), findsOneWidget);
-    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedSquare), findsOneWidget);
-    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedCancel01), findsOneWidget);
-    expect(find.byWidgetPredicate((w) => w is HugeIcon && w.icon == HugeIcons.strokeRoundedMaximize02), findsNothing);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.minus), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.square), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.x), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.icon == LucideIcons.maximize2), findsNothing);
   });
 
   testWidgets('StudioDesktopTitleBar renders default workstation title when idle', (WidgetTester tester) async {

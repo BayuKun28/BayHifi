@@ -3,7 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -329,8 +329,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                   children: [
                     Row(
                       children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedLayers01,
+                        Icon(
+                          LucideIcons.layers,
                           size: 20,
                           color: primary,
                         ),
@@ -398,8 +398,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                 ),
                                 child: Row(
                                   children: [
-                                    const HugeIcon(
-                                      icon: HugeIcons.strokeRoundedSparkles,
+                                    const Icon(
+                                      LucideIcons.sparkles,
                                       size: 20,
                                       color: StudioCategoryColors.warmTubeAmber,
                                     ),
@@ -442,13 +442,13 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                             const SizedBox(height: 16),
 
                             // ─── SHARED METADATA FIELDS ────────────────────
-                            _buildSectionHeader('COMMON TAGS (APPLY TO ALL)', HugeIcons.strokeRoundedEdit02, primary),
+                            _buildSectionHeader('COMMON TAGS (APPLY TO ALL)', LucideIcons.filePen, primary),
                             const SizedBox(height: 8),
 
                             _buildCheckboxField(
                               label: 'ALBUM ARTIST',
                               controller: _albumArtistController,
-                              icon: HugeIcons.strokeRoundedUserGroup,
+                              icon: LucideIcons.users,
                               isChecked: _applyAlbumArtist,
                               onChanged: (val) => setState(() => _applyAlbumArtist = val ?? false),
                               cs: cs,
@@ -461,7 +461,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                             _buildCheckboxField(
                               label: 'TRACK ARTIST',
                               controller: _artistController,
-                              icon: HugeIcons.strokeRoundedUser,
+                              icon: LucideIcons.user,
                               isChecked: _applyArtist,
                               onChanged: (val) => setState(() => _applyArtist = val ?? false),
                               cs: cs,
@@ -474,7 +474,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                             _buildCheckboxField(
                               label: 'ALBUM NAME',
                               controller: _albumController,
-                              icon: HugeIcons.strokeRoundedAlbum01,
+                              icon: LucideIcons.disc,
                               isChecked: _applyAlbum,
                               onChanged: (val) => setState(() => _applyAlbum = val ?? false),
                               cs: cs,
@@ -491,7 +491,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                   child: _buildCheckboxField(
                                     label: 'GENRE',
                                     controller: _genreController,
-                                    icon: HugeIcons.strokeRoundedTag01,
+                                    icon: LucideIcons.tag,
                                     isChecked: _applyGenre,
                                     onChanged: (val) => setState(() => _applyGenre = val ?? false),
                                     cs: cs,
@@ -506,7 +506,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                   child: _buildCheckboxField(
                                     label: 'YEAR',
                                     controller: _yearController,
-                                    icon: HugeIcons.strokeRoundedCalendar03,
+                                    icon: LucideIcons.calendar,
                                     isChecked: _applyYear,
                                     onChanged: (val) => setState(() => _applyYear = val ?? false),
                                     cs: cs,
@@ -568,7 +568,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                             const SizedBox(height: 16),
 
                             // ─── TRACK ORDER REORDERABLE PREVIEW ───────────
-                            _buildSectionHeader('SELECTED TRACKS QUEUE', HugeIcons.strokeRoundedPlaylist01, primary),
+                            _buildSectionHeader('SELECTED TRACKS QUEUE', LucideIcons.listMusic, primary),
                             const SizedBox(height: 8),
                             _buildTracksPreviewList(cs, outline, primary, isSolid),
                             const SizedBox(height: 12),
@@ -608,8 +608,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                         flex: 2,
                         child: FilledButton.icon(
                           onPressed: _executeBatchTagging,
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                          icon: Icon(
+                            LucideIcons.circleCheck,
                             size: 16,
                             color: cs.onPrimary,
                           ),
@@ -640,10 +640,10 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
     );
   }
 
-  Widget _buildSectionHeader(String title, dynamic icon, Color primary) {
+  Widget _buildSectionHeader(String title, IconData icon, Color primary) {
     return Row(
       children: [
-        HugeIcon(icon: icon, size: 14, color: primary),
+        Icon(icon, size: 14, color: primary),
         const SizedBox(width: 6),
         Text(
           title,
@@ -680,8 +680,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
             child: _artworkBytes != null
                 ? Image.memory(_artworkBytes!, fit: BoxFit.cover)
                 : Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedAlbum01,
+                    child: Icon(
+                      LucideIcons.disc,
                       size: 26,
                       color: cs.onSurfaceVariant.withAlpha(120),
                     ),
@@ -793,8 +793,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
         children: [
           Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedPlaylist01,
+              Icon(
+                LucideIcons.listMusic,
                 size: 16,
                 color: primary,
               ),
@@ -877,8 +877,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
         children: [
           Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedTextFont,
+              Icon(
+                LucideIcons.type,
                 size: 16,
                 color: primary,
               ),
@@ -997,8 +997,8 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                 fontSize: 10.5,
               ),
             ),
-            trailing: HugeIcon(
-              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+            trailing: Icon(
+              LucideIcons.circleCheck,
               size: 16,
               color: primary.withAlpha(150),
             ),
@@ -1011,7 +1011,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
   Widget _buildCheckboxField({
     required String label,
     required TextEditingController controller,
-    required dynamic icon,
+    required IconData icon,
     required bool isChecked,
     required ValueChanged<bool?> onChanged,
     required ColorScheme cs,
@@ -1036,7 +1036,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           const SizedBox(width: 4),
-          HugeIcon(icon: icon, size: 16, color: isChecked ? primary : cs.onSurfaceVariant),
+          Icon(icon, size: 16, color: isChecked ? primary : cs.onSurfaceVariant),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(

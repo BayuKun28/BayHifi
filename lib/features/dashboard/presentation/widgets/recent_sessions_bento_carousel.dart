@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -56,8 +56,8 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
                           color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedPlayList,
+                        child: Icon(
+                          LucideIcons.listMusic,
                           size: 15,
                           color: primary,
                         ),
@@ -96,8 +96,8 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 2),
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedArrowRight01,
+                          Icon(
+                            LucideIcons.arrowRight,
                             size: 11,
                             color: primary,
                           ),
@@ -204,8 +204,8 @@ class RecentSessionsBentoCarousel extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedVolumeHigh,
+                        child: Icon(
+                          LucideIcons.volume2,
                           size: 18,
                           color: primary,
                         ),

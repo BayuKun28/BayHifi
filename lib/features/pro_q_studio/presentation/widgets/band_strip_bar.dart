@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
 import '../../domain/eq_band.dart';
@@ -65,7 +65,7 @@ class BandStripBar extends ConsumerWidget {
                   child: Row(
                     children: [
                       _ActionButton(
-                        icon: HugeIcons.strokeRoundedAdd01,
+                        icon: LucideIcons.plus,
                         tooltip: 'Add Band',
                         color: const Color(0xFF00E5FF),
                         isSolid: isSolid,
@@ -73,7 +73,7 @@ class BandStripBar extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       _ActionButton(
-                        icon: HugeIcons.strokeRoundedDelete02,
+                        icon: LucideIcons.trash2,
                         tooltip: 'Delete Selected Band',
                         color: const Color(0xFFEF5350),
                         isSolid: isSolid,
@@ -83,7 +83,7 @@ class BandStripBar extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       _ActionButton(
-                        icon: HugeIcons.strokeRoundedRefresh,
+                        icon: LucideIcons.rotateCcw,
                         tooltip: 'Reset Active Band Gain',
                         color: theme.colorScheme.onSurfaceVariant,
                         isSolid: isSolid,
@@ -167,7 +167,7 @@ class BandStripBar extends ConsumerWidget {
 
               // 2. Action Buttons: Add, Delete, Reset
               _ActionButton(
-                icon: HugeIcons.strokeRoundedAdd01,
+                icon: LucideIcons.plus,
                 tooltip: 'Add Band',
                 color: const Color(0xFF00E5FF),
                 isSolid: isSolid,
@@ -175,7 +175,7 @@ class BandStripBar extends ConsumerWidget {
               ),
               const SizedBox(width: 6),
               _ActionButton(
-                icon: HugeIcons.strokeRoundedDelete02,
+                icon: LucideIcons.trash2,
                 tooltip: 'Delete Selected Band',
                 color: const Color(0xFFEF5350),
                 isSolid: isSolid,
@@ -185,7 +185,7 @@ class BandStripBar extends ConsumerWidget {
               ),
               const SizedBox(width: 6),
               _ActionButton(
-                icon: HugeIcons.strokeRoundedRefresh,
+                icon: LucideIcons.rotateCcw,
                 tooltip: 'Reset Active Band Gain',
                 color: theme.colorScheme.onSurfaceVariant,
                 isSolid: isSolid,
@@ -305,8 +305,8 @@ class BandStripBar extends ConsumerWidget {
                             color: isSolid ? theme.colorScheme.outline : const Color(0xFFEF5350).withValues(alpha: 0.4),
                           ),
                         ),
-                        child: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedVolumeLow,
+                        child: const Icon(
+                          LucideIcons.volume1,
                           size: 18,
                           color: Color(0xFFEF5350),
                         ),
@@ -342,8 +342,8 @@ class BandStripBar extends ConsumerWidget {
                       M3EIconButton(
                         variant: M3EIconButtonVariant.standard,
                         onPressed: () => Navigator.pop(sheetContext),
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedCancel01,
+                        icon: Icon(
+                          LucideIcons.x,
                           size: 22,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -431,10 +431,10 @@ class BandStripBar extends ConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          HugeIcon(
-                            icon: state.autoPreampEnabled
-                                ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                : HugeIcons.strokeRoundedSecurityCheck,
+                          Icon(
+                            state.autoPreampEnabled
+                                ? LucideIcons.circleCheck
+                                : LucideIcons.shieldCheck,
                             size: 18,
                             color: state.autoPreampEnabled
                                 ? const Color(0xFF00E676)
@@ -763,7 +763,7 @@ class _BandPill extends StatelessWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  final dynamic icon;
+  final IconData icon;
   final String tooltip;
   final Color color;
   final bool isSolid;
@@ -801,8 +801,8 @@ class _ActionButton extends StatelessWidget {
             ),
           ),
           child: Center(
-            child: HugeIcon(
-              icon: icon,
+            child: Icon(
+              icon,
               size: 16,
               color: isEnabled ? color : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),

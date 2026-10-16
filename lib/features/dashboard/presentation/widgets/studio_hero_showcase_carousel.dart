@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -18,7 +18,7 @@ class StudioMixItem {
   final String categoryBadge;
   final String title;
   final String subtitle;
-  final dynamic icon;
+  final IconData icon;
   final List<Track> tracks;
 
   const StudioMixItem({
@@ -77,7 +77,7 @@ class _StudioHeroShowcaseCarouselState
       categoryBadge: 'OPUS 160K • DSP MASTER',
       title: 'YouTube Music HiFi',
       subtitle: 'Stream global music charts & route Opus audio directly through SoLoud DSP chain',
-      icon: HugeIcons.strokeRoundedPlayList,
+      icon: LucideIcons.listMusic,
       tracks: [],
     );
 
@@ -88,7 +88,7 @@ class _StudioHeroShowcaseCarouselState
           categoryBadge: 'STUDIO MIXES',
           title: 'Add Music to Generate Mixes',
           subtitle: 'Scan your local folders or connect Navidrome to unlock smart dynamic mixes',
-          icon: HugeIcons.strokeRoundedMusicNote01,
+          icon: LucideIcons.music,
           tracks: [],
         ),
         ytShowcase,
@@ -137,7 +137,7 @@ class _StudioHeroShowcaseCarouselState
         categoryBadge: '50 TRACKS • DYNAMIC MIX',
         title: 'Recommended Studio Mix',
         subtitle: 'Auto-generated randomized selection from your lossless collection',
-        icon: HugeIcons.strokeRoundedSparkles,
+        icon: LucideIcons.sparkles,
         tracks: recommendedTracks,
       ),
       ytShowcase,
@@ -146,7 +146,7 @@ class _StudioHeroShowcaseCarouselState
         categoryBadge: 'HEAVY ROTATION • TOP RECENTS',
         title: 'Top Heavy Rotation',
         subtitle: 'Your most played and recently enjoyed audiophile tracks',
-        icon: HugeIcons.strokeRoundedFavourite,
+        icon: LucideIcons.heart,
         tracks: heavyRotationTracks,
       ),
       StudioMixItem(
@@ -154,7 +154,7 @@ class _StudioHeroShowcaseCarouselState
         categoryBadge: 'DISCOVERY • HI-RES GEMS',
         title: 'Underrated Hi-Res Gems',
         subtitle: 'Hidden studio master tracks waiting to be rediscovered',
-        icon: HugeIcons.strokeRoundedDiamond,
+        icon: LucideIcons.gem,
         tracks: underratedTracks,
       ),
       StudioMixItem(
@@ -162,7 +162,7 @@ class _StudioHeroShowcaseCarouselState
         categoryBadge: 'STUDIO SESSION • ANALOG CHILL',
         title: 'Late-Night Acoustic Session',
         subtitle: 'Warm, acoustic, ambient & relaxing vocal recordings for late-night listening',
-        icon: HugeIcons.strokeRoundedMoon02,
+        icon: LucideIcons.moon,
         tracks: lateNightTracks,
       ),
       StudioMixItem(
@@ -170,7 +170,7 @@ class _StudioHeroShowcaseCarouselState
         categoryBadge: '24-BIT / 96KHZ • STUDIO MASTER',
         title: 'Studio Master Quality Mix',
         subtitle: 'Pure bit-perfect lossless high dynamic range tracks',
-        icon: HugeIcons.strokeRoundedAudioWaveform,
+        icon: LucideIcons.audioWaveform,
         tracks: masterTracks,
       ),
     ];
@@ -265,8 +265,8 @@ class _StudioHeroShowcaseCarouselState
           children: [
             Row(
               children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedSparkles,
+                Icon(
+                  LucideIcons.sparkles,
                   size: 15,
                   color: primary,
                 ),
@@ -379,8 +379,8 @@ class _StudioHeroShowcaseCarouselState
                 bottom: -15,
                 child: Opacity(
                   opacity: 0.05,
-                  child: HugeIcon(
-                    icon: mix.icon,
+                  child: Icon(
+                    mix.icon,
                     size: 140,
                     color: mixColor,
                   ),
@@ -410,8 +410,8 @@ class _StudioHeroShowcaseCarouselState
                           ],
                         ),
                         child: const Center(
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedPlayList,
+                          child: Icon(
+                            LucideIcons.listMusic,
                             size: 34,
                             color: StudioCategoryColors.youtubeMusic,
                           ),
@@ -479,8 +479,8 @@ class _StudioHeroShowcaseCarouselState
                                   color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.6),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: HugeIcon(
-                                  icon: mix.icon,
+                                child: Icon(
+                                  mix.icon,
                                   size: 14,
                                   color: mixColor,
                                 ),
@@ -575,8 +575,8 @@ class _StudioHeroShowcaseCarouselState
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            HugeIcon(
-                                              icon: HugeIcons.strokeRoundedPlayList,
+                                            Icon(
+                                              LucideIcons.compass,
                                               size: 12,
                                               color: onMixColor,
                                             ),
@@ -608,8 +608,8 @@ class _StudioHeroShowcaseCarouselState
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              HugeIcon(
-                                                icon: HugeIcons.strokeRoundedShuffle,
+                                              Icon(
+                                                LucideIcons.shuffle,
                                                 size: 12,
                                                 color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                                               ),
@@ -640,8 +640,8 @@ class _StudioHeroShowcaseCarouselState
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            HugeIcon(
-                                              icon: HugeIcons.strokeRoundedPlay,
+                                            Icon(
+                                              LucideIcons.play,
                                               size: 12,
                                               color: onMixColor,
                                             ),
@@ -813,8 +813,8 @@ class _StudioMixDetailSheet extends StatelessWidget {
                 Expanded(
                   child: M3EButton.filled(
                     onPressed: onPlayAll,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlay,
+                    icon: Icon(
+                      LucideIcons.play,
                       size: 16,
                       color: theme.colorScheme.onPrimary,
                     ),
@@ -832,8 +832,8 @@ class _StudioMixDetailSheet extends StatelessWidget {
                 Expanded(
                   child: M3EButton.outlined(
                     onPressed: onShuffle,
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedShuffle,
+                    icon: Icon(
+                      LucideIcons.shuffle,
                       size: 16,
                       color: theme.colorScheme.onSurface,
                     ),
@@ -950,8 +950,8 @@ class _StudioMixDetailSheet extends StatelessWidget {
                             ),
                         ],
                       ),
-                      trailing: HugeIcon(
-                        icon: HugeIcons.strokeRoundedPlay,
+                      trailing: Icon(
+                        LucideIcons.play,
                         size: 16,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

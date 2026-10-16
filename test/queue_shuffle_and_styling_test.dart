@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/features/player/domain/playback_state.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
@@ -84,10 +83,10 @@ void main() {
     expect(find.text('03'), findsOneWidget);
 
     // Verify clear queue button exists
-    expect(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Clear Queue'), findsOneWidget);
+    expect(find.byTooltip('Clear Queue'), findsOneWidget);
 
     // Tap shuffle button
-    await tester.tap(find.byWidgetPredicate((w) => w is M3EIconButton && w.tooltip == 'Shuffle Queue'));
+    await tester.tap(find.byTooltip('Shuffle Queue'));
     await tester.pumpAndSettle();
 
     expect(controller.state.isShuffle, isTrue);

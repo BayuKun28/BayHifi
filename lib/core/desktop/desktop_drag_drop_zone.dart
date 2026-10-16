@@ -3,7 +3,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../features/library/data/local_audio_scanner.dart';
 import '../../features/player/domain/track.dart';
 import '../../features/player/presentation/controllers/player_controller.dart';
@@ -173,8 +173,8 @@ class _DesktopDragDropZoneState extends ConsumerState<DesktopDragDropZone> {
                             shape: BoxShape.circle,
                           ),
                           child: Center(
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedUpload04,
+                            child: Icon(
+                              LucideIcons.upload,
                               color: theme.colorScheme.primary,
                               size: 32,
                             ),

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -112,8 +112,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedSparkles,
+                      child: Icon(
+                        LucideIcons.sparkles,
                         size: 18,
                         color: theme.colorScheme.primary,
                       ),
@@ -153,8 +153,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                         AppHaptics.selectionClick();
                         Navigator.pop(context);
                       },
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCancel01,
+                      icon: Icon(
+                        LucideIcons.x,
                         size: 22,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -185,7 +185,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             Expanded(
                               flex: 6,
                               child: _buildActionOutlinedButton(
-                                icon: HugeIcons.strokeRoundedHeadphones,
+                                icon: LucideIcons.headphones,
                                 label: 'IMPORT DRIVER (TXT/CSV)',
                                 borderColor: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6),
                                 color: theme.colorScheme.secondary,
@@ -197,7 +197,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             Expanded(
                               flex: 5,
                               child: _buildActionOutlinedButton(
-                                icon: HugeIcons.strokeRoundedFolderLibrary,
+                                icon: LucideIcons.library,
                                 label: 'CURVE LIBRARY',
                                 borderColor: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6),
                                 color: theme.colorScheme.primary,
@@ -223,7 +223,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                           children: [
                             Expanded(
                               child: _buildActionOutlinedButton(
-                                icon: HugeIcons.strokeRoundedTarget02,
+                                icon: LucideIcons.crosshair,
                                 label: 'IMPORT',
                                 borderColor: isSolid ? const Color(0xFFFF9F0A) : const Color(0xFFFF9F0A).withValues(alpha: 0.6),
                                 color: const Color(0xFFFF9F0A),
@@ -234,7 +234,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             const SizedBox(width: 5),
                             Expanded(
                               child: _buildActionOutlinedButton(
-                                icon: HugeIcons.strokeRoundedFolderLibrary,
+                                icon: LucideIcons.library,
                                 label: 'LIBRARY',
                                 borderColor: isSolid ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.6),
                                 color: theme.colorScheme.primary,
@@ -245,7 +245,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             const SizedBox(width: 5),
                             Expanded(
                               child: _buildActionOutlinedButton(
-                                icon: HugeIcons.strokeRoundedCloudDownload,
+                                icon: LucideIcons.cloudDownload,
                                 label: 'CLOUD DB',
                                 borderColor: isSolid ? theme.colorScheme.secondary : theme.colorScheme.secondary.withValues(alpha: 0.6),
                                 color: theme.colorScheme.secondary,
@@ -256,7 +256,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             const SizedBox(width: 5),
                             Expanded(
                               child: _buildActionOutlinedButton(
-                                icon: HugeIcons.strokeRoundedSparkles,
+                                icon: LucideIcons.sparkles,
                                 label: 'SQUIGLINK',
                                 borderColor: isSolid ? theme.colorScheme.tertiary : theme.colorScheme.tertiary.withValues(alpha: 0.6),
                                 color: theme.colorScheme.tertiary,
@@ -472,21 +472,12 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.primary,
                                 borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: isSolid
-                                        ? Colors.black.withValues(alpha: 0.3)
-                                        : theme.colorScheme.primary.withValues(alpha: 0.35),
-                                    blurRadius: 14,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedChartBarLine,
+                                  Icon(
+                                    LucideIcons.activity,
                                     size: 20,
                                     color: theme.colorScheme.onPrimary,
                                   ),
@@ -526,8 +517,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedCancelSquare,
+                                  Icon(
+                                    LucideIcons.x,
                                     size: 13,
                                     color: theme.colorScheme.error,
                                   ),
@@ -589,8 +580,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedDelete02,
+                  Icon(
+                    LucideIcons.trash2,
                     size: 12,
                     color: theme.colorScheme.error,
                   ),
@@ -630,8 +621,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
           value: d,
           child: Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedHeadphones,
+              Icon(
+                LucideIcons.headphones,
                 size: 14,
                 color: isSelected ? theme.colorScheme.secondary : theme.colorScheme.onSurfaceVariant,
               ),
@@ -662,8 +653,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         ),
         child: Row(
           children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedCloud,
+            Icon(
+              LucideIcons.cloud,
               size: 15,
               color: theme.colorScheme.secondary,
             ),
@@ -680,8 +671,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowDown01,
+            Icon(
+              LucideIcons.chevronDown,
               size: 16,
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -710,8 +701,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
           value: t,
           child: Row(
             children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedTarget02,
+              Icon(
+                LucideIcons.crosshair,
                 size: 14,
                 color: isSelected ? const Color(0xFFFF9F0A) : theme.colorScheme.onSurfaceVariant,
               ),
@@ -742,8 +733,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         ),
         child: Row(
           children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedCloud,
+            const Icon(
+              LucideIcons.cloud,
               size: 15,
               color: Color(0xFFFF9F0A),
             ),
@@ -760,8 +751,8 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowDown01,
+            Icon(
+              LucideIcons.chevronDown,
               size: 16,
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -856,7 +847,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
   }
 
   Widget _buildActionOutlinedButton({
-    required dynamic icon,
+    required IconData icon,
     required String label,
     required Color borderColor,
     required Color color,
@@ -877,7 +868,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            HugeIcon(icon: icon, size: 12, color: color),
+            Icon(icon, size: 12, color: color),
             const SizedBox(width: 3),
             Flexible(
               child: Text(

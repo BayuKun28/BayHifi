@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../domain/studio_wrapped_data.dart';
 
@@ -35,13 +35,9 @@ class TopTracksChartView extends StatelessWidget {
         border: Border.all(color: const Color(0xFF21283B), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: goldAccent.withValues(alpha: 0.15),
-            blurRadius: 36,
-            offset: const Offset(0, 12),
-          ),
-          BoxShadow(
             color: Colors.black.withValues(alpha: 0.75),
             blurRadius: 28,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -70,8 +66,8 @@ class TopTracksChartView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedAward01,
+                      Icon(
+                        LucideIcons.award,
                         size: 16,
                         color: goldAccent,
                       ),
@@ -147,7 +143,7 @@ class TopTracksChartView extends StatelessWidget {
                               width: 68,
                               height: 68,
                               borderRadius: BorderRadius.circular(14),
-                              fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                              fallbackIcon: LucideIcons.music,
                               fallbackIconSize: 28,
                               backgroundColor: const Color(0xFF1E2433),
                             ),
@@ -159,12 +155,6 @@ class TopTracksChartView extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: goldAccent,
                                   borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: goldAccent.withValues(alpha: 0.4),
-                                      blurRadius: 8,
-                                    ),
-                                  ],
                                 ),
                                 child: const Text(
                                   '#01',
@@ -228,8 +218,8 @@ class TopTracksChartView extends StatelessWidget {
                               const SizedBox(height: 6),
                               Row(
                                 children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedRepeat,
+                                  Icon(
+                                    LucideIcons.repeat,
                                     size: 11,
                                     color: goldAccent,
                                   ),
@@ -315,7 +305,7 @@ class TopTracksChartView extends StatelessWidget {
                             width: 32,
                             height: 32,
                             borderRadius: BorderRadius.circular(8),
-                            fallbackIcon: HugeIcons.strokeRoundedMusicNote01,
+                            fallbackIcon: LucideIcons.music,
                             fallbackIconSize: 14,
                             backgroundColor: const Color(0xFF1C2233),
                           ),
@@ -477,8 +467,8 @@ class TopTracksChartView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedMusicNoteSquare02,
+                      Icon(
+                        LucideIcons.music,
                         size: 13,
                         color: cyanAccent,
                       ),

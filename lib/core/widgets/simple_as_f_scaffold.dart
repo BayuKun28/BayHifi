@@ -26,7 +26,7 @@ class SimpleAsFScaffold extends StatelessWidget {
     this.extendBody = false,
     this.extendBodyBehindAppBar = false,
     this.backgroundColor,
-    this.enableAmbientGlow = true,
+    this.enableAmbientGlow = false,
   });
 
   @override

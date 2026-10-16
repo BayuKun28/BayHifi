@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../app/theme/studio_surface_theme.dart';
 import '../../../../player/domain/track.dart';
 import '../../../domain/models/audiophile_stamp_config.dart';
@@ -61,7 +61,7 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     if (stampConfig.showSignalChain) {
       items.add(
         _buildChip(
-          icon: isHiRes ? HugeIcons.strokeRoundedShieldEnergy : HugeIcons.strokeRoundedMusicNote01,
+          icon: isHiRes ? LucideIcons.shieldCheck : LucideIcons.music,
           label: '$formatLabel $bitDepth-BIT / ${sampleRateKhz}kHz',
           highlight: isHiRes,
           fontSize: fontSize,
@@ -74,7 +74,7 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     if (stampConfig.showAutoEq && stampConfig.effectiveAutoEqName.isNotEmpty) {
       items.add(
         _buildChip(
-          icon: HugeIcons.strokeRoundedSlidersVertical,
+          icon: LucideIcons.sliders,
           label: 'AUTOEQ: ${stampConfig.effectiveAutoEqName.toUpperCase()}',
           fontSize: fontSize,
           iconSize: iconSize,
@@ -86,7 +86,7 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     if (stampConfig.showDspUnits && stampConfig.effectiveDspChainName.isNotEmpty) {
       items.add(
         _buildChip(
-          icon: HugeIcons.strokeRoundedAudioWave01,
+          icon: LucideIcons.audioWaveform,
           label: 'DSP: ${stampConfig.effectiveDspChainName.toUpperCase()}',
           fontSize: fontSize,
           iconSize: iconSize,
@@ -98,7 +98,7 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     if (stampConfig.showDacBridge && stampConfig.effectiveDacName.isNotEmpty) {
       items.add(
         _buildChip(
-          icon: HugeIcons.strokeRoundedCpu,
+          icon: LucideIcons.cpu,
           label: 'DAC: ${stampConfig.effectiveDacName.toUpperCase()}',
           fontSize: fontSize,
           iconSize: iconSize,
@@ -111,7 +111,7 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     if (stampConfig.customGearText != null && stampConfig.customGearText!.trim().isNotEmpty) {
       items.add(
         _buildChip(
-          icon: HugeIcons.strokeRoundedHeadphones,
+          icon: LucideIcons.headphones,
           label: stampConfig.customGearText!.trim().toUpperCase(),
           fontSize: fontSize,
           iconSize: iconSize,
@@ -124,7 +124,7 @@ class AudiophileTelemetryStamp extends StatelessWidget {
       final effectiveTime = stampConfig.timestamp ?? DateTime.now();
       items.add(
         _buildChip(
-          icon: HugeIcons.strokeRoundedClock01,
+          icon: LucideIcons.clock,
           label: _formatTimestamp(effectiveTime),
           fontSize: fontSize,
           iconSize: iconSize,
@@ -157,7 +157,7 @@ class AudiophileTelemetryStamp extends StatelessWidget {
   }
 
   Widget _buildChip({
-    required dynamic icon,
+    required IconData icon,
     required String label,
     required double fontSize,
     required double iconSize,
@@ -168,8 +168,8 @@ class AudiophileTelemetryStamp extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        HugeIcon(
-          icon: icon,
+        Icon(
+          icon,
           size: iconSize,
           color: chipColor,
         ),
