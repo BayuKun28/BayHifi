@@ -19,6 +19,7 @@ class FloatingRoundedDock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSolid = ref.isSolidStyle;
 
     final items = [
@@ -51,16 +52,16 @@ class FloatingRoundedDock extends ConsumerWidget {
         height: 64,
         decoration: BoxDecoration(
           color: isSolid
-              ? const Color(0xFF12141A)
+              ? (isDark ? const Color(0xFF12141A) : theme.colorScheme.surfaceContainer)
               : StudioSurfaceTheme.surfaceContainer(context, isSolid: true),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFF262936),
+            color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
             width: 0.8,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
+              color: isDark ? Colors.black.withValues(alpha: 0.35) : Colors.black.withValues(alpha: 0.08),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -91,12 +92,12 @@ class FloatingRoundedDock extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFF222532)
+                          ? (isDark ? const Color(0xFF222532) : theme.colorScheme.primaryContainer)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(18),
                       border: isSelected
                           ? Border.all(
-                              color: const Color(0xFF383D50),
+                              color: isDark ? const Color(0xFF383D50) : theme.colorScheme.primary.withValues(alpha: 0.3),
                               width: 0.8,
                             )
                           : null,
@@ -108,7 +109,7 @@ class FloatingRoundedDock extends ConsumerWidget {
                         Icon(
                           item.icon,
                           color: isSelected
-                              ? Colors.white
+                              ? (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer)
                               : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                           size: 19,
                         ),
@@ -121,7 +122,7 @@ class FloatingRoundedDock extends ConsumerWidget {
                                 ? FontWeight.w700
                                 : FontWeight.w500,
                             color: isSelected
-                                ? Colors.white
+                                ? (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer)
                                 : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                             letterSpacing: 0.2,
                           ),

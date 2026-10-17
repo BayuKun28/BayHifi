@@ -22,10 +22,10 @@ void main() {
 
   group('Phase 34.1: 19 M3 Expressive Studio Palettes Integrity Tests', () {
     test('All 19 AppPalette presets are registered with unique IDs', () {
-      expect(AppPalette.allPresets.length, 19);
+      expect(AppPalette.allPresets.length, 20);
 
       final ids = AppPalette.allPresets.map((p) => p.id).toSet();
-      expect(ids.length, 19, reason: 'Every palette must have a unique identifier');
+      expect(ids.length, 20, reason: 'Every palette must have a unique identifier');
 
       // Verify the 7 newly added palettes
       final newPaletteIds = {
@@ -77,15 +77,13 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Cockpit Hero
-      expect(find.text('STUDIO SYSTEM COCKPIT'), findsOneWidget);
-      expect(find.text('48kHz SOLOUD ENGINE'), findsOneWidget);
+      // Wrapped Hero
+      expect(find.text('STUDIO WRAPPED & LISTENING STATS'), findsOneWidget);
 
       // Section Headers
-      expect(find.text('AESTHETICS & ATMOSPHERE'), findsOneWidget);
-      expect(find.text('AUDIO ARCHITECTURE & DSP WORKSTATION'), findsOneWidget);
-      expect(find.text('MEDIA, LIBRARY & STORAGE'), findsOneWidget);
-      expect(find.text('SYSTEM, GESTURES & ARCHIVE'), findsOneWidget);
+      expect(find.text('AESTHETICS & DISPLAY'), findsOneWidget);
+      expect(find.text('AUDIO ARCHITECTURE & ENGINE'), findsOneWidget);
+      expect(find.text('MEDIA, STORAGE & VAULT'), findsOneWidget);
 
       // Category Cards
       expect(find.text('THEMING & COLOR PALETTES'), findsOneWidget);
@@ -95,8 +93,8 @@ void main() {
       expect(find.text('ADVANCED PLAYBACK ENGINE & FADES'), findsOneWidget);
       expect(find.text('LIBRARY SCANNER & SLEEP TIMER'), findsOneWidget);
       expect(find.text('STORAGE & CACHE QUOTA'), findsOneWidget);
-      expect(find.text('GESTURES & TRACK TILES'), findsOneWidget);
-      expect(find.text('BACKUP & RESTORE ARCHIVE'), findsOneWidget);
+      expect(find.text('GESTURES, HOTKEYS & CONTROLS'), findsOneWidget);
+      expect(find.text('CLOUD VAULT & BACKUP'), findsOneWidget);
     });
 
     testWidgets('SettingsScreen responds to palette changes dynamically', (tester) async {
@@ -146,8 +144,7 @@ void main() {
 
       expect(find.text('THEMING & COLOR PALETTES'), findsOneWidget);
       expect(find.text('ACTIVE STUDIO THEME PREVIEW'), findsOneWidget);
-      expect(find.text('THEME MODE'), findsWidgets);
-      expect(find.text('SURFACE & COMPONENT FILL STYLE'), findsWidgets);
+      expect(find.text('DISPLAY GROUND & SURFACE STYLE'), findsWidgets);
       expect(find.text('STUDIO COLOR PALETTES'), findsOneWidget);
 
       // Verify the new palettes render in list

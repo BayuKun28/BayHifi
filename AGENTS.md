@@ -22,13 +22,13 @@ UI/UX & Theming Standards — Simple-As-F Minimalist Design Mandate (Dribbble 27
   - Typography: Pure White (`#FFFFFF`) with two-tone colored keywords (e.g., "Liked *Songs*", "Recently *Played*", "Equalizer *Studio*").
   - Small Meta Headers: Small uppercase tracking (`WELCOME, MATT`, `RECENTLY PLAYED`, `DOWNLOAD`).
 - Core Layout & Screen Paradigms:
-  - Track List: Uncarded, floating row layout for music tracks. Active track is highlighted in a soft dark capsule container with an animated audio wave / speaker icon.
-  - Now Playing: Prominent squircle album artwork (border radius 28–32px), centered bold track info, favorite heart button on left, interactive **waveform seekbar** (amplitude bars with played/unplayed contrast and tabular time figures), and minimalist playback controls row (shuffle, prev, play/pause pill/circle, next, repeat).
-  - Home / Discovery: Clean header with user avatar & greeting, two-tone section titles, and a 2-column squircle card grid for albums/playlists with clean metadata below.
+  - Track List: Uncarded, floating row layout for music tracks. Active track is highlighted in a soft dark capsule container with proportional vertical padding (10–12px) so borders never collide with audio format badges.
+  - Now Playing: Prominent squircle album artwork (border radius 28–32px), centered bold track info, favorite heart button on left, interactive **waveform seekbar** (amplitude bars with played/unplayed contrast and tabular time figures), minimalist playback controls row, and a **compact auxiliary action bar** (34x34px solid studio icon buttons with tooltips for EQ, Driver, Target, Lyrics, and Queue, with concise format badge).
+  - Dashboard: Personal greeting header, Studio Wrapped recap banner, Discovery Smart Mix suggestion banner (`StudioInstantMixBanner`), Quick YouTube HiFi streaming launcher, Recently Played grid (powered by real persistent playback history, strictly **2x2 grid** on mobile <650px), and Liked/Top songs list (with download toggle removed).
   - Floating MiniPlayer: Sleek floating pill/capsule dock pinned above the bottom navigation bar.
 - Modern Iconography: ALL icons MUST use `lucide_icons_flutter` (`LucideIcons.*`) for crisp, consistent, unified aesthetics. NEVER mix generic legacy Material 1/2 icons or HugeIcons.
 - Zero-Emoji Policy (Strictly Enforced): NEVER use emojis in UI widgets, button labels, dialog titles, snackbars, status texts, code, or documentation. Always use the available icon library (`LucideIcons.*`).
-- Pure Solid & Anti-Neon Policy: Strictly NO glowing neon blur effects, garish colored drop-shadow halos, or blurry saturated card containers. Surfaces must be crisp, solid, and refined (`SimpleAsFTheme`, `StudioSurfaceTheme`) with clean structural outlines (`Border.all`) or subtle dark shadows (`Colors.black.withValues(alpha: ...)`).
+- Pure Solid & Anti-Neon Policy: Strictly NO glowing neon blur effects, garish colored drop-shadow halos, or blurry saturated card containers. Surfaces and dialog buttons (AutoEQ, Cloud Browser) must be crisp, solid studio containers (`#1E212B` / `#16181F`) with clean structural outlines (`Border.all`) and high-contrast text/icons.
 - Anti-AI-Slop Policy: Follow `anti-ai-slop-ui` standards (high information clarity, tabular figures for audio data via `FontFeature.tabularFigures()`, restrained palettes, zero unreadable frosted glass or decorative bloat).
 - Language: 100% English across all UI labels, tooltips, dialogs, snackbars, and messages.
 

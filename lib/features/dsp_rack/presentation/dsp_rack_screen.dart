@@ -576,6 +576,7 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
     Track? currentTrack,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final primaryColor = theme.colorScheme.primary;
 
     final studioPresets = DspPreset.studioPresets;
@@ -602,10 +603,10 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 0.8,
         ),
       ),
@@ -755,13 +756,13 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: state.isBypassed
-                        ? const Color(0xFF1E212B)
-                        : const Color(0xFF252834),
+                        ? (isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest)
+                        : (isDark ? const Color(0xFF252834) : theme.colorScheme.primaryContainer),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: state.isBypassed
-                          ? const Color(0xFF262936)
-                          : const Color(0xFF383D50),
+                          ? (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant)
+                          : (isDark ? const Color(0xFF383D50) : theme.colorScheme.primary.withValues(alpha: 0.5)),
                       width: 0.8,
                     ),
                   ),
@@ -774,8 +775,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                             : LucideIcons.checkCircle2,
                         size: 14,
                         color: state.isBypassed
-                            ? const Color(0xFF64748B)
-                            : Colors.white,
+                            ? (isDark ? const Color(0xFF64748B) : theme.colorScheme.onSurfaceVariant)
+                            : (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer),
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -785,8 +786,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
                           color: state.isBypassed
-                              ? const Color(0xFF94A3B8)
-                              : Colors.white,
+                              ? (isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant)
+                              : (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer),
                         ),
                       ),
                     ],
@@ -900,6 +901,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
 
   /// Category filter pills row for clean and breathable rack navigation
   Widget _buildCategoryFilterRow(BuildContext context, Color primaryColor, bool isSolid) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -919,13 +922,13 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF252834)
-                      : const Color(0xFF16181F),
+                      ? (isDark ? const Color(0xFF252834) : theme.colorScheme.primaryContainer)
+                      : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFF383D50)
-                        : const Color(0xFF262936),
+                        ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.primary.withValues(alpha: 0.4))
+                        : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
                     width: 0.8,
                   ),
                 ),
@@ -935,7 +938,9 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                     Icon(
                       filter.icon,
                       size: 13,
-                      color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                      color: isSelected
+                          ? (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer)
+                          : (isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(width: 5),
                     Text(
@@ -943,7 +948,9 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                        color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                        color: isSelected
+                            ? (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer)
+                            : (isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant),
                       ),
                     ),
                   ],

@@ -305,11 +305,11 @@ class AppPalette {
     primary: Color(0xFF38BDF8),
     secondary: Color(0xFF0284C7),
     accent: Color(0xFF38BDF8),
-    backgroundDark: Color(0xFF0C1217),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF1F6FB),
-    surfaceDark: Color(0xFF121921),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF7FAFD),
-    surfaceContainerDark: Color(0xFF1A2430),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFE2EFF9),
   );
 
@@ -320,11 +320,11 @@ class AppPalette {
     primary: Color(0xFFF59E0B),
     secondary: Color(0xFFD97706),
     accent: Color(0xFFF59E0B),
-    backgroundDark: Color(0xFF141009),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF6F0),
-    surfaceDark: Color(0xFF1C170E),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFCFAF6),
-    surfaceContainerDark: Color(0xFF282115),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF6EADB),
   );
 
@@ -335,11 +335,11 @@ class AppPalette {
     primary: Color(0xFF10B981),
     secondary: Color(0xFF059669),
     accent: Color(0xFF10B981),
-    backgroundDark: Color(0xFF0C1410),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF0F8F4),
-    surfaceDark: Color(0xFF121E18),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF6FBF8),
-    surfaceContainerDark: Color(0xFF1A2A22),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFDDF5EA),
   );
 
@@ -350,11 +350,11 @@ class AppPalette {
     primary: Color(0xFFA855F7),
     secondary: Color(0xFF7E22CE),
     accent: Color(0xFFC084FC),
-    backgroundDark: Color(0xFF130C1A),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF8F3FC),
-    surfaceDark: Color(0xFF1B1125),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFAF6FD),
-    surfaceContainerDark: Color(0xFF271A36),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF0E3FA),
   );
 
@@ -365,11 +365,11 @@ class AppPalette {
     primary: Color(0xFFF43F5E),
     secondary: Color(0xFFBE123C),
     accent: Color(0xFFFB7185),
-    backgroundDark: Color(0xFF160B0F),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF2F4),
-    surfaceDark: Color(0xFF201017),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFDF6F8),
-    surfaceContainerDark: Color(0xFF2E1721),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFFCE1E7),
   );
 
@@ -396,11 +396,11 @@ class AppPalette {
     primary: Color(0xFFB8A9E8),
     secondary: Color(0xFF9D8BC9),
     accent: Color(0xFFB8A9E8),
-    backgroundDark: Color(0xFF121019),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF7F5FC),
-    surfaceDark: Color(0xFF191624),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFAF8FE),
-    surfaceContainerDark: Color(0xFF242033),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFECE7F8),
   );
 
@@ -411,11 +411,11 @@ class AppPalette {
     primary: Color(0xFF93D5C0),
     secondary: Color(0xFF72B8A2),
     accent: Color(0xFF93D5C0),
-    backgroundDark: Color(0xFF0E1412),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF2F8F5),
-    surfaceDark: Color(0xFF141D1A),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF7FCFA),
-    surfaceContainerDark: Color(0xFF1C2925),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFE2F3EC),
   );
 
@@ -426,11 +426,11 @@ class AppPalette {
     primary: Color(0xFF9AC8EB),
     secondary: Color(0xFF74ABD4),
     accent: Color(0xFF9AC8EB),
-    backgroundDark: Color(0xFF0E1319),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF2F7FB),
-    surfaceDark: Color(0xFF141B23),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF7FAFD),
-    surfaceContainerDark: Color(0xFF1C2733),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFE2EFF8),
   );
 
@@ -441,11 +441,11 @@ class AppPalette {
     primary: Color(0xFFF7B297),
     secondary: Color(0xFFDE9173),
     accent: Color(0xFFF7B297),
-    backgroundDark: Color(0xFF16100E),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF4F1),
-    surfaceDark: Color(0xFF201714),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFCF8F6),
-    surfaceContainerDark: Color(0xFF2E211D),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF9EAE3),
   );
 
@@ -456,11 +456,11 @@ class AppPalette {
     primary: Color(0xFFF2A7B5),
     secondary: Color(0xFFD78494),
     accent: Color(0xFFF2A7B5),
-    backgroundDark: Color(0xFF160E12),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF3F5),
-    surfaceDark: Color(0xFF20141A),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFCF7F9),
-    surfaceContainerDark: Color(0xFF2E1D26),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF8E7EC),
   );
 
@@ -471,11 +471,11 @@ class AppPalette {
     primary: Color(0xFFE8D18C),
     secondary: Color(0xFFCDB367),
     accent: Color(0xFFE8D18C),
-    backgroundDark: Color(0xFF15130B),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF8EE),
-    surfaceDark: Color(0xFF1E1B10),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFCFAF2),
-    surfaceContainerDark: Color(0xFF2B2717),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF7F3DC),
   );
 
@@ -486,11 +486,11 @@ class AppPalette {
     primary: Color(0xFF64748B),
     secondary: Color(0xFF475569),
     accent: Color(0xFF94A3B8),
-    backgroundDark: Color(0xFF0F1218),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF2F5F8),
-    surfaceDark: Color(0xFF151922),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF8FAFC),
-    surfaceContainerDark: Color(0xFF1E2330),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFE6ECF2),
   );
 
@@ -501,11 +501,11 @@ class AppPalette {
     primary: Color(0xFFC2410C),
     secondary: Color(0xFF9A3412),
     accent: Color(0xFFEA580C),
-    backgroundDark: Color(0xFF140F0C),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF4F0),
-    surfaceDark: Color(0xFF1C1511),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFCF8F5),
-    surfaceContainerDark: Color(0xFF271F1A),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF7ECE4),
   );
 
@@ -516,11 +516,11 @@ class AppPalette {
     primary: Color(0xFF15803D),
     secondary: Color(0xFF166534),
     accent: Color(0xFF22C55E),
-    backgroundDark: Color(0xFF0D140F),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF1F7F3),
-    surfaceDark: Color(0xFF131D16),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF7FAF7),
-    surfaceContainerDark: Color(0xFF1C2A20),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFE2F0E5),
   );
 
@@ -531,11 +531,11 @@ class AppPalette {
     primary: Color(0xFF2563EB),
     secondary: Color(0xFF1D4ED8),
     accent: Color(0xFF3B82F6),
-    backgroundDark: Color(0xFF0C101A),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF1F5FC),
-    surfaceDark: Color(0xFF121827),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFF7FAFD),
-    surfaceContainerDark: Color(0xFF1A2237),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFE3EDFA),
   );
 
@@ -546,11 +546,11 @@ class AppPalette {
     primary: Color(0xFFCA8A04),
     secondary: Color(0xFFA16207),
     accent: Color(0xFFEAB308),
-    backgroundDark: Color(0xFF14110A),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF7EE),
-    surfaceDark: Color(0xFF1C180E),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFCF9F2),
-    surfaceContainerDark: Color(0xFF272214),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF5EFDC),
   );
 
@@ -561,11 +561,11 @@ class AppPalette {
     primary: Color(0xFF78350F),
     secondary: Color(0xFF92400E),
     accent: Color(0xFFB45309),
-    backgroundDark: Color(0xFF130E0B),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFFAF4F0),
-    surfaceDark: Color(0xFF1B1410),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFCF8F5),
-    surfaceContainerDark: Color(0xFF261D18),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFF6EDE6),
   );
 
@@ -576,11 +576,11 @@ class AppPalette {
     primary: Color(0xFF71717A),
     secondary: Color(0xFF52525B),
     accent: Color(0xFFA1A1AA),
-    backgroundDark: Color(0xFF111113),
+    backgroundDark: Color(0xFF0D0E12),
     backgroundLight: Color(0xFFF4F4F5),
-    surfaceDark: Color(0xFF18181B),
+    surfaceDark: Color(0xFF12141A),
     surfaceLight: Color(0xFFFAFAFA),
-    surfaceContainerDark: Color(0xFF242428),
+    surfaceContainerDark: Color(0xFF16181F),
     surfaceContainerLight: Color(0xFFEAEAEB),
   );
 
@@ -835,9 +835,10 @@ class ThemeController extends StateNotifier<ThemeSettingsState> {
   }
 
   void setCustomAccent(Color color) {
-    final surfaceDark = Color.alphaBlend(color.withValues(alpha: 0.08), const Color(0xFF101318));
-    final surfaceContainerDark = Color.alphaBlend(color.withValues(alpha: 0.16), const Color(0xFF141822));
-    final backgroundDark = Color.alphaBlend(color.withValues(alpha: 0.04), const Color(0xFF0A0C10));
+    final isOled = state.currentPalette.isOledBlack;
+    final surfaceDark = isOled ? const Color(0xFF0A0A0A) : const Color(0xFF12141A);
+    final surfaceContainerDark = isOled ? const Color(0xFF141414) : const Color(0xFF16181F);
+    final backgroundDark = isOled ? const Color(0xFF000000) : const Color(0xFF0D0E12);
     final surfaceContainerLight = Color.alphaBlend(color.withValues(alpha: 0.10), const Color(0xFFF0F4F8));
 
     state = state.copyWith(
@@ -1219,11 +1220,18 @@ class StudioColorHarmonizer {
 /// Generator ThemeData untuk Dark Mode dan Light Mode
 class AppThemeBuilder {
   static ThemeData buildTheme(AppPalette palette, {required bool isDark, bool isWallpaperActive = false}) {
+    final isOled = palette.isOledBlack;
     final bg = isWallpaperActive
         ? Colors.transparent
-        : (isDark ? palette.backgroundDark : palette.backgroundLight);
-    final surface = isDark ? palette.surfaceDark : palette.surfaceLight;
-    final surfaceContainer = isDark ? palette.surfaceContainerDark : palette.surfaceContainerLight;
+        : (isDark
+            ? (isOled ? const Color(0xFF000000) : const Color(0xFF0D0E12))
+            : palette.backgroundLight);
+    final surface = isDark
+        ? (isOled ? const Color(0xFF0A0A0A) : const Color(0xFF12141A))
+        : palette.surfaceLight;
+    final surfaceContainer = isDark
+        ? (isOled ? const Color(0xFF141414) : const Color(0xFF16181F))
+        : palette.surfaceContainerLight;
     final textPrimary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 

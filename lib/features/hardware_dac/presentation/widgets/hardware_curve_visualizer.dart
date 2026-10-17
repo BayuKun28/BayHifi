@@ -29,12 +29,16 @@ class HardwareCurveVisualizer extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF262936)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(

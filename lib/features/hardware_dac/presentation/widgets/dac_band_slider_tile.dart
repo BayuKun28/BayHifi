@@ -22,12 +22,19 @@ class DacBandSliderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF1E212B) : const Color(0xFF16181F),
+        color: isSelected
+            ? (isDark ? const Color(0xFF1E212B) : theme.colorScheme.primaryContainer)
+            : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? const Color(0xFF383D50) : const Color(0xFF262936),
+          color: isSelected
+              ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.primary.withValues(alpha: 0.35))
+              : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
           width: isSelected ? 1.2 : 0.8,
         ),
       ),
@@ -47,11 +54,15 @@ class DacBandSliderTile extends StatelessWidget {
                     height: 26,
                     decoration: BoxDecoration(
                       color: band.isBypassed
-                          ? const Color(0xFF2E3242)
-                          : (isSelected ? const Color(0xFF10B981) : const Color(0xFF252834)),
+                          ? (isDark ? const Color(0xFF2E3242) : theme.colorScheme.surfaceContainerHighest)
+                          : (isSelected
+                              ? const Color(0xFF10B981)
+                              : (isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest)),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSelected ? const Color(0xFF10B981) : const Color(0xFF383D50),
+                        color: isSelected
+                            ? const Color(0xFF10B981)
+                            : (isDark ? const Color(0xFF383D50) : theme.colorScheme.outlineVariant),
                         width: 0.8,
                       ),
                     ),
@@ -60,8 +71,10 @@ class DacBandSliderTile extends StatelessWidget {
                       '${band.bandIndex + 1}',
                       style: TextStyle(
                         color: band.isBypassed
-                            ? const Color(0xFF8A9A90)
-                            : (isSelected ? Colors.black : Colors.white),
+                            ? (isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant)
+                            : (isSelected
+                                ? Colors.white
+                                : (isDark ? Colors.white : theme.colorScheme.onSurface)),
                         fontWeight: FontWeight.w800,
                         fontSize: 11.5,
                       ),
@@ -75,8 +88,8 @@ class DacBandSliderTile extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,
                         color: band.isBypassed
-                            ? const Color(0xFF64748B)
-                            : Colors.white,
+                            ? (isDark ? const Color(0xFF64748B) : theme.colorScheme.outline)
+                            : (isDark ? Colors.white : theme.colorScheme.onSurface),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -89,15 +102,18 @@ class DacBandSliderTile extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E212B),
+                        color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0xFF262936), width: 0.8),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
+                          width: 0.8,
+                        ),
                       ),
                       child: Text(
                         '${band.formattedFrequency} • ${band.formattedGain} • ${band.formattedQ}',
-                        style: const TextStyle(
-                          color: Color(0xFFE6EAE7),
-                          fontFeatures: [FontFeature.tabularFigures()],
+                        style: TextStyle(
+                          color: isDark ? const Color(0xFFE6EAE7) : theme.colorScheme.onSurface,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                           fontWeight: FontWeight.w600,
                           fontSize: 10.5,
                         ),
@@ -120,9 +136,12 @@ class DacBandSliderTile extends StatelessWidget {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E212B),
+                          color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF262936), width: 0.8),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
+                            width: 0.8,
+                          ),
                         ),
                         alignment: Alignment.center,
                         child: Icon(
@@ -130,7 +149,7 @@ class DacBandSliderTile extends StatelessWidget {
                           size: 15,
                           color: band.isBypassed
                               ? const Color(0xFFEF4444)
-                              : const Color(0xFFA1B2A7),
+                              : (isDark ? const Color(0xFFA1B2A7) : theme.colorScheme.onSurfaceVariant),
                         ),
                       ),
                     ),
@@ -142,6 +161,7 @@ class DacBandSliderTile extends StatelessWidget {
 
               // Frequency Slider (Logarithmic 20Hz - 20,000Hz)
               _buildSliderRow(
+                context,
                 label: 'FREQ',
                 valueString: band.formattedFrequency,
                 slider: M3ESlider(
@@ -159,6 +179,7 @@ class DacBandSliderTile extends StatelessWidget {
 
               // Gain Slider (-12.0 dB .. +12.0 dB)
               _buildSliderRow(
+                context,
                 label: 'GAIN',
                 valueString: band.formattedGain,
                 slider: M3ESlider(
@@ -176,6 +197,7 @@ class DacBandSliderTile extends StatelessWidget {
 
               // Q-Factor Slider (0.10 .. 10.00)
               _buildSliderRow(
+                context,
                 label: 'Q',
                 valueString: band.formattedQ,
                 slider: M3ESlider(
@@ -197,20 +219,24 @@ class DacBandSliderTile extends StatelessWidget {
     );
   }
 
-  Widget _buildSliderRow({
+  Widget _buildSliderRow(
+    BuildContext context, {
     required String label,
     required String valueString,
     required Widget slider,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       children: [
         SizedBox(
           width: 38,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF8A9A90),
+              color: isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant,
               fontSize: 10,
               letterSpacing: 0.5,
             ),
@@ -222,9 +248,9 @@ class DacBandSliderTile extends StatelessWidget {
           child: Text(
             valueString,
             textAlign: TextAlign.end,
-            style: const TextStyle(
-              color: Colors.white,
-              fontFeatures: [FontFeature.tabularFigures()],
+            style: TextStyle(
+              color: isDark ? Colors.white : theme.colorScheme.onSurface,
+              fontFeatures: const [FontFeature.tabularFigures()],
               fontWeight: FontWeight.w600,
               fontSize: 11,
             ),

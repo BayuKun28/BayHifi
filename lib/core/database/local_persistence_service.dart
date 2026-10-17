@@ -387,6 +387,7 @@ class LocalPersistenceService {
     int? dynamicVibrantValue,
     Map<String, dynamic>? wallpaperSettings,
   }) async {
+    _writeScoped('migrated_to_simple_as_f_v2', true);
     _writeScoped('theme_settings', {
       'palette_id': paletteId,
       'theme_mode': themeModeIndex,

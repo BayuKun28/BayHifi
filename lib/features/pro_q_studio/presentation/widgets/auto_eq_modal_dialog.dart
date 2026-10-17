@@ -48,6 +48,7 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     final notifier = ref.read(eqControllerProvider.notifier);
     final theme = Theme.of(context);
     final isSolid = ref.isSolidStyle;
+    final isDark = theme.brightness == Brightness.dark;
 
     final selectedDriver = eqState.driverFr;
     final selectedTarget = eqState.targetFr;
@@ -470,22 +471,26 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
+                                color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.primaryContainer,
                                 borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF10B981) : theme.colorScheme.primary.withValues(alpha: 0.5),
+                                  width: 1.2,
+                                ),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     LucideIcons.activity,
-                                    size: 20,
-                                    color: theme.colorScheme.onPrimary,
+                                    size: 18,
+                                    color: isDark ? const Color(0xFF34D399) : theme.colorScheme.primary,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'APPLY TO DSP',
                                     style: TextStyle(
-                                      color: theme.colorScheme.onPrimary,
+                                      color: isDark ? Colors.white : theme.colorScheme.onPrimaryContainer,
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 0.8,
@@ -854,30 +859,36 @@ class _AutoEqModalDialogState extends ConsumerState<AutoEqModalDialog> {
     required Color bgColor,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         height: 32,
         decoration: BoxDecoration(
-          color: bgColor,
+          color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: borderColor, width: 1.0),
+          border: Border.all(
+            color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
+            width: 1.0,
+          ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 12, color: color),
-            const SizedBox(width: 3),
+            const SizedBox(width: 4),
             Flexible(
               child: Text(
                 label,
                 style: TextStyle(
-                  color: color,
-                  fontSize: 8.5,
+                  color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                  fontSize: 9.0,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.1,
+                  letterSpacing: 0.2,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

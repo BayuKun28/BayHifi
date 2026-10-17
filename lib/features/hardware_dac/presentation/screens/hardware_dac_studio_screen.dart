@@ -59,10 +59,15 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
       }
     });
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final iconColor = isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0E12),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D0E12),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: const TwoToneHeader(
@@ -87,19 +92,19 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
               ),
             ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.bookmark,
               size: 20,
-              color: Color(0xFF8A9A90),
+              color: iconColor,
             ),
             tooltip: 'DAC Profile Library',
             onPressed: () => DacProfileManagerModal.show(context),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.refreshCw,
               size: 20,
-              color: Color(0xFF8A9A90),
+              color: iconColor,
             ),
             tooltip: 'Rescan USB DAC',
             onPressed: dacState.isBusy
@@ -137,6 +142,10 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
     DacBridgeState state,
     DacBridgeController controller,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
@@ -214,29 +223,31 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'HARDWARE FILTER BANDS',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.8,
-                            color: Color(0xFF8A9A90),
+                            color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E212B),
+                            color: isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: const Color(0xFF262936)),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+                            ),
                           ),
-                          child: const Text(
+                          child: Text(
                             '5-BAND BIQUAD REGISTERS',
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
-                              color: Color(0xFF8A9A90),
+                              color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -280,6 +291,10 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
     DacBridgeState state,
     DacBridgeController controller,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 680),
@@ -340,29 +355,36 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'HARDWARE FILTER BANDS',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: Color(0xFF8A9A90),
+                        Expanded(
+                          child: Text(
+                            'HARDWARE FILTER BANDS',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                              color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E212B),
+                            color: isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: const Color(0xFF262936)),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+                            ),
                           ),
-                          child: const Text(
+                          child: Text(
                             '5-BAND BIQUAD',
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
-                              color: Color(0xFF8A9A90),
+                              color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -419,6 +441,15 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
   ) {
     if (state.device == null) return;
     final isDesktopOrTablet = MediaQuery.of(context).size.width >= 650;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final sheetBg = isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainer;
+    final outlineColor = isDark ? const Color(0xFF262936) : colorScheme.outlineVariant;
+    final cardBg = isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest;
+    final textPrimary = isDark ? Colors.white : colorScheme.onSurface;
+    final textSecondary = isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant;
 
     Widget contentBuilder(BuildContext ctx) {
       return Container(
@@ -427,9 +458,9 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
           maxHeight: MediaQuery.of(context).size.height * 0.75,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFF16181F),
+          color: sheetBg,
           borderRadius: BorderRadius.circular(isDesktopOrTablet ? 20 : 0),
-          border: isDesktopOrTablet ? Border.all(color: const Color(0xFF262936)) : null,
+          border: isDesktopOrTablet ? Border.all(color: outlineColor) : null,
         ),
         child: SafeArea(
           child: Padding(
@@ -441,17 +472,17 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'IMPORT TARGET CURVE',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
-                        color: Colors.white,
+                        color: textPrimary,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(LucideIcons.x, size: 18, color: Color(0xFF8A9A90)),
+                      icon: Icon(LucideIcons.x, size: 18, color: textSecondary),
                       onPressed: () => Navigator.of(ctx).pop(),
                     ),
                   ],
@@ -466,9 +497,9 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
                       final preset = DacPeqProfile.builtInPresets[index];
                       return Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E212B),
+                          color: cardBg,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF262936)),
+                          border: Border.all(color: outlineColor),
                         ),
                         child: ListTile(
                           leading: const Icon(
@@ -478,18 +509,18 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
                           ),
                           title: Text(
                             preset.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13.5,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: textPrimary,
                             ),
                           ),
                           subtitle: Text(
                             preset.description,
                             maxLines: 1,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: Color(0xFF8A9A90),
+                              color: textSecondary,
                             ),
                           ),
                           onTap: () {
@@ -521,7 +552,7 @@ class _HardwareDacStudioScreenState extends ConsumerState<HardwareDacStudioScree
     } else {
       showModalBottomSheet(
         context: context,
-        backgroundColor: const Color(0xFF16181F),
+        backgroundColor: sheetBg,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),

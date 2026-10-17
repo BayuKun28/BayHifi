@@ -304,13 +304,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildSearchBar(BuildContext context, ThemeData theme, Color primary, bool isSolid) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       key: const ValueKey('settings_search_bar_container'),
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 0.8,
         ),
       ),
@@ -319,9 +320,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         controller: _searchController,
         focusNode: _searchFocusNode,
         onChanged: (val) => setState(() => _searchQuery = val.trim()),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13.5,
-          color: Colors.white,
+          color: isDark ? Colors.white : theme.colorScheme.onSurface,
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
@@ -330,11 +331,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             fontSize: 13,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
-          prefixIcon: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Icon(
               LucideIcons.search,
-              color: Color(0xFF94A3B8),
+              color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
               size: 18,
             ),
           ),
@@ -343,9 +344,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ? Padding(
                   padding: const EdgeInsets.only(right: 4),
                   child: IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       LucideIcons.x,
-                      color: Color(0xFF94A3B8),
+                      color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                       size: 16,
                     ),
                     onPressed: () {
@@ -582,16 +583,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required IconData icon,
     required Color color,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final metaColor = isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant;
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, bottom: 2.0),
       child: Row(
         children: [
-          Icon(icon, size: 13, color: const Color(0xFF94A3B8)),
+          Icon(icon, size: 13, color: metaColor),
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF94A3B8),
+            style: TextStyle(
+              color: metaColor,
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.8,
@@ -613,6 +617,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required bool isSolid,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
       onTap: onTap,
@@ -620,10 +625,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF16181F),
+          color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: const Color(0xFF262936),
+            color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
             width: 0.8,
           ),
         ),
@@ -635,15 +640,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: const Color(0xFF20232E),
+                color: isDark ? const Color(0xFF20232E) : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: const Color(0xFF2E3242),
+                  color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant,
                   width: 0.8,
                 ),
               ),
               alignment: Alignment.center,
-              child: Icon(icon, size: 18, color: Colors.white),
+              child: Icon(icon, size: 18, color: isDark ? Colors.white : theme.colorScheme.onSurface),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -652,8 +657,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : theme.colorScheme.onSurface,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,
@@ -677,17 +682,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E212B),
+                      color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: const Color(0xFF262936),
+                        color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
                         width: 0.8,
                       ),
                     ),
                     child: Text(
                       badgeText,
-                      style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                         fontSize: 9.5,
                         fontWeight: FontWeight.w600,
                       ),
@@ -699,10 +704,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            const Icon(
+            Icon(
               LucideIcons.chevronRight,
               size: 16,
-              color: Color(0xFF64748B),
+              color: isDark ? const Color(0xFF64748B) : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
           ],
         ),

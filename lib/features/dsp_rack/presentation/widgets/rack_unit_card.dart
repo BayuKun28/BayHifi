@@ -62,7 +62,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
     final isDark = theme.brightness == Brightness.dark;
     final color = widget.accentColor ?? theme.colorScheme.primary;
 
-    final chassisBg = const Color(0xFF16181F);
+    final chassisBg = isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -70,7 +70,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
         color: chassisBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 0.8,
         ),
       ),
@@ -87,7 +87,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E212B),
+                color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.vertical(
                   top: const Radius.circular(15),
                   bottom: _isExpanded ? Radius.zero : const Radius.circular(15),
@@ -104,12 +104,12 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: widget.isActive
-                          ? const Color(0xFF252834)
+                          ? (isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHigh)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(4),
                       border: widget.isActive
                           ? Border.all(
-                              color: const Color(0xFF383D50),
+                              color: isDark ? const Color(0xFF383D50) : theme.colorScheme.outlineVariant,
                               width: 0.8,
                             )
                           : null,
@@ -120,7 +120,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                         fontFamily: 'monospace',
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: widget.isActive ? Colors.white : (isDark ? Colors.white54 : Colors.black54),
+                        color: widget.isActive ? (isDark ? Colors.white : theme.colorScheme.onSurface) : (isDark ? Colors.white54 : theme.colorScheme.onSurfaceVariant),
                       ),
                     ),
                   ),
@@ -139,7 +139,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.0,
                             color: widget.isActive
-                                ? Colors.white
+                                ? (isDark ? Colors.white : theme.colorScheme.onSurface)
                                 : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                           maxLines: 1,
@@ -147,9 +147,9 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                         ),
                         Text(
                           widget.subtitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            color: Color(0xFF94A3B8),
+                            color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -172,13 +172,13 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: widget.isActive
-                            ? const Color(0xFF252834)
-                            : const Color(0xFF16181F),
+                            ? (isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHigh)
+                            : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: widget.isActive
-                              ? const Color(0xFF383D50)
-                              : const Color(0xFF262936),
+                              ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+                              : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
                           width: 0.8,
                         ),
                       ),
@@ -191,7 +191,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                             height: 6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: widget.isActive ? color : const Color(0xFF64748B),
+                              color: widget.isActive ? color : (isDark ? const Color(0xFF64748B) : theme.colorScheme.outline),
                             ),
                           ),
                           const SizedBox(width: 5),
@@ -201,7 +201,7 @@ class _RackUnitCardState extends ConsumerState<RackUnitCard> {
                               fontSize: 9.5,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
-                              color: widget.isActive ? Colors.white : const Color(0xFF94A3B8),
+                              color: widget.isActive ? (isDark ? Colors.white : theme.colorScheme.onSurface) : (isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant),
                             ),
                           ),
                         ],

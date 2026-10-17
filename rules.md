@@ -48,7 +48,7 @@ Pada branch `simple-as-f`, aplikasi Baydev HiFi bertransformasi dari arsitektur 
 - **Tabular Figures**:
   - Semua durasi waktu lagu (`2.34`, `6.37`) dan angka audio tetap wajib menggunakan `FontFeature.tabularFigures()`.
 
-### 2.3 Layar Now Playing dengan Interactive Waveform Seekbar
+### 2.3 Layar Now Playing dengan Interactive Waveform Seekbar & Compact Auxiliary Bar
 - **Album Artwork Squircle Card**:
   - Album art ditampilkan besar di tengah dengan bentuk squircle elegan (`borderRadius: BorderRadius.circular(28)` hingga `(32)`).
   - Bayangan lembut terpadu dengan latar belakang obsidian tanpa border kasar.
@@ -60,29 +60,40 @@ Pada branch `simple-as-f`, aplikasi Baydev HiFi bertransformasi dari arsitektur 
   - Timestamp diposisikan di bawah waveform pada sisi kiri (`0:00`) dan kanan (`durasi total`).
 - **Minimalist Playback Controls**:
   - Tombol kontrol sejajar horizontal: Shuffle, Previous, Tombol Play/Pause utama berbentuk pill/circle kontras, Next, dan Repeat.
+- **Compact Auxiliary Action Bar**:
+  - Baris bawah menggunakan tombol icon ramping berukuran 34x34px (solid studio charcoal `#16181F`, border `#262936`) dengan tooltip untuk EQ, Driver, Target, Lyrics, dan Queue, menyisakan format badge `[WAV 44.1kHz]` ringkas. Dilarang menggunakan teks tombol panjang yang memadati layar dan memicu horizontal overflow.
 
 ### 2.4 Daftar Lagu Uncarded Floating & Active Capsule Highlight
 - **Uncarded Clean List**:
   - Lagu di dalam playlist/library tidak dibungkus dalam kartu bento individual yang berat.
   - Setiap item berupa baris mengambang bersih (*floating row*): Title (Bold White), Artis & Album (Sage Slate), dan menu `...` di kanan.
-- **Active Playing Highlight**:
-  - Lagu yang sedang aktif diputar otomatis dibungkus dalam **Soft Dark Capsule** (`borderRadius: BorderRadius.circular(16)`, latar `#16241C`) dengan icon speaker / audio waveform mini di sisi kiri.
-- **Download Action Row**:
-  - Sub-header memiliki opsi toggle download bersih: label uppercase `DOWNLOAD` di kiri, switch pill minimalis hijau di kanan.
+- **Active Playing Highlight & Spacing**:
+  - Lagu yang sedang aktif diputar otomatis dibungkus dalam **Soft Dark Capsule** (`borderRadius: BorderRadius.circular(16)`, latar `#1E212B`, border halus emerald).
+  - Wajib memiliki *breathing room* yang proporsional (`minVerticalPadding: 8`, `bottom: 12`) agar garis border bawah tidak menabrak badge format file (`WAV 44.1kHz 03:57`).
+- **Pembersihan Dashboard**:
+  - Baris toggle download ditiadakan dari layar Dashboard agar daftar lagu bernapas lega dan tidak sesak.
 
-### 2.5 Home / Discovery Staggered Grid & Floating MiniPlayer Dock
-- **Header Personal**:
-  - Menampilkan salam personal (`WELCOME, USER`), avatar lingkaran di kanan, dan judul besar dua warna `"Recently Played"`.
-- **2-Column Rounded Cover Art Grid**:
-  - Grid album/lagu 2 kolom dengan cover art squircle (`BorderRadius.circular(20)`), diikuti teks judul dan artis di bawah gambar.
+### 2.5 Dashboard Discovery Grid & Arsitektur Layar Utama
+- **Urutan Hierarki Dashboard**:
+  1. Header Personal (`WELCOME, MATT`, avatar profil).
+  2. Studio Wrapped Recap Banner (ringkasan personal statistik).
+  3. Discovery Smart Mix Suggestion Banner (`StudioInstantMixBanner` bertenaga `InstantMixEngine`).
+  4. Quick YouTube Music HiFi Launcher Capsule.
+  5. Recently Played Squircle Grid: Mengambil data riwayat putar nyata dari `LocalPersistenceService.instance.getPlaybackHistory()`. Pada layar mobile (<650px), wajib menggunakan **Grid 2x2** (tepat 4 kartu).
+  6. Liked / Top Songs: Baris mengambang bersih tanpa toggle download yang mengganggu.
 - **Floating Capsule MiniPlayer & Dock**:
   - MiniPlayer melayang ramping di atas navigation bar dengan thumbnail album art, teks berjalan halus (*marquee*), tombol play/pause dan next, serta indikator progress halus.
   - Transisi buka-tutup NowPlayingScreen menggunakan gestur drag yang halus.
 
-### 2.6 Ikonografi Lucide Icons, Zero-Emoji & No-Neon Solid Policy
+### 2.6 Ikonografi Lucide, Pure Solid Dialogs & Penempatan YouTube HiFi
 - **Lucide Icons Library Mandate**: Seluruh ikon di aplikasi wajib menggunakan `lucide_icons_flutter` (`LucideIcons.*`). Dilarang mencampur icon legacy Material 1/2 ataupun HugeIcons.
 - **Zero-Emoji Policy (Strictly Enforced)**: Dilarang keras menggunakan emoji di UI, tombol, dialog, komentar kode, maupun dokumentasi. Selalu gunakan icon resmi dari `LucideIcons`.
-- **Pure Solid & Anti-Neon Policy**: Dilarang keras efek neon glow buram (glowing box-shadows dengan colored blur yang tebal). Seluruh permukaan kartu dan modal wajib solid, bersih, elegan (`SimpleAsFTheme`, `StudioSurfaceTheme`) dengan batas struktural kontras (`Border.all`) atau bayangan gelap tipis (`Colors.black.withValues(alpha: ...)`).
+- **Pure Solid & Anti-Neon Policy**:
+  - Dilarang keras efek neon glow buram (glowing box-shadows dengan colored blur yang tebal) atau tombol flood-fill neon terang benderang.
+  - Seluruh tombol dialog (AutoEQ, Cloud Browser, dll.) wajib menggunakan *Solid Studio Buttons* (`#1E212B` / `#16181F` dengan border `#262936`), icon aksen tajam kontras, dan teks putih pekat `#FFFFFF`.
+- **Penempatan YouTube Music HiFi**:
+  - Di Library: Ditempatkan pada Tab Kategori ke-2 (`YouTube HiFi`) tepat di samping `Tracks` serta tombol streaming cepat di AppBar.
+  - Di Dashboard: Disediakan kapsul peluncur streaming cepat.
 - **Desktop Mobile Mode CSD Offset**: Pada desktop window mode mobile (<650px), header bar (`NowPlayingScreen`) wajib diberi offset padding atas (`StudioDesktopTitleBar.barHeight`) dengan platform guard `isDesktopPlatform`, agar tombol aksi tidak tertutup oleh tombol kontrol CSD window desktop, tanpa merusak layout Android mobile/tablet.
 - **100% English Language Policy**: Seluruh teks antarmuka wajib dalam Bahasa Inggris.
 

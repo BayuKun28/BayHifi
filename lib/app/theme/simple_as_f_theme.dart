@@ -106,43 +106,73 @@ abstract final class SimpleAsFTheme {
       Theme.of(context).colorScheme.surfaceContainer;
 
   /// Dynamic soft dark capsule container for active playing track
-  static Color surfaceActive(BuildContext context) =>
-      Theme.of(context).colorScheme.surfaceContainer;
+  static Color surfaceActive(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? surfaceActiveCapsule : Theme.of(context).colorScheme.surfaceContainerHighest;
+  }
+
+  /// Dynamic elevated surface color for cards and dialogs
+  static Color surfaceElevatedColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? surfaceElevated : Theme.of(context).colorScheme.surfaceContainer;
+  }
 
   /// Dynamic unplayed seekbar bar color
-  static Color unplayedBarColor(BuildContext context) =>
-      const Color(0xFF252834);
+  static Color unplayedBarColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFF252834) : const Color(0xFFCBD5E1);
+  }
 
   /// Dynamic subtle hairline border
-  static Color subtleBorder(BuildContext context) =>
-      const Color(0xFF262936);
+  static Color subtleBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFF262936) : Theme.of(context).colorScheme.outlineVariant;
+  }
 
   /// Dynamic ambient dark depth
-  static Color ambientGlow(BuildContext context) =>
-      const Color(0xFF12141A);
+  static Color ambientGlow(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFF12141A) : Colors.transparent;
+  }
+
+  /// Dynamic primary text color
+  static Color textPrimary(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? textWhite : Theme.of(context).colorScheme.onSurface;
+  }
+
+  /// Dynamic secondary text color
+  static Color textSecondary(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? sageSlate : Theme.of(context).colorScheme.onSurfaceVariant;
+  }
 
   /// Dynamic active playing track capsule decoration
-  static BoxDecoration activeTrackCapsuleDecoration(BuildContext context) =>
-      BoxDecoration(
-        color: const Color(0xFF1E212B),
-        borderRadius: capsuleRowRadius,
-        border: Border.all(
-          color: const Color(0xFF2E3242),
-          width: 0.8,
-        ),
-      );
+  static BoxDecoration activeTrackCapsuleDecoration(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return BoxDecoration(
+      color: isDark ? const Color(0xFF1E212B) : Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: capsuleRowRadius,
+      border: Border.all(
+        color: isDark ? const Color(0xFF2E3242) : Theme.of(context).colorScheme.outlineVariant,
+        width: 0.8,
+      ),
+    );
+  }
 
   /// Dynamic squircle card decoration
   static BoxDecoration squircleCardDecoration(
     BuildContext context, {
     BorderRadius? radius,
-  }) =>
-      BoxDecoration(
-        borderRadius: radius ?? squircleCardRadius,
-        color: const Color(0xFF16181F),
-        border: Border.all(
-          color: const Color(0xFF262936),
-          width: 0.8,
-        ),
-      );
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return BoxDecoration(
+      borderRadius: radius ?? squircleCardRadius,
+      color: isDark ? const Color(0xFF16181F) : Theme.of(context).colorScheme.surfaceContainer,
+      border: Border.all(
+        color: isDark ? const Color(0xFF262936) : Theme.of(context).colorScheme.outlineVariant,
+        width: 0.8,
+      ),
+    );
+  }
 }

@@ -103,7 +103,7 @@ class TrackTile extends ConsumerWidget {
     Widget tileContent = Container(
       margin: EdgeInsets.symmetric(
         horizontal: isTileActive ? 4 : 2,
-        vertical: isTileActive ? 4 : 1,
+        vertical: isTileActive ? 4 : 2,
       ),
       decoration: BoxDecoration(
         color: isSelected
@@ -124,211 +124,219 @@ class TrackTile extends ConsumerWidget {
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
-        child: ListTile(
-          contentPadding: EdgeInsets.only(
-            left: isTileActive ? 12 : 8,
-            right: isTileActive ? 10 : 6,
-            top: isTileActive ? 6 : 2,
-            bottom: isTileActive ? 8 : 4,
-          ),
+        child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
-          leading: Stack(
-            alignment: Alignment.center,
-            children: [
-              StudioArtworkWidget(
-                track: track,
-                width: 46,
-                height: 46,
-                borderRadius: BorderRadius.circular(12),
-                fallbackIcon: LucideIcons.music,
-                fallbackIconSize: 22,
-              ),
-              if (isMultiSelecting)
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? SimpleAsFTheme.accent(context).withValues(alpha: 0.85)
-                        : Colors.black.withValues(alpha: 0.45),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      isSelected
-                          ? LucideIcons.checkSquare
-                          : LucideIcons.square,
-                      color: isSelected ? const Color(0xFF0B110E) : Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                )
-              else if (isTileActive)
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: isBuffering
-                        ? SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                              valueColor: AlwaysStoppedAnimation<Color>(SimpleAsFTheme.accent(context)),
-                            ),
-                          )
-                        : Icon(
-                            LucideIcons.audioLines,
-                            color: SimpleAsFTheme.accent(context),
-                            size: 22,
-                          ),
-                  ),
-                ),
-            ],
-          ),
-          title: Text(
-            titleText,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontWeight: isTileActive ? FontWeight.w800 : FontWeight.w600,
-              color: isTileActive ? SimpleAsFTheme.accent(context) : Colors.white,
-              fontSize: 14,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isTileActive ? 12 : 8,
+              vertical: isTileActive ? 10 : 8,
             ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                subtitleText,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: SimpleAsFTheme.sageSlate,
-                ),
-              ),
-              const SizedBox(height: 4),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+            child: Row(
+              children: [
+                Stack(
+                  alignment: Alignment.center,
                   children: [
-                    if (settings.trackShowFormatBadge) ...[
-                      Builder(
-                        builder: (context) {
-                          final Color badgeColor = track.isHiRes
-                              ? SimpleAsFTheme.accent(context)
-                              : SimpleAsFTheme.sageSlate;
-
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: badgeColor.withValues(alpha: 0.16),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              track.format.name.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                color: badgeColor,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 6),
-                    ],
-                    if ((track.streamUrl != null || track.remoteUrl != null) &&
-                        AudioCacheService.instance.isCached(track.id)) ...[
+                    StudioArtworkWidget(
+                      track: track,
+                      width: 46,
+                      height: 46,
+                      borderRadius: BorderRadius.circular(12),
+                      fallbackIcon: LucideIcons.music,
+                      fallbackIconSize: 22,
+                    ),
+                    if (isMultiSelecting)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                        width: 46,
+                        height: 46,
                         decoration: BoxDecoration(
-                          color: StudioCategoryColors.bitPerfect.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(4),
+                          color: isSelected
+                              ? SimpleAsFTheme.accent(context).withValues(alpha: 0.85)
+                              : Colors.black.withValues(alpha: 0.45),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              LucideIcons.checkCircle2,
-                              size: 10,
-                              color: StudioCategoryColors.bitPerfect,
-                            ),
-                            SizedBox(width: 2),
-                            Text(
-                              'CACHED',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w800,
-                                color: StudioCategoryColors.bitPerfect,
-                              ),
-                            ),
-                          ],
+                        child: Center(
+                          child: Icon(
+                            isSelected
+                                ? LucideIcons.checkSquare
+                                : LucideIcons.square,
+                            color: isSelected ? const Color(0xFF0B110E) : Colors.white,
+                            size: 20,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                    ],
-                    if (settings.trackShowBitrate && track.sampleRate != null) ...[
-                      Text(
-                        '${(track.sampleRate! / 1000).toStringAsFixed(1)}kHz',
-                        style: TextStyle(
-                          fontFeatures: AppTypography.audioFigures,
-                          fontSize: 10,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                          fontWeight: FontWeight.w700,
+                      )
+                    else if (isTileActive)
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                    ],
-                    if (settings.trackShowDuration && track.duration.inSeconds > 0)
-                      Text(
-                        _formatDuration(track.duration),
-                        style: TextStyle(
-                          fontFeatures: AppTypography.audioFigures,
-                          fontSize: 10,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                          fontWeight: FontWeight.w700,
+                        child: Center(
+                          child: isBuffering
+                              ? SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.0,
+                                    valueColor: AlwaysStoppedAnimation<Color>(SimpleAsFTheme.accent(context)),
+                                  ),
+                                )
+                              : Icon(
+                                  LucideIcons.audioLines,
+                                  color: SimpleAsFTheme.accent(context),
+                                  size: 22,
+                                ),
                         ),
                       ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 2),
-            ],
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (settings.trackShowDirectFav)
-                IconButton(
-                  icon: Icon(
-                    LucideIcons.heart,
-                    color: isFav ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
-                    size: 19,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        titleText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: isTileActive ? FontWeight.w800 : FontWeight.w600,
+                          color: isTileActive ? SimpleAsFTheme.accent(context) : theme.colorScheme.onSurface,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitleText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            if (settings.trackShowFormatBadge) ...[
+                              Builder(
+                                builder: (context) {
+                                  final Color badgeColor = track.isHiRes
+                                      ? SimpleAsFTheme.accent(context)
+                                      : theme.colorScheme.onSurfaceVariant;
+
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                    decoration: BoxDecoration(
+                                      color: badgeColor.withValues(alpha: 0.16),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      track.format.name.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: badgeColor,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            if ((track.streamUrl != null || track.remoteUrl != null) &&
+                                AudioCacheService.instance.isCached(track.id)) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: StudioCategoryColors.bitPerfect.withValues(alpha: 0.16),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.checkCircle2,
+                                      size: 10,
+                                      color: StudioCategoryColors.bitPerfect,
+                                    ),
+                                    SizedBox(width: 2),
+                                    Text(
+                                      'CACHED',
+                                      style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w800,
+                                        color: StudioCategoryColors.bitPerfect,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            if (settings.trackShowBitrate && track.sampleRate != null) ...[
+                              Text(
+                                '${(track.sampleRate! / 1000).toStringAsFixed(1)}kHz',
+                                style: TextStyle(
+                                  fontFeatures: AppTypography.audioFigures,
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            if (settings.trackShowDuration && track.duration.inSeconds > 0)
+                              Text(
+                                _formatDuration(track.duration),
+                                style: TextStyle(
+                                  fontFeatures: AppTypography.audioFigures,
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  tooltip: isFav ? 'Remove Favorite' : 'Favorite Track',
-                  onPressed: () {
-                    AppHaptics.selectionClick();
-                    ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
-                  },
                 ),
-              IconButton(
-                icon: const Icon(
-                  LucideIcons.moreVertical,
-                  color: SimpleAsFTheme.sageSlate,
-                  size: 19,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (settings.trackShowDirectFav)
+                      IconButton(
+                        icon: Icon(
+                          LucideIcons.heart,
+                          color: isFav ? SimpleAsFTheme.accent(context) : theme.colorScheme.onSurfaceVariant,
+                          size: 19,
+                        ),
+                        tooltip: isFav ? 'Remove Favorite' : 'Favorite Track',
+                        onPressed: () {
+                          AppHaptics.selectionClick();
+                          ref.read(unifiedLibraryProvider.notifier).toggleFavorite(track.id);
+                        },
+                      ),
+                    IconButton(
+                      icon: Icon(
+                        LucideIcons.moreVertical,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        size: 19,
+                      ),
+                      tooltip: 'Track Options',
+                      onPressed: () => StudioTrackActionSheet.show(context, track),
+                    ),
+                  ],
                 ),
-                tooltip: 'Track Options',
-                onPressed: () => StudioTrackActionSheet.show(context, track),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

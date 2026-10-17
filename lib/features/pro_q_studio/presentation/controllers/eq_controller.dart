@@ -58,6 +58,7 @@ class EqController extends StateNotifier<EqState> {
         List<EqBand>? bands;
         if (bandMaps is List) {
           bands = bandMaps
+              .map((b) => b is Map ? Map<String, dynamic>.from(b) : null)
               .whereType<Map<String, dynamic>>()
               .toList()
               .asMap()

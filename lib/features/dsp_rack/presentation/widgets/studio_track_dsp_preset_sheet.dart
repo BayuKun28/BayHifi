@@ -36,6 +36,7 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSolid = ref.isSolidStyle;
     final primary = theme.colorScheme.primary;
     final controller = ref.read(dspRackControllerProvider.notifier);
@@ -156,16 +157,36 @@ class StudioTrackDspPresetSheet extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  M3EIconButton(
-                    icon: const Icon(
-                      LucideIcons.slidersHorizontal,
-                      size: 20,
-                      color: Colors.grey,
+                  Tooltip(
+                    message: 'Configure Genre Rules',
+                    child: InkWell(
+                      onTap: () {
+                        AppHaptics.lightImpact();
+                        GenreRulesConfigModal.show(context);
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: isSolid
+                              ? (isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest)
+                              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: false),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant,
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            LucideIcons.slidersHorizontal,
+                            size: 18,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
                     ),
-                    tooltip: 'Configure Genre Rules',
-                    onPressed: () {
-                      GenreRulesConfigModal.show(context);
-                    },
                   ),
                 ],
               ),

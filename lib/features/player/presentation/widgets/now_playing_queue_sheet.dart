@@ -112,6 +112,8 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
       },
     );
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final playback = ref.watch(playerControllerProvider);
     final controller = ref.read(playerControllerProvider.notifier);
     final isDialog = widget.isDialog;
@@ -119,12 +121,12 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
     return Container(
       height: isDialog ? 640 : MediaQuery.of(context).size.height * 0.75,
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: isDialog
             ? BorderRadius.circular(24)
             : const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 1.0,
         ),
       ),
@@ -139,7 +141,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2E3242),
+                  color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -184,9 +186,9 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                       playback.queue.isNotEmpty
                           ? '${playback.queueIndex + 1} of ${playback.queue.length} Tracks'
                           : 'Queue Empty',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF8A9A90),
+                        color: isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         fontFeatures: AppTypography.audioFigures,
                       ),
@@ -197,14 +199,14 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                 Row(
                   children: [
                     // Add Tracks to Queue
-                    _buildActionButton(
+                    _buildActionButton( 
                       icon: LucideIcons.listPlus,
                       tooltip: 'Add Tracks to Queue',
                       onPressed: () => AddTracksToQueueSheet.show(context),
                     ),
                     const SizedBox(width: 4),
                     // Shuffle Toggle
-                    _buildActionButton(
+                    _buildActionButton( 
                       icon: LucideIcons.shuffle,
                       tooltip: 'Shuffle Queue',
                       isActive: playback.isShuffle,
@@ -215,7 +217,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                     ),
                     const SizedBox(width: 4),
                     // Repeat Mode Toggle
-                    _buildActionButton(
+                    _buildActionButton( 
                       icon: playback.repeatMode == PlaybackRepeatMode.one
                           ? LucideIcons.repeat1
                           : LucideIcons.repeat,
@@ -229,7 +231,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                     // Clear Queue
                     if (playback.queue.isNotEmpty) ...[
                       const SizedBox(width: 4),
-                      _buildActionButton(
+                      _buildActionButton( 
                         icon: LucideIcons.trash2,
                         tooltip: 'Clear Queue',
                         iconColor: const Color(0xFFEF4444),
@@ -241,7 +243,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
                     ],
                     if (isDialog) ...[
                       const SizedBox(width: 4),
-                      _buildActionButton(
+                      _buildActionButton( 
                         icon: LucideIcons.x,
                         tooltip: 'Close Dialog',
                         onPressed: () => Navigator.of(context).pop(),
@@ -254,34 +256,34 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
           ),
 
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF262936), height: 1),
+          Divider(color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant, height: 1),
 
           // ─── 3. REORDERABLE QUEUE LIST ──────────────────────────────────
           Expanded(
             child: playback.queue.isEmpty
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           LucideIcons.listMusic,
                           size: 48,
-                          color: Color(0xFF2E3242),
+                          color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
                           'No Tracks in Queue',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: isDark ? Colors.white : theme.colorScheme.onSurface,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           'Add songs from Library or Playlists to stream',
                           style: TextStyle(
-                            color: Color(0xFF8A9A90),
+                            color: isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant,
                             fontSize: 11.5,
                           ),
                         ),
@@ -343,6 +345,8 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
     bool isActive = false,
     Color? iconColor,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Tooltip(
       message: tooltip,
       child: InkWell(
@@ -352,10 +356,14 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
           width: 34,
           height: 34,
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF222532) : const Color(0xFF1E212B),
+            color: isActive
+                ? (isDark ? const Color(0xFF222532) : theme.colorScheme.surfaceContainerHighest)
+                : (isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainer),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isActive ? const Color(0xFF383D50) : const Color(0xFF262936),
+              color: isActive
+                  ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+                  : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
               width: 0.8,
             ),
           ),
@@ -364,7 +372,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
             icon,
             size: 15,
             color: iconColor ??
-                (isActive ? const Color(0xFF10B981) : const Color(0xFFA1B2A7)),
+                (isActive ? const Color(0xFF10B981) : (isDark ? const Color(0xFFA1B2A7) : theme.colorScheme.onSurfaceVariant)),
           ),
         ),
       ),
@@ -397,13 +405,29 @@ class _QueueTrackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final tileBg = isCurrent
+        ? (isDark ? const Color(0xFF20232E) : theme.colorScheme.surfaceContainerHighest)
+        : (isDark ? const Color(0xFF12141A) : theme.colorScheme.surfaceContainer);
+    final tileBorder = isCurrent
+        ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+        : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant);
+    final indexBoxBg = isCurrent
+        ? (isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHigh)
+        : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer);
+    final indexBoxBorder = isCurrent
+        ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+        : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant);
+    final metaColor = isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3.0),
       decoration: BoxDecoration(
-        color: isCurrent ? const Color(0xFF20232E) : const Color(0xFF12141A),
+        color: tileBg,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isCurrent ? const Color(0xFF383D50) : const Color(0xFF262936),
+          color: tileBorder,
           width: isCurrent ? 1.0 : 0.8,
         ),
       ),
@@ -421,14 +445,10 @@ class _QueueTrackTile extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: isCurrent
-                        ? const Color(0xFF252834)
-                        : const Color(0xFF16181F),
+                    color: indexBoxBg,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isCurrent
-                          ? const Color(0xFF383D50)
-                          : const Color(0xFF262936),
+                      color: indexBoxBorder,
                       width: 0.8,
                     ),
                   ),
@@ -450,11 +470,11 @@ class _QueueTrackTile extends StatelessWidget {
                             )
                           : Text(
                               (index + 1).toString().padLeft(2, '0'),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF8A9A90),
-                                fontFeatures: [FontFeature.tabularFigures()],
+                                color: metaColor,
+                                fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             )),
                 ),
@@ -471,7 +491,9 @@ class _QueueTrackTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                          color: isCurrent ? Colors.white : const Color(0xFFE6EAE7),
+                          color: isCurrent
+                              ? (isDark ? Colors.white : theme.colorScheme.onSurface)
+                              : (isDark ? const Color(0xFFE6EAE7) : theme.colorScheme.onSurface),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -482,9 +504,9 @@ class _QueueTrackTile extends StatelessWidget {
                           Expanded(
                             child: Text(
                               track.artist.isNotEmpty ? track.artist : 'Unknown Artist',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: Color(0xFF8A9A90),
+                                color: metaColor,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -493,11 +515,11 @@ class _QueueTrackTile extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             _formatDuration(track.duration),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF8A9A90),
-                              fontFeatures: [FontFeature.tabularFigures()],
+                              color: metaColor,
+                              fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
                         ],
@@ -511,12 +533,12 @@ class _QueueTrackTile extends StatelessWidget {
                 InkWell(
                   onTap: onRemove,
                   borderRadius: BorderRadius.circular(6),
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
                     child: Icon(
                       LucideIcons.x,
                       size: 14,
-                      color: Color(0xFF8A9A90),
+                      color: metaColor,
                     ),
                   ),
                 ),
@@ -525,12 +547,12 @@ class _QueueTrackTile extends StatelessWidget {
                 // Drag Handle
                 ReorderableDragStartListener(
                   index: index,
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
                     child: Icon(
                       LucideIcons.gripVertical,
                       size: 16,
-                      color: Color(0xFF8A9A90),
+                      color: metaColor,
                     ),
                   ),
                 ),

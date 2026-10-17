@@ -78,6 +78,17 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final dacState = ref.watch(dacBridgeControllerProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final dialogBg = isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainer;
+    final outlineColor = isDark ? const Color(0xFF262936) : colorScheme.outlineVariant;
+    final capsuleBg = isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest;
+    final textPrimary = isDark ? Colors.white : colorScheme.onSurface;
+    final textSecondary = isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant;
+    final hintColor = isDark ? const Color(0xFF555D6E) : colorScheme.outline;
+    final fieldFill = isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -85,10 +96,10 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 420),
         decoration: BoxDecoration(
-          color: const Color(0xFF16181F),
+          color: dialogBg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFF262936),
+            color: outlineColor,
             width: 1.0,
           ),
         ),
@@ -105,9 +116,9 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E212B),
+                      color: capsuleBg,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF262936)),
+                      border: Border.all(color: outlineColor),
                     ),
                     alignment: Alignment.center,
                     child: const Icon(
@@ -117,7 +128,7 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -126,14 +137,14 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: textPrimary,
                           ),
                         ),
                         Text(
                           'Save current hardware tuning to your profile library',
                           style: TextStyle(
                             fontSize: 11.5,
-                            color: Color(0xFF8A9A90),
+                            color: textSecondary,
                           ),
                         ),
                       ],
@@ -147,28 +158,31 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E212B),
+                  color: capsuleBg,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF262936)),
+                  border: Border.all(color: outlineColor),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: _buildSnapshotItem(
+                        context: context,
                         label: 'BANDS',
                         value: '${dacState.bands.length}',
                       ),
                     ),
-                    Container(width: 1, height: 22, color: const Color(0xFF262936)),
+                    Container(width: 1, height: 22, color: outlineColor),
                     Expanded(
                       child: _buildSnapshotItem(
+                        context: context,
                         label: 'PREAMP',
                         value: '${dacState.globalGainDb >= 0 ? "+" : ""}${dacState.globalGainDb.toStringAsFixed(1)} dB',
                       ),
                     ),
-                    Container(width: 1, height: 22, color: const Color(0xFF262936)),
+                    Container(width: 1, height: 22, color: outlineColor),
                     Expanded(
                       child: _buildSnapshotItem(
+                        context: context,
                         label: 'CHIPSET',
                         value: dacState.device?.chipset.displayName ?? 'KT0211L',
                       ),
@@ -215,32 +229,32 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
               TextField(
                 controller: _nameController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white, fontSize: 13.5),
+                style: TextStyle(color: textPrimary, fontSize: 13.5),
                 decoration: InputDecoration(
                   labelText: 'Profile Name',
-                  labelStyle: const TextStyle(color: Color(0xFF8A9A90), fontSize: 12),
+                  labelStyle: TextStyle(color: textSecondary, fontSize: 12),
                   hintText: 'e.g. Warm Vocal Studio / Harman IEM',
-                  hintStyle: const TextStyle(color: Color(0xFF555D6E), fontSize: 12),
+                  hintStyle: TextStyle(color: hintColor, fontSize: 12),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 20),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 12, right: 8),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 12, right: 8),
                     child: Icon(
                       LucideIcons.bookmark,
                       size: 15,
-                      color: Color(0xFF8A9A90),
+                      color: textSecondary,
                     ),
                   ),
                   filled: true,
-                  fillColor: const Color(0xFF1E212B),
+                  fillColor: fieldFill,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF262936)),
+                    borderSide: BorderSide(color: outlineColor),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF4ADE80)),
+                    borderSide: BorderSide(color: colorScheme.primary),
                   ),
                 ),
               ),
@@ -249,32 +263,32 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
               // Description Field (Optional)
               TextField(
                 controller: _descController,
-                style: const TextStyle(color: Colors.white, fontSize: 13.5),
+                style: TextStyle(color: textPrimary, fontSize: 13.5),
                 decoration: InputDecoration(
                   labelText: 'Description (Optional)',
-                  labelStyle: const TextStyle(color: Color(0xFF8A9A90), fontSize: 12),
+                  labelStyle: TextStyle(color: textSecondary, fontSize: 12),
                   hintText: 'e.g. Tuned for Kiwi Ears with punchy sub-bass',
-                  hintStyle: const TextStyle(color: Color(0xFF555D6E), fontSize: 12),
+                  hintStyle: TextStyle(color: hintColor, fontSize: 12),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 20),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 12, right: 8),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 12, right: 8),
                     child: Icon(
                       LucideIcons.fileText,
                       size: 15,
-                      color: Color(0xFF8A9A90),
+                      color: textSecondary,
                     ),
                   ),
                   filled: true,
-                  fillColor: const Color(0xFF1E212B),
+                  fillColor: fieldFill,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF262936)),
+                    borderSide: BorderSide(color: outlineColor),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF4ADE80)),
+                    borderSide: BorderSide(color: colorScheme.primary),
                   ),
                 ),
               ),
@@ -285,17 +299,17 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.x,
                         size: 15,
-                        color: Color(0xFF8A9A90),
+                        color: textSecondary,
                       ),
-                      label: const Text(
+                      label: Text(
                         'CANCEL',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF8A9A90)),
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: textSecondary),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF262936)),
+                        side: BorderSide(color: outlineColor),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 11),
                       ),
@@ -342,28 +356,33 @@ class _SaveDacProfileDialogState extends ConsumerState<SaveDacProfileDialog> {
   }
 
   Widget _buildSnapshotItem({
+    required BuildContext context,
     required String label,
     required String value,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.5,
-            color: Color(0xFF8A9A90),
+            color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w800,
-            color: Colors.white,
+            color: isDark ? Colors.white : colorScheme.onSurface,
           ),
         ),
       ],

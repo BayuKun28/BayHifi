@@ -135,7 +135,7 @@ void main() {
 
       expect(find.text('Add Tracks to Queue'), findsOneWidget);
       expect(find.text('Random'), findsOneWidget);
-      expect(find.text('Mood & Vibe'), findsOneWidget);
+      expect(find.text('Mood'), findsOneWidget);
       expect(find.text('Similar'), findsOneWidget);
       expect(find.text('Favorites'), findsOneWidget);
       expect(find.text('Append to End'), findsOneWidget);

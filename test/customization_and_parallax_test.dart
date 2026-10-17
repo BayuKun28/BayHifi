@@ -16,9 +16,9 @@ void main() {
     test('Default settings verify studio audiophile defaults', () {
       const settings = PlayerCustomizationSettings();
 
-      expect(settings.albumArtStyle, AlbumArtStyle.cdJewel);
+      expect(settings.albumArtStyle, AlbumArtStyle.squircle);
       expect(settings.spectrumStyle, SpectrumStyle.m3Expressive);
-      expect(settings.timeBarStyle, TimeBarStyle.wavy);
+      expect(settings.timeBarStyle, TimeBarStyle.waveform);
       expect(settings.ambientGlow, isTrue);
       expect(settings.ambientGlowIntensity, 0.35);
       expect(settings.fftBins, 512);

@@ -94,7 +94,10 @@ class NowPlayingOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const emeraldMint = Color(0xFF4ADE80);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final emeraldMint = theme.colorScheme.primary;
+    final defaultIconColor = isDark ? Colors.white : theme.colorScheme.onSurface;
 
     return Container(
       constraints: BoxConstraints(
@@ -102,12 +105,12 @@ class NowPlayingOptionsSheet extends StatelessWidget {
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: isDialog
             ? BorderRadius.circular(20)
             : const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 1,
         ),
       ),
@@ -127,7 +130,7 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2E3344),
+                      color: isDark ? const Color(0xFF2E3344) : theme.colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -147,7 +150,7 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                       if (track != null)
                         Text(
                           track!.format.name.toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
                             color: emeraldMint,
@@ -157,7 +160,7 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                       if (isDialog) ...[
                         const SizedBox(width: 8),
                         IconButton(
-                          icon: const Icon(LucideIcons.x, size: 16, color: Color(0xFF8A9A90)),
+                          icon: Icon(LucideIcons.x, size: 16, color: isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant),
                           onPressed: () => Navigator.pop(context),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
@@ -175,7 +178,7 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildOptionTile(
+                      _buildOptionTile(context: context, 
                         icon: LucideIcons.sliders,
                         title: 'Pro-Q Studio Equalizer',
                         subtitle: 'Parametric EQ, target matching & biquad filters',
@@ -185,7 +188,7 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                           onOpenProQStudio();
                         },
                       ),
-                      _buildOptionTile(
+                      _buildOptionTile(context: context, 
                         icon: LucideIcons.quote,
                         title: 'Synchronized Lyrics',
                         subtitle: isLyricsActive ? 'Currently active — tap to hide' : 'View time-synced LRC lyrics',
@@ -195,63 +198,63 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                           onToggleLyrics();
                         },
                       ),
-                      _buildOptionTile(
+                      _buildOptionTile(context: context, 
                         icon: LucideIcons.timer,
                         title: 'Sleep Timer',
                         subtitle: 'Auto pause after timeout or current song',
-                        iconColor: Colors.white,
+                        iconColor: defaultIconColor,
                         onTap: () {
                           Navigator.pop(context);
                           onOpenSleepTimer();
                         },
                       ),
-                      _buildOptionTile(
+                      _buildOptionTile(context: context, 
                         icon: LucideIcons.gauge,
                         title: 'Speed & Pitch Semitone Engine',
                         subtitle: 'Tempo scaling and pitch adjustment',
-                        iconColor: Colors.white,
+                        iconColor: defaultIconColor,
                         onTap: () {
                           Navigator.pop(context);
                           onOpenSpeedPitch();
                         },
                       ),
-                      _buildOptionTile(
+                      _buildOptionTile(context: context, 
                         icon: LucideIcons.car,
                         title: 'Studio Desk & Car Docking Mode',
                         subtitle: 'Distraction-free high contrast full screen deck',
-                        iconColor: Colors.white,
+                        iconColor: defaultIconColor,
                         onTap: () {
                           Navigator.pop(context);
                           onOpenDeskMode();
                         },
                       ),
                       if (track != null)
-                        _buildOptionTile(
+                        _buildOptionTile(context: context, 
                           icon: LucideIcons.info,
                           title: 'Technical Specs Inspector',
                           subtitle: 'Detailed sample rate, bit depth, codec & file tags',
-                          iconColor: Colors.white,
+                          iconColor: defaultIconColor,
                           onTap: () {
                             Navigator.pop(context);
                             onOpenInspector();
                           },
                         ),
-                      _buildOptionTile(
+                      _buildOptionTile(context: context, 
                         icon: LucideIcons.folder,
                         title: 'Open Audio File',
                         subtitle: 'Play FLAC, DSD, WAV, MP3 from local storage',
-                        iconColor: Colors.white,
+                        iconColor: defaultIconColor,
                         onTap: () {
                           Navigator.pop(context);
                           onOpenFile();
                         },
                       ),
                       if (track != null)
-                        _buildOptionTile(
+                        _buildOptionTile(context: context, 
                           icon: LucideIcons.maximize2,
                           title: 'View Artwork Lightbox',
                           subtitle: 'Full resolution cover preview',
-                          iconColor: Colors.white,
+                          iconColor: defaultIconColor,
                           onTap: () {
                             Navigator.pop(context);
                             onOpenLightbox();
@@ -269,12 +272,16 @@ class NowPlayingOptionsSheet extends StatelessWidget {
   }
 
   Widget _buildOptionTile({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
     required Color iconColor,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return InkWell(
       onTap: () {
         AppHaptics.lightImpact();
@@ -289,9 +296,9 @@ class NowPlayingOptionsSheet extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E212B),
+                color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFF262936)),
+                border: Border.all(color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
               ),
               child: Center(
                 child: Icon(
@@ -309,18 +316,18 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: isDark ? Colors.white : theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF8A9A90),
+                      color: isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -328,10 +335,10 @@ class NowPlayingOptionsSheet extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               LucideIcons.chevronRight,
               size: 15,
-              color: Color(0xFF555D6E),
+              color: isDark ? const Color(0xFF555D6E) : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
           ],
         ),

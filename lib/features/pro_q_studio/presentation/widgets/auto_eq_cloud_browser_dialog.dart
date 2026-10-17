@@ -342,6 +342,7 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                           separatorBuilder: (_, _) => const SizedBox(height: 8),
                           itemBuilder: (context, index) {
                             final item = items[index];
+                            final isDark = theme.brightness == Brightness.dark;
                             final isTarget = item.category == AutoEqCloudCategory.target;
                             final isSelectedAsDriver = eqState.driverFr?.name == item.name;
                             final isSelectedAsTarget = eqState.targetFr?.name == item.name;
@@ -350,66 +351,77 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                             final Color targetColor = const Color(0xFFFF9F0A);
                             final Color driverColor = theme.colorScheme.secondary;
 
-                            final Widget setButton = isTarget
-                                ? M3EButton.elevated(
-                                    onPressed: () async {
-                                      final curve = await _service.downloadItem(item);
-                                      eqNotifier.importTarget(curve);
-                                      setState(() {});
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('Target set: ${item.name}'),
-                                            duration: const Duration(seconds: 2),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    icon: Icon(
-                                      isSelectedAsTarget
-                                          ? LucideIcons.circleCheck
-                                          : LucideIcons.crosshair,
-                                      size: 13,
-                                      color: isSelectedAsTarget ? theme.colorScheme.onPrimary : Colors.black,
-                                    ),
-                                    label: Text(
-                                      isSelectedAsTarget ? 'ACTIVE TARGET' : 'SET TARGET',
-                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  )
-                                : M3EButton.elevated(
-                                    onPressed: () async {
-                                      final curve = await _service.downloadItem(item);
-                                      eqNotifier.importDriver(curve);
-                                      setState(() {});
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('Driver measurement set: ${item.name}'),
-                                            duration: const Duration(seconds: 2),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    icon: Icon(
-                                      isSelectedAsDriver
-                                          ? LucideIcons.circleCheck
-                                          : LucideIcons.headphones,
-                                      size: 13,
-                                      color: isSelectedAsDriver ? theme.colorScheme.onPrimary : theme.colorScheme.onSecondary,
-                                    ),
-                                    label: Text(
-                                      isSelectedAsDriver ? 'ACTIVE DRIVER' : 'SET DRIVER',
-                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                            final Widget setButton = InkWell(
+                              onTap: () async {
+                                final curve = await _service.downloadItem(item);
+                                if (isTarget) {
+                                  eqNotifier.importTarget(curve);
+                                } else {
+                                  eqNotifier.importDriver(curve);
+                                }
+                                setState(() {});
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(isTarget ? 'Target set: ${item.name}' : 'Driver measurement set: ${item.name}'),
+                                      duration: const Duration(seconds: 2),
                                     ),
                                   );
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                height: 30,
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? (isTarget ? const Color(0xFFFF9F0A) : const Color(0xFF10B981))
+                                      : (isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Colors.transparent
+                                        : (isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isSelected
+                                          ? LucideIcons.circleCheck
+                                          : (isTarget ? LucideIcons.crosshair : LucideIcons.headphones),
+                                      size: 13,
+                                      color: isSelected
+                                          ? Colors.black
+                                          : (isTarget ? const Color(0xFFFF9F0A) : const Color(0xFF10B981)),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        isTarget
+                                            ? (isSelectedAsTarget ? 'ACTIVE TARGET' : 'SET TARGET')
+                                            : (isSelectedAsDriver ? 'ACTIVE DRIVER' : 'SET DRIVER'),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          color: isSelected
+                                              ? Colors.black
+                                              : (isDark ? Colors.white : theme.colorScheme.onSurface),
+                                          letterSpacing: 0.2,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
 
-                            final Widget solveButton = M3EButton.outlined(
-                              onPressed: () async {
+                            final Widget solveButton = InkWell(
+                              onTap: () async {
                                 final curve = await _service.downloadItem(item);
                                 if (isTarget) {
                                   eqNotifier.importTarget(curve);
@@ -423,10 +435,10 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                     Navigator.of(context).pop();
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        backgroundColor: theme.colorScheme.primary,
-                                        content: Text(
+                                        backgroundColor: const Color(0xFF10B981),
+                                        content: const Text(
                                           'AutoEQ Solved and Applied directly to Pro-Q DSP!',
-                                          style: TextStyle(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold),
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                         ),
                                         duration: const Duration(seconds: 3),
                                       ),
@@ -447,12 +459,38 @@ class _AutoEqCloudBrowserDialogState extends ConsumerState<AutoEqCloudBrowserDia
                                   }
                                 }
                               },
-                              label: Text(
-                                'SOLVE',
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                height: 30,
+                                padding: const EdgeInsets.symmetric(horizontal: 9),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF252834) : theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.primary.withValues(alpha: 0.35),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.play,
+                                      size: 11,
+                                      color: isDark ? const Color(0xFF34D399) : theme.colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'SOLVE',
+                                      style: TextStyle(
+                                        color: isDark ? Colors.white : theme.colorScheme.onPrimaryContainer,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );

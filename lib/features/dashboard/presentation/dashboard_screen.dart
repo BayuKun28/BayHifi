@@ -9,10 +9,11 @@ import '../../../core/widgets/simple_as_f_scaffold.dart';
 import '../../../core/widgets/two_tone_header.dart';
 import '../../cloud_sync/presentation/widgets/dashboard_profile_button.dart';
 import '../../library/presentation/controllers/library_controller.dart';
-import '../../library/presentation/widgets/download_toggle_row.dart';
 import '../../library/presentation/widgets/track_tile.dart';
 import '../../player/presentation/controllers/player_controller.dart';
+import '../../youtube_music/presentation/youtube_discovery_screen.dart';
 import 'widgets/simple_as_f_discovery_grid.dart';
+import 'widgets/studio_instant_mix_banner.dart';
 import 'widgets/studio_wrapped_bento_banner.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -32,8 +33,6 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  bool _isOfflineOnly = false;
-
   @override
   Widget build(BuildContext context) {
     final libraryState = ref.watch(unifiedLibraryProvider);
@@ -65,9 +64,80 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   .fadeIn(duration: 250.ms, curve: Curves.easeOut)
                   .slideY(begin: -0.04, end: 0.0, curve: Curves.easeOutCubic),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 18),
 
-              // ─── 2. RECENTLY PLAYED SQUIRCLE GRID ────────────────────────────
+              // ─── 2. STUDIO WRAPPED RECAP (Placed Above Recently Played) ───────
+              const StudioWrappedBentoBanner(),
+
+              const SizedBox(height: 14),
+
+              // ─── 3. DISCOVERY SMART MIX SUGGESTION BANNER ────────────────────
+              const StudioInstantMixBanner(),
+
+              const SizedBox(height: 14),
+
+              // ─── 4. QUICK YOUTUBE MUSIC HIFI LAUNCHER CAPSULE ─────────────────
+              Builder(
+                builder: (ctx) {
+                  final isDark = Theme.of(ctx).brightness == Brightness.dark;
+                  return InkWell(
+                    onTap: () {
+                      AppHaptics.lightImpact();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const YouTubeDiscoveryScreen()),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF16181F)
+                            : Theme.of(ctx).colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF262936)
+                              : Theme.of(ctx).colorScheme.outlineVariant,
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            LucideIcons.playSquare,
+                            size: 16,
+                            color: Color(0xFF34D399),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Explore YouTube Music HiFi • Global Streaming',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? Colors.white : Theme.of(ctx).colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(
+                            LucideIcons.chevronRight,
+                            size: 14,
+                            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              // ─── 5. RECENTLY PLAYED SQUIRCLE GRID (Real Data • 2x2 on Mobile) ──
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -86,8 +156,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         widget.onNavigateToLibrary!();
                       },
                       borderRadius: BorderRadius.circular(6),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         child: Row(
                           children: [
                             Text(
@@ -95,14 +165,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: SimpleAsFTheme.sageSlate,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            SizedBox(width: 2),
+                            const SizedBox(width: 2),
                             Icon(
                               LucideIcons.chevronRight,
                               size: 14,
-                              color: SimpleAsFTheme.sageSlate,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ],
                         ),
@@ -114,14 +184,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
               const SimpleAsFDiscoveryGrid(),
 
-              const SizedBox(height: 24),
-
-              // ─── 2.5 STUDIO WRAPPED & AUDIOPHILE PERSONA RECAP ───────────────
-              const StudioWrappedBentoBanner(),
-
               const SizedBox(height: 26),
 
-              // ─── 3. FAVORITE SONGS & DOWNLOAD TOGGLE ─────────────────────────
+              // ─── 6. LIKED / TOP SONGS (Uncluttered, No Download Toggle) ───────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -140,29 +205,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         widget.onNavigateToLibrary!();
                       },
                       borderRadius: BorderRadius.circular(6),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         child: Text(
                           'View library',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: SimpleAsFTheme.sageSlate,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
                     ),
                 ],
               ),
-              const SizedBox(height: 4),
-
-              // Download Toggle Row matching Dribbble 27089924
-              DownloadToggleRow(
-                isDownloaded: _isOfflineOnly,
-                onToggle: (val) => setState(() => _isOfflineOnly = val),
-              ),
-
-              const SizedBox(height: 4),
+              const SizedBox(height: 12),
 
               // Uncarded floating track list with soft dark active capsule
               if (sampleTracks.isNotEmpty)
@@ -192,11 +249,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                   alignment: Alignment.center,
-                  child: const Text(
+                  child: Text(
                     'No tracks available yet. Scan your music folder in Library.',
                     style: TextStyle(
                       fontSize: 12.5,
-                      color: SimpleAsFTheme.sageSlate,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),

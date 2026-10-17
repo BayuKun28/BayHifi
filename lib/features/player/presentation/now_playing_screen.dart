@@ -354,20 +354,20 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         if (widget.onCollapse != null)
           IconButton(
             onPressed: widget.onCollapse,
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.chevronDown,
               size: 22,
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
             ),
             tooltip: 'Collapse to MiniPlayer',
           )
         else if (Navigator.canPop(context))
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.arrowLeft,
               size: 22,
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
             ),
             tooltip: 'Back',
           )
@@ -383,7 +383,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             fontSize: 11,
             letterSpacing: 1.4,
             textAlign: TextAlign.center,
-            color: SimpleAsFTheme.sageSlate,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
 
@@ -463,10 +463,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   isLyricsActive: _showLyrics,
                 );
               },
-              icon: const Icon(
+              icon: Icon(
                 LucideIcons.moreVertical,
                 size: 22,
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
               ),
               tooltip: 'Playback Options',
             ),
@@ -713,10 +713,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     isLyricsActive: _showLyrics,
                   );
                 },
-                icon: const Icon(
+                icon: Icon(
                   LucideIcons.moreVertical,
                   size: 22,
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                 ),
                 tooltip: 'Playback Options',
               ),
@@ -805,7 +805,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 },
                 icon: Icon(
                   LucideIcons.heart,
-                  color: isFav ? SimpleAsFTheme.emeraldMint : Colors.white.withValues(alpha: 0.7),
+                  color: isFav ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   size: 22,
                 ),
                 tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
@@ -818,11 +818,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   children: [
                     Text(
                       track?.title ?? 'No Track Playing',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.3,
-                        color: Colors.white,
+                        color: theme.colorScheme.onSurface,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -842,10 +842,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                 child: Text(
                                   track.artist,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w500,
-                                    color: SimpleAsFTheme.sageSlate,
+                                    color: theme.colorScheme.onSurfaceVariant,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -854,11 +854,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                             ),
                           ),
                           if (track.album.isNotEmpty) ...[
-                            const Text(
+                            Text(
                               ' • ',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: SimpleAsFTheme.sageSlate,
+                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                               ),
                             ),
                             Flexible(
@@ -869,10 +869,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                   child: Text(
                                     track.album,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w400,
-                                      color: SimpleAsFTheme.sageSlate,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -884,11 +884,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                         ],
                       )
                     else
-                      const Text(
+                      Text(
                         'Select music from library',
                         style: TextStyle(
                           fontSize: 13,
-                          color: SimpleAsFTheme.sageSlate,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                   ],
@@ -907,10 +907,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   backgroundColor: primary,
                   textColor: theme.colorScheme.onPrimary,
                   smallSize: 8,
-                  child: const Icon(
+                  child: Icon(
                     LucideIcons.listMusic,
                     size: 22,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 tooltip: 'Up Next Queue',
@@ -955,7 +955,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           },
           icon: Icon(
             LucideIcons.shuffle,
-            color: playback.isShuffle ? primary : Colors.white.withValues(alpha: 0.6),
+            color: playback.isShuffle ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
             size: 20,
           ),
           tooltip: 'Shuffle Playback',
@@ -972,10 +972,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               AppHaptics.lightImpact();
               ref.read(playerControllerProvider.notifier).skipPrevious();
             },
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.stepBack,
               size: 26,
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
             ),
             tooltip: 'Previous Track',
           ),
@@ -1026,10 +1026,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               AppHaptics.lightImpact();
               ref.read(playerControllerProvider.notifier).skipNext();
             },
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.stepForward,
               size: 26,
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
             ),
             tooltip: 'Next Track',
           ),
@@ -1047,7 +1047,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 : LucideIcons.repeat,
             color: playback.repeatMode != PlaybackRepeatMode.off
                 ? primary
-                : Colors.white.withValues(alpha: 0.6),
+                : theme.colorScheme.onSurface.withValues(alpha: 0.6),
             size: 20,
           ),
           tooltip: 'Repeat Mode (${playback.repeatMode.name.toUpperCase()})',
@@ -1062,7 +1062,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     Track? track,
     EqState eqState,
   ) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.primary;
+    final surfaceContainer = isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainerHighest;
+    final outlineBorder = isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant;
+    final subtleColor = theme.colorScheme.onSurfaceVariant;
+
     final hasDriver = eqState.driverFr != null;
     final hasTarget = eqState.targetFr != null;
 
@@ -1081,10 +1087,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               },
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                height: 30,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: surfaceContainer,
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: outlineBorder, width: 1.0),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1101,10 +1109,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     const SizedBox(width: 4),
                     Text(
                       '${track.sampleRate != null ? (track.sampleRate! / 1000).toStringAsFixed(1) : '44.1'}kHz',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFeatures: AppTypography.audioFigures,
                         fontSize: 10,
-                        color: SimpleAsFTheme.sageSlate,
+                        color: subtleColor,
                       ),
                     ),
                   ],
@@ -1114,183 +1122,142 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             const SizedBox(width: 8),
           ],
 
-          // 2. Pro-Q EQ Button
-          InkWell(
-            onTap: () {
-              AppHaptics.selectionClick();
-              widget.onOpenProQStudio();
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-              decoration: BoxDecoration(
-                color: eqState.isEnabled
-                    ? primary.withValues(alpha: 0.15)
-                    : Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: eqState.isEnabled
-                      ? primary.withValues(alpha: 0.3)
-                      : Colors.transparent,
-                  width: 1,
+          // 2. Pro-Q EQ Icon Button
+          Tooltip(
+            message: eqState.isEnabled ? 'Pro-Q Studio (Active)' : 'Pro-Q Studio (Off)',
+            child: InkWell(
+              onTap: () {
+                AppHaptics.selectionClick();
+                widget.onOpenProQStudio();
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 34,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: surfaceContainer,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: eqState.isEnabled ? primary : outlineBorder,
+                    width: 1.0,
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
+                child: Center(
+                  child: Icon(
                     LucideIcons.sliders,
-                    size: 13,
-                    color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
+                    size: 14,
+                    color: eqState.isEnabled ? primary : subtleColor,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    eqState.isEnabled ? 'EQ ON' : 'EQ',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
-                      color: eqState.isEnabled ? primary : SimpleAsFTheme.sageSlate,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
           const SizedBox(width: 8),
 
-          // 3. Driver Curve Shortcut Modal
-          InkWell(
-            onTap: () {
-              AppHaptics.selectionClick();
-              SavedCurvesLibrarySheet.show(context, initialCategory: 'driver');
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-              decoration: BoxDecoration(
-                color: hasDriver
-                    ? primary.withValues(alpha: 0.15)
-                    : Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: hasDriver
-                      ? primary.withValues(alpha: 0.3)
-                      : Colors.transparent,
-                  width: 1,
+          // 3. Driver Curve Shortcut Icon Button
+          Tooltip(
+            message: hasDriver ? 'Driver: ${eqState.driverFr!.name}' : 'Select Headphone Driver',
+            child: InkWell(
+              onTap: () {
+                AppHaptics.selectionClick();
+                SavedCurvesLibrarySheet.show(context, initialCategory: 'driver');
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 34,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: surfaceContainer,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: hasDriver ? primary : outlineBorder,
+                    width: 1.0,
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
+                child: Center(
+                  child: Icon(
                     LucideIcons.headphones,
-                    size: 13,
-                    color: hasDriver ? primary : SimpleAsFTheme.sageSlate,
+                    size: 14,
+                    color: hasDriver ? primary : subtleColor,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    hasDriver
-                        ? (eqState.driverFr!.name.length > 9
-                            ? '${eqState.driverFr!.name.substring(0, 9)}..'
-                            : eqState.driverFr!.name)
-                        : 'DRIVER',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                      color: hasDriver ? primary : SimpleAsFTheme.sageSlate,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // 4. Target Curve Shortcut Modal
-          InkWell(
-            onTap: () {
-              AppHaptics.selectionClick();
-              SavedCurvesLibrarySheet.show(context, initialCategory: 'target');
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-              decoration: BoxDecoration(
-                color: hasTarget
-                    ? const Color(0xFFFFB74D).withValues(alpha: 0.15)
-                    : Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: hasTarget
-                      ? const Color(0xFFFFB74D).withValues(alpha: 0.3)
-                      : Colors.transparent,
-                  width: 1,
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 4. Target Curve Shortcut Icon Button
+          Tooltip(
+            message: hasTarget ? 'Target: ${eqState.targetFr!.name}' : 'Select Target Response Curve',
+            child: InkWell(
+              onTap: () {
+                AppHaptics.selectionClick();
+                SavedCurvesLibrarySheet.show(context, initialCategory: 'target');
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 34,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: surfaceContainer,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: hasTarget ? const Color(0xFFFFB74D) : outlineBorder,
+                    width: 1.0,
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
                     LucideIcons.target,
-                    size: 13,
-                    color: hasTarget ? const Color(0xFFFFB74D) : SimpleAsFTheme.sageSlate,
+                    size: 14,
+                    color: hasTarget ? const Color(0xFFFFB74D) : subtleColor,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    hasTarget
-                        ? (eqState.targetFr!.name.length > 9
-                            ? '${eqState.targetFr!.name.substring(0, 9)}..'
-                            : eqState.targetFr!.name)
-                        : 'TARGET',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                      color: hasTarget ? const Color(0xFFFFB74D) : SimpleAsFTheme.sageSlate,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
           const SizedBox(width: 8),
 
-          // 5. Lyrics Toggle
-          InkWell(
-            onTap: () {
-              AppHaptics.lightImpact();
-              setState(() => _showLyrics = !_showLyrics);
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _showLyrics
-                    ? SimpleAsFTheme.emeraldMint.withValues(alpha: 0.15)
-                    : Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    LucideIcons.quote,
-                    size: 13,
-                    color: _showLyrics ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
+          // 5. Lyrics Toggle Button with Label for Symmetry with Audio Specs Tag
+          Tooltip(
+            message: _showLyrics ? 'Hide Synchronized Lyrics' : 'Show Synchronized Lyrics',
+            child: InkWell(
+              onTap: () {
+                AppHaptics.lightImpact();
+                setState(() => _showLyrics = !_showLyrics);
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 30,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _showLyrics ? primary : outlineBorder,
+                    width: 1.0,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'LYRICS',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                      color: _showLyrics ? SimpleAsFTheme.emeraldMint : SimpleAsFTheme.sageSlate,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.quote,
+                      size: 13,
+                      color: _showLyrics ? primary : subtleColor,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Text(
+                      'LYRICS',
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                        color: _showLyrics ? primary : subtleColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

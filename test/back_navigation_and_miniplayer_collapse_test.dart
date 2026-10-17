@@ -8,6 +8,8 @@ import 'package:baydev_hifi/features/player/presentation/controllers/player_cont
 import 'package:baydev_hifi/features/player/presentation/controllers/player_expansion_controller.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/namida_expandable_miniplayer.dart';
 import 'package:baydev_hifi/features/library/presentation/unified_library_screen.dart';
+import 'package:baydev_hifi/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:baydev_hifi/features/player/presentation/now_playing_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -99,13 +101,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify Dashboard is visible
-      expect(find.text('BAYDEV HIFI STUDIO'), findsOneWidget);
+      expect(find.byType(DashboardScreen), findsOneWidget);
+      expect(find.text('WELCOME TO BAYDEV HIFI'), findsOneWidget);
 
       // Expand the player screen
       container.read(playerExpansionProvider.notifier).expand();
       await tester.pumpAndSettle();
       expect(container.read(playerExpansionProvider), isTrue);
-      expect(find.text('NOW PLAYING'), findsOneWidget);
+      expect(find.byType(NowPlayingScreen), findsOneWidget);
 
       // Press Android system back button
       final handled = await tester.binding.handlePopRoute();
@@ -114,7 +117,8 @@ void main() {
 
       // Verify app returned to Dashboard with player collapsed as miniplayer
       expect(container.read(playerExpansionProvider), isFalse);
-      expect(find.text('BAYDEV HIFI STUDIO'), findsOneWidget);
+      expect(find.byType(DashboardScreen), findsOneWidget);
+      expect(find.text('WELCOME TO BAYDEV HIFI'), findsOneWidget);
     });
 
     testWidgets('Desktop Layout (>=960px) in BaydevHiFiApp renders DesktopBottomMasterTransportDeck and expands to NowPlayingScreen',

@@ -152,7 +152,9 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
           content: Text(
             'Added ${newTracks.length} tracks to ${_placement == QueueAddPlacement.playNext ? 'play next' : 'queue end'}.',
           ),
-          backgroundColor: const Color(0xFF1E212B),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF1E212B)
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
       );
     } else {
@@ -165,16 +167,19 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isDialog = widget.isDialog;
+    final metaColor = isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant;
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: isDialog
             ? BorderRadius.circular(24)
             : const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 1.0,
         ),
       ),
@@ -193,7 +198,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2E3242),
+                      color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -210,21 +215,21 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                     color: Color(0xFF10B981),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
+                  Text(
                     'Add Tracks to Queue',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: isDark ? Colors.white : theme.colorScheme.onSurface,
                     ),
                   ),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E212B),
+                      color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFF262936), width: 0.8),
+                      border: Border.all(color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant, width: 0.8),
                     ),
                     child: const Text(
                       'SMART MIX',
@@ -252,38 +257,38 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               const SizedBox(height: 18),
 
               // 3. Mode Selection Grid
-              const Text(
+              Text(
                 'SELECT SOURCE & CRITERIA',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0,
-                  color: Color(0xFF8A9A90),
+                  color: metaColor,
                 ),
               ),
               const SizedBox(height: 8),
 
               Row(
                 children: [
-                  _buildModeTile(
+                  _buildModeTile( 
                     label: 'Random',
                     icon: LucideIcons.shuffle,
                     mode: QueueAddSourceMode.smartRandom,
                   ),
                   const SizedBox(width: 8),
-                  _buildModeTile(
+                  _buildModeTile( 
                     label: 'Mood',
                     icon: LucideIcons.sparkles,
                     mode: QueueAddSourceMode.mood,
                   ),
                   const SizedBox(width: 8),
-                  _buildModeTile(
+                  _buildModeTile( 
                     label: 'Similar',
                     icon: LucideIcons.audioLines,
                     mode: QueueAddSourceMode.similarToCurrent,
                   ),
                   const SizedBox(width: 8),
-                  _buildModeTile(
+                  _buildModeTile( 
                     label: 'Favorites',
                     icon: LucideIcons.heart,
                     mode: QueueAddSourceMode.favorites,
@@ -294,13 +299,13 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               // Mood Selector Sub-options
               if (_selectedMode == QueueAddSourceMode.mood) ...[
                 const SizedBox(height: 14),
-                const Text(
+                Text(
                   'TARGET MOOD',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.0,
-                    color: Color(0xFF8A9A90),
+                    color: metaColor,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -321,13 +326,13 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF252834)
-                              : const Color(0xFF16181F),
+                              ? (isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest)
+                              : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFF383D50)
-                                : const Color(0xFF262936),
+                                ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+                                : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
                             width: 0.8,
                           ),
                         ),
@@ -336,7 +341,9 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
+                            color: isSelected
+                                ? (isDark ? Colors.white : theme.colorScheme.onSurface)
+                                : (isDark ? const Color(0xFFA1B2A7) : theme.colorScheme.onSurfaceVariant),
                           ),
                         ),
                       ),
@@ -351,22 +358,22 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'NUMBER OF TRACKS',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.0,
-                      color: Color(0xFF8A9A90),
+                      color: metaColor,
                     ),
                   ),
                   Text(
                     '$_selectedCount tracks',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],
@@ -393,13 +400,13 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF252834)
-                                : const Color(0xFF16181F),
+                                ? (isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest)
+                                : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isSelected
-                                  ? const Color(0xFF383D50)
-                                  : const Color(0xFF262936),
+                                  ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+                                  : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
                               width: 0.8,
                             ),
                           ),
@@ -408,7 +415,9 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                             style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                              color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
+                              color: isSelected
+                                  ? (isDark ? Colors.white : theme.colorScheme.onSurface)
+                                  : (isDark ? const Color(0xFFA1B2A7) : theme.colorScheme.onSurfaceVariant),
                               fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
@@ -422,13 +431,13 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               const SizedBox(height: 18),
 
               // 5. Queue Placement Selector
-              const Text(
+              Text(
                 'QUEUE PLACEMENT',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0,
-                  color: Color(0xFF8A9A90),
+                  color: metaColor,
                 ),
               ),
               const SizedBox(height: 8),
@@ -436,7 +445,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildPlacementOption(
+                    child: _buildPlacementOption( 
                       title: 'Append to End',
                       subtitle: 'Add after current queue',
                       placement: QueueAddPlacement.appendToEnd,
@@ -445,7 +454,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _buildPlacementOption(
+                    child: _buildPlacementOption( 
                       title: 'Play Next',
                       subtitle: 'Insert right after playing',
                       placement: QueueAddPlacement.playNext,
@@ -463,12 +472,12 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                 child: ElevatedButton.icon(
                   onPressed: _executeAdd,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF252834),
-                    foregroundColor: Colors.white,
+                    backgroundColor: isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest,
+                    foregroundColor: isDark ? Colors.white : theme.colorScheme.onSurface,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(color: Color(0xFF2E3242), width: 1),
+                      side: BorderSide(color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant, width: 1),
                     ),
                   ),
                   icon: const Icon(LucideIcons.plus, size: 16),
@@ -496,6 +505,8 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
     required IconData icon,
     required QueueAddSourceMode mode,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _selectedMode == mode;
 
     return Expanded(
@@ -511,11 +522,13 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFF252834)
-                : const Color(0xFF16181F),
+                ? (isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest)
+                : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? const Color(0xFF383D50) : const Color(0xFF262936),
+              color: isSelected
+                  ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+                  : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
               width: 0.8,
             ),
           ),
@@ -525,7 +538,9 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
               Icon(
                 icon,
                 size: 16,
-                color: isSelected ? Colors.white : const Color(0xFF8A9A90),
+                color: isSelected
+                    ? (isDark ? Colors.white : theme.colorScheme.onSurface)
+                    : (isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 4),
               Text(
@@ -533,7 +548,9 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                 style: TextStyle(
                   fontSize: 10.5,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
+                  color: isSelected
+                      ? (isDark ? Colors.white : theme.colorScheme.onSurface)
+                      : (isDark ? const Color(0xFFA1B2A7) : theme.colorScheme.onSurfaceVariant),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -551,7 +568,10 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
     required QueueAddPlacement placement,
     required IconData icon,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _placement == placement;
+    final meta = isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant;
 
     return InkWell(
       borderRadius: BorderRadius.circular(10),
@@ -565,11 +585,13 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF20232E)
-              : const Color(0xFF16181F),
+              ? (isDark ? const Color(0xFF20232E) : theme.colorScheme.surfaceContainerHighest)
+              : (isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? const Color(0xFF383D50) : const Color(0xFF262936),
+            color: isSelected
+                ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.outline)
+                : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
             width: 0.8,
           ),
         ),
@@ -578,7 +600,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? const Color(0xFF10B981) : const Color(0xFF8A9A90),
+              color: isSelected ? const Color(0xFF10B981) : meta,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -590,16 +612,18 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
+                      color: isSelected
+                          ? (isDark ? Colors.white : theme.colorScheme.onSurface)
+                          : (isDark ? const Color(0xFFA1B2A7) : theme.colorScheme.onSurfaceVariant),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 9.5,
-                      color: Color(0xFF8A9A90),
+                      color: meta,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

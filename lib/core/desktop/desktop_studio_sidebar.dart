@@ -68,16 +68,27 @@ class DesktopStudioSidebar extends ConsumerWidget {
       ),
     ];
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sidebarBg = isDark ? const Color(0xFF0D0E12) : Theme.of(context).colorScheme.surface;
+    final sidebarBorder = isDark ? const Color(0xFF262936) : Theme.of(context).colorScheme.outlineVariant;
+    final cardBg = isDark ? const Color(0xFF16181F) : Theme.of(context).colorScheme.surfaceContainer;
+    final elevatedBg = isDark ? const Color(0xFF1E212B) : Theme.of(context).colorScheme.surfaceContainerHighest;
+    final iconColor = isDark ? const Color(0xFFA1B2A7) : Theme.of(context).colorScheme.onSurfaceVariant;
+    final textColor = isDark ? Colors.white : Theme.of(context).colorScheme.onSurface;
+    final selectedBg = isDark ? const Color(0xFF222532) : Theme.of(context).colorScheme.primaryContainer;
+    final selectedBorder = isDark ? const Color(0xFF383D50) : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3);
+    final unselectedText = isDark ? const Color(0xFFA1B2A7) : Theme.of(context).colorScheme.onSurfaceVariant;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeInOutCubic,
       clipBehavior: Clip.hardEdge,
       width: effectiveIsCompact ? 76 : 220,
-      decoration: const BoxDecoration(
-        color: Color(0xFF0D0E12),
+      decoration: BoxDecoration(
+        color: sidebarBg,
         border: Border(
           right: BorderSide(
-            color: Color(0xFF262936),
+            color: sidebarBorder,
             width: 1.0,
           ),
         ),
@@ -105,10 +116,10 @@ class DesktopStudioSidebar extends ConsumerWidget {
                             width: 38,
                             height: 38,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF16181F),
+                              color: cardBg,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: const Color(0xFF262936),
+                                color: sidebarBorder,
                                 width: 1.0,
                               ),
                             ),
@@ -135,17 +146,17 @@ class DesktopStudioSidebar extends ConsumerWidget {
                                 height: 28,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E212B),
+                                  color: elevatedBg,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: const Color(0xFF262936),
+                                    color: sidebarBorder,
                                     width: 0.8,
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   LucideIcons.panelLeftOpen,
                                   size: 14,
-                                  color: Color(0xFFA1B2A7),
+                                  color: iconColor,
                                 ),
                               ),
                             ),
@@ -158,10 +169,10 @@ class DesktopStudioSidebar extends ConsumerWidget {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF16181F),
+                              color: cardBg,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: const Color(0xFF262936),
+                                color: sidebarBorder,
                                 width: 1.0,
                               ),
                             ),
@@ -175,7 +186,7 @@ class DesktopStudioSidebar extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
@@ -186,11 +197,11 @@ class DesktopStudioSidebar extends ConsumerWidget {
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: -0.2,
-                                    color: Colors.white,
+                                    color: textColor,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                Text(
+                                const Text(
                                   'STUDIO MASTER',
                                   style: TextStyle(
                                     fontSize: 8.5,
@@ -213,17 +224,17 @@ class DesktopStudioSidebar extends ConsumerWidget {
                               child: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E212B),
+                                  color: elevatedBg,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: const Color(0xFF262936),
+                                    color: sidebarBorder,
                                     width: 0.8,
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   LucideIcons.panelLeftClose,
                                   size: 14,
-                                  color: Color(0xFFA1B2A7),
+                                  color: iconColor,
                                 ),
                               ),
                             ),
@@ -232,7 +243,7 @@ class DesktopStudioSidebar extends ConsumerWidget {
                       ),
               ),
 
-              const Divider(height: 1, color: Color(0xFF262936)),
+              Divider(height: 1, color: sidebarBorder),
               const SizedBox(height: 10),
 
               // ─── Navigation Items ──────────────────────────────
@@ -259,15 +270,10 @@ class DesktopStudioSidebar extends ConsumerWidget {
                           height: 44,
                           padding: EdgeInsets.symmetric(horizontal: effectiveIsCompact ? 14 : 14),
                           decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0xFF222532)
-                                : Colors.transparent,
+                            color: isSelected ? selectedBg : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
-                                ? Border.all(
-                                    color: const Color(0xFF383D50),
-                                    width: 0.8,
-                                  )
+                                ? Border.all(color: selectedBorder, width: 0.8)
                                 : null,
                           ),
                           child: Row(
@@ -276,9 +282,7 @@ class DesktopStudioSidebar extends ConsumerWidget {
                             children: [
                               Icon(
                                 item.icon,
-                                color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xFF8A9A90),
+                                color: isSelected ? textColor : iconColor,
                                 size: 18,
                               ),
                               if (!effectiveIsCompact) ...[
@@ -289,9 +293,7 @@ class DesktopStudioSidebar extends ConsumerWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFFA1B2A7),
+                                      color: isSelected ? textColor : unselectedText,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -300,10 +302,10 @@ class DesktopStudioSidebar extends ConsumerWidget {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF1E212B),
+                                      color: elevatedBg,
                                       borderRadius: BorderRadius.circular(5),
                                       border: Border.all(
-                                        color: const Color(0xFF262936),
+                                        color: sidebarBorder,
                                         width: 0.8,
                                       ),
                                     ),
@@ -338,7 +340,7 @@ class DesktopStudioSidebar extends ConsumerWidget {
               ),
 
               // ─── Footer: Telemetry & Shortcuts ──────────────────
-              const Divider(height: 1, color: Color(0xFF262936)),
+              Divider(height: 1, color: sidebarBorder),
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: effectiveIsCompact ? 8 : 14,
@@ -365,9 +367,9 @@ class DesktopStudioSidebar extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 isNavidromeConnected ? 'Navidrome Sync' : 'Local Storage',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
-                                  color: Color(0xFF8A9A90),
+                                  color: iconColor,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -385,38 +387,38 @@ class DesktopStudioSidebar extends ConsumerWidget {
                       child: Container(
                         height: 38,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF16181F),
+                          color: cardBg,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF262936),
+                            color: sidebarBorder,
                             width: 0.8,
                           ),
                         ),
                         alignment: Alignment.center,
                         child: effectiveIsCompact
-                            ? const Tooltip(
+                            ? Tooltip(
                                 message: 'Studio Shortcuts',
                                 child: Icon(
                                   LucideIcons.keyboard,
-                                  color: Color(0xFFA1B2A7),
+                                  color: iconColor,
                                   size: 16,
                                 ),
                               )
-                            : const Row(
+                            : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     LucideIcons.keyboard,
-                                    color: Color(0xFFA1B2A7),
+                                    color: iconColor,
                                     size: 15,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
                                     'Shortcuts',
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFFA1B2A7),
+                                      color: iconColor,
                                     ),
                                   ),
                                 ],

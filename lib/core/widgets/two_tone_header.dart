@@ -35,7 +35,8 @@ class TwoToneHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pColor = primaryColor ?? SimpleAsFTheme.textWhite;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pColor = primaryColor ?? (isDark ? SimpleAsFTheme.textWhite : const Color(0xFF0F172A));
     final aColor = accentColor ?? SimpleAsFTheme.accent(context);
 
     final headerText = Text.rich(

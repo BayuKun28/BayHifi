@@ -116,10 +116,15 @@ class ThermalReceiptView extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'TERMINAL: BIT-PERFECT FLAC',
-                      style: monoStyle.copyWith(fontSize: 8.5, color: mutedInk),
+                    Flexible(
+                      child: Text(
+                        'TERMINAL: BIT-PERFECT FLAC',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: monoStyle.copyWith(fontSize: 8.5, color: mutedInk),
+                      ),
                     ),
+                    const SizedBox(width: 4),
                     Text(
                       'AUTH: MASTERED',
                       style: monoStyle.copyWith(fontSize: 8.5, color: mutedInk),

@@ -1,24 +1,32 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:baydev_hifi/core/database/local_persistence_service.dart';
 import 'package:baydev_hifi/features/player/presentation/widgets/now_playing_queue_sheet.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
-    Directory('/tmp/bayhifi_shuffle_test_dir').createSync(recursive: true);
-    const channel = MethodChannel('plugins.flutter.io/path_provider');
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      return '/tmp/bayhifi_shuffle_test_dir';
-    });
+  late Directory tempDir;
+
+  setUp(() async {
+    tempDir = await Directory.systemTemp.createTemp('bayhifi_shuffle_test_');
+    await LocalPersistenceService.instance.init(
+      customPath: '${tempDir.path}/test_storage.json',
+    );
+  });
+
+  tearDown(() async {
+    try {
+      if (tempDir.existsSync()) {
+        await tempDir.delete(recursive: true);
+      }
+    } catch (_) {}
   });
 
   final List<Track> sampleAlbumTracks = List.generate(

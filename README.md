@@ -18,16 +18,17 @@
 
 ---
 
-## UI Framework: Pure `material_3_expressive`
+## UI Framework & Design: Simple-As-F Minimalist Architecture
 
-Baydev HiFi mandates 100% adoption of `material_3_expressive`:
-- **App Shell**: `M3EMaterialApp` + `M3EThemeData` with dynamic coloring and under-system-bars layout.
-- **Actions**: `M3EButton`, `M3EIconButton`, `M3EFab`, `M3EFabMenu`, `M3ESegmentedButton`, `M3EButtonGroup`.
-- **Containment**: `M3ECard` (Bento Grid cards), `M3ECarousel`, `M3EListTile`, `M3EBottomSheet`, `M3EDialog`.
-- **Inputs**: `M3ESlider` (continuous, discrete, wavy), `M3ESwitch`, `M3ECheckbox`, `M3EChip`, `M3ETextField`.
-- **Navigation**: `M3ENavigationBar`, `M3EAppBar`, `M3ESearchBar`, `M3EToolbar`, `M3ETabBar`.
-- **Feedback**: `M3EBadge`, `M3EProgressIndicator`, `M3ELoadingIndicator`, `M3ESnackbar`, `M3ETooltip`.
-- **Iconography**: Unified vector stroke iconography via `lucide_icons_flutter` (`LucideIcons.*`) with strict zero-emoji policy.
+Baydev HiFi adopts the **Simple-As-F Minimalist Architecture** (Dribbble 27089924 reference):
+- **Design Philosophy**: Extreme minimalism, uncluttered surfaces, high breathability, two-tone colored typography, and pure solid audiophile dark surfaces.
+- **Color Atmosphere**: Neutral Matte Obsidian Carbon (`#0D0E12` / `#08090B`), Solid Studio Charcoal (`#16181F`), Active Playing Capsule (`#1E212B`), and Clean Studio Emerald Mint (`#10B981` / `#34D399`).
+- **Core Screens**:
+  - **Now Playing**: Squircle artwork (`borderRadius: 28–32px`), interactive waveform seekbar with tabular audio figures, minimalist playback controls, and a compact auxiliary action bar (34x34px solid icon buttons).
+  - **Dashboard**: Studio Wrapped recap banner, Discovery Smart Mix suggestion banner, quick YouTube HiFi launcher, persistent Recently Played 2x2 mobile grid, and clean floating liked tracks.
+  - **Library**: High-visibility YouTube HiFi streaming tab (position 2), quick streaming AppBar launcher, and uncarded floating track list with proportional active capsule padding.
+- **Iconography**: Unified vector stroke iconography via `lucide_icons_flutter` (`LucideIcons.*`) with strict zero-emoji and pure-solid (anti-neon) policies.
+- **M3 Expressive Integration**: Selectively integrated for smooth physics (`motor` spring curves) and specialized controls (`M3ESwitch`, `M3ESlider`).
 
 ---
 

@@ -249,6 +249,7 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
             targetChipset: device.chipset,
           );
 
+          if (!mounted) return;
           state = state.copyWith(
             status: DacBridgeStatus.connected,
             device: () => device,
@@ -263,12 +264,14 @@ class DacBridgeController extends StateNotifier<DacBridgeState> {
         }
       }
 
+      if (!mounted) return;
       state = state.copyWith(
         status: DacBridgeStatus.disconnected,
         device: () => null,
         statusBannerMessage: () => 'No supported USB DAC detected.',
       );
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         status: DacBridgeStatus.error,
         errorMessage: () => 'Connection failed: $e',

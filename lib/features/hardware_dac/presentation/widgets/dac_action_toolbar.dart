@@ -32,12 +32,21 @@ class DacActionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final metaColor = isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF262936), width: 1.0),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+          width: 1.0,
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -45,19 +54,19 @@ class DacActionToolbar extends StatelessWidget {
           // Row 1: Preset Quick Selection
           Row(
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.bookmark,
                 size: 15,
-                color: Color(0xFF8A9A90),
+                color: metaColor,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'PRESETS:',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.8,
-                  color: Color(0xFF8A9A90),
+                  color: metaColor,
                 ),
               ),
               const SizedBox(width: 8),
@@ -75,16 +84,19 @@ class DacActionToolbar extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E212B),
+                                color: isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFF262936), width: 0.8),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+                                  width: 0.8,
+                                ),
                               ),
                               child: Text(
                                 preset.name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFFE6EAE7),
+                                  color: isDark ? const Color(0xFFE6EAE7) : colorScheme.onSurface,
                                 ),
                               ),
                             ),
@@ -99,17 +111,20 @@ class DacActionToolbar extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF252834),
+                              color: isDark ? const Color(0xFF252834) : colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFF383D50), width: 0.8),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF383D50) : colorScheme.outlineVariant,
+                                width: 0.8,
+                              ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'MANAGE ALL',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.5,
-                                color: Color(0xFF10B981),
+                                color: isDark ? const Color(0xFF10B981) : colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ),
@@ -123,7 +138,10 @@ class DacActionToolbar extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1, color: Color(0xFF262936)),
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+          ),
           const SizedBox(height: 12),
 
           // Row 2: Action Buttons
@@ -134,6 +152,7 @@ class DacActionToolbar extends StatelessWidget {
             children: [
               // Burn to Flash (Primary Action)
               _buildButton(
+                context,
                 label: 'Burn to Flash',
                 icon: LucideIcons.save,
                 isPrimary: true,
@@ -142,6 +161,7 @@ class DacActionToolbar extends StatelessWidget {
 
               // Save Current Tuning as Named Profile
               _buildButton(
+                context,
                 label: 'Save Profile',
                 icon: LucideIcons.bookmarkPlus,
                 onPressed: isConnected && !isBusy ? () => SaveDacProfileDialog.show(context) : null,
@@ -149,6 +169,7 @@ class DacActionToolbar extends StatelessWidget {
 
               // Import AutoEQ
               _buildButton(
+                context,
                 label: 'AutoEQ Import',
                 icon: LucideIcons.download,
                 onPressed: isConnected && !isBusy ? onImportAutoEq : null,
@@ -156,6 +177,7 @@ class DacActionToolbar extends StatelessWidget {
 
               // Sync / Read from Hardware
               _buildButton(
+                context,
                 label: 'Read DAC',
                 icon: LucideIcons.refreshCw,
                 onPressed: isConnected && !isBusy ? onReadFromHardware : null,
@@ -163,6 +185,7 @@ class DacActionToolbar extends StatelessWidget {
 
               // Factory Reset
               _buildButton(
+                context,
                 label: 'Reset Flat',
                 icon: LucideIcons.rotateCcw,
                 onPressed: isConnected && !isBusy ? onResetDefault : null,
@@ -174,27 +197,39 @@ class DacActionToolbar extends StatelessWidget {
     );
   }
 
-  Widget _buildButton({
+  Widget _buildButton(
+    BuildContext context, {
     required String label,
     required IconData icon,
     required VoidCallback? onPressed,
     bool isPrimary = false,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final primaryBg = isDark ? const Color(0xFF252834) : colorScheme.primaryContainer;
+    final primaryFg = isDark ? const Color(0xFF10B981) : colorScheme.onPrimaryContainer;
+    final secondaryBg = isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest;
+    final secondaryFg = isDark ? Colors.white : colorScheme.onSurface;
+
     return SizedBox(
       height: 36,
       child: ElevatedButton.icon(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? const Color(0xFF252834) : const Color(0xFF1E212B),
-          foregroundColor: isPrimary ? const Color(0xFF10B981) : Colors.white,
-          disabledBackgroundColor: const Color(0xFF16181F),
-          disabledForegroundColor: const Color(0xFF4B5563),
+          backgroundColor: isPrimary ? primaryBg : secondaryBg,
+          foregroundColor: isPrimary ? primaryFg : secondaryFg,
+          disabledBackgroundColor: isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainerLow,
+          disabledForegroundColor: isDark ? const Color(0xFF4B5563) : colorScheme.onSurface.withValues(alpha: 0.38),
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(
-              color: isPrimary ? const Color(0xFF383D50) : const Color(0xFF262936),
+              color: isPrimary
+                  ? (isDark ? const Color(0xFF383D50) : colorScheme.primary.withValues(alpha: 0.4))
+                  : (isDark ? const Color(0xFF262936) : colorScheme.outlineVariant),
               width: 0.8,
             ),
           ),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/theme_mode_controller.dart';
@@ -134,7 +135,7 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
         clearError: true,
       );
 
-      // Pull remote user settings & playback history logs if available
+      // Pull remote user settings, playback history logs & DSP profile if available
       try {
         if (state.token != null) {
           final remoteSettings = await _service.fetchUserSettings(
@@ -151,6 +152,13 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
           if (remoteLogs.isNotEmpty) {
             await LocalPersistenceService.instance.importPlaybackLogs(remoteLogs);
           }
+          final remoteDsp = await _service.fetchDspProfile(
+            serverUrl: state.serverUrl,
+            token: state.token!,
+          );
+          if (remoteDsp != null) {
+            _importRemoteDspProfile(remoteDsp);
+          }
         }
       } catch (e) {
         debugPrint('[CloudAuthController] Remote hydration error: $e');
@@ -159,8 +167,8 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
       // Auto-apply user configuration dynamically into UI and audio engine
       _autoApplyUserConfiguration();
 
-      // Immediate sync on successful login
-      syncNow();
+      // Immediate bidirectional sync on successful login (push & finalize)
+      await syncNow();
       return true;
     } else {
       state = state.copyWith(
@@ -201,7 +209,7 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
       );
 
       _autoApplyUserConfiguration();
-      syncNow();
+      await syncNow();
       return true;
     } else {
       state = state.copyWith(
@@ -240,15 +248,99 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
     );
   }
 
+  /// Import and apply remote DSP & AutoEQ profile into local persistence & VirtualDspService
+  void _importRemoteDspProfile(Map<String, dynamic> remoteDsp) {
+    try {
+      final rawBands = remoteDsp['bands'];
+      List<Map<String, dynamic>> bands = [];
+      if (rawBands is List) {
+        bands = rawBands.map((b) => Map<String, dynamic>.from(b as Map)).toList();
+      } else if (rawBands is String && rawBands.isNotEmpty) {
+        final decoded = jsonDecode(rawBands);
+        if (decoded is List) {
+          bands = decoded.map((b) => Map<String, dynamic>.from(b as Map)).toList();
+        }
+      }
+
+      if (bands.isNotEmpty) {
+        LocalPersistenceService.instance.saveActiveEqState(
+          bands: bands,
+          preampDb: (remoteDsp['safePreampDb'] as num?)?.toDouble() ?? 0.0,
+          activePresetName: remoteDsp['activePresetName'] as String? ?? 'Cloud Reference',
+          lastDriverName: remoteDsp['driverName'] as String?,
+          lastTargetName: remoteDsp['targetName'] as String?,
+          isAutoEqActive: remoteDsp['isAutoEqActive'] as bool? ?? false,
+          isEnabled: true,
+          preserveCurvesIfNull: true,
+        );
+      }
+
+      dynamic toggles = remoteDsp['dspToggles'];
+      if (toggles is String && toggles.isNotEmpty) {
+        try {
+          toggles = jsonDecode(toggles);
+        } catch (_) {}
+      }
+      if (toggles is Map) {
+        final dsp = VirtualDspService.instance;
+        if (toggles['tubeEnabled'] != null) dsp.toggleTubeExciter(toggles['tubeEnabled'] == true);
+        if (toggles['limiterEnabled'] != null) dsp.toggleLimiter(toggles['limiterEnabled'] == true);
+        if (toggles['reverbEnabled'] != null) dsp.toggleReverb(toggles['reverbEnabled'] == true);
+        if (toggles['crossfeedEnabled'] != null) dsp.toggleCrossfeed(toggles['crossfeedEnabled'] == true);
+        if (toggles['bassBoostEnabled'] != null) dsp.toggleBassBoost(toggles['bassBoostEnabled'] == true);
+        if (toggles['stereoWidthEnabled'] != null) dsp.toggleStereoWidth(toggles['stereoWidthEnabled'] == true);
+      }
+    } catch (e) {
+      debugPrint('[CloudAuthController] Remote DSP import error: $e');
+    }
+  }
+
   /// Sinkronisasi log pemutaran (Studio Wrapped), AutoEQ / DSP profil, dan pengaturan pengguna
-  Future<void> syncNow() async {
+  /// Melakukan sinkronisasi dua arah (GET data remote terlebih dahulu, lalu PUSH pembaruan lokal)
+  /// Mengembalikan true jika sinkronisasi berhasil, false jika gagal.
+  Future<bool> syncNow() async {
     // ATURAN KETAT: Jika tidak login, sama sekali tidak melakukan koneksi/sync!
     if (!state.isAuthenticated || state.token == null) {
-      return;
+      return false;
     }
 
+    if (state.isSyncing) {
+      return false;
+    }
+
+    state = state.copyWith(isSyncing: true, clearError: true);
+
     try {
-      // 1. Ambil log pemutaran lokal
+      // 1. GET / PULL: Ambil data remote terbaru jika ada
+      try {
+        final remoteSettings = await _service.fetchUserSettings(
+          serverUrl: state.serverUrl,
+          token: state.token!,
+        );
+        if (remoteSettings != null && remoteSettings.isNotEmpty) {
+          await LocalPersistenceService.instance.importCurrentUserSettings(remoteSettings, overwrite: false);
+        }
+
+        final remoteLogs = await _service.fetchPlaybackLogs(
+          serverUrl: state.serverUrl,
+          token: state.token!,
+        );
+        if (remoteLogs.isNotEmpty) {
+          await LocalPersistenceService.instance.importPlaybackLogs(remoteLogs);
+        }
+
+        final remoteDsp = await _service.fetchDspProfile(
+          serverUrl: state.serverUrl,
+          token: state.token!,
+        );
+        if (remoteDsp != null) {
+          _importRemoteDspProfile(remoteDsp);
+        }
+      } catch (e) {
+        debugPrint('[CloudAuthController] Sync pull error: $e');
+      }
+
+      // 2. PUSH: Ambil log pemutaran lokal dan kirim ke cloud
       final rawLogs = LocalPersistenceService.instance.getPlaybackHistoryLogs();
       if (rawLogs.isNotEmpty) {
         await _service.syncPlaybackLogs(
@@ -258,7 +350,7 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
         );
       }
 
-      // 2. Ambil profil AutoEQ & DSP aktif
+      // 3. PUSH: Ambil profil AutoEQ & DSP aktif dan kirim ke cloud
       final eqData = LocalPersistenceService.instance.getActiveEqState();
       final dspService = VirtualDspService.instance;
       final dspPayload = {
@@ -278,28 +370,49 @@ class CloudAuthController extends StateNotifier<CloudAuthState> {
         },
       };
 
-      await _service.syncDspProfile(
+      final dspSynced = await _service.syncDspProfile(
         serverUrl: state.serverUrl,
         token: state.token!,
         dspData: dspPayload,
       );
 
-      // 3. Sinkronkan seluruh bundel pengaturan pengguna
+      // 4. PUSH: Sinkronkan seluruh bundel pengaturan pengguna ke cloud
       final settingsBundle = LocalPersistenceService.instance.exportCurrentUserSettings();
+      bool settingsSynced = true;
       if (settingsBundle.isNotEmpty) {
-        await _service.saveUserSettings(
+        settingsSynced = await _service.saveUserSettings(
           serverUrl: state.serverUrl,
           token: state.token!,
           settings: settingsBundle,
         );
       }
 
-      state = state.copyWith(
-        lastSyncedAt: DateTime.now(),
-        pendingSyncCount: 0,
-      );
+      final isSuccess = dspSynced && settingsSynced;
+
+      if (isSuccess) {
+        state = state.copyWith(
+          isSyncing: false,
+          lastSyncedAt: DateTime.now(),
+          pendingSyncCount: 0,
+        );
+
+        // 5. Terapkan konfigurasi ke UI & audio engine
+        _autoApplyUserConfiguration();
+        return true;
+      } else {
+        state = state.copyWith(
+          isSyncing: false,
+          errorMessage: 'Server synchronization failed or timed out',
+        );
+        return false;
+      }
     } catch (e) {
       debugPrint('[CloudAuthController] Sync failed: $e');
+      state = state.copyWith(
+        isSyncing: false,
+        errorMessage: 'Sync failed: $e',
+      );
+      return false;
     }
   }
 }

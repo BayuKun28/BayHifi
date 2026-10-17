@@ -18,14 +18,16 @@ class DacGlobalGainCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final clampedGain = globalGainDb.clamp(-18.0, 3.0);
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 0.8,
         ),
       ),
@@ -42,22 +44,25 @@ class DacGlobalGainCard extends StatelessWidget {
                   height: 32,
                   decoration: BoxDecoration(
                     color: isConnected
-                        ? const Color(0xFF222532)
-                        : const Color(0xFF1E212B),
+                        ? (isDark ? const Color(0xFF222532) : theme.colorScheme.primaryContainer)
+                        : (isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF262936), width: 0.8),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
+                      width: 0.8,
+                    ),
                   ),
                   alignment: Alignment.center,
                   child: Icon(
                     LucideIcons.volume2,
                     color: isConnected
-                        ? const Color(0xFF10B981)
-                        : const Color(0xFF8A9A90),
+                        ? (isDark ? const Color(0xFF10B981) : theme.colorScheme.primary)
+                        : (isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant),
                     size: 16,
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -66,13 +71,13 @@ class DacGlobalGainCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: isDark ? Colors.white : theme.colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         'Hardware analog volume / digital headroom',
                         style: TextStyle(
-                          color: Color(0xFF8A9A90),
+                          color: isDark ? const Color(0xFF8A9A90) : theme.colorScheme.onSurfaceVariant,
                           fontSize: 11,
                         ),
                       ),
@@ -85,13 +90,13 @@ class DacGlobalGainCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: clampedGain > 0
-                        ? const Color(0xFF2A2416)
-                        : const Color(0xFF1E212B),
+                        ? (isDark ? const Color(0xFF2A2416) : const Color(0xFFFEF3C7))
+                        : (isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHighest),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: clampedGain > 0
                           ? const Color(0xFFF59E0B)
-                          : const Color(0xFF262936),
+                          : (isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant),
                       width: 0.8,
                     ),
                   ),
@@ -99,8 +104,8 @@ class DacGlobalGainCard extends StatelessWidget {
                     '${clampedGain >= 0 ? '+' : ''}${clampedGain.toStringAsFixed(1)} dB',
                     style: TextStyle(
                       color: clampedGain > 0
-                          ? const Color(0xFFFBBF24)
-                          : Colors.white,
+                          ? const Color(0xFFD97706)
+                          : (isDark ? Colors.white : theme.colorScheme.onSurface),
                       fontFeatures: const [FontFeature.tabularFigures()],
                       fontWeight: FontWeight.w700,
                       fontSize: 11,

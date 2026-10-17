@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 84 Fase (Fase 1–84 Selesai • 100% Passing)
+- **Total Fase**: 88 Fase (Fase 1–88 Selesai • 100% Passing)
 - **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Neutral Matte Obsidian Carbon Palette (`#0D0E12`, `#16181F`, `#1E212B`, `#252834`), Pure Solid Surfaces (100% Opaque, No Translucent Soft Tint, No Neon Glow Halo Shadows), Lucide Vector Stroke Iconography (`lucide_icons_flutter`), Responsive Workstations (Mobile / Desktop / Tablet Dual-Pane), Two-Tone Typography, Tabular Audio Figures, Zero Emojis (100% English)_
-- **Status Proyek**: _Phase 84: Full Repository Icon Migration to Lucide Icons, Pure Solid & No-Neon Policy Enforcement, Active Track Badge Collision Fix, Desktop Mobile Window CSD Safety, Driver & Target Curves Quick-Access Shortcuts Complete (53/53 Migrated Tests Passing, 0 Lint Warnings, 0 Errors)_
+- **Status Proyek**: _Phase 88: Library Source Filter Counter Synchronization & Cloud Account Bidirectional Sync Overhaul Complete_
 
 ---
 
@@ -2269,3 +2269,128 @@ Rombak total tampilan aplikasi sesuai arahan user dan panduan `taste-skill` / `m
   - [x] Perbarui [rules.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/rules.md) dan [GEMINI.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/GEMINI.md) untuk mendokumentasikan sistem ikon Lucide, kebijakan Pure Solid Anti-Neon, dan standar CSD offset desktop.
   - [x] `flutter analyze`: 0 errors, 0 warnings.
   - [x] `flutter test`: 100% passing pada seluruh test suite yang dimigrasikan (53 unit & widget tests).
+
+---
+
+## Fase 85: UI Polish, Dialog Solidification, Compact NowPlaying Auxiliary Bar, Dashboard Overhaul & YouTube Music HiFi Integration
+
+- [x] **85.1 Active Track Tile Padding & Collision Fix**:
+  - [x] Beri ruang napas vertikal (`minVerticalPadding: 8`, `bottom: 12`) pada `TrackTile` sehingga border kapsul aktif tidak menabrak format badge ("WAV 44.1kHz 03:57").
+- [x] **85.2 AutoEQ Modal Dialog Solidification**:
+  - [x] Ubah tombol `"APPLY TO DSP"` dan tombol aksi kategori target dari wireframe/neon menyala menjadi solid studio buttons (`#1E212B` dengan outline emerald `#10B981` dan teks putih).
+- [x] **85.3 AutoEQ Cloud Browser Buttons Visibility**:
+  - [x] Ganti icon hitam pada tombol `"SET TARGET"` / `"SET DRIVER"` menjadi icon aksen kontras tinggi (Amber `#FFB74D` / Mint `#10B981`) pada container solid `#1E212B`.
+  - [x] Perbaiki tombol `"SOLVE"` mini solid `#252834` dengan icon Lucide play dan label teks yang terbaca jelas.
+- [x] **85.4 Compact Now Playing Auxiliary Action Bar**:
+  - [x] Ubah kontrol EQ, Driver, Target, Lyrics, dan Queue menjadi deretan compact icon buttons 34x34px berpermukaan solid studio charcoal `#16181F` dengan border `#262936` dan tooltip deskriptif, menyisakan format badge audio ringkas tanpa horizontal overflow pada layar mobile.
+- [x] **85.5 Dashboard Architecture & Recently Played Overhaul**:
+  - [x] Pindahkan Studio Wrapped Recap banner ke atas Recently Played.
+  - [x] Hubungkan `SimpleAsFDiscoveryGrid` ke riwayat putar nyata `LocalPersistenceService.instance.getPlaybackHistory()`.
+  - [x] Kunci tampilan Recently Played pada format **Grid 2x2** (4 kartu) pada layar mobile (<650px).
+  - [x] Hapus `DownloadToggleRow` di atas daftar lagu Dashboard agar antarmuka bersih dan bernapas.
+  - [x] Kembalikan `StudioInstantMixBanner` bertenaga `InstantMixEngine` dengan estetika solid matte obsidian.
+- [x] **85.6 YouTube Music HiFi Integration**:
+  - [x] Tempatkan tab `YouTube HiFi` di urutan ke-2 tepat di samping `Tracks` pada tab kategori Library.
+  - [x] Sediakan tombol streaming cepat di AppBar Library dan kapsul launcher YouTube HiFi di Dashboard.
+- [x] **85.7 Sinkronisasi Dokumentasi & Pengujian**:
+  - [x] Perbarui [rules.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/rules.md), [GEMINI.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/GEMINI.md), [AGENTS.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/AGENTS.md), dan [README.md](file:///mnt/01DC9A2666E1A190/Other/PROJECTS/BayHifi/README.md) agar 100% konsisten dengan desain terkini.
+
+---
+
+## Fase 86: Universal Light Mode & Dark Mode Card Visibility Overhaul
+
+Audit menyeluruh dan perbaikan tampilan kartu, kontras teks, border, dan tombol aksi di seluruh aplikasi saat Light Mode aktif, memastikan tidak ada lagi kartu hitam atau teks tak terbaca saat beralih antara Dark Mode dan Light Mode.
+
+- [x] **86.1 Dashboard & Home Banners & Discovery Grid**:
+  - [x] Di `SimpleAsFDiscoveryGrid`: Buat squircle card container, border, shadow, empty state fallback, teks judul lagu, dan artis adaptif terhadap `isDark` (`onSurface` pada Light Mode, `outlineVariant` untuk border).
+  - [x] Di `StudioWrappedBentoBanner`: Adaptasikan tombol "PLAY RECAP STORY" dan "TEMPLATES" ke `colorScheme.primary` / `surfaceContainerHighest` saat Light Mode aktif.
+  - [x] Di `StudioInstantMixBanner`: Adaptasikan background kartu, tag "STUDIO SMART MIX", subtitle seed track, dan tombol "START SMART MIX" ke skema warna terang.
+  - [x] Di `DashboardScreen`: Adaptasikan tombol "See all", chevron, teks empty state, dan kapsul launcher streaming YouTube HiFi.
+- [x] **86.2 Library & Filter Chips Adaptability**:
+  - [x] Di `UnifiedLibraryScreen`: Adaptasikan audio source filter chips (`_buildSourceChip`) dari container hitam `#252834` menjadi `primaryContainer` / `onPrimaryContainer` saat Light Mode aktif.
+- [x] **86.3 Pro-Q Studio Dialogs**:
+  - [x] Di `AutoEqModalDialog` & `AutoEqCloudBrowserDialog`: Adaptasikan tombol aksi "APPLY TO DSP", "SOLVE", dan "SET TARGET / DRIVER" ke tema terang dengan kontras tinggi.
+- [x] **86.4 Hardware DAC Studio Suite**:
+  - [x] Di `HardwareDacStudioScreen`: Ubah scaffold dan AppBar background dari hardcoded `#0D0E12` menjadi `theme.scaffoldBackgroundColor`, serta adaptasikan header register 5-band biquad dan bottom sheet selector AutoEQ.
+  - [x] Di `DacHeroStatusCard`: Buat USB status card container, border, badge metadata, text status, dan switch DSP responsif terhadap tema dan terhindar dari horizontal overflow pada layar mobile.
+  - [x] Di `HardwareCurveVisualizer`: Buat curve canvas container dan border adaptif terhadap `colorScheme.surfaceContainer` dan `outlineVariant`.
+  - [x] Di `DacActionToolbar`: Buat toolbar container, preset quick-selector capsule, divider, dan seluruh tombol aksi (Burn to Flash, Save Profile, AutoEQ Import, Read DAC, Reset Flat) adaptif ke `primaryContainer` / `surfaceContainerHighest`.
+  - [x] Di `DacProfileManagerModal` & `SaveDacProfileDialog`: Adaptasikan dialog container, field input nama/deskripsi, snapshot capsule, divider, dan kartu profil DAC ke tema terang.
+- [x] **86.5 Now Playing Screen Top Bar Contrast Fix**:
+  - [x] Di `NowPlayingScreen` (`_buildMinimalistTopBar` dan `_buildLandscapeTopBar`): Ganti hardcoded `color: Colors.white` pada tombol chevron down/collapse miniplayer, back arrow, dan tombol 3-dots `moreVertical` options menjadi `theme.colorScheme.onSurface`.
+  - [x] Ganti warna header album tracking label menjadi `theme.colorScheme.onSurfaceVariant` untuk kontras yang tajam dan nyaman dibaca saat Light Mode.
+- [x] **86.6 Unit & Widget Test Verification**:
+  - [x] Perbarui `test/dark_mode_and_palette_propagation_test.dart` dengan pengujian otomatis adaptasi kartu Dashboard, Hardware DAC Studio, dan tombol NowPlayingScreen dalam Light Mode (6/6 tests passing 100%).
+  - [x] Jalankan `flutter test test/phase_85_dashboard_and_ui_polish_test.dart` (4/4 tests passing 100%).
+  - [x] Jalankan `flutter analyze`: **0 errors, 0 warnings!**
+
+---
+
+## Fase 87: Studio Recap Story & Export Hub Light Mode Visibility Overhaul
+
+Perbaikan visibilitas font, tombol navigasi, dan kontrol aksi di layar Recap Story (`StudioWrappedStoryScreen`) dan Templates Story (`StudioWrappedExportHub`) saat Light Mode aktif.
+
+- [x] **87.1 Studio Wrapped Export Hub (Templates Story) Adaptability**:
+  - [x] Ubah warna tombol back (`LucideIcons.arrowLeft`) di AppBar dari hardcoded `Colors.white` menjadi `theme.colorScheme.onSurface`.
+  - [x] Ubah warna icon kalender filter tahun (`LucideIcons.calendar`) dari hardcoded `Colors.white` menjadi `theme.colorScheme.onSurface`.
+  - [x] Buat teks judul AppBar adaptif terhadap `theme.colorScheme.onSurface`.
+  - [x] Adaptasikan category switcher chips dan template selector pills agar menggunakan `StudioSurfaceTheme.surfaceContainer` solid (menghilangkan tampilan washed out / transparansi berlebih di Light Mode).
+  - [x] Pastikan tombol share di bar bawah memiliki kontras tinggi pada background emerald studio.
+- [x] **87.2 Studio Wrapped Story Screen (Recap Story) Adaptability**:
+  - [x] Ubah `Scaffold.backgroundColor` dari hardcoded `Colors.black` menjadi `theme.scaffoldBackgroundColor`.
+  - [x] Sediakan tombol back eksplisit di pojok kiri atas (`LucideIcons.arrowLeft`) dengan warna `theme.colorScheme.onSurface`.
+  - [x] Ubah tombol aksi header atas (`LucideIcons.share2` dan `LucideIcons.x`) dari hardcoded `Colors.white` menjadi `theme.colorScheme.onSurface`.
+  - [x] Adaptasikan multi-segment story progress bar agar track yang belum aktif menggunakan `theme.colorScheme.onSurface.withValues(alpha: 0.15)` saat Light Mode.
+  - [x] Adaptasikan seluruh teks dan pill pada Slide 1 (Welcome & Listening Time) ke `onSurface` dan `onSurfaceVariant`.
+  - [x] Adaptasikan Slide 2 (Top Tracks Countdown), Slide 3 (Artists & Sonic Spectrum), Slide 4 (Audio Purity), Slide 5 (DSP Mastery & AutoEQ Target), Slide 6 (Hardware DAC Engine), dan Slide 7 (Persona Grand Reveal & Template Showcase) agar semua teks judul, nama lagu/artis, ranking badge, dan container kartu menggunakan token tema dinamis.
+- [x] **87.3 Thermal Receipt View Responsive Overflow Fix**:
+  - [x] Di `ThermalReceiptView`, bungkus label `TERMINAL: BIT-PERFECT FLAC` dengan `Flexible` dan `TextOverflow.ellipsis` untuk mencegah horizontal RenderFlex overflow di layar mobile kecil.
+- [x] **87.4 Automated Testing & Quality Gate Verification**:
+  - [x] Tambahkan widget tests di `test/dark_mode_and_palette_propagation_test.dart` untuk memverifikasi kontras tombol dan teks di `StudioWrappedExportHub` dan `StudioWrappedStoryScreen` (8/8 tests passing 100%).
+  - [x] `flutter test test/phase_85_dashboard_and_ui_polish_test.dart`: 4/4 tests passing 100%.
+  - [x] `flutter analyze`: **0 errors, 0 warnings!**
+
+---
+
+## Fase 88: Library Source Filter Counter Synchronization & Cloud Account Bidirectional Sync Overhaul
+
+Perbaikan sinkronisasi jumlah track pada category chips tab Library saat filter sumber audio (FAB / chip) aktif, serta audit menyeluruh dan implementasi sinkronisasi cloud dua arah (bidirectional PULL & PUSH) saat login akun.
+
+- [x] **88.1 Library Audio Source Filter Tracks Counter Fix**:
+  - [x] Di `UnifiedLibraryScreen` (`_buildCategoryTabsRow`): Ubah count pada tab chip `Tracks` dari `state.totalTracksCount` menjadi `state.filteredTracks.length`.
+  - [x] Saat pengguna memilih sumber audio (Cloud Library, Offline Local, Hi-Res Lossless, Untagged Audio) lewat floating source filter dock FAB atau chips, jumlah counter di chip `Tracks` kini otomatis berubah sinkron sesuai dengan jumlah album, artis, dan genre yang difilter.
+  - [x] Perbarui subheader summary pada tab Albums (`_getSubheaderSummary`) agar menampilkan jumlah tracks terfilter (`${state.filteredTracks.length} Tracks`).
+- [x] **88.2 Cloud Account Login & Bidirectional Sync Architecture**:
+  - [x] Di `CloudAuthController.login`: Tambahkan penarikan remote DSP & AutoEQ profile (`fetchDspProfile`) selain remote user settings dan playback logs.
+  - [x] Di `_importRemoteDspProfile`: Implementasikan parsing dan injeksi otomatis profil AutoEQ (bands, safe preamp, driver name, target name) dan status toggles DSP (tube exciter, limiter, reverb, crossfeed, bass boost, stereo width) ke persistence lokal dan `VirtualDspService`.
+  - [x] Jadikan eksekusi `syncNow()` di dalam `login()` dan `register()` tersinkronisasi penuh (`await syncNow()`) sehingga login hanya dinyatakan berhasil setelah data remote di-PULL dan data lokal di-PUSH ke server.
+  - [x] Di `CloudAuthController.syncNow()`: Terapkan alur sinkronisasi dua arah (Bidirectional Sync):
+    1. **PULL (GET)**: Ambil `fetchUserSettings`, `fetchPlaybackLogs` (deduplikasi riwayat pemutaran), dan `fetchDspProfile` dari server.
+    2. **PUSH (POST/PUT)**: Kirim log pemutaran lokal, profil AutoEQ/DSP aktif, dan preferensi pengguna (`saveUserSettings`) ke backend.
+    3. **APPLY**: Panggil `_autoApplyUserConfiguration()` agar antarmuka UI dan engine DSP langsung terupdate secara reaktif.
+- [x] **88.3 Persistence Partitioning & DAC Controller Resilience**:
+  - [x] Di `LocalPersistenceService.saveThemeSettings`: Pastikan flag `migrated_to_simple_as_f_v2` dicatat saat pengaturan tema disimpan, mencegah partisi baru mengabaikan preferensi yang di-clone dari guest.
+  - [x] Di `DacBridgeController._performScanAndConnect`: Tambahkan pengecekan `if (!mounted) return;` sebelum mutasi `state` guna mencegah exception jika controller telah di-dispose selama pemindaian USB.
+  - [x] Di `EqController._hydrateActiveState`: Konversikan elemen list maps menjadi `Map<String, dynamic>.from` agar kompatibel dengan seluruh format deserialisasi JSON.
+- [x] **88.4 Automated Testing & Quality Gate**:
+  - [x] Buat file test baru `test/library_source_filter_counter_and_sync_test.dart` menguji verifikasi reaktif counter chip saat filter sumber berganti (All -> Cloud -> Offline -> All) serta alur login bidirectional sync (3/3 tests passing 100%).
+  - [x] Jalankan seluruh test suite cloud sync & multi-user isolation (`test/user_settings_and_stats_isolation_test.dart`, `test/cloud_sync_and_profile_ui_test.dart`, `test/change_password_test.dart`, `test/dark_mode_and_palette_propagation_test.dart`): **29/29 tests passing 100%**.
+  - [x] Jalankan `flutter analyze`: **0 errors, 0 warnings!**
+
+## Fase 89: User Profile Dialog Sync Button Loading Spinner & Toast Notification Architecture
+- [x] **89.1 CloudAuthState & CloudAuthController Syncing State Extension**:
+  - [x] Di `CloudAuthState`: Tambahkan properti `isSyncing` (default `false`) dan perbarui metode `copyWith` untuk mendukung propagasi status sinkronisasi ke seluruh subscriber UI.
+  - [x] Di `CloudAuthController.syncNow`: Return type diubah menjadi `Future<bool>` yang mengembalikan status kesuksesan sinkronisasi secara deterministik. State diperbarui dengan `isSyncing: true` saat proses berjalan dan `isSyncing: false` beserta pesan error saat selesai atau gagal.
+- [x] **89.2 User Profile Sheet & Settings Account Card UX Enhancement**:
+  - [x] Di `UserProfileSheet`: Konversikan ke `ConsumerStatefulWidget` untuk mengelola banner status umpan balik instan.
+  - [x] Ganti ikon `SYNC NOW` dengan `CircularProgressIndicator(strokeWidth: 2)` dan label `SYNCING...` saat sinkronisasi sedang berjalan, sekaligus menonaktifkan tombol (`onPressed: null`) guna mencegah klik ganda.
+  - [x] Tampilkan banner kapsul obsidian minimalis inline di dalam sheet (`#10B981` untuk sukses dengan `LucideIcons.checkCircle2`, dan error container untuk kegagalan dengan `LucideIcons.alertCircle`).
+  - [x] Tampilkan toast floating `SnackBar` dengan sudut melengkung dan ikon Lucide yang mengonfirmasi bahwa profil & telemetri telah diperbarui atau menampilkan penyebab kegagalan koneksi.
+  - [x] Di `SettingsAccountCard`: Terapkan proteksi `authState.isSyncing`, spinner `CircularProgressIndicator`, label `SYNCING...`, dan floating toast `SnackBar` yang serupa agar konsisten di seluruh aplikasi.
+- [x] **89.3 Automated Testing & Zero Regression Verification**:
+  - [x] Di `test/cloud_sync_and_profile_ui_test.dart`: Tambahkan `FakeSyncService` dan grup pengujian widget `UserProfileSheet Widget Tests` serta `SettingsAccountCard` untuk memverifikasi penampilan spinner, penonaktifan tombol, dan munculnya toast sukses/gagal (15/15 tests passing 100%).
+  - [x] Jalankan seluruh test suite terkait sinkronisasi cloud (`test/cloud_sync_and_profile_ui_test.dart`, `test/library_source_filter_counter_and_sync_test.dart`, `test/user_settings_and_stats_isolation_test.dart`, `test/features/cloud_sync/change_password_test.dart`): **34/34 tests passing 100%**.
+  - [x] Jalankan `flutter analyze`: **0 errors, 0 warnings!**
+
+
+

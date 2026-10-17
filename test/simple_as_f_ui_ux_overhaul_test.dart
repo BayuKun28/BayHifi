@@ -77,8 +77,9 @@ void main() {
 
     testWidgets('5. MetaTrackingLabel renders uppercase spaced text', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: const Scaffold(
             body: MetaTrackingLabel(
               'welcome, matt',
               fontSize: 12,

@@ -426,6 +426,18 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             ),
           ] else ...[
             IconButton(
+              icon: const Icon(
+                LucideIcons.playSquare,
+                size: 18,
+                color: Color(0xFF34D399),
+              ),
+              tooltip: 'YouTube Music HiFi Streaming',
+              onPressed: () {
+                AppHaptics.lightImpact();
+                controller.setTab(CollectionTab.youtube);
+              },
+            ),
+            IconButton(
               icon: Icon(
                 LucideIcons.search,
                 size: 18,
@@ -885,13 +897,13 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     final activeCount = downloadState.totalActiveCount;
 
     final tabs = [
-      (tab: CollectionTab.tracks, label: 'Tracks', count: state.totalTracksCount, icon: LucideIcons.music, color: primaryColor),
+      (tab: CollectionTab.tracks, label: 'Tracks', count: state.filteredTracks.length, icon: LucideIcons.music, color: primaryColor),
+      (tab: CollectionTab.youtube, label: 'YouTube HiFi', count: null, icon: LucideIcons.playSquare, color: const Color(0xFF34D399)),
       (tab: CollectionTab.albums, label: 'Albums', count: state.albums.length, icon: LucideIcons.disc, color: primaryColor),
       (tab: CollectionTab.artists, label: 'Artists', count: state.artists.length, icon: LucideIcons.mic, color: primaryColor),
       (tab: CollectionTab.genres, label: 'Genres', count: state.genres.length, icon: LucideIcons.listMusic, color: primaryColor),
       (tab: CollectionTab.downloads, label: 'Downloads', count: activeCount > 0 ? activeCount : null, icon: LucideIcons.download, color: primaryColor),
       (tab: CollectionTab.folders, label: 'Folders', count: state.folders.length, icon: LucideIcons.folder, color: primaryColor),
-      (tab: CollectionTab.youtube, label: 'YouTube', count: null, icon: LucideIcons.playSquare, color: primaryColor),
     ];
 
     return Container(
@@ -981,7 +993,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   String _getSubheaderSummary(UnifiedLibraryState state) {
     return switch (state.currentTab) {
       CollectionTab.tracks => '${state.filteredTracks.length} Tracks • Sorted by ${state.sortField.label}',
-      CollectionTab.albums => '${state.albums.length} Albums • ${state.totalTracksCount} Total Tracks',
+      CollectionTab.albums => '${state.albums.length} Albums • ${state.filteredTracks.length} Tracks',
       CollectionTab.artists => '${state.artists.length} Artists in Library',
       CollectionTab.genres => '${state.genres.length} Audio Genres',
       CollectionTab.downloads => 'Download Manager • Studio Offline Cache',
@@ -1000,6 +1012,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSolid = ref.isSolidStyle;
 
     return InkWell(
@@ -1013,11 +1026,13 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF252834)
+              ? (isDark ? const Color(0xFF252834) : theme.colorScheme.primaryContainer)
               : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? const Color(0xFF383D50) : const Color(0xFF262936),
+            color: isSelected
+                ? (isDark ? const Color(0xFF383D50) : theme.colorScheme.primary.withValues(alpha: 0.35))
+                : theme.colorScheme.outlineVariant,
             width: 0.8,
           ),
         ),
@@ -1027,7 +1042,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             Icon(
               icon,
               size: 12,
-              color: isSelected ? Colors.white : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              color: isSelected
+                  ? (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer)
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(width: 5),
             Text(
@@ -1035,7 +1052,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                color: isSelected
+                    ? (isDark ? Colors.white : theme.colorScheme.onPrimaryContainer)
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.65),
               ),
             ),
           ],
@@ -1054,6 +1073,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () {
         AppHaptics.selectionClick();
@@ -1066,13 +1086,13 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF252834)
-              : const Color(0xFF16181F),
+              ? theme.colorScheme.primaryContainer
+              : theme.colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF383D50)
-                : const Color(0xFF262936),
+                ? theme.colorScheme.primary.withValues(alpha: 0.4)
+                : theme.colorScheme.outlineVariant,
             width: 0.8,
           ),
         ),
@@ -1082,7 +1102,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
             Icon(
               icon,
               size: 11,
-              color: isSelected ? Colors.white : const Color(0xFF8A9A90),
+              color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
             Text(
@@ -1090,7 +1110,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFFA1B2A7),
+                color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -1187,7 +1207,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     final trackListContent = ListView.builder(
       controller: _tracksScrollController,
-      itemExtent: isUntaggedFilter ? null : 74.0,
+      itemExtent: null,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.fromLTRB(14, 4, isAlphabetical ? 28 : 14, bottomPadding),
       itemCount: tracks.length + (isUntaggedFilter ? 1 : 0),
@@ -1226,7 +1246,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     return StudioAlphabeticalScroller(
       scrollController: _tracksScrollController,
       itemCount: tracks.length,
-      itemHeight: 74.0,
+      itemHeight: 84.0,
       isAlphabetical: isAlphabetical,
       letterSelector: (index) {
         if (index < 0 || index >= tracks.length) return '';

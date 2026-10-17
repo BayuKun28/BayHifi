@@ -168,6 +168,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSolid = ref.isSolidStyle;
     final wrappedData = ref.watch(studioWrappedDataProvider);
     final activeFilter = ref.watch(studioWrappedFilterProvider);
@@ -182,18 +183,19 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, size: 20, color: Colors.white),
+          icon: Icon(LucideIcons.arrowLeft, size: 20, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'STUDIO RECAP GALLERY',
               style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.5,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             Text(
@@ -210,7 +212,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
         actions: [
           // Time Filter Dropdown / Menu
           PopupMenuButton<RecapTimeFilter>(
-            icon: const Icon(LucideIcons.calendar, size: 18, color: Colors.white),
+            icon: Icon(LucideIcons.calendar, size: 18, color: theme.colorScheme.onSurface),
             tooltip: 'Select Time Range',
             onSelected: (filter) {
               ref.read(studioWrappedFilterProvider.notifier).state = filter;
@@ -260,7 +262,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                         decoration: BoxDecoration(
                           color: isSelected
                               ? theme.colorScheme.primary.withValues(alpha: 0.18)
-                              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.25),
+                              : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected
@@ -324,7 +326,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                         decoration: BoxDecoration(
                           color: isSelected
                               ? theme.colorScheme.primary.withValues(alpha: 0.22)
-                              : StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.35),
+                              : StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: isSelected
@@ -411,7 +413,7 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: Colors.black,
+                        foregroundColor: isDark ? Colors.black : theme.colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -419,18 +421,26 @@ class _StudioWrappedExportHubState extends ConsumerState<StudioWrappedExportHub>
                       ),
                       onPressed: _isExporting ? null : _handleShare,
                       icon: _isExporting
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: isDark ? Colors.black : theme.colorScheme.onPrimary,
+                              ),
                             )
-                          : const Icon(LucideIcons.share2, size: 18, color: Colors.black),
+                          : Icon(
+                              LucideIcons.share2,
+                              size: 18,
+                              color: isDark ? Colors.black : theme.colorScheme.onPrimary,
+                            ),
                       label: Text(
                         _isExporting ? 'GENERATING HD CARD...' : 'SHARE RECAP STORY',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12.0,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.0,
+                          color: isDark ? Colors.black : theme.colorScheme.onPrimary,
                         ),
                       ),
                     ),

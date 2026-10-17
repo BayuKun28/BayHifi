@@ -133,6 +133,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
   Widget build(BuildContext context) {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
 
@@ -162,7 +163,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.plus, size: 20, color: Colors.white),
+            icon: Icon(LucideIcons.plus, size: 20, color: isDark ? Colors.white : theme.colorScheme.onSurface),
             tooltip: 'Create Playlist Options',
             onPressed: () => _showCreateOptionsSheet(context),
           ),
@@ -313,25 +314,29 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF16181F),
+                  color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: const Color(0xFF262936),
+                    color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
                     width: 0.8,
                   ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       LucideIcons.listMusic,
                       size: 36,
-                      color: Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF64748B) : theme.colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'NO CUSTOM PLAYLISTS',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Colors.white),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -349,24 +354,24 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF252834),
+                          color: isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF383D50),
+                            color: isDark ? const Color(0xFF383D50) : theme.colorScheme.outline,
                             width: 0.8,
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(LucideIcons.plus, size: 14, color: Colors.white),
-                            SizedBox(width: 7),
+                            Icon(LucideIcons.plus, size: 14, color: isDark ? Colors.white : theme.colorScheme.onSurface),
+                            const SizedBox(width: 7),
                             Text(
                               'CREATE PLAYLIST',
                               style: TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                                color: isDark ? Colors.white : theme.colorScheme.onSurface,
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -512,13 +517,16 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
     required VoidCallback onTap,
     required VoidCallback onMoreTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: 146,
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 0.8,
         ),
       ),
@@ -540,26 +548,26 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF20232E),
+                        color: isDark ? const Color(0xFF20232E) : theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: const Color(0xFF2E3242),
+                          color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant,
                           width: 0.8,
                         ),
                       ),
                       child: Center(
-                        child: Icon(icon, color: Colors.white, size: 16),
+                        child: Icon(icon, color: isDark ? Colors.white : theme.colorScheme.onSurface, size: 16),
                       ),
                     ),
                     InkWell(
                       onTap: onMoreTap,
                       borderRadius: BorderRadius.circular(6),
-                      child: const Padding(
-                        padding: EdgeInsets.all(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
                         child: Icon(
                           LucideIcons.ellipsisVertical,
                           size: 15,
-                          color: Color(0xFF94A3B8),
+                          color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -571,16 +579,20 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: Colors.white),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12.5,
+                        color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10.5,
-                        color: Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                         fontFeatures: AppTypography.audioFigures,
                       ),
                       maxLines: 1,

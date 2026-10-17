@@ -95,12 +95,13 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSolid = ref.isSolidStyle;
     final wrappedData = ref.watch(studioWrappedDataProvider);
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: GestureDetector(
           onTapDown: (details) => _onTapDown(details, size.width),
@@ -127,7 +128,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                     switchOutCurve: Curves.easeInCubic,
                     child: KeyedSubtree(
                       key: ValueKey<int>(_currentSlideIndex),
-                      child: _buildSlideContent(_currentSlideIndex, wrappedData, theme, isSolid),
+                      child: _buildSlideContent(_currentSlideIndex, wrappedData, theme, isSolid, isDark),
                     ),
                   ),
                 ),
@@ -149,7 +150,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                             height: 3.5,
                             margin: const EdgeInsets.symmetric(horizontal: 2.0),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : theme.colorScheme.onSurface.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(2),
                             ),
                             child: AnimatedBuilder(
@@ -179,9 +182,15 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                     ),
                     const SizedBox(height: 10),
 
-                    // Top Header Bar with Close & Gallery Button
+                    // Top Header Bar with Back, Close & Gallery Button
                     Row(
                       children: [
+                        // Back Button in Top-Left Corner
+                        IconButton(
+                          icon: Icon(LucideIcons.arrowLeft, size: 20, color: theme.colorScheme.onSurface),
+                          tooltip: 'Back',
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                           decoration: BoxDecoration(
@@ -213,7 +222,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         const Spacer(),
                         // Open Gallery / Export Hub Button
                         IconButton(
-                          icon: const Icon(LucideIcons.share2, size: 18, color: Colors.white),
+                          icon: Icon(LucideIcons.share2, size: 18, color: theme.colorScheme.onSurface),
                           tooltip: 'Recap Templates & Share',
                           onPressed: () {
                             _pauseStory();
@@ -224,7 +233,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         ),
                         // Close Story Button
                         IconButton(
-                          icon: const Icon(LucideIcons.x, size: 20, color: Colors.white),
+                          icon: Icon(LucideIcons.x, size: 20, color: theme.colorScheme.onSurface),
                           tooltip: 'Close Story',
                           onPressed: () => Navigator.of(context).pop(),
                         ),
@@ -240,28 +249,28 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
     );
   }
 
-  Widget _buildSlideContent(int index, StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlideContent(int index, StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     switch (index) {
       case 0:
-        return _buildSlide1Welcome(data, theme, isSolid);
+        return _buildSlide1Welcome(data, theme, isSolid, isDark);
       case 1:
-        return _buildSlide2TopTracks(data, theme, isSolid);
+        return _buildSlide2TopTracks(data, theme, isSolid, isDark);
       case 2:
-        return _buildSlide3TopArtists(data, theme, isSolid);
+        return _buildSlide3TopArtists(data, theme, isSolid, isDark);
       case 3:
-        return _buildSlide4AudioPurity(data, theme, isSolid);
+        return _buildSlide4AudioPurity(data, theme, isSolid, isDark);
       case 4:
-        return _buildSlide5DspMastery(data, theme, isSolid);
+        return _buildSlide5DspMastery(data, theme, isSolid, isDark);
       case 5:
-        return _buildSlide6HardwareDac(data, theme, isSolid);
+        return _buildSlide6HardwareDac(data, theme, isSolid, isDark);
       case 6:
       default:
-        return _buildSlide7PersonaGrandReveal(data, theme, isSolid);
+        return _buildSlide7PersonaGrandReveal(data, theme, isSolid, isDark);
     }
   }
 
   // ─── SLIDE 1: WELCOME & LISTENING TIME ─────────────────────────────────────
-  Widget _buildSlide1Welcome(StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlide1Welcome(StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -294,12 +303,12 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'A Year in Pure Sound',
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w900,
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,
@@ -328,13 +337,13 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'MINUTES STREAMED & PLAYED',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
-                  color: Colors.white70,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 18),
@@ -354,7 +363,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   }
 
   // ─── SLIDE 2: TOP TRACKS COUNTDOWN ─────────────────────────────────────────
-  Widget _buildSlide2TopTracks(StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlide2TopTracks(StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -374,9 +383,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           ],
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Your Heavy Rotation',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 16),
 
@@ -410,7 +419,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: isNumberOne ? theme.colorScheme.primary : Colors.white10,
+                        color: isNumberOne
+                            ? theme.colorScheme.primary
+                            : (isDark ? Colors.white10 : theme.colorScheme.surfaceContainerHighest),
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
@@ -419,7 +430,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
-                          color: isNumberOne ? Colors.black : Colors.white,
+                          color: isNumberOne ? Colors.black : theme.colorScheme.onSurface,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
@@ -442,10 +453,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         children: [
                           Text(
                             track.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
-                              color: Colors.white,
+                              color: theme.colorScheme.onSurface,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -480,11 +491,11 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                         ),
                         Text(
                           '${track.totalDuration.inMinutes} MIN',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white54,
-                            fontFeatures: [FontFeature.tabularFigures()],
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -552,7 +563,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   }
 
   // ─── SLIDE 3: TOP ARTISTS & GENRES ─────────────────────────────────────────
-  Widget _buildSlide3TopArtists(StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlide3TopArtists(StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -572,9 +583,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           ],
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Top Artists & Genres',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 16),
 
@@ -615,17 +626,17 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                       const SizedBox(height: 2),
                       Text(
                         data.topArtists.first.artist,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${data.topArtists.first.minutesListened} minutes streamed',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Colors.white70,
-                          fontFeatures: [FontFeature.tabularFigures()],
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ],
@@ -671,23 +682,23 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                       borderRadius: BorderRadius.circular(16),
                       fallbackIcon: LucideIcons.user,
                       fallbackIconSize: 16,
-                      backgroundColor: Colors.white10,
+                      backgroundColor: isDark ? Colors.white10 : theme.colorScheme.surfaceContainerHighest,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         artist.artist,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Text(
                       '${artist.minutesListened}m',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white54,
-                        fontFeatures: [FontFeature.tabularFigures()],
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
@@ -706,17 +717,20 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.white10,
+                color: isDark ? Colors.white10 : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white24, width: 0.6),
+                border: Border.all(
+                  color: isDark ? Colors.white24 : theme.colorScheme.outlineVariant,
+                  width: 0.6,
+                ),
               ),
               child: Text(
                 '${g.genre.toUpperCase()} ${(g.percentage * 100).toInt()}%',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white70,
-                  fontFeatures: [FontFeature.tabularFigures()],
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             );
@@ -725,8 +739,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
 
         // Contextual Quick-Export Pills for Artists and Genres
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 6,
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(14),
@@ -769,7 +785,6 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                 ),
               ),
             ),
-            const SizedBox(width: 8),
             InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: () {
@@ -785,26 +800,29 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white10,
+                  color: isDark ? Colors.white10 : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white24, width: 0.8),
+                  border: Border.all(
+                    color: isDark ? Colors.white24 : theme.colorScheme.outlineVariant,
+                    width: 0.8,
+                  ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       LucideIcons.sliders,
                       size: 12,
-                      color: Colors.white70,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       'SONIC SPECTRUM',
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.6,
-                        color: Colors.white70,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -818,7 +836,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   }
 
   // ─── SLIDE 4: AUDIOPHILE PURITY & BIT-PERFECT ──────────────────────────────
-  Widget _buildSlide4AudioPurity(StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlide4AudioPurity(StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     final purity = data.audioPurityReport;
     final flacPercent = (purity.losslessFlacRatio * 100).toInt();
 
@@ -841,9 +859,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           ],
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Bit-Perfect Signal Path',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 20),
 
@@ -868,9 +886,14 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                   letterSpacing: -1.0,
                 ),
               ),
-              const Text(
+              Text(
                 'HI-RES LOSSLESS / FLAC RATIO',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: Colors.white70),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 16),
               // Segmented visual bar
@@ -886,7 +909,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                       ),
                       Expanded(
                         flex: (100 - flacPercent).clamp(1, 100),
-                        child: Container(color: Colors.white24),
+                        child: Container(
+                          color: isDark ? Colors.white24 : theme.colorScheme.outlineVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -918,7 +943,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   }
 
   // ─── SLIDE 5: DSP & TUNING MASTERY ─────────────────────────────────────────
-  Widget _buildSlide5DspMastery(StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlide5DspMastery(StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -938,9 +963,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           ],
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Target Curve Mastery',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 18),
 
@@ -974,12 +999,12 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               const SizedBox(height: 8),
               Text(
                 data.topAutoEqTarget,
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white),
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
               ),
               const SizedBox(height: 4),
               Text(
                 'Tuned for headphone: ${data.favoriteHeadphoneProfile}',
-                style: const TextStyle(fontSize: 11, color: Colors.white60),
+                style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -1021,7 +1046,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   }
 
   // ─── SLIDE 6: HARDWARE & DAC JOURNEY ───────────────────────────────────────
-  Widget _buildSlide6HardwareDac(StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlide6HardwareDac(StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1041,9 +1066,9 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           ],
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Audiophile Signal Engine',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 20),
 
@@ -1072,19 +1097,24 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               const SizedBox(height: 12),
               Text(
                 data.favoriteDacDevice.toUpperCase(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'PRIMARY USB OTG / DESKTOP DAC',
-                style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.white54, letterSpacing: 1.0),
+                style: TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  letterSpacing: 1.0,
+                ),
               ),
               const SizedBox(height: 14),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white10,
+                  color: isDark ? Colors.white10 : theme.colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1118,14 +1148,19 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'REFERENCE HEADPHONE PROFILE',
-                      style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white54, letterSpacing: 0.8),
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        letterSpacing: 0.8,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       data.favoriteHeadphoneProfile,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: theme.colorScheme.onSurface),
                     ),
                   ],
                 ),
@@ -1138,7 +1173,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
   }
 
   // ─── SLIDE 7: AUDIOPHILE PERSONA & GRAND REVEAL ───────────────────────────
-  Widget _buildSlide7PersonaGrandReveal(StudioWrappedData data, ThemeData theme, bool isSolid) {
+  Widget _buildSlide7PersonaGrandReveal(StudioWrappedData data, ThemeData theme, bool isSolid, bool isDark) {
     final persona = data.persona;
 
     return SingleChildScrollView(
@@ -1187,10 +1222,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           // Persona Title & Subtitle
           Text(
             persona.title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w900,
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
               letterSpacing: -0.3,
             ),
             textAlign: TextAlign.center,
@@ -1218,10 +1253,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
             ),
             child: Text(
               persona.description,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11.5,
                 height: 1.4,
-                color: Colors.white70,
+                color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
@@ -1238,16 +1273,19 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white12,
+                  color: isDark ? Colors.white12 : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white24, width: 0.8),
+                  border: Border.all(
+                    color: isDark ? Colors.white24 : theme.colorScheme.outlineVariant,
+                    width: 0.8,
+                  ),
                 ),
                 child: Text(
                   tag,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -1314,18 +1352,22 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.sparkles, size: 13, color: Colors.white70),
+                      Icon(LucideIcons.sparkles, size: 13, color: theme.colorScheme.onSurfaceVariant),
                       const SizedBox(width: 6),
-                      const Text(
-                        'CHOOSE EXPORT STYLE (12 TEMPLATES)',
-                        style: TextStyle(
-                          fontSize: 9.0,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.0,
-                          color: Colors.white70,
+                      Expanded(
+                        child: Text(
+                          'CHOOSE EXPORT STYLE (12 TEMPLATES)',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 9.0,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.0,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 6),
                       Text(
                         'TAP TO PREVIEW',
                         style: TextStyle(
@@ -1367,12 +1409,14 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                           decoration: BoxDecoration(
                             color: isFocus
                                 ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                                : Colors.white.withValues(alpha: 0.05),
+                                : (isDark
+                                    ? Colors.white.withValues(alpha: 0.05)
+                                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6)),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isFocus
                                   ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                                  : Colors.white12,
+                                  : (isDark ? Colors.white12 : theme.colorScheme.outlineVariant),
                               width: 0.8,
                             ),
                           ),
@@ -1382,7 +1426,7 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                               Icon(
                                 style.icon,
                                 size: 16,
-                                color: isFocus ? theme.colorScheme.primary : Colors.white,
+                                color: isFocus ? theme.colorScheme.primary : theme.colorScheme.onSurface,
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -1392,16 +1436,16 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                                 style: TextStyle(
                                   fontSize: 9.5,
                                   fontWeight: FontWeight.w800,
-                                  color: isFocus ? theme.colorScheme.primary : Colors.white,
+                                  color: isFocus ? theme.colorScheme.primary : theme.colorScheme.onSurface,
                                 ),
                               ),
                               Text(
                                 isFocus ? 'FOCUS CARD' : 'ALL-IN-ONE',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 7.0,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.4,
-                                  color: Colors.white54,
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -1433,10 +1477,19 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
                   MaterialPageRoute(builder: (_) => const StudioWrappedExportHub()),
                 );
               },
-              icon: const Icon(LucideIcons.share2, size: 18, color: Colors.black),
+              icon: const Icon(
+                LucideIcons.share2,
+                size: 18,
+                color: Colors.black,
+              ),
               label: const Text(
                 'OPEN FULL EXPORT GALLERY',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.0),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.0,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
@@ -1451,10 +1504,15 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               _progressController.reset();
               _progressController.forward();
             },
-            icon: const Icon(LucideIcons.repeat, size: 14, color: Colors.white60),
-            label: const Text(
+            icon: Icon(LucideIcons.repeat, size: 14, color: theme.colorScheme.onSurfaceVariant),
+            label: Text(
               'REPLAY RECAP STORY',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white60, letterSpacing: 1.0),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.onSurfaceVariant,
+                letterSpacing: 1.0,
+              ),
             ),
           ),
         ],
@@ -1470,20 +1528,20 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w900,
-            color: Colors.white,
-            fontFeatures: [FontFeature.tabularFigures()],
+            color: theme.colorScheme.onSurface,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 8.5,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
-            color: Colors.white54,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -1521,10 +1579,10 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 8,
               fontWeight: FontWeight.w800,
-              color: Colors.white54,
+              color: theme.colorScheme.onSurfaceVariant,
               letterSpacing: 0.5,
             ),
             maxLines: 1,
@@ -1553,7 +1611,12 @@ class _StudioWrappedStoryScreenState extends ConsumerState<StudioWrappedStoryScr
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.white54, letterSpacing: 0.8),
+                  style: TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w900,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    letterSpacing: 0.8,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(

@@ -27,6 +27,7 @@ class MetaTrackingLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       text.toUpperCase(),
       maxLines: maxLines,
@@ -36,7 +37,7 @@ class MetaTrackingLabel extends StatelessWidget {
         fontSize: fontSize,
         fontWeight: fontWeight,
         letterSpacing: letterSpacing,
-        color: color ?? SimpleAsFTheme.sageSlate,
+        color: color ?? (isDark ? SimpleAsFTheme.sageSlate : const Color(0xFF64748B)),
       ),
     );
   }

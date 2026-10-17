@@ -15,6 +15,7 @@ class SettingsAccountCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(cloudAuthControllerProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isAuthenticated = authState.isAuthenticated;
     final user = authState.user;
 
@@ -24,10 +25,10 @@ class SettingsAccountCard extends ConsumerWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF16181F),
+          color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFF262936),
+            color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
             width: 0.8,
           ),
         ),
@@ -40,18 +41,18 @@ class SettingsAccountCard extends ConsumerWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF20232E),
+                    color: isDark ? const Color(0xFF20232E) : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFF2E3242),
+                      color: isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant,
                       width: 0.8,
                     ),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(
+                  child: Icon(
                     LucideIcons.cloudUpload,
                     size: 18,
-                    color: Colors.white,
+                    color: isDark ? Colors.white : theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -59,13 +60,13 @@ class SettingsAccountCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'BAYHIFI CLOUD ACCOUNT',
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.6,
-                          color: Colors.white,
+                          color: isDark ? Colors.white : theme.colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -102,26 +103,26 @@ class SettingsAccountCard extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF252834),
+                    color: isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFF383D50),
+                      color: isDark ? const Color(0xFF383D50) : theme.colorScheme.outline,
                       width: 0.8,
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         LucideIcons.logIn,
                         size: 14,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : theme.colorScheme.onSurface,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
                         'CONNECT & SIGN IN',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: isDark ? Colors.white : theme.colorScheme.onSurface,
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
@@ -149,10 +150,10 @@ class SettingsAccountCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 0.8,
         ),
       ),
@@ -165,18 +166,18 @@ class SettingsAccountCard extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF252834),
+                  color: isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: const Color(0xFF383D50),
+                    color: isDark ? const Color(0xFF383D50) : theme.colorScheme.outline,
                     width: 0.8,
                   ),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   username.isNotEmpty ? username[0].toUpperCase() : 'U',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : theme.colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -189,10 +190,10 @@ class SettingsAccountCard extends ConsumerWidget {
                   children: [
                     Text(
                       username,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : theme.colorScheme.onSurface,
                       ),
                     ),
                     if (email != null && email.isNotEmpty)
@@ -205,9 +206,9 @@ class SettingsAccountCard extends ConsumerWidget {
                       ),
                     Text(
                       syncText,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10.5,
-                        color: Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -221,37 +222,84 @@ class SettingsAccountCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: InkWell(
-                  onTap: () async {
-                    AppHaptics.selectionClick();
-                    await ref.read(cloudAuthControllerProvider.notifier).syncNow();
-                    AppHaptics.mediumImpact();
-                  },
+                  onTap: authState.isSyncing
+                      ? null
+                      : () async {
+                          AppHaptics.selectionClick();
+                          final success = await ref.read(cloudAuthControllerProvider.notifier).syncNow();
+                          if (!context.mounted) return;
+                          AppHaptics.mediumImpact();
+
+                          final err = ref.read(cloudAuthControllerProvider).errorMessage ?? 'Unable to connect to sync server';
+                          final messenger = ScaffoldMessenger.of(context);
+                          messenger.hideCurrentSnackBar();
+                          messenger.showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: success ? const Color(0xFF10B981) : theme.colorScheme.error,
+                              duration: Duration(seconds: success ? 3 : 4),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              content: Row(
+                                children: [
+                                  Icon(
+                                    success ? LucideIcons.checkCircle2 : LucideIcons.alertCircle,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      success
+                                          ? 'Studio Cloud sync completed. All profiles & telemetry updated.'
+                                          : 'Sync failed: $err',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 9),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF252834),
+                      color: isDark ? const Color(0xFF252834) : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFF383D50),
+                        color: isDark ? const Color(0xFF383D50) : theme.colorScheme.outline,
                         width: 0.8,
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          LucideIcons.refreshCw,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 7),
+                        if (authState.isSyncing)
+                          SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                            ),
+                          )
+                        else
+                          Icon(
+                            LucideIcons.refreshCw,
+                            size: 14,
+                            color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                          ),
+                        const SizedBox(width: 7),
                         Text(
-                          'SYNC NOW',
+                          authState.isSyncing ? 'SYNCING...' : 'SYNC NOW',
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: isDark ? Colors.white : theme.colorScheme.onSurface,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -271,28 +319,28 @@ class SettingsAccountCard extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 9),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E212B),
+                      color: isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFF262936),
+                        color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
                         width: 0.8,
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           LucideIcons.user,
                           size: 14,
-                          color: Color(0xFF94A3B8),
+                          color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                         ),
-                        SizedBox(width: 7),
+                        const SizedBox(width: 7),
                         Text(
                           'DETAILS',
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF94A3B8),
+                            color: isDark ? const Color(0xFF94A3B8) : theme.colorScheme.onSurfaceVariant,
                             letterSpacing: 0.5,
                           ),
                         ),

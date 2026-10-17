@@ -133,6 +133,9 @@ class DacProfileManagerModal extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dacState = ref.watch(dacBridgeControllerProvider);
     final controller = ref.read(dacBridgeControllerProvider.notifier);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     final userProfiles = dacState.availablePresets.where((p) => !p.isBuiltIn).toList();
     final builtInProfiles = dacState.availablePresets.where((p) => p.isBuiltIn).toList();
@@ -143,12 +146,12 @@ class DacProfileManagerModal extends ConsumerWidget {
         maxHeight: MediaQuery.of(context).size.height * 0.88,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainer,
         borderRadius: isDialog
             ? BorderRadius.circular(20)
             : const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFF262936),
+          color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
           width: 1,
         ),
       ),
@@ -164,7 +167,7 @@ class DacProfileManagerModal extends ConsumerWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2E3344),
+                  color: isDark ? const Color(0xFF2E3344) : colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -179,9 +182,11 @@ class DacProfileManagerModal extends ConsumerWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E212B),
+                    color: isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF262936)),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+                    ),
                   ),
                   alignment: Alignment.center,
                   child: const Icon(
@@ -191,7 +196,7 @@ class DacProfileManagerModal extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -201,24 +206,24 @@ class DacProfileManagerModal extends ConsumerWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.5,
-                          color: Colors.white,
+                          color: isDark ? Colors.white : colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         'User custom tunings and factory hardware presets',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Color(0xFF8A9A90),
+                          color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     LucideIcons.x,
                     size: 18,
-                    color: Color(0xFF8A9A90),
+                    color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
                   ),
                   tooltip: 'Close',
                   onPressed: () {
@@ -256,13 +261,19 @@ class DacProfileManagerModal extends ConsumerWidget {
                 const SizedBox(width: 8),
                 FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF222532),
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Color(0xFF262936)),
+                    backgroundColor: isDark ? const Color(0xFF222532) : colorScheme.surfaceContainerHighest,
+                    foregroundColor: isDark ? Colors.white : colorScheme.onSurface,
+                    side: BorderSide(
+                      color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+                    ),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
                   ),
-                  icon: const Icon(LucideIcons.download, size: 15, color: Color(0xFF8A9A90)),
+                  icon: Icon(
+                    LucideIcons.download,
+                    size: 15,
+                    color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
+                  ),
                   label: const Text(
                     'IMPORT FILE',
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.4),
@@ -282,12 +293,13 @@ class DacProfileManagerModal extends ConsumerWidget {
               children: [
                 // ─── SECTION 1: USER CUSTOM PROFILES ─────────────────────────
                 _buildSectionTitle(
+                  context: context,
                   title: 'USER CUSTOM PROFILES',
                   count: userProfiles.length,
                 ),
                 const SizedBox(height: 8),
                 if (userProfiles.isEmpty)
-                  _buildEmptyUserProfiles()
+                  _buildEmptyUserProfiles(context)
                 else
                   ...userProfiles.map(
                     (p) => Padding(
@@ -307,6 +319,7 @@ class DacProfileManagerModal extends ConsumerWidget {
 
                 // ─── SECTION 2: FACTORY STOCK PRESETS ───────────────────────
                 _buildSectionTitle(
+                  context: context,
                   title: 'FACTORY STOCK PRESETS',
                   count: builtInProfiles.length,
                 ),
@@ -332,35 +345,42 @@ class DacProfileManagerModal extends ConsumerWidget {
   }
 
   Widget _buildSectionTitle({
+    required BuildContext context,
     required String title,
     required int count,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 10.5,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
-            color: Color(0xFF8A9A90),
+            color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E212B),
+            color: isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: const Color(0xFF262936)),
+            border: Border.all(
+              color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+            ),
           ),
           child: Text(
             '$count',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w800,
-              fontFeatures: [FontFeature.tabularFigures()],
-              color: Color(0xFF8A9A90),
+              fontFeatures: const [FontFeature.tabularFigures()],
+              color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -368,37 +388,43 @@ class DacProfileManagerModal extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyUserProfiles() {
+  Widget _buildEmptyUserProfiles(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
+        color: isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF262936)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
+        ),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           children: [
             Icon(
               LucideIcons.bookmark,
               size: 24,
-              color: Color(0xFF555D6E),
+              color: isDark ? const Color(0xFF555D6E) : colorScheme.outline,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'No custom DAC profiles saved yet',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: isDark ? Colors.white : colorScheme.onSurface,
               ),
             ),
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
             Text(
               'Tune your 5-band PEQ and tap SAVE CURRENT TUNING.',
               style: TextStyle(
                 fontSize: 11.5,
-                color: Color(0xFF8A9A90),
+                color: isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -415,12 +441,23 @@ class DacProfileManagerModal extends ConsumerWidget {
     required DacBridgeController controller,
     VoidCallback? onExport,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final activeCardBg = isDark ? const Color(0xFF222532) : colorScheme.primaryContainer.withValues(alpha: 0.35);
+    final inactiveCardBg = isDark ? const Color(0xFF1E212B) : colorScheme.surfaceContainerHighest;
+    final activeBorder = isDark ? const Color(0xFF4ADE80) : colorScheme.primary;
+    final inactiveBorder = isDark ? const Color(0xFF262936) : colorScheme.outlineVariant;
+    final metaColor = isDark ? const Color(0xFF8A9A90) : colorScheme.onSurfaceVariant;
+    final capsuleBg = isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainer;
+
     return Container(
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF222532) : const Color(0xFF1E212B),
+        color: isActive ? activeCardBg : inactiveCardBg,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isActive ? const Color(0xFF4ADE80) : const Color(0xFF262936),
+          color: isActive ? activeBorder : inactiveBorder,
           width: isActive ? 1.5 : 1.0,
         ),
       ),
@@ -435,17 +472,21 @@ class DacProfileManagerModal extends ConsumerWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: isActive ? const Color(0xFF4ADE80) : const Color(0xFF16181F),
+                  color: isActive
+                      ? (isDark ? const Color(0xFF4ADE80) : colorScheme.primary)
+                      : capsuleBg,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isActive ? const Color(0xFF4ADE80) : const Color(0xFF262936),
+                    color: isActive ? activeBorder : inactiveBorder,
                   ),
                 ),
                 alignment: Alignment.center,
                 child: Icon(
                   LucideIcons.sliders,
                   size: 15,
-                  color: isActive ? const Color(0xFF0B110E) : const Color(0xFF8A9A90),
+                  color: isActive
+                      ? (isDark ? const Color(0xFF0B110E) : colorScheme.onPrimary)
+                      : metaColor,
                 ),
               ),
               const SizedBox(width: 10),
@@ -455,10 +496,10 @@ class DacProfileManagerModal extends ConsumerWidget {
                   children: [
                     Text(
                       profile.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : colorScheme.onSurface,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -467,9 +508,9 @@ class DacProfileManagerModal extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         profile.description,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Color(0xFF8A9A90),
+                          color: metaColor,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -483,17 +524,17 @@ class DacProfileManagerModal extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF16181F),
+                  color: capsuleBg,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFF262936)),
+                  border: Border.all(color: inactiveBorder),
                 ),
                 child: Text(
                   '${profile.preampGainDb >= 0 ? "+" : ""}${profile.preampGainDb.toStringAsFixed(1)} dB',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    fontFeatures: [FontFeature.tabularFigures()],
-                    color: Color(0xFF8A9A90),
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: metaColor,
                   ),
                 ),
               ),
@@ -516,10 +557,10 @@ class DacProfileManagerModal extends ConsumerWidget {
                   margin: const EdgeInsets.only(right: 6),
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF16181F),
+                    color: capsuleBg,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: const Color(0xFF262936),
+                      color: inactiveBorder,
                       width: 0.8,
                     ),
                   ),
@@ -529,7 +570,9 @@ class DacProfileManagerModal extends ConsumerWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                       fontFeatures: const [FontFeature.tabularFigures()],
-                      color: b.gainDb != 0.0 ? const Color(0xFF4ADE80) : const Color(0xFF8A9A90),
+                      color: b.gainDb != 0.0
+                          ? (isDark ? const Color(0xFF4ADE80) : colorScheme.primary)
+                          : metaColor,
                     ),
                   ),
                 );
@@ -546,10 +589,10 @@ class DacProfileManagerModal extends ConsumerWidget {
               // Export file button (Custom profiles only)
               if (!profile.isBuiltIn && onExport != null)
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     LucideIcons.download,
                     size: 16,
-                    color: Color(0xFF8A9A90),
+                    color: metaColor,
                   ),
                   tooltip: 'Export as .dac file',
                   onPressed: onExport,
@@ -576,7 +619,7 @@ class DacProfileManagerModal extends ConsumerWidget {
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(
-                    color: isActive ? const Color(0xFF4ADE80) : const Color(0xFF383D50),
+                    color: isActive ? activeBorder : (isDark ? const Color(0xFF383D50) : colorScheme.outlineVariant),
                   ),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -593,7 +636,7 @@ class DacProfileManagerModal extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: isActive ? const Color(0xFF4ADE80) : Colors.white,
+                    color: isActive ? activeBorder : (isDark ? Colors.white : colorScheme.onSurface),
                   ),
                 ),
               ),
@@ -603,9 +646,11 @@ class DacProfileManagerModal extends ConsumerWidget {
               // Burn to Flash Button
               FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF252834),
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Color(0xFF383D50)),
+                  backgroundColor: isDark ? const Color(0xFF252834) : colorScheme.primaryContainer,
+                  foregroundColor: isDark ? Colors.white : colorScheme.onPrimaryContainer,
+                  side: BorderSide(
+                    color: isDark ? const Color(0xFF383D50) : colorScheme.outlineVariant,
+                  ),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 ),

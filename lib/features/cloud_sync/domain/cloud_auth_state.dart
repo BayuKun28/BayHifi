@@ -13,6 +13,7 @@ class CloudAuthState {
   final DateTime? lastSyncedAt;
   final int pendingSyncCount;
   final String? errorMessage;
+  final bool isSyncing;
 
   const CloudAuthState({
     this.status = CloudAuthStatus.guest,
@@ -22,6 +23,7 @@ class CloudAuthState {
     this.lastSyncedAt,
     this.pendingSyncCount = 0,
     this.errorMessage,
+    this.isSyncing = false,
   });
 
   bool get isAuthenticated => status == CloudAuthStatus.authenticated && token != null && token!.isNotEmpty;
@@ -35,6 +37,7 @@ class CloudAuthState {
     DateTime? lastSyncedAt,
     int? pendingSyncCount,
     String? errorMessage,
+    bool? isSyncing,
     bool clearError = false,
     bool clearAuth = false,
   }) {
@@ -46,6 +49,7 @@ class CloudAuthState {
       lastSyncedAt: clearAuth ? null : (lastSyncedAt ?? this.lastSyncedAt),
       pendingSyncCount: pendingSyncCount ?? this.pendingSyncCount,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      isSyncing: clearAuth ? false : (isSyncing ?? this.isSyncing),
     );
   }
 }
