@@ -56,8 +56,6 @@ dependencies:
   # UI Animation & Utilities
   flutter_animate: ^4.5.2
   intl: ^0.20.2
-  cupertino_icons: ^1.0.8
-  hugeicons: ^1.2.0
   lucide_icons_flutter: ^3.1.25
   collection: ^1.18.0
 

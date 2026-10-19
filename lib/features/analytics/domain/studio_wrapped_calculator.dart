@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../../../core/database/local_persistence_service.dart';
 import '../../player/domain/track.dart';
 import 'audiophile_persona.dart';
 import 'playback_log_entry.dart';
@@ -32,6 +33,85 @@ class StudioWrappedCalculator {
       return _generateSampleWrappedData(timeFilter: timeFilter, libraryTracks: libraryFallback);
     }
 
+    // Fast lookup dictionaries from libraryFallback for deterministic artwork resolution
+    final libraryById = <String, Track>{};
+    final libraryByTitleArtist = <String, Track>{};
+    final libraryArtistArt = <String, String>{};
+    final libraryAlbumArt = <String, String>{};
+
+    if (libraryFallback != null && libraryFallback.isNotEmpty) {
+      for (final t in libraryFallback) {
+        if (t.id.isNotEmpty) libraryById[t.id] = t;
+        final cleanKey = '${t.title.trim().toLowerCase()}_${t.artist.trim().toLowerCase()}';
+        libraryByTitleArtist.putIfAbsent(cleanKey, () => t);
+
+        final art = t.albumArtUrl?.trim();
+        if (art != null && art.isNotEmpty) {
+          final artistKey = t.artist.trim().toLowerCase();
+          if (artistKey.isNotEmpty) {
+            libraryArtistArt.putIfAbsent(artistKey, () => art);
+          }
+          final albumKey = '${t.album.trim().toLowerCase()}_$artistKey';
+          if (t.album.trim().isNotEmpty) {
+            libraryAlbumArt.putIfAbsent(albumKey, () => art);
+          }
+        }
+      }
+    }
+
+    String? resolveTrackArtwork(String trackId, String title, String artist, String? existingUrl) {
+      if (existingUrl != null && existingUrl.trim().isNotEmpty) return existingUrl.trim();
+      if (libraryById.containsKey(trackId)) {
+        final art = libraryById[trackId]!.albumArtUrl?.trim();
+        if (art != null && art.isNotEmpty) return art;
+      }
+      final key = '${title.trim().toLowerCase()}_${artist.trim().toLowerCase()}';
+      if (libraryByTitleArtist.containsKey(key)) {
+        final art = libraryByTitleArtist[key]!.albumArtUrl?.trim();
+        if (art != null && art.isNotEmpty) return art;
+      }
+      if (trackId.startsWith('yt_')) {
+        final videoId = trackId.replaceFirst('yt_', '');
+        return 'https://i.ytimg.com/vi/$videoId/hqdefault.jpg';
+      }
+      return null;
+    }
+
+    String? resolveArtistArtwork(String artist, String? existingUrl) {
+      if (existingUrl != null && existingUrl.trim().isNotEmpty) return existingUrl.trim();
+      final artistKey = artist.trim().toLowerCase();
+      if (artistKey.isEmpty) return null;
+      if (libraryArtistArt.containsKey(artistKey)) {
+        return libraryArtistArt[artistKey];
+      }
+      try {
+        final saved = LocalPersistenceService.instance.getSetting<String>('artist_art_$artistKey', '');
+        if (saved != null && saved.trim().isNotEmpty && saved != '__none__') {
+          return saved.trim();
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    String? resolveAlbumArtwork(String album, String artist, String? existingUrl) {
+      if (existingUrl != null && existingUrl.trim().isNotEmpty) return existingUrl.trim();
+      final albumKey = '${album.trim().toLowerCase()}_${artist.trim().toLowerCase()}';
+      if (libraryAlbumArt.containsKey(albumKey)) {
+        return libraryAlbumArt[albumKey];
+      }
+      if (libraryFallback != null) {
+        final targetAlbum = album.trim().toLowerCase();
+        for (final t in libraryFallback) {
+          if (t.album.trim().toLowerCase() == targetAlbum &&
+              t.albumArtUrl != null &&
+              t.albumArtUrl!.trim().isNotEmpty) {
+            return t.albumArtUrl!.trim();
+          }
+        }
+      }
+      return null;
+    }
+
     // 3. Compute Top Tracks
     final trackMap = <String, _TrackAggregator>{};
     for (final log in filteredLogs) {
@@ -49,6 +129,9 @@ class StudioWrappedCalculator {
           artworkUrl: log.artworkUrl,
         ),
       );
+      if ((agg.artworkUrl == null || agg.artworkUrl!.isEmpty) && log.artworkUrl != null && log.artworkUrl!.isNotEmpty) {
+        agg.artworkUrl = log.artworkUrl;
+      }
       agg.playCount++;
       agg.totalDurationMs += log.durationPlayedMs > 0 ? log.durationPlayedMs : log.trackDurationMs;
     }
@@ -58,6 +141,7 @@ class StudioWrappedCalculator {
 
     final topTracks = sortedTracks.take(10).toList().asMap().entries.map((e) {
       final agg = e.value;
+      final resolvedArt = resolveTrackArtwork(agg.trackId, agg.title, agg.artist, agg.artworkUrl);
       return TopTrackRank(
         rank: e.key + 1,
         trackId: agg.trackId,
@@ -69,7 +153,7 @@ class StudioWrappedCalculator {
         bitDepth: agg.bitDepth,
         playCount: agg.playCount,
         totalMinutes: math.max(1, (agg.totalDurationMs / 60000).round()),
-        albumArtUri: agg.artworkUrl,
+        albumArtUri: resolvedArt,
       );
     }).toList();
 
@@ -81,7 +165,7 @@ class StudioWrappedCalculator {
         artistName,
         () => _ArtistAggregator(artist: artistName, artworkUrl: log.artworkUrl),
       );
-      if (agg.artworkUrl == null && log.artworkUrl != null) {
+      if ((agg.artworkUrl == null || agg.artworkUrl!.isEmpty) && log.artworkUrl != null && log.artworkUrl!.isNotEmpty) {
         agg.artworkUrl = log.artworkUrl;
       }
       agg.playCount++;
@@ -100,13 +184,14 @@ class StudioWrappedCalculator {
     final topArtists = sortedArtists.take(5).toList().asMap().entries.map((e) {
       final agg = e.value;
       final pct = totalListeningMs > 0 ? (agg.totalDurationMs / totalListeningMs) * 100 : 0.0;
+      final resolvedArt = resolveArtistArtwork(agg.artist, agg.artworkUrl);
       return TopArtistRank(
         rank: e.key + 1,
         artist: agg.artist,
         playCount: agg.playCount,
         totalMinutes: math.max(1, (agg.totalDurationMs / 60000).round()),
         percentage: (pct * 10).round() / 10.0,
-        artworkUrl: agg.artworkUrl,
+        artworkUrl: resolvedArt,
       );
     }).toList();
 
@@ -120,7 +205,7 @@ class StudioWrappedCalculator {
         key,
         () => _AlbumAggregator(album: albumName, artist: artistName, artworkUrl: log.artworkUrl),
       );
-      if (agg.artworkUrl == null && log.artworkUrl != null) {
+      if ((agg.artworkUrl == null || agg.artworkUrl!.isEmpty) && log.artworkUrl != null && log.artworkUrl!.isNotEmpty) {
         agg.artworkUrl = log.artworkUrl;
       }
       agg.playCount++;
@@ -133,6 +218,7 @@ class StudioWrappedCalculator {
 
     final topAlbums = sortedAlbums.take(5).toList().asMap().entries.map((e) {
       final agg = e.value;
+      final resolvedArt = resolveAlbumArtwork(agg.album, agg.artist, agg.artworkUrl);
       return TopAlbumRank(
         rank: e.key + 1,
         album: agg.album,
@@ -140,7 +226,7 @@ class StudioWrappedCalculator {
         playCount: agg.playCount,
         totalMinutes: math.max(1, (agg.totalDurationMs / 60000).round()),
         trackCount: math.max(1, agg.trackIds.length),
-        artworkUrl: agg.artworkUrl,
+        artworkUrl: resolvedArt,
       );
     }).toList();
 
@@ -461,6 +547,12 @@ class StudioWrappedCalculator {
         );
       }).toList();
     } else {
+      const pFloydWallArt = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80';
+      const pFloydDarkArt = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&auto=format&fit=crop&q=80';
+      const queenOperaArt = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80';
+      const eaglesArt = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
+      const starboyArt = 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&auto=format&fit=crop&q=80';
+
       sampleTracks = const <TopTrackRank>[
         TopTrackRank(
           rank: 1,
@@ -473,6 +565,7 @@ class StudioWrappedCalculator {
           bitDepth: 24,
           playCount: 142,
           totalMinutes: 852,
+          albumArtUri: pFloydWallArt,
         ),
         TopTrackRank(
           rank: 2,
@@ -485,6 +578,7 @@ class StudioWrappedCalculator {
           bitDepth: 24,
           playCount: 98,
           totalMinutes: 686,
+          albumArtUri: pFloydDarkArt,
         ),
         TopTrackRank(
           rank: 3,
@@ -497,6 +591,7 @@ class StudioWrappedCalculator {
           bitDepth: 16,
           playCount: 76,
           totalMinutes: 456,
+          albumArtUri: queenOperaArt,
         ),
         TopTrackRank(
           rank: 4,
@@ -509,6 +604,7 @@ class StudioWrappedCalculator {
           bitDepth: 24,
           playCount: 64,
           totalMinutes: 416,
+          albumArtUri: eaglesArt,
         ),
         TopTrackRank(
           rank: 5,
@@ -521,23 +617,24 @@ class StudioWrappedCalculator {
           bitDepth: 16,
           playCount: 52,
           totalMinutes: 208,
+          albumArtUri: starboyArt,
         ),
       ];
 
       sampleArtists = const <TopArtistRank>[
-        TopArtistRank(rank: 1, artist: 'Pink Floyd', playCount: 240, totalMinutes: 1538, percentage: 38.5),
-        TopArtistRank(rank: 2, artist: 'Queen', playCount: 120, totalMinutes: 640, percentage: 16.0),
-        TopArtistRank(rank: 3, artist: 'Eagles', playCount: 95, totalMinutes: 520, percentage: 13.0),
-        TopArtistRank(rank: 4, artist: 'The Weeknd', playCount: 80, totalMinutes: 380, percentage: 9.5),
-        TopArtistRank(rank: 5, artist: 'Daft Punk', playCount: 65, totalMinutes: 310, percentage: 7.8),
+        TopArtistRank(rank: 1, artist: 'Pink Floyd', playCount: 240, totalMinutes: 1538, percentage: 38.5, artworkUrl: pFloydWallArt),
+        TopArtistRank(rank: 2, artist: 'Queen', playCount: 120, totalMinutes: 640, percentage: 16.0, artworkUrl: queenOperaArt),
+        TopArtistRank(rank: 3, artist: 'Eagles', playCount: 95, totalMinutes: 520, percentage: 13.0, artworkUrl: eaglesArt),
+        TopArtistRank(rank: 4, artist: 'The Weeknd', playCount: 80, totalMinutes: 380, percentage: 9.5, artworkUrl: starboyArt),
+        TopArtistRank(rank: 5, artist: 'Daft Punk', playCount: 65, totalMinutes: 310, percentage: 7.8, artworkUrl: pFloydDarkArt),
       ];
 
       sampleAlbums = const <TopAlbumRank>[
-        TopAlbumRank(rank: 1, album: 'The Wall (Lossless Remaster)', artist: 'Pink Floyd', playCount: 142, totalMinutes: 852, trackCount: 26),
-        TopAlbumRank(rank: 2, album: 'The Dark Side of the Moon', artist: 'Pink Floyd', playCount: 98, totalMinutes: 686, trackCount: 10),
-        TopAlbumRank(rank: 3, album: 'A Night at the Opera', artist: 'Queen', playCount: 76, totalMinutes: 456, trackCount: 12),
-        TopAlbumRank(rank: 4, album: 'Hotel California (High-Res 192k)', artist: 'Eagles', playCount: 64, totalMinutes: 416, trackCount: 9),
-        TopAlbumRank(rank: 5, album: 'Starboy', artist: 'The Weeknd', playCount: 52, totalMinutes: 208, trackCount: 18),
+        TopAlbumRank(rank: 1, album: 'The Wall (Lossless Remaster)', artist: 'Pink Floyd', playCount: 142, totalMinutes: 852, trackCount: 26, artworkUrl: pFloydWallArt),
+        TopAlbumRank(rank: 2, album: 'The Dark Side of the Moon', artist: 'Pink Floyd', playCount: 98, totalMinutes: 686, trackCount: 10, artworkUrl: pFloydDarkArt),
+        TopAlbumRank(rank: 3, album: 'A Night at the Opera', artist: 'Queen', playCount: 76, totalMinutes: 456, trackCount: 12, artworkUrl: queenOperaArt),
+        TopAlbumRank(rank: 4, album: 'Hotel California (High-Res 192k)', artist: 'Eagles', playCount: 64, totalMinutes: 416, trackCount: 9, artworkUrl: eaglesArt),
+        TopAlbumRank(rank: 5, album: 'Starboy', artist: 'The Weeknd', playCount: 52, totalMinutes: 208, trackCount: 18, artworkUrl: starboyArt),
       ];
     }
 
@@ -591,7 +688,7 @@ class _TrackAggregator {
   final String format;
   final int sampleRate;
   final int bitDepth;
-  final String? artworkUrl;
+  String? artworkUrl;
   int playCount = 0;
   int totalDurationMs = 0;
 

@@ -12,7 +12,7 @@ import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/meta_tracking_label.dart';
 import '../../../core/widgets/studio_artwork_lightbox.dart';
 import '../../../core/desktop/desktop_layout_controller.dart';
-import '../../pro_q_studio/presentation/widgets/saved_curves_library_sheet.dart';
+import '../../pro_q_studio/presentation/widgets/auto_eq_modal_dialog.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
 import '../../library/domain/library_collection_models.dart';
 import '../../library/presentation/controllers/library_controller.dart';
@@ -251,15 +251,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     );
 
     final sleepTimer = ref.watch(sleepTimerControllerProvider);
-    final libraryState = ref.watch(unifiedLibraryProvider);
+    final isFav = ref.watch(unifiedLibraryProvider.select((s) => track != null && s.favoriteTrackIds.contains(track.id)));
     final libraryController = ref.read(unifiedLibraryProvider.notifier);
     final displaySettings = ref.watch(playerCustomizationProvider);
     final eqState = ref.watch(eqControllerProvider);
 
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
-
-    final isFav = track != null && libraryState.favoriteTrackIds.contains(track.id);
 
     // Auto-fetch lyrics when track changes
     if (track != null && track.id != _loadedTrackId && !_isLoadingLyrics) {
@@ -1071,6 +1069,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
 
     final hasDriver = eqState.driverFr != null;
     final hasTarget = eqState.targetFr != null;
+    final isAutoActive = eqState.isAutoEqActive || hasDriver;
+    final autoEqTooltip = hasDriver
+        ? 'AutoEQ: ${eqState.driverFr!.name}${hasTarget ? ' → ${eqState.targetFr!.name}' : ''}'
+        : 'AutoEQ Studio & Target Matching';
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -1115,6 +1117,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                         color: subtleColor,
                       ),
                     ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '• SOLOUD',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: primary.withValues(alpha: 0.85),
+                        letterSpacing: 0.4,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1154,13 +1166,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           ),
           const SizedBox(width: 8),
 
-          // 3. Driver Curve Shortcut Icon Button
+          // 3. AutoEQ (Driver & Target Matching) Shortcut Icon Button
           Tooltip(
-            message: hasDriver ? 'Driver: ${eqState.driverFr!.name}' : 'Select Headphone Driver',
+            message: autoEqTooltip,
             child: InkWell(
               onTap: () {
                 AppHaptics.selectionClick();
-                SavedCurvesLibrarySheet.show(context, initialCategory: 'driver');
+                AutoEqModalDialog.show(context);
               },
               borderRadius: BorderRadius.circular(10),
               child: Container(
@@ -1170,47 +1182,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   color: surfaceContainer,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: hasDriver ? primary : outlineBorder,
+                    color: isAutoActive ? primary : outlineBorder,
                     width: 1.0,
                   ),
                 ),
                 child: Center(
                   child: Icon(
-                    LucideIcons.headphones,
+                    LucideIcons.sparkles,
                     size: 14,
-                    color: hasDriver ? primary : subtleColor,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // 4. Target Curve Shortcut Icon Button
-          Tooltip(
-            message: hasTarget ? 'Target: ${eqState.targetFr!.name}' : 'Select Target Response Curve',
-            child: InkWell(
-              onTap: () {
-                AppHaptics.selectionClick();
-                SavedCurvesLibrarySheet.show(context, initialCategory: 'target');
-              },
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                width: 34,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: surfaceContainer,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: hasTarget ? const Color(0xFFFFB74D) : outlineBorder,
-                    width: 1.0,
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    LucideIcons.target,
-                    size: 14,
-                    color: hasTarget ? const Color(0xFFFFB74D) : subtleColor,
+                    color: isAutoActive ? primary : subtleColor,
                   ),
                 ),
               ),
@@ -1318,7 +1298,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              '$formatStr • $bitDepthStr / $sampleRateStr',
+              '$formatStr • $bitDepthStr / $sampleRateStr • SOLOUD',
               style: TextStyle(
                 fontFeatures: AppTypography.audioFigures,
                 fontSize: 10.5,
@@ -1438,7 +1418,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'BAYDEV AUDIO ENGINE',
+                                  'POWERED BY SOLOUD ENGINE',
                                   style: TextStyle(
                                     fontSize: 8.5,
                                     fontWeight: FontWeight.w800,

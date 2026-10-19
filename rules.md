@@ -61,7 +61,7 @@ Pada branch `simple-as-f`, aplikasi Baydev HiFi bertransformasi dari arsitektur 
 - **Minimalist Playback Controls**:
   - Tombol kontrol sejajar horizontal: Shuffle, Previous, Tombol Play/Pause utama berbentuk pill/circle kontras, Next, dan Repeat.
 - **Compact Auxiliary Action Bar**:
-  - Baris bawah menggunakan tombol icon ramping berukuran 34x34px (solid studio charcoal `#16181F`, border `#262936`) dengan tooltip untuk EQ, Driver, Target, Lyrics, dan Queue, menyisakan format badge `[WAV 44.1kHz]` ringkas. Dilarang menggunakan teks tombol panjang yang memadati layar dan memicu horizontal overflow.
+  - Baris bawah menggunakan tombol icon ramping berukuran 34x30px (solid studio charcoal `#16181F`, border `#262936`) dengan tooltip untuk EQ, AutoEQ (tombol terpadu Driver & Target matching dialog `AutoEqModalDialog`), Lyrics, dan format badge `[WAV 44.1kHz]` ringkas. Dilarang menggunakan teks tombol panjang yang memadati layar dan memicu horizontal overflow.
 
 ### 2.4 Daftar Lagu Uncarded Floating & Active Capsule Highlight
 - **Uncarded Clean List**:
@@ -305,5 +305,30 @@ $$\text{Preamp Gain} \rightarrow \text{Parametric EQ} \rightarrow \text{Bass Boo
 
 ## 10. Ringkasan Eksekusi
 Aturan di atas berlaku untuk seluruh penulisan kode pada project **Baydev HiFi**. Setiap penambahan atau pembaruan modul wajib mematuhi pemisahan layer, penamaan konsisten, presisi matematika DSP RYNLABS_HIFI, standar antarmuka Material 3 Expressive, dan isolasi ketat antar-platform.
+
+---
+
+## 11. Mandat Rekayasa Always-On: Integrasi Ponytail & RTK (Rust Token Killer)
+
+### 11.1 Ponytail — Lazy Senior Dev Mode Mandate
+- **The Best Code is Code Never Written**: Selesaikan setiap tugas dengan perubahan terkecil yang tuntas (*smallest complete change*).
+- **Anti-Over-Engineering**: Jangan menambahkan abstraksi, wrapper, boilerplates, atau fitur spekulatif yang tidak diminta.
+- **Tuntas & Bertanggung Jawab**: Bersikap hemat pada solusi, bukan pada kualitas eksekusi. Perubahan wajib menyelesaikan seluruh caller, unit/widget tests, dan fixtures yang terdampak.
+- **Root Cause Single-Point Fix**: Untuk perbaikan bug, telusuri semua pemanggil fungsi terlebih dahulu via grep, lalu perbaiki akar masalah sekali di kode bersama.
+- **Reporting Clarity**: Akhiri balasan dengan ringkasan apa yang dilewati/ditunda beserta risiko teknis yang perlu diketahui pengguna.
+
+### 11.2 RTK — Token Optimization & Code Simplification Mandate
+- **Efisiensi Token Terminal**: Hindari dump log/output yang masif pada perintah CLI. Gunakan paginasi (`-n <N>`) dan path spesifik.
+- **Kode Idiomatik & Bersih**: Gunakan functional chains bawaan bahasa, early returns (`guard clauses`), dan minimalkan alokasi memori yang redundan.
+- **Zero Regression**: Pertahankan error handling yang kuat dan verifikasi selalu dengan unit/widget tests yang deterministik (`flutter test` dan `flutter analyze`).
+
+### 11.3 Aturan Eksekusi Pengujian & Quality Gate (Anti-Parallel / Sequential Only)
+- **Targeted Test First**: Saat pengembangan dan perbaikan bug/fitur, utamakan menjalankan file tes spesifik (`flutter test test/specific_test.dart`) untuk menghemat resource dan waktu eksekusi.
+- **Dilarang Menjalankan Pengujian Global Bersamaan**:
+  - Jika menjalankan `flutter test` tanpa menentukan berkas spesifik (menjalankan seluruh test suite), DILARANG KERAS menjalankan `flutter test` lain atau `flutter analyze` secara paralel/bersamaan.
+  - Pengujian suite global memakan konsumsi CPU, memori, dan I/O disk yang sangat berat. Menjalankan beberapa proses secara bersamaan dapat membekukan perangkat atau menyebabkan *high resource thrashing*.
+  - **Wajib Tunggu Selesai**: Selalu tunggu proses `flutter test` atau `flutter analyze` selesai sepenuhnya (*100% finished*) sebelum memulai perintah analisis atau pengujian berikutnya. Seluruh pemeriksaan kualitas harus dieksekusi secara serial / sekuensial satu per satu.
+
+
 
 

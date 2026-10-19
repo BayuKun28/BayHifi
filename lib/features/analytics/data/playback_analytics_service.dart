@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../audio_engine/virtual_dsp_service.dart';
 import '../../../core/database/local_persistence_service.dart';
+import '../../library/presentation/controllers/library_controller.dart';
 import '../../player/domain/track.dart';
 import '../domain/playback_log_entry.dart';
 import '../domain/studio_wrapped_calculator.dart';
@@ -67,6 +68,23 @@ class PlaybackAnalyticsService {
         if (dspService.limiterEnabled) activeDsp++;
       } catch (_) {}
 
+      String? artwork = track.albumArtUrl?.trim();
+      if (artwork == null || artwork.isEmpty) {
+        try {
+          final libTracks = _ref.read(unifiedLibraryProvider).tracks;
+          final match = libTracks.firstWhere(
+            (t) =>
+                t.id == track.id ||
+                (t.title.trim().toLowerCase() == track.title.trim().toLowerCase() &&
+                    t.artist.trim().toLowerCase() == track.artist.trim().toLowerCase()),
+            orElse: () => track,
+          );
+          if (match.albumArtUrl != null && match.albumArtUrl!.trim().isNotEmpty) {
+            artwork = match.albumArtUrl!.trim();
+          }
+        } catch (_) {}
+      }
+
       final log = PlaybackLogEntry(
         id: 'log_${DateTime.now().millisecondsSinceEpoch}_${track.id}',
         trackId: track.id,
@@ -85,7 +103,7 @@ class PlaybackAnalyticsService {
         isAutoEqActive: isAutoEqActive,
         activeDspCount: activeDsp,
         dacDeviceName: dacDeviceName,
-        artworkUrl: track.albumArtUrl,
+        artworkUrl: artwork,
       );
 
       await LocalPersistenceService.instance.logPlaybackSession(log.toMap());
@@ -109,11 +127,25 @@ class PlaybackAnalyticsService {
     final logs = rawList.map(PlaybackLogEntry.fromMap).toList();
     List<Track>? libraryTracks;
     try {
-      final rawSaved = LocalPersistenceService.instance.getSavedLibraryTracks();
-      if (rawSaved.isNotEmpty) {
-        libraryTracks = rawSaved.map(Track.fromMap).toList();
+      final inMemory = _ref.read(unifiedLibraryProvider).tracks;
+      if (inMemory.isNotEmpty) {
+        libraryTracks = inMemory;
       }
     } catch (_) {}
+
+    if (libraryTracks == null || libraryTracks.isEmpty) {
+      try {
+        final rawSaved = LocalPersistenceService.instance.getSavedLibraryTracks();
+        if (rawSaved.isNotEmpty) {
+          libraryTracks = rawSaved.map(Track.fromMap).toList();
+        }
+      } catch (_) {}
+    }
+
+    // Lazy asynchronous backfill for past saved logs that had missing artwork URLs
+    if (libraryTracks != null && libraryTracks.isNotEmpty) {
+      _backfillPersistedLogsIfMissing(rawList, libraryTracks);
+    }
 
     const calculator = StudioWrappedCalculator();
     return calculator.calculate(
@@ -121,5 +153,56 @@ class PlaybackAnalyticsService {
       timeFilter: timeFilter,
       libraryFallback: libraryTracks,
     );
+  }
+
+  void _backfillPersistedLogsIfMissing(
+    List<Map<String, dynamic>> rawList,
+    List<Track> libraryTracks,
+  ) {
+    bool hasMissing = false;
+    for (final m in rawList) {
+      final art = m['artworkUrl'] as String?;
+      if (art == null || art.trim().isEmpty) {
+        hasMissing = true;
+        break;
+      }
+    }
+    if (!hasMissing) return;
+
+    final libById = <String, String>{};
+    final libByTitleArtist = <String, String>{};
+    for (final t in libraryTracks) {
+      if (t.albumArtUrl != null && t.albumArtUrl!.trim().isNotEmpty) {
+        final art = t.albumArtUrl!.trim();
+        if (t.id.isNotEmpty) libById[t.id] = art;
+        final key = '${t.title.trim().toLowerCase()}_${t.artist.trim().toLowerCase()}';
+        libByTitleArtist.putIfAbsent(key, () => art);
+      }
+    }
+
+    bool modified = false;
+    for (final map in rawList) {
+      final existing = map['artworkUrl'] as String?;
+      if (existing == null || existing.trim().isEmpty) {
+        final trackId = map['trackId'] as String? ?? '';
+        final title = map['title'] as String? ?? '';
+        final artist = map['artist'] as String? ?? '';
+        String? art = libById[trackId];
+        art ??= libByTitleArtist['${title.trim().toLowerCase()}_${artist.trim().toLowerCase()}'];
+        if (art == null && trackId.startsWith('yt_')) {
+          final vid = trackId.replaceFirst('yt_', '');
+          art = 'https://i.ytimg.com/vi/$vid/hqdefault.jpg';
+        }
+        if (art != null && art.isNotEmpty) {
+          map['artworkUrl'] = art;
+          modified = true;
+        }
+      }
+    }
+
+    if (modified) {
+      // Persist in background without awaiting or blocking UI
+      LocalPersistenceService.instance.updatePlaybackHistoryLogs(rawList);
+    }
   }
 }

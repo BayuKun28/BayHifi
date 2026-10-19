@@ -37,7 +37,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     final libraryState = ref.watch(unifiedLibraryProvider);
     final tracks = libraryState.tracks;
-    final playback = ref.watch(playerControllerProvider);
+    final currentPlayingId = ref.watch(playerControllerProvider.select((s) => s.isPlaying ? s.currentTrack?.id : null));
 
     // Get favorite tracks or fallback to recent tracks
     final favoriteTracks = tracks
@@ -230,7 +230,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   itemCount: sampleTracks.length,
                   itemBuilder: (context, index) {
                     final track = sampleTracks[index];
-                    final isPlaying = playback.isPlaying && playback.currentTrack?.id == track.id;
+                    final isPlaying = currentPlayingId == track.id;
 
                     return TrackTile(
                       track: track,

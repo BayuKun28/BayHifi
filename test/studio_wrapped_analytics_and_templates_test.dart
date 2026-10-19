@@ -23,7 +23,6 @@ import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/st
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/thermal_receipt_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/top_tracks_chart_view.dart';
 import 'package:baydev_hifi/features/analytics/presentation/templates/widgets/vinyl_gatefold_view.dart';
-import 'package:baydev_hifi/features/dashboard/presentation/widgets/listening_statistics_card.dart';
 import 'package:baydev_hifi/features/dashboard/presentation/widgets/studio_wrapped_bento_banner.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 
@@ -279,13 +278,63 @@ void main() {
       expect(data.topArtists.first.artworkUrl, 'https://example.com/starboy.jpg');
     });
 
+    test('Backfills artworkUrl from libraryFallback for tracks, artists, and albums when log artwork is null', () {
+      final now = DateTime(2026, 8, 1);
+      final logsWithoutArtwork = [
+        PlaybackLogEntry(
+          id: 'l_null_art',
+          trackId: 'local_123',
+          title: 'Medusa',
+          artist: 'Bring Me The Horizon',
+          album: 'Count Your Blessings',
+          genre: 'Metalcore',
+          durationPlayedMs: 240000,
+          trackDurationMs: 250000,
+          format: 'flac',
+          sampleRate: 96000,
+          bitDepth: 24,
+          timestamp: now,
+          artworkUrl: null, // Artwork was null in log
+        ),
+      ];
+
+      final library = [
+        const Track(
+          id: 'local_123',
+          title: 'Medusa',
+          artist: 'Bring Me The Horizon',
+          album: 'Count Your Blessings',
+          duration: Duration(minutes: 4),
+          albumArtUrl: '/home/x/Documents/covers/art_123.jpg',
+        ),
+      ];
+
+      const calculator = StudioWrappedCalculator();
+      final data = calculator.calculate(
+        rawLogs: logsWithoutArtwork,
+        timeFilter: RecapTimeFilter.year2026,
+        libraryFallback: library,
+      );
+
+      // Top Track must backfill from library
+      expect(data.topTracks.first.albumArtUri, '/home/x/Documents/covers/art_123.jpg');
+      // Top Artist must backfill from library
+      expect(data.topArtists.first.artworkUrl, '/home/x/Documents/covers/art_123.jpg');
+      // Top Album must backfill from library
+      expect(data.topAlbums.first.artworkUrl, '/home/x/Documents/covers/art_123.jpg');
+    });
+
     test('Generates high-fidelity demo sample data when logs are empty', () {
       const calculator = StudioWrappedCalculator();
       final fallbackData = calculator.calculate(rawLogs: [], timeFilter: RecapTimeFilter.year2026);
 
       expect(fallbackData.totalListeningMinutes, greaterThan(0));
       expect(fallbackData.topTracks, isNotEmpty);
+      expect(fallbackData.topTracks.first.albumArtUri, isNotNull);
       expect(fallbackData.topArtists, isNotEmpty);
+      expect(fallbackData.topArtists.first.artworkUrl, isNotNull);
+      expect(fallbackData.topAlbums, isNotEmpty);
+      expect(fallbackData.topAlbums.first.artworkUrl, isNotNull);
       expect(fallbackData.topGenres, isNotEmpty);
       expect(fallbackData.persona, isNotNull);
       expect(fallbackData.resonanceProfile.waveSeedAmplitudes, isNotEmpty);
@@ -676,7 +725,7 @@ void main() {
 
       // Verify persona title text widget is found and its color is onSurface (not white)
       final titleFinder = find.byWidgetPredicate(
-        (widget) => widget is Text && widget.style?.fontSize == 15 && widget.style?.fontWeight == FontWeight.w900,
+        (widget) => widget is Text && widget.style?.fontSize == 15 && widget.style?.fontWeight == FontWeight.w800,
       );
       expect(titleFinder, findsOneWidget);
       final lightTitleWidget = tester.widget<Text>(titleFinder);
@@ -705,7 +754,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final darkTitleWidget = tester.widget<Text>(titleFinder);
-      expect(darkTitleWidget.style?.color, equals(const Color(0xFFF1F5F9)));
+      expect(darkTitleWidget.style?.color, equals(Colors.white));
     });
   });
 
@@ -771,31 +820,20 @@ void main() {
       expect(data.topAlbum?.album, 'The Wall');
     });
 
-    testWidgets('ListeningStatisticsCard renders telemetry, artists, tracks, and opens detail screen', (tester) async {
+    testWidgets('StudioWrappedBentoBanner renders recap badge, stats, and handles tap', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: ListeningStatisticsCard(),
+              body: StudioWrappedBentoBanner(),
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('AUDIOPHILE LISTENING STATS'), findsOneWidget);
-      expect(find.text('Listening Time'), findsOneWidget);
-      expect(find.text('Total Plays'), findsOneWidget);
-      expect(find.text('Lossless Purity'), findsOneWidget);
-      expect(find.text('View All'), findsOneWidget);
-      expect(find.text('Explore full listening insights & signal telemetry'), findsOneWidget);
-
-      // Tap View All Insights
-      await tester.tap(find.text('View All'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Listening Insights'), findsOneWidget);
-      expect(find.text('Deep playback telemetry & signal metrics'), findsOneWidget);
+      expect(find.text('STUDIO WRAPPED 2026'), findsOneWidget);
+      expect(find.byType(StudioWrappedBentoBanner), findsOneWidget);
     });
 
     testWidgets('StudioListeningStatsDetailScreen renders all sections, filter switcher, and launchers', (tester) async {

@@ -16,6 +16,9 @@ class StudioArtworkWidget extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double? width;
   final double? height;
+  final int? cacheWidth;
+  final int? cacheHeight;
+  final bool disableDownsampling;
   final IconData fallbackIcon;
   final double fallbackIconSize;
   final Color? fallbackColor;
@@ -30,6 +33,9 @@ class StudioArtworkWidget extends StatelessWidget {
     this.borderRadius,
     this.width,
     this.height,
+    this.cacheWidth,
+    this.cacheHeight,
+    this.disableDownsampling = false,
     this.fallbackIcon = LucideIcons.disc,
     this.fallbackIconSize = 24.0,
     this.fallbackColor,
@@ -56,6 +62,10 @@ class StudioArtworkWidget extends StatelessWidget {
         path.startsWith('/mnt/') ||
         path.startsWith('/data/') ||
         path.startsWith('/storage/') ||
+        path.startsWith('/sdcard/') ||
+        path.startsWith('/media/') ||
+        path.startsWith('/run/media/') ||
+        path.startsWith('/android/') ||
         path.startsWith('/private/') ||
         path.startsWith('/Users/') ||
         path.startsWith('/var/') ||
@@ -117,6 +127,24 @@ class StudioArtworkWidget extends StatelessWidget {
     final targetBytes = bytes ?? track?.albumArtBytes;
     final targetUrl = url ?? track?.albumArtUrl;
 
+    // Bitmap downsampling calculation to avoid decoding multi-megapixel images for small thumbnails
+    // If effectiveCacheWidth is computed, leaving effectiveCacheHeight as null preserves natural aspect ratio.
+    final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 2.0;
+    int? effectiveCacheWidth = disableDownsampling
+        ? null
+        : (cacheWidth ??
+            ((width != null && width!.isFinite && width! > 0 && width! < 600)
+                ? (width! * dpr).round()
+                : null));
+    int? effectiveCacheHeight = disableDownsampling
+        ? null
+        : (cacheHeight ??
+            ((effectiveCacheWidth == null && height != null && height!.isFinite && height! > 0 && height! < 600)
+                ? (height! * dpr).round()
+                : null));
+    if (effectiveCacheWidth != null && effectiveCacheWidth <= 0) effectiveCacheWidth = null;
+    if (effectiveCacheHeight != null && effectiveCacheHeight <= 0) effectiveCacheHeight = null;
+
     Widget imageContent;
 
     if (targetBytes != null && targetBytes.isNotEmpty) {
@@ -125,6 +153,8 @@ class StudioArtworkWidget extends StatelessWidget {
         fit: fit,
         width: width ?? double.infinity,
         height: height ?? double.infinity,
+        cacheWidth: effectiveCacheWidth,
+        cacheHeight: effectiveCacheHeight,
         errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
       );
     } else if (targetUrl != null && targetUrl.trim().isNotEmpty) {
@@ -135,6 +165,8 @@ class StudioArtworkWidget extends StatelessWidget {
           fit: fit,
           width: width ?? double.infinity,
           height: height ?? double.infinity,
+          cacheWidth: effectiveCacheWidth,
+          cacheHeight: effectiveCacheHeight,
           errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
         );
       } else if (_isLocalPath(cleanUrl)) {
@@ -146,6 +178,8 @@ class StudioArtworkWidget extends StatelessWidget {
           fit: fit,
           width: width ?? double.infinity,
           height: height ?? double.infinity,
+          cacheWidth: effectiveCacheWidth,
+          cacheHeight: effectiveCacheHeight,
           errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
         );
       } else if (cleanUrl.startsWith('/')) {
@@ -155,6 +189,8 @@ class StudioArtworkWidget extends StatelessWidget {
           fit: fit,
           width: width ?? double.infinity,
           height: height ?? double.infinity,
+          cacheWidth: effectiveCacheWidth,
+          cacheHeight: effectiveCacheHeight,
           errorBuilder: (context, error, stackTrace) => _buildFallback(theme, primary),
         );
       } else {

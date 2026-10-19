@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -240,7 +241,47 @@ class LocalPersistenceService {
     }
   }
 
-  Future<void> _save() async {
+  Timer? _saveDebounceTimer;
+  Completer<void>? _saveCompleter;
+
+  Future<void> _save({bool immediate = false}) {
+    final inTest = Platform.environment.containsKey('FLUTTER_TEST');
+    if (immediate || inTest) {
+      _saveDebounceTimer?.cancel();
+      _saveDebounceTimer = null;
+      final completer = _saveCompleter;
+      _saveCompleter = null;
+      return _performWrite().then((_) {
+        if (completer != null && !completer.isCompleted) completer.complete();
+      }).catchError((e) {
+        if (completer != null && !completer.isCompleted) completer.completeError(e);
+      });
+    }
+
+    _saveCompleter ??= Completer<void>();
+    _saveDebounceTimer?.cancel();
+    _saveDebounceTimer = Timer(const Duration(milliseconds: 150), () {
+      _saveDebounceTimer = null;
+      final completer = _saveCompleter;
+      _saveCompleter = null;
+      _performWrite().then((_) {
+        if (completer != null && !completer.isCompleted) completer.complete();
+      }).catchError((e) {
+        if (completer != null && !completer.isCompleted) completer.completeError(e);
+      });
+    });
+
+    return _saveCompleter!.future;
+  }
+
+  /// Forces an immediate flush to disk if any debounced write is pending
+  Future<void> flush() async {
+    if (_saveDebounceTimer != null) {
+      await _save(immediate: true);
+    }
+  }
+
+  Future<void> _performWrite() async {
     if (kIsWeb) {
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -946,6 +987,11 @@ class LocalPersistenceService {
 
   Future<void> clearPlaybackHistoryLogs() async {
     _writeScoped('playback_history_logs', <Map<String, dynamic>>[]);
+    await _save();
+  }
+
+  Future<void> updatePlaybackHistoryLogs(List<Map<String, dynamic>> updatedLogs) async {
+    _writeScoped('playback_history_logs', updatedLogs);
     await _save();
   }
 

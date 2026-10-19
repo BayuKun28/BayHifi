@@ -266,7 +266,7 @@ void main() {
 
               expect(accent, amberAccent);
               expect(canvas, const Color(0xFF141009));
-              expect(activeCapsule, const Color(0xFF282115));
+              expect(activeCapsule, SimpleAsFTheme.surfaceActiveCapsule);
 
               return Scaffold(
                 body: TwoToneHeader(

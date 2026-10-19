@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 import 'soloud_controller.dart';
@@ -17,16 +18,16 @@ class FftProcessor {
   final double maxFreq;
   final double sampleRate;
 
-  final List<double> _smoothedValues;
-  final List<double> _peakValues;
+  final Float64List _smoothedValues;
+  final Float64List _peakValues;
 
   FftProcessor({
     this.bandCount = 48,
     this.minFreq = 20.0,
     this.maxFreq = 20000.0,
     this.sampleRate = 48000.0,
-  })  : _smoothedValues = List.filled(bandCount, 0.0),
-        _peakValues = List.filled(bandCount, 0.0);
+  })  : _smoothedValues = Float64List(bandCount),
+        _peakValues = Float64List(bandCount);
 
   List<double> processFft(AudioVisualizationData data) {
     final rawFft = data.fftData;
@@ -35,7 +36,7 @@ class FftProcessor {
       for (int i = 0; i < bandCount; i++) {
         _smoothedValues[i] *= 0.85;
       }
-      return List.unmodifiable(_smoothedValues);
+      return Float64List.fromList(_smoothedValues);
     }
 
     final fftSize = rawFft.length;
@@ -75,6 +76,6 @@ class FftProcessor {
       }
     }
 
-    return List.unmodifiable(_smoothedValues);
+    return Float64List.fromList(_smoothedValues);
   }
 }

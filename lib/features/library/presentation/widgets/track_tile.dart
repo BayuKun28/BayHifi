@@ -87,16 +87,20 @@ class TrackTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final settings = ref.watch(playerCustomizationProvider);
-    final libraryState = ref.watch(unifiedLibraryProvider);
-    final playback = ref.watch(playerControllerProvider);
-    final isFav = libraryState.favoriteTrackIds.contains(track.id);
-    final isCurrent = playback.currentTrack?.id == track.id;
-    final isBuffering = isCurrent && playback.isLoading;
+    final isFav = ref.watch(unifiedLibraryProvider.select((s) => s.favoriteTrackIds.contains(track.id)));
+    final isBuffering = ref.watch(playerControllerProvider.select((s) => s.currentTrack?.id == track.id && s.isLoading));
     final isTileActive = isPlaying || isBuffering;
 
-    final titleText = settings.trackTitleFirst ? track.title : track.artist;
-    final subtitleText = settings.trackTitleFirst
+    final trackTitleFirst = ref.watch(playerCustomizationProvider.select((s) => s.trackTitleFirst));
+    final trackShowDuration = ref.watch(playerCustomizationProvider.select((s) => s.trackShowDuration));
+    final trackShowDirectFav = ref.watch(playerCustomizationProvider.select((s) => s.trackShowDirectFav));
+    final trackSwipeLeft = ref.watch(playerCustomizationProvider.select((s) => s.trackSwipeLeft));
+    final trackSwipeRight = ref.watch(playerCustomizationProvider.select((s) => s.trackSwipeRight));
+    final trackShowFormatBadge = ref.watch(playerCustomizationProvider.select((s) => s.trackShowFormatBadge));
+    final trackShowBitrate = ref.watch(playerCustomizationProvider.select((s) => s.trackShowBitrate));
+
+    final titleText = trackTitleFirst ? track.title : track.artist;
+    final subtitleText = trackTitleFirst
         ? '${track.artist} • ${track.album}'
         : '${track.title} • ${track.album}';
 
@@ -224,7 +228,7 @@ class TrackTile extends ConsumerWidget {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
-                            if (settings.trackShowFormatBadge) ...[
+                            if (trackShowFormatBadge) ...[
                               Builder(
                                 builder: (context) {
                                   final Color badgeColor = track.isHiRes
@@ -280,7 +284,7 @@ class TrackTile extends ConsumerWidget {
                               ),
                               const SizedBox(width: 6),
                             ],
-                            if (settings.trackShowBitrate && track.sampleRate != null) ...[
+                            if (trackShowBitrate && track.sampleRate != null) ...[
                               Text(
                                 '${(track.sampleRate! / 1000).toStringAsFixed(1)}kHz',
                                 style: TextStyle(
@@ -292,7 +296,7 @@ class TrackTile extends ConsumerWidget {
                               ),
                               const SizedBox(width: 6),
                             ],
-                            if (settings.trackShowDuration && track.duration.inSeconds > 0)
+                            if (trackShowDuration && track.duration.inSeconds > 0)
                               Text(
                                 _formatDuration(track.duration),
                                 style: TextStyle(
@@ -311,7 +315,7 @@ class TrackTile extends ConsumerWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (settings.trackShowDirectFav)
+                    if (trackShowDirectFav)
                       IconButton(
                         icon: Icon(
                           LucideIcons.heart,
@@ -343,31 +347,31 @@ class TrackTile extends ConsumerWidget {
     );
 
     // If both swipe actions are disabled, return simple tile
-    if (settings.trackSwipeLeft == TrackTileSwipeAction.none &&
-        settings.trackSwipeRight == TrackTileSwipeAction.none) {
+    if (trackSwipeLeft == TrackTileSwipeAction.none &&
+        trackSwipeRight == TrackTileSwipeAction.none) {
       return tileContent;
     }
 
     return Dismissible(
       key: ValueKey('track_tile_${track.id}'),
-      direction: _getDismissDirection(settings.trackSwipeLeft, settings.trackSwipeRight),
+      direction: _getDismissDirection(trackSwipeLeft, trackSwipeRight),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          _executeAction(context, ref, settings.trackSwipeRight);
+          _executeAction(context, ref, trackSwipeRight);
         } else if (direction == DismissDirection.endToStart) {
-          _executeAction(context, ref, settings.trackSwipeLeft);
+          _executeAction(context, ref, trackSwipeLeft);
         }
         return false; // Prevent removal from list
       },
       background: _buildSwipeBackground(
         theme,
-        settings.trackSwipeRight,
+        trackSwipeRight,
         Alignment.centerLeft,
         const EdgeInsets.only(left: 18),
       ),
       secondaryBackground: _buildSwipeBackground(
         theme,
-        settings.trackSwipeLeft,
+        trackSwipeLeft,
         Alignment.centerRight,
         const EdgeInsets.only(right: 18),
       ),

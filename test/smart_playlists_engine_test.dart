@@ -5,7 +5,6 @@ import 'package:baydev_hifi/features/library/domain/m3u8_playlist_service.dart';
 import 'package:baydev_hifi/features/library/domain/smart_playlist_evaluator.dart';
 import 'package:baydev_hifi/features/library/domain/smart_playlist_models.dart';
 import 'package:baydev_hifi/features/library/presentation/controllers/library_controller.dart';
-import 'package:baydev_hifi/features/library/presentation/playlists_screen.dart';
 import 'package:baydev_hifi/features/library/presentation/widgets/create_smart_playlist_dialog.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 
@@ -494,64 +493,7 @@ void main() {
     });
   });
 
-  group('PlaylistsScreen & CreateSmartPlaylistDialog Widget Tests', () {
-    testWidgets('PlaylistsScreen renders Dynamic Smart Playlists and allows opening detail', (tester) async {
-      final controller = UnifiedLibraryController(
-        initialTracks: allTracks,
-        initialSmartPlaylists: [
-          SmartPlaylist(
-            id: 'smart_ui_test',
-            name: 'Studio Master Series',
-            description: 'Filtered studio masters',
-            rules: const [
-              SmartPlaylistRule(
-                field: SmartPlaylistField.isHiRes,
-                operator: SmartPlaylistOperator.isTrue,
-                value: 'true',
-              ),
-            ],
-            createdAt: DateTime.now(),
-            isPreset: false,
-          ),
-        ],
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            unifiedLibraryProvider.overrideWith((ref) => controller),
-          ],
-          child: const MaterialApp(
-            home: PlaylistsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Verify Headers & Merged Studio Collections
-      expect(find.text('STUDIO PLAYLISTS'), findsOneWidget);
-      expect(find.text('STUDIO COLLECTIONS'), findsOneWidget);
-      expect(find.text('Dynamic Smart Playlists'), findsOneWidget);
-
-      // Tap Dynamic Smart Playlists row to navigate to SmartPlaylistsScreen
-      await tester.tap(find.text('Dynamic Smart Playlists'));
-      await tester.pumpAndSettle();
-
-      // Verify SmartPlaylistsScreen renders the smart playlist
-      expect(find.text('DYNAMIC SMART PLAYLISTS'), findsOneWidget);
-      expect(find.text('Studio Master Series'), findsOneWidget);
-
-      // Tap Smart Playlist to open PlaylistDetailScreen
-      await tester.tap(find.text('Studio Master Series'));
-      await tester.pumpAndSettle();
-
-      // Verify Detail Screen contains evaluated track and actions
-      expect(find.text('Autumn Leaves'), findsOneWidget);
-      expect(find.text('Play All'), findsOneWidget);
-      expect(find.text('Shuffle'), findsOneWidget);
-    });
-
+  group('CreateSmartPlaylistDialog Widget Tests', () {
     testWidgets('CreateSmartPlaylistDialog opens, live evaluates count, and saves new playlist', (tester) async {
       final controller = UnifiedLibraryController(initialTracks: allTracks);
 

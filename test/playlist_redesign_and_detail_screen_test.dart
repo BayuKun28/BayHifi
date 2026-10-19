@@ -118,7 +118,7 @@ void main() {
       expect(find.text('STUDIO COLLECTIONS'), findsOneWidget);
       expect(find.text('Favorite Tracks'), findsOneWidget);
       expect(find.text('Hi-Res Lossless Masters'), findsOneWidget);
-      expect(find.text('Dynamic Smart Playlists'), findsOneWidget);
+      expect(find.text('Smart Rules'), findsOneWidget);
       expect(find.text('Acoustic Studio Masters'), findsOneWidget);
       expect(find.text('+ New Playlist'), findsOneWidget);
     });

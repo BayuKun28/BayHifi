@@ -126,9 +126,10 @@ class _NamidaExpandableMiniPlayerState
   @override
   Widget build(BuildContext context) {
     final isExpanded = ref.watch(playerExpansionProvider);
-    final playback = ref.watch(playerControllerProvider);
-    final libraryState = ref.watch(unifiedLibraryProvider);
-    final track = playback.currentTrack;
+    final track = ref.watch(playerControllerProvider.select((s) => s.currentTrack));
+    final isPlaying = ref.watch(playerControllerProvider.select((s) => s.isPlaying));
+    final isLoading = ref.watch(playerControllerProvider.select((s) => s.isLoading));
+    final isTracksTab = ref.watch(unifiedLibraryProvider.select((s) => s.currentTab == CollectionTab.tracks));
     final theme = Theme.of(context);
     final isSolid = ref.isSolidStyle;
     final mediaQuery = MediaQuery.of(context);
@@ -282,9 +283,10 @@ class _NamidaExpandableMiniPlayerState
                                 child: _buildMiniPlayerContent(
                                   context,
                                   currentTrack,
-                                  playback,
-                                  theme,
-                                  isSolid,
+                                  isPlaying: isPlaying,
+                                  isLoading: isLoading,
+                                  theme: theme,
+                                  isSolid: isSolid,
                                 ),
                               ),
                             ),
@@ -311,7 +313,7 @@ class _NamidaExpandableMiniPlayerState
 
             // ─── 4. SHUFFLE SHORTCUT FAB (DI ATAS SOURCE FILTER FAB PADA TRACKS TAB) ───
             if (widget.isLibraryTab &&
-                libraryState.currentTab == CollectionTab.tracks &&
+                isTracksTab &&
                 !_isSourceDockExpanded &&
                 progress < 0.95)
               Positioned(
@@ -618,17 +620,12 @@ class _NamidaExpandableMiniPlayerState
 
   Widget _buildMiniPlayerContent(
     BuildContext context,
-    Track track,
-    dynamic playback,
-    ThemeData theme,
-    bool isSolid,
-  ) {
-    final isPlaying = playback.isPlaying as bool;
-    final position = playback.position as Duration;
-    final duration = playback.duration as Duration;
-    final progressRatio = duration.inMilliseconds > 0
-        ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
-        : 0.0;
+    Track track, {
+    required bool isPlaying,
+    required bool isLoading,
+    required ThemeData theme,
+    required bool isSolid,
+  }) {
 
     return GestureDetector(
       onVerticalDragEnd: (details) {
@@ -763,8 +760,7 @@ class _NamidaExpandableMiniPlayerState
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: playback.isLoading
+                      child: isLoading
                             ? SizedBox(
                                 width: 18,
                                 height: 18,
@@ -781,7 +777,6 @@ class _NamidaExpandableMiniPlayerState
                       ),
                     ),
                   ),
-                ),
                 const SizedBox(width: 4),
 
                 // Next Button
@@ -823,23 +818,44 @@ class _NamidaExpandableMiniPlayerState
             ),
           ),
 
-          // Micro Progress Bar at the bottom
+          // Micro Progress Bar at the bottom (isolated from root miniplayer rebuilds)
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: SizedBox(
-              height: 2.5,
-              child: M3EProgressIndicator.linear(
-                value: progressRatio,
-                trackColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                color: theme.colorScheme.primary,
-              ),
-            ),
+            child: _MiniPlayerLinearProgressBar(isSolid: isSolid),
           ),
         ],
       ),
     ),
   );
 }
+}
+
+/// Isolated micro progress bar that exclusively listens to playback progress,
+/// preventing the entire MiniPlayer from rebuilding on every playback tick.
+class _MiniPlayerLinearProgressBar extends ConsumerWidget {
+  final bool isSolid;
+
+  const _MiniPlayerLinearProgressBar({required this.isSolid});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progressRatio = ref.watch(playerControllerProvider.select((s) {
+      if (s.duration.inMilliseconds <= 0) return 0.0;
+      return (s.position.inMilliseconds / s.duration.inMilliseconds).clamp(0.0, 1.0);
+    }));
+    final theme = Theme.of(context);
+
+    return RepaintBoundary(
+      child: SizedBox(
+        height: 2.5,
+        child: M3EProgressIndicator.linear(
+          value: progressRatio,
+          trackColor: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+          color: theme.colorScheme.primary,
+        ),
+      ),
+    );
+  }
 }

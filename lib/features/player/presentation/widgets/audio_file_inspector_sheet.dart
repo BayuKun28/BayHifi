@@ -69,20 +69,26 @@ class AudioFileInspectorSheet extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      LucideIcons.audioLines,
-                      size: 20,
-                      color: primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'AUDIO FILE INSPECTOR',
-                      style: AppTypography.badge(color: primary),
-                    ),
-                  ],
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        LucideIcons.audioLines,
+                        size: 20,
+                        color: primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'AUDIO FILE INSPECTOR',
+                          style: AppTypography.badge(color: primary),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -120,18 +126,32 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                     const SizedBox(width: 6),
                     Tooltip(
                       message: 'Edit Metadata Tags',
-                      child: M3EIconButton(
-                        variant: M3EIconButtonVariant.tonal,
-                        icon: Icon(
-                          LucideIcons.pencil,
-                          size: 16,
-                          color: primary,
-                        ),
-                        onPressed: () {
+                      child: InkWell(
+                        onTap: () {
                           AppHaptics.selectionClick();
                           Navigator.of(context).pop();
                           MetadataTagEditorSheet.show(context, track);
                         },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 32,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              LucideIcons.pencil,
+                              size: 14,
+                              color: primary,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -319,6 +339,15 @@ class AudioFileInspectorSheet extends ConsumerWidget {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 8),
+                        _buildInspectorRow(
+                          context,
+                          isSolid,
+                          'Audio Engine Pipeline',
+                          'SoLoud C++ Native Engine',
+                          '32-bit Floating-Point Low Latency Pipeline',
+                          LucideIcons.cpu,
                         ),
                         const SizedBox(height: 8),
                         _buildInspectorRow(

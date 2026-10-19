@@ -1187,12 +1187,11 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
   // ─── TRACKS LIST ──────────────────────────────────────────────────────────
   Widget _buildTracksList(BuildContext context, List<Track> tracks, double bottomPadding) {
-    final playback = ref.watch(playerControllerProvider);
+    final currentPlayingId = ref.watch(playerControllerProvider.select((s) => s.currentTrack?.id));
     final libraryState = ref.watch(unifiedLibraryProvider);
     final selectionState = ref.watch(librarySelectionProvider);
     final theme = Theme.of(context);
     final isSolid = ref.isSolidStyle;
-    final currentPlayingId = playback.currentTrack?.id;
 
     if (tracks.isEmpty) {
       return _buildEmptyState(context, 'No audio tracks found.');

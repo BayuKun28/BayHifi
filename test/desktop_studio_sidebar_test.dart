@@ -62,7 +62,7 @@ void main() {
       // Verify branding and destination labels in expanded mode
       expect(find.text('Baydev HiFi'), findsOneWidget);
       expect(find.text('STUDIO MASTER'), findsOneWidget);
-      expect(find.text('Dashboard'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
       expect(find.text('DSP Rack'), findsOneWidget);
       expect(find.text('Library'), findsOneWidget);
       expect(find.text('Playlists'), findsOneWidget);
@@ -109,7 +109,7 @@ void main() {
       // Verify expanded mode returns
       expect(find.text('Baydev HiFi'), findsOneWidget);
       expect(find.text('STUDIO MASTER'), findsOneWidget);
-      expect(find.text('Dashboard'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
       expect(find.byTooltip('Collapse sidebar (Ctrl+B)'), findsOneWidget);
     });
 

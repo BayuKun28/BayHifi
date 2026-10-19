@@ -571,6 +571,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 letterSpacing: 0.5,
               ),
             ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+              decoration: BoxDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF1E212B)
+                    : theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2E3242)
+                      : theme.colorScheme.outlineVariant,
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.cpu,
+                    size: 11,
+                    color: primary,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    'POWERED BY SOLOUD C++ AUDIO ENGINE',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.white
+                          : theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
