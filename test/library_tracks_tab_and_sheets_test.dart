@@ -95,4 +95,78 @@ void main() {
     expect(find.text(SortField.title.label), findsOneWidget);
     expect(find.text(SortField.artist.label), findsOneWidget);
   });
+
+  testWidgets('LibraryTracksTab reactively filters tracks when audio source filter changes', (tester) async {
+    final scrollController = ScrollController();
+    addTearDown(() => scrollController.dispose());
+
+    final hiResTrack = Track(
+      id: 'hires_1',
+      title: 'Hi-Res Symphony',
+      artist: 'Audiophile Master',
+      album: 'Studio Vault',
+      duration: const Duration(minutes: 4),
+      filePath: '/music/symphony.flac',
+      format: AudioFormat.flac,
+      sampleRate: 96000,
+      bitDepth: 24,
+    );
+
+    final standardTrack = Track(
+      id: 'standard_1',
+      title: 'Standard MP3 Song',
+      artist: 'Radio Band',
+      album: 'Pop Hits',
+      duration: const Duration(minutes: 3),
+      filePath: '/music/song.mp3',
+      format: AudioFormat.mp3,
+      sampleRate: 44100,
+      bitDepth: 16,
+    );
+
+    late UnifiedLibraryController controller;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          unifiedLibraryProvider.overrideWith((ref) {
+            controller = UnifiedLibraryController(
+              initialTracks: [hiResTrack, standardTrack],
+            );
+            return controller;
+          }),
+        ],
+        child: MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: LibraryTracksTab(
+              scrollController: scrollController,
+              bottomPadding: 0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Initially with LibrarySourceFilter.all, both tracks are visible
+    expect(find.text('Hi-Res Symphony'), findsOneWidget);
+    expect(find.text('Standard MP3 Song'), findsOneWidget);
+
+    // Filter to Hi-Res only (as triggered by FAB audio source dock)
+    controller.setFilter(LibrarySourceFilter.hiRes);
+    await tester.pumpAndSettle();
+
+    // Now only Hi-Res Symphony must be displayed
+    expect(find.text('Hi-Res Symphony'), findsOneWidget);
+    expect(find.text('Standard MP3 Song'), findsNothing);
+
+    // Reset back to All Sources
+    controller.setFilter(LibrarySourceFilter.all);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hi-Res Symphony'), findsOneWidget);
+    expect(find.text('Standard MP3 Song'), findsOneWidget);
+  });
 }

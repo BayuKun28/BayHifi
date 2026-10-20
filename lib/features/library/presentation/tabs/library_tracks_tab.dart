@@ -15,6 +15,7 @@ import '../widgets/track_tile.dart';
 
 /// Modular Presentation Tab for Library Tracks View (Alphabetical Scroller & List)
 class LibraryTracksTab extends ConsumerWidget {
+  final List<Track>? tracks;
   final ScrollController scrollController;
   final double bottomPadding;
   final Widget? emptyView;
@@ -23,6 +24,7 @@ class LibraryTracksTab extends ConsumerWidget {
 
   const LibraryTracksTab({
     super.key,
+    this.tracks,
     required this.scrollController,
     required this.bottomPadding,
     this.emptyView,
@@ -33,13 +35,13 @@ class LibraryTracksTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final libraryState = ref.watch(unifiedLibraryProvider);
-    final tracks = libraryState.tracks;
+    final displayTracks = tracks ?? libraryState.filteredTracks;
     final currentPlayingId = ref.watch(playerControllerProvider.select((s) => s.currentTrack?.id));
     final selectionState = ref.watch(librarySelectionProvider);
     final theme = Theme.of(context);
     final isSolid = ref.isSolidStyle;
 
-    if (tracks.isEmpty) {
+    if (displayTracks.isEmpty) {
       return emptyView ?? const Center(child: Text('No audio tracks found.'));
     }
 
@@ -55,14 +57,14 @@ class LibraryTracksTab extends ConsumerWidget {
       itemExtent: null,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.fromLTRB(14, 4, isAlphabetical ? 28 : 14, bottomPadding),
-      itemCount: tracks.length + (isUntaggedFilter ? 1 : 0),
+      itemCount: displayTracks.length + (isUntaggedFilter ? 1 : 0),
       itemBuilder: (ctx, index) {
         if (isUntaggedFilter && index == 0) {
-          return _buildUntaggedQuickBanner(context, tracks, theme, isSolid);
+          return _buildUntaggedQuickBanner(context, displayTracks, theme, isSolid);
         }
 
         final trackIndex = isUntaggedFilter ? index - 1 : index;
-        final track = tracks[trackIndex];
+        final track = displayTracks[trackIndex];
         final isPlayingThis = currentPlayingId == track.id;
         final isSelected = selectionState.isSelected(track.id);
 
@@ -77,7 +79,7 @@ class LibraryTracksTab extends ConsumerWidget {
             if (selectionState.isSelecting) {
               ref.read(librarySelectionProvider.notifier).toggle(track.id);
             } else {
-              ref.read(playerControllerProvider.notifier).setQueue(tracks, initialIndex: trackIndex);
+              ref.read(playerControllerProvider.notifier).setQueue(displayTracks, initialIndex: trackIndex);
             }
           },
           onLongPress: () => ref.read(librarySelectionProvider.notifier).toggle(track.id),
@@ -90,12 +92,12 @@ class LibraryTracksTab extends ConsumerWidget {
 
     return StudioAlphabeticalScroller(
       scrollController: scrollController,
-      itemCount: tracks.length,
+      itemCount: displayTracks.length,
       itemHeight: 84.0,
       isAlphabetical: isAlphabetical,
       letterSelector: (index) {
-        if (index < 0 || index >= tracks.length) return '';
-        final track = tracks[index];
+        if (index < 0 || index >= displayTracks.length) return '';
+        final track = displayTracks[index];
         return switch (libraryState.sortField) {
           SortField.artist => track.artist,
           SortField.album => track.album,

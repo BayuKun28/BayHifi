@@ -2402,6 +2402,7 @@ Pembersihan technical debt, modularisasi komponen berukuran besar (monolith), pe
   - [x] Ekstraksi `LibraryTracksTab` ke `lib/features/library/presentation/tabs/library_tracks_tab.dart` (mengenkapsulasi daftar lagu, alphabetical scroller, multi-selection, dan untagged quick banner).
   - [x] Ekstraksi bottom sheet pengurutan dan filter ke `lib/features/library/presentation/widgets/library_sort_filter_sheets.dart` (`LibrarySortFilterSheets.showSortSheet` & `LibrarySortFilterSheets.showFilterSheet`).
   - [x] Dekomposisi `UnifiedLibraryScreen` sehingga terstruktur modular dengan delegasi callback yang bersih.
+  - [x] **Bugfix Source Filter Reactivity**: Perbaiki `LibraryTracksTab` agar membaca `libraryState.filteredTracks` (bukan unfiltered `libraryState.tracks`) sehingga pergantian filter sumber audio lewat floating dock FAB langsung memfilter tampilan list lagu secara reaktif.
 - [x] **90.2 Android Scoped Storage Hardening & Cache Pruning**:
   - [x] Refaktorisasi `LyricImageGenerator.saveBytesToPublicGallery` di `lib/features/lyrics_share/presentation/services/lyric_image_generator.dart` menggunakan `getExternalStorageDirectories(type: StorageDirectory.pictures)` dengan fallback aman ke `getApplicationDocumentsDirectory()`, menggantikan hardcoded path `/storage/emulated/0/`.
   - [x] Implementasi `pruneOrphanedCaches` dengan ambang batas usia 48 jam untuk menghapus cache PNG kartu lirik yang sudah tidak terpakai secara berkala di background.
@@ -2412,7 +2413,7 @@ Pembersihan technical debt, modularisasi komponen berukuran besar (monolith), pe
 - [x] **90.4 DSP Rack Repaint Boundary Isolation**:
   - [x] Membungkus seluruh visualizer audio frekuensi tinggi (`VuLevelMeter`, `TubeGlowIndicator`, `GainReductionMeter`, `SoundstageWidthVisualizer`) dalam `RepaintBoundary` di `lib/features/dsp_rack/presentation/dsp_rack_screen.dart` untuk mencegah repaint berlebihan pada modul DSP lainnya saat animasi berjalan pada 60 FPS.
 - [x] **90.5 Automated Testing & Quality Gate**:
-  - [x] `test/library_tracks_tab_and_sheets_test.dart`: 2/2 tests passing 100%.
+  - [x] `test/library_tracks_tab_and_sheets_test.dart`: 3/3 tests passing 100% (termasuk verifikasi reaktivitas filter sumber audio).
   - [x] `test/lyric_image_generator_storage_test.dart`: 3/3 tests passing 100%.
   - [x] `test/youtube_track_tile_and_banner_test.dart`: 2/2 tests passing 100%.
   - [x] `test/dsp_rack_repaint_boundary_test.dart`: 1/1 tests passing 100%.

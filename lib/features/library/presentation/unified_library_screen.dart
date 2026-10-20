@@ -1001,6 +1001,7 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     return switch (state.currentTab) {
       CollectionTab.tracks => LibraryTracksTab(
+          tracks: state.filteredTracks,
           scrollController: _tracksScrollController,
           bottomPadding: bottomPadding,
           emptyView: _buildEmptyState(context, 'No audio tracks found.'),
