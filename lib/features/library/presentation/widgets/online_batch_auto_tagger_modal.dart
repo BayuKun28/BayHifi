@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../../app/app.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
@@ -181,8 +182,9 @@ class _OnlineBatchAutoTaggerModalState
       ref.read(playerControllerProvider.notifier).updateBatchTracksMetadata(result.updatedTracks);
 
       if (mounted) {
+        final messenger = ScaffoldMessenger.maybeOf(context) ?? rootScaffoldMessengerKey.currentState;
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger?.showSnackBar(
           SnackBar(
             content: Text('Successfully updated tags for ${result.successCount} files!'),
             duration: const Duration(seconds: 3),
@@ -192,7 +194,8 @@ class _OnlineBatchAutoTaggerModalState
     } catch (e) {
       if (mounted) {
         setState(() => _isWriting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
+        final messenger = ScaffoldMessenger.maybeOf(context) ?? rootScaffoldMessengerKey.currentState;
+        messenger?.showSnackBar(
           SnackBar(
             content: Text('Error writing batch tags: $e'),
             backgroundColor: Theme.of(context).colorScheme.error,

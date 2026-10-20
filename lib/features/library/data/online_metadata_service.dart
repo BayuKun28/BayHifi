@@ -465,7 +465,11 @@ class OnlineMetadataService {
 
       return list;
     } catch (e) {
-      debugPrint('[OnlineMetadataService] MusicBrainz search error: $e');
+      if (e is DioException && e.response?.statusCode == 503) {
+        debugPrint('[OnlineMetadataService] MusicBrainz query rate-limited (HTTP 503), falling back to other providers.');
+      } else {
+        debugPrint('[OnlineMetadataService] MusicBrainz search notice: $e');
+      }
       return const [];
     }
   }
@@ -551,7 +555,18 @@ class OnlineMetadataService {
         }
       }
     } catch (e) {
-      debugPrint('[OnlineMetadataService] LRCLIB lyrics query notice: $e');
+      if (e is DioException) {
+        final code = e.response?.statusCode;
+        if (code == 404) {
+          debugPrint('[OnlineMetadataService] LRCLIB lyrics not found (HTTP 404).');
+        } else if (code == 503) {
+          debugPrint('[OnlineMetadataService] LRCLIB lyrics service busy (HTTP 503).');
+        } else {
+          debugPrint('[OnlineMetadataService] LRCLIB lyrics query notice: HTTP $code');
+        }
+      } else {
+        debugPrint('[OnlineMetadataService] LRCLIB lyrics query notice: $e');
+      }
     }
     return (lyrics: null, isSynced: false);
   }

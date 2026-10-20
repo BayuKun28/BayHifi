@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import '../../../app/app.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
@@ -131,8 +132,9 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     ref.listen<UnifiedLibraryState>(unifiedLibraryProvider, (previous, next) {
       if (!next.isScanning && next.statusMessage != null && next.statusMessage != previous?.statusMessage) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
+        final messenger = ScaffoldMessenger.maybeOf(context) ?? rootScaffoldMessengerKey.currentState;
+        messenger?.hideCurrentSnackBar();
+        messenger?.showSnackBar(
           SnackBar(
             content: Text(next.statusMessage!),
             duration: const Duration(seconds: 3),

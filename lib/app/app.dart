@@ -26,6 +26,9 @@ import '../features/settings/presentation/settings_screen.dart';
 import '../audio_engine/soloud_controller.dart';
 import '../features/youtube_music/presentation/youtube_discovery_screen.dart';
 
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 class BaydevHiFiApp extends ConsumerStatefulWidget {
   const BaydevHiFiApp({super.key});
 
@@ -91,19 +94,21 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> with WidgetsBindi
       isWallpaperActive: isWallpaperActive,
     );
 
-    return Theme(
-      data: themeData,
-      child: M3EMaterialApp(
-        title: 'Baydev HiFi',
-        debugShowCheckedModeBanner: false,
-        drawUnderSystemBars: true,
-        data: m3eThemeData,
-        localizationsDelegates: const [
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        home: Theme(
-          data: themeData,
+    return MaterialApp(
+      title: 'Baydev HiFi',
+      debugShowCheckedModeBanner: false,
+      theme: themeData,
+      darkTheme: themeData,
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
+      localizationsDelegates: const [
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      home: Theme(
+        data: themeData,
+        child: M3ETheme(
+          data: m3eThemeData,
           child: DesktopShortcutsDispatcher(
             onSearchRequested: () => setState(() => _selectedNavIndex = 2),
             child: DesktopDragDropZone(
