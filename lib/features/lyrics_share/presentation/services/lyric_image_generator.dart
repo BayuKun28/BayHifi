@@ -63,7 +63,7 @@ class LyricImageGenerator {
     }
   }
 
-  /// Writes PNG bytes to the device's public Pictures / Gallery directory so it appears in Photos/Gallery
+  /// Writes PNG bytes to the device's public Pictures / Downloads / Gallery directory so it appears in Photos/Gallery
   static Future<File?> saveBytesToPublicGallery(
     Uint8List bytes, {
     String prefix = 'baydev_hifi_lyric',
@@ -74,25 +74,17 @@ class LyricImageGenerator {
       Directory? targetDir;
 
       if (!kIsWeb && Platform.isAndroid) {
-        // Try public Pictures/BayHifi directory for direct gallery visibility
+        // Safe Scoped Storage: use external picture directory provided by OS
         try {
-          final publicDir = Directory('/storage/emulated/0/Pictures/BayHifi');
-          if (!await publicDir.exists()) {
-            await publicDir.create(recursive: true);
-          }
-          if (await publicDir.exists()) {
-            targetDir = publicDir;
+          final extDirs = await getExternalStorageDirectories(type: StorageDirectory.pictures);
+          if (extDirs != null && extDirs.isNotEmpty) {
+            final bayHifiDir = Directory('${extDirs.first.path}/BayHifi');
+            if (!await bayHifiDir.exists()) {
+              await bayHifiDir.create(recursive: true);
+            }
+            targetDir = bayHifiDir;
           }
         } catch (_) {}
-
-        if (targetDir == null) {
-          try {
-            final extDirs = await getExternalStorageDirectories(type: StorageDirectory.pictures);
-            if (extDirs != null && extDirs.isNotEmpty) {
-              targetDir = extDirs.first;
-            }
-          } catch (_) {}
-        }
       } else if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
         try {
           final downloads = await getDownloadsDirectory();
@@ -110,7 +102,7 @@ class LyricImageGenerator {
         } catch (_) {}
       }
 
-      // Fallback to application documents or temp directory
+      // Fallback to application documents directory
       targetDir ??= await getApplicationDocumentsDirectory();
 
       final file = File('${targetDir.path}/$fileName');
@@ -130,6 +122,9 @@ class LyricImageGenerator {
     String prefix = 'baydev_hifi_lyrics',
   }) async {
     try {
+      // Trigger background cache pruning without blocking current operation
+      pruneOrphanedCaches();
+
       final tempDir = await getTemporaryDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final file = File('${tempDir.path}/${prefix}_$timestamp.png');
@@ -139,6 +134,40 @@ class LyricImageGenerator {
       debugPrint('[LyricImageGenerator] Cache write error: $e');
       return null;
     }
+  }
+
+  /// Scans the temporary cache directory for generated lyric cards older than [maxAge] (default 48 hours)
+  /// and deletes them to prevent disk storage accumulation.
+  static Future<int> pruneOrphanedCaches({
+    Duration maxAge = const Duration(hours: 48),
+  }) async {
+    int deletedCount = 0;
+    try {
+      final tempDir = await getTemporaryDirectory();
+      if (!await tempDir.exists()) return 0;
+
+      final now = DateTime.now();
+      final files = tempDir.listSync();
+      for (final entity in files) {
+        if (entity is File &&
+            entity.path.contains('baydev_hifi_lyric') &&
+            entity.path.endsWith('.png')) {
+          try {
+            final stat = entity.statSync();
+            if (now.difference(stat.modified) > maxAge) {
+              await entity.delete();
+              deletedCount++;
+            }
+          } catch (_) {}
+        }
+      }
+      if (deletedCount > 0) {
+        debugPrint('[LyricImageGenerator] Pruned $deletedCount orphaned lyric card caches.');
+      }
+    } catch (e) {
+      debugPrint('[LyricImageGenerator] Prune caches error: $e');
+    }
+    return deletedCount;
   }
 
   /// Triggers native OS sharing dialog with the generated image file.

@@ -6,15 +6,14 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
-import '../../../core/widgets/studio_artwork_widget.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
-import '../../library/presentation/widgets/studio_track_action_sheet.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
 import 'controllers/youtube_music_controller.dart';
+import 'widgets/youtube_offline_banner.dart';
+import 'widgets/youtube_track_tile.dart';
 import '../../spotify_importer/presentation/widgets/universal_import_dialog.dart';
 import '../../../core/widgets/two_tone_header.dart';
-import '../../../app/theme/simple_as_f_theme.dart';
 
 /// Material 3 Expressive Studio YouTube Music Discovery & Search Screen
 /// Provides high-bitrate Opus/AAC streaming directly processed through C++ SoLoud DSP master chain.
@@ -37,12 +36,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   String _selectedFilter = 'All';
-
-  String _formatDuration(Duration d) {
-    final m = d.inMinutes;
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
 
   static final List<({String label, IconData icon})> _quickFilters = [
     (label: 'All', icon: LucideIcons.sparkles),
@@ -588,10 +581,10 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               itemBuilder: (ctx, index) {
                 final track = searchResults[index];
                 final isPlaying = currentPlayingId == track.id;
-                return _buildYouTubeTrackTile(
-                  context: context,
+                return YouTubeTrackTile(
                   track: track,
                   isPlaying: isPlaying,
+                  isSolid: isSolid,
                   onTap: () {
                     AppHaptics.selectionClick();
                     _searchFocusNode.unfocus();
@@ -601,8 +594,6 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                         );
                   },
                   onStartRadio: () => ytController.startRadio(track),
-                  theme: theme,
-                  isSolid: isSolid,
                 );
               },
             ),
@@ -617,15 +608,13 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
         if (errorMessage != null)
-          _buildOfflineCapsuleBanner(
-            context: context,
+          YouTubeOfflineBanner(
             message: errorMessage,
+            isSolid: isSolid,
             onRetry: () {
               AppHaptics.selectionClick();
               ytController.fetchTrending(force: true);
             },
-            theme: theme,
-            isSolid: isSolid,
           ),
         // ─── SIMPLE-AS-F TWO-TONE HEADER ─────────────────────────────────────
         Padding(
@@ -759,10 +748,10 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
         else
           ...trendingTracks.map((track) {
             final isPlaying = currentPlayingId == track.id;
-            return _buildYouTubeTrackTile(
-              context: context,
+            return YouTubeTrackTile(
               track: track,
               isPlaying: isPlaying,
+              isSolid: isSolid,
               onTap: () {
                 AppHaptics.selectionClick();
                 ref.read(playerControllerProvider.notifier).setQueue(
@@ -771,270 +760,9 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                     );
               },
               onStartRadio: () => ytController.startRadio(track),
-              theme: theme,
-              isSolid: isSolid,
             );
           }),
       ],
-    );
-  }
-
-  Widget _buildOfflineCapsuleBanner({
-    required BuildContext context,
-    required String message,
-    required VoidCallback onRetry,
-    required ThemeData theme,
-    required bool isSolid,
-  }) {
-    final primary = theme.colorScheme.primary;
-    final cleanMessage = message.contains('Failed to') || message.contains('Exception')
-        ? 'Offline Mode • Tap to retry connection'
-        : message;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-        borderRadius: SimpleAsFTheme.capsuleRowRadius,
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.18),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            LucideIcons.wifiOff,
-            size: 16,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              cleanMessage,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: 10),
-          InkWell(
-            onTap: onRetry,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.tintedContainer(
-                  context,
-                  primary,
-                  isSolid: isSolid,
-                  translucentAlpha: 0.14,
-                  solidBlendAlpha: 0.20,
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    LucideIcons.refreshCw,
-                    size: 12,
-                    color: primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Retry',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildYouTubeTrackTile({
-    required BuildContext context,
-    required Track track,
-    required bool isPlaying,
-    required VoidCallback onTap,
-    required VoidCallback onStartRadio,
-    required ThemeData theme,
-    required bool isSolid,
-  }) {
-    final primary = theme.colorScheme.primary;
-
-    final playback = ref.watch(playerControllerProvider);
-    final isCurrent = playback.currentTrack?.id == track.id;
-    final isBuffering = isCurrent && playback.isLoading;
-    final isTileActive = isPlaying || isBuffering;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
-      child: Material(
-        color: isTileActive
-            ? SimpleAsFTheme.surfaceActive(context)
-            : Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isTileActive
-              ? BorderSide(
-                  color: primary.withValues(alpha: 0.35),
-                  width: 1.0,
-                )
-              : BorderSide.none,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: ListTile(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: isTileActive ? 12 : 8,
-            vertical: 2,
-          ),
-          leading: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: StudioArtworkWidget(
-                  track: track,
-                  borderRadius: BorderRadius.circular(11),
-                  fallbackIconSize: 20,
-                ),
-              ),
-              if (isTileActive)
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.45),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: isBuffering
-                        ? SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: M3EProgressIndicator.circular(
-                              strokeWidth: 2.0,
-                              color: primary,
-                            ),
-                          )
-                        : Icon(
-                            LucideIcons.audioLines,
-                            size: 20,
-                            color: primary,
-                          ),
-                  ),
-                ),
-            ],
-          ),
-          title: Text(
-            track.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isTileActive ? FontWeight.w900 : FontWeight.w700,
-              color: isTileActive ? primary : theme.colorScheme.onSurface,
-            ),
-          ),
-          subtitle: Row(
-            children: [
-              // Format tag
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: StudioSurfaceTheme.tintedContainer(context, primary, isSolid: isSolid, translucentAlpha: 0.12, solidBlendAlpha: 0.16),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'OPUS',
-                  style: TextStyle(
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w900,
-                    color: primary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  track.artist,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ),
-              Text(
-                _formatDuration(track.duration),
-                style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  fontFeatures: AppTypography.audioFigures,
-                ),
-              ),
-            ],
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Start Radio Button
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                icon: Icon(
-                  LucideIcons.radio,
-                  size: 22,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                tooltip: 'Start Smart Track Radio',
-                onPressed: () {
-                  AppHaptics.selectionClick();
-                  onStartRadio();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Starting smart radio based on "${track.title}"...'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-              // Unified Track Action Sheet
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                icon: Icon(
-                  LucideIcons.moreVertical,
-                  size: 22,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                tooltip: 'Track Options',
-                onPressed: () {
-                  StudioTrackActionSheet.show(context, track);
-                },
-              ),
-            ],
-          ),
-          onTap: onTap,
-        ),
-      ),
     );
   }
 }

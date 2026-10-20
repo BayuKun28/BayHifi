@@ -6,9 +6,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/studio_surface_theme.dart';
-import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/desktop/desktop_layout_controller.dart';
-import '../../../core/widgets/studio_alphabetical_scroller.dart';
 import '../../../core/widgets/two_tone_header.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
@@ -24,10 +22,10 @@ import '../../youtube_music/presentation/youtube_discovery_screen.dart';
 import 'controllers/library_selection_controller.dart';
 import 'widgets/batch_track_tag_editor_modal.dart';
 import 'widgets/library_batch_actions_bar.dart';
-import 'widgets/online_batch_auto_tagger_modal.dart';
-import 'widgets/track_tile.dart';
+import 'widgets/library_sort_filter_sheets.dart';
 import '../../download_manager/presentation/controllers/download_controller.dart';
 import '../../download_manager/presentation/tabs/library_downloads_tab.dart';
+import 'tabs/library_tracks_tab.dart';
 import 'tabs/library_albums_tab.dart';
 import 'tabs/library_artists_tab.dart';
 import 'tabs/library_genres_tab.dart';
@@ -64,182 +62,15 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
   }
 
   void _showSortBottomSheet(BuildContext context) {
-    final controller = ref.read(unifiedLibraryProvider.notifier);
-    final theme = Theme.of(context);
-    final fillStyle = ref.watch(themeControllerProvider.select((s) => s.surfaceFillStyle ?? SurfaceFillStyle.solid));
-    final isSolid = fillStyle == SurfaceFillStyle.solid;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final curState = ref.watch(unifiedLibraryProvider);
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: theme.dividerColor,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'SORT COLLECTION',
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        IconButton.filledTonal(
-                          onPressed: () {
-                            AppHaptics.selectionClick();
-                            controller.toggleSortDirection();
-                            setModalState(() {});
-                          },
-                          icon: Icon(
-                            curState.sortDirection == SortDirection.ascending
-                                ? LucideIcons.arrowUp
-                                : LucideIcons.arrowDown,
-                            size: 18,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                          tooltip: curState.sortDirection.label,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: SortField.values.map((field) {
-                        final isSelected = curState.sortField == field;
-                        return ChoiceChip(
-                          showCheckmark: false,
-                          label: Text(field.label),
-                          selected: isSelected,
-                          onSelected: (val) {
-                            if (val) {
-                              AppHaptics.selectionClick();
-                              controller.setSortField(field);
-                              setModalState(() {});
-                            }
-                          },
-                          selectedColor: theme.colorScheme.primary.withValues(alpha: 0.18),
-                          backgroundColor: StudioSurfaceTheme.surfaceContainerLow(context, isSolid: isSolid),
-                          side: BorderSide(
-                            color: isSelected
-                                ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                                : StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                            width: 1,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
+    LibrarySortFilterSheets.showSortSheet(context, ref);
   }
 
-
-
   void _showAddToPlaylistSheet(BuildContext context, Track track) {
-    _showAddToPlaylistSheetForTracks(context, [track]);
+    LibrarySortFilterSheets.showAddToPlaylistSheet(context, ref, [track]);
   }
 
   void _showAddToPlaylistSheetForTracks(BuildContext context, List<Track> tracks) {
-    final playlists = ref.read(unifiedLibraryProvider).customPlaylists;
-    final theme = Theme.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'ADD ${tracks.length} TRACK${tracks.length > 1 ? 'S' : ''} TO PLAYLIST',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 8),
-              if (playlists.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Text(
-                      'No custom playlists found. Create a new playlist first.',
-                      style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-              else
-                ...playlists.map(
-                  (p) => ListTile(
-                    leading: Icon(
-                      LucideIcons.listMusic,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: Text(p.name),
-                    subtitle: Text('${p.trackCount} tracks'),
-                    onTap: () {
-                      for (final t in tracks) {
-                        ref.read(unifiedLibraryProvider.notifier).addTrackToPlaylist(p.id, t);
-                      }
-                      Navigator.of(ctx).pop();
-                      ref.read(librarySelectionProvider.notifier).clear();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Added ${tracks.length} track${tracks.length > 1 ? 's' : ''} to "${p.name}".')),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
+    LibrarySortFilterSheets.showAddToPlaylistSheet(context, ref, tracks);
   }
 
   // ─── DEDICATED SCREEN NAVIGATION (SPOTIFY & NAMIDA GRADE) ─────────────────
@@ -1169,7 +1000,15 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     final bottomPadding = isKeyboardOpen ? (viewInsetsBottom + 16.0) : 96.0;
 
     return switch (state.currentTab) {
-      CollectionTab.tracks => _buildTracksList(context, state.filteredTracks, bottomPadding),
+      CollectionTab.tracks => LibraryTracksTab(
+          scrollController: _tracksScrollController,
+          bottomPadding: bottomPadding,
+          emptyView: _buildEmptyState(context, 'No audio tracks found.'),
+          onDismissKeyboard: () {
+            _searchFocusNode.unfocus();
+          },
+          onAddToPlaylist: (track) => _showAddToPlaylistSheet(context, track),
+        ),
       CollectionTab.albums => LibraryAlbumsTab(
           scrollController: _albumsScrollController,
           bottomPadding: bottomPadding,
@@ -1203,209 +1042,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     return YouTubeDiscoveryScreen(
       showAppBar: false,
       bottomPadding: bottomPadding,
-    );
-  }
-
-  // ─── TRACKS LIST ──────────────────────────────────────────────────────────
-  Widget _buildTracksList(BuildContext context, List<Track> tracks, double bottomPadding) {
-    final currentPlayingId = ref.watch(playerControllerProvider.select((s) => s.currentTrack?.id));
-    final libraryState = ref.watch(unifiedLibraryProvider);
-    final selectionState = ref.watch(librarySelectionProvider);
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-
-    if (tracks.isEmpty) {
-      return _buildEmptyState(context, 'No audio tracks found.');
-    }
-
-    final isUntaggedFilter = libraryState.selectedFilter == LibrarySourceFilter.untagged;
-
-    final isAlphabetical = !isUntaggedFilter &&
-        (libraryState.sortField == SortField.title ||
-            libraryState.sortField == SortField.artist ||
-            libraryState.sortField == SortField.album);
-
-    final trackListContent = ListView.builder(
-      controller: _tracksScrollController,
-      itemExtent: null,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.fromLTRB(14, 4, isAlphabetical ? 28 : 14, bottomPadding),
-      itemCount: tracks.length + (isUntaggedFilter ? 1 : 0),
-      itemBuilder: (ctx, index) {
-        if (isUntaggedFilter && index == 0) {
-          return _buildUntaggedQuickBanner(context, tracks, theme, isSolid);
-        }
-
-        final trackIndex = isUntaggedFilter ? index - 1 : index;
-        final track = tracks[trackIndex];
-        final isPlayingThis = currentPlayingId == track.id;
-        final isSelected = selectionState.isSelected(track.id);
-
-        return TrackTile(
-          track: track,
-          isPlaying: isPlayingThis,
-          isMultiSelecting: selectionState.isSelecting,
-          isSelected: isSelected,
-          onTap: () {
-            _searchFocusNode.unfocus();
-            FocusManager.instance.primaryFocus?.unfocus();
-            if (selectionState.isSelecting) {
-              ref.read(librarySelectionProvider.notifier).toggle(track.id);
-            } else {
-              ref.read(playerControllerProvider.notifier).setQueue(tracks, initialIndex: trackIndex);
-            }
-          },
-          onLongPress: () => ref.read(librarySelectionProvider.notifier).toggle(track.id),
-          onPlayNext: () => ref.read(playerControllerProvider.notifier).playNext(track),
-          onAddToQueue: () => ref.read(playerControllerProvider.notifier).addToQueue(track),
-          onAddToPlaylist: () => _showAddToPlaylistSheet(context, track),
-        );
-      },
-    );
-
-    return StudioAlphabeticalScroller(
-      scrollController: _tracksScrollController,
-      itemCount: tracks.length,
-      itemHeight: 84.0,
-      isAlphabetical: isAlphabetical,
-      letterSelector: (index) {
-        if (index < 0 || index >= tracks.length) return '';
-        final track = tracks[index];
-        return switch (libraryState.sortField) {
-          SortField.artist => track.artist,
-          SortField.album => track.album,
-          _ => track.title,
-        };
-      },
-      padding: EdgeInsets.only(bottom: bottomPadding),
-      child: trackListContent,
-    );
-  }
-
-  Widget _buildUntaggedQuickBanner(
-    BuildContext context,
-    List<Track> tracks,
-    ThemeData theme,
-    bool isSolid,
-  ) {
-    final cs = theme.colorScheme;
-    final primary = cs.primary;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12, top: 4),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: StudioSurfaceTheme.tintedContainer(
-          context,
-          primary,
-          isSolid: isSolid,
-          solidBlendAlpha: 0.16,
-          translucentAlpha: 0.12,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: primary.withValues(alpha: 0.35),
-          width: 0.8,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  LucideIcons.alertCircle,
-                  size: 18,
-                  color: primary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${tracks.length} Untagged Tracks Found',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    Text(
-                      'These tracks lack proper artist, album tags, or cover art.',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 1,
-                  ),
-                  icon: const Icon(
-                    LucideIcons.sparkles,
-                    size: 16,
-                    color: Colors.black,
-                  ),
-                  label: const Text(
-                    'Auto-Tag All from Internet',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
-                  ),
-                  onPressed: () {
-                    OnlineBatchAutoTaggerModal.show(context, tracks);
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: cs.onSurface,
-                  side: BorderSide(
-                    color: StudioSurfaceTheme.subtleOutline(context, isSolid: isSolid),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                icon: const Icon(
-                  LucideIcons.pencil,
-                  size: 15,
-                ),
-                label: const Text(
-                  'Batch Edit',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-                onPressed: () {
-                  BatchTrackTagEditorModal.show(context, tracks);
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 

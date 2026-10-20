@@ -129,8 +129,10 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                VuLevelMeter(
-                  levelDb: dspState.isBypassed ? 0.0 : dspState.preampDb,
+                RepaintBoundary(
+                  child: VuLevelMeter(
+                    levelDb: dspState.isBypassed ? 0.0 : dspState.preampDb,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 RackKnobSlider(
@@ -216,10 +218,12 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TubeGlowIndicator(
-                  drive: dspState.tubeDrive,
-                  warmth: dspState.tubeWarmth,
-                  isActive: !dspState.isBypassed && dspState.tubeExciterEnabled,
+                RepaintBoundary(
+                  child: TubeGlowIndicator(
+                    drive: dspState.tubeDrive,
+                    warmth: dspState.tubeWarmth,
+                    isActive: !dspState.isBypassed && dspState.tubeExciterEnabled,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 RackKnobSlider(
@@ -268,12 +272,14 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                GainReductionMeter(
-                  gainReductionDb:
-                      (!dspState.isBypassed && dspState.compressorEnabled)
-                      ? (dspState.compThreshold * 0.4).clamp(-20.0, 0.0)
-                      : 0.0,
-                  isActive: !dspState.isBypassed && dspState.compressorEnabled,
+                RepaintBoundary(
+                  child: GainReductionMeter(
+                    gainReductionDb:
+                        (!dspState.isBypassed && dspState.compressorEnabled)
+                        ? (dspState.compThreshold * 0.4).clamp(-20.0, 0.0)
+                        : 0.0,
+                    isActive: !dspState.isBypassed && dspState.compressorEnabled,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 RackKnobSlider(
@@ -354,9 +360,11 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SoundstageWidthVisualizer(
-                  widthFactor: dspState.stereoWidth,
-                  isActive: !dspState.isBypassed && dspState.stereoWidthEnabled,
+                RepaintBoundary(
+                  child: SoundstageWidthVisualizer(
+                    widthFactor: dspState.stereoWidth,
+                    isActive: !dspState.isBypassed && dspState.stereoWidthEnabled,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 RackKnobSlider(
