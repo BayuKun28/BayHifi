@@ -9,13 +9,11 @@ import '../../../app/theme/studio_surface_theme.dart';
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/desktop/desktop_layout_controller.dart';
 import '../../../core/widgets/studio_alphabetical_scroller.dart';
-import '../../../core/widgets/studio_artwork_widget.dart';
 import '../../../core/widgets/two_tone_header.dart';
 import '../../player/domain/track.dart';
 import '../../player/presentation/controllers/player_controller.dart';
 import '../../navidrome/domain/subsonic_models.dart';
 import '../../navidrome/presentation/widgets/navidrome_connect_dialog.dart';
-import '../domain/genre_icon_helper.dart';
 import '../domain/library_collection_models.dart';
 import 'controllers/library_controller.dart';
 import 'screens/album_detail_screen.dart';
@@ -24,13 +22,16 @@ import 'screens/folder_detail_screen.dart';
 import 'screens/genre_detail_screen.dart';
 import '../../youtube_music/presentation/youtube_discovery_screen.dart';
 import 'controllers/library_selection_controller.dart';
-import 'widgets/artist_avatar_widget.dart';
 import 'widgets/batch_track_tag_editor_modal.dart';
 import 'widgets/library_batch_actions_bar.dart';
 import 'widgets/online_batch_auto_tagger_modal.dart';
 import 'widgets/track_tile.dart';
 import '../../download_manager/presentation/controllers/download_controller.dart';
 import '../../download_manager/presentation/tabs/library_downloads_tab.dart';
+import 'tabs/library_albums_tab.dart';
+import 'tabs/library_artists_tab.dart';
+import 'tabs/library_genres_tab.dart';
+import 'tabs/library_folders_tab.dart';
 
 
 /// Studio Music Library Screen (Unified Collection: Tracks, Albums, Artists, Genres, Playlists, Folders)
@@ -1169,11 +1170,31 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
 
     return switch (state.currentTab) {
       CollectionTab.tracks => _buildTracksList(context, state.filteredTracks, bottomPadding),
-      CollectionTab.albums => _buildAlbumsView(context, state, bottomPadding),
-      CollectionTab.artists => _buildArtistsView(context, state, bottomPadding),
-      CollectionTab.genres => _buildGenresView(context, state, bottomPadding),
+      CollectionTab.albums => LibraryAlbumsTab(
+          scrollController: _albumsScrollController,
+          bottomPadding: bottomPadding,
+          onOpenAlbum: (album) => _openAlbumDetail(context, album),
+          emptyView: _buildEmptyState(context, 'No albums found.'),
+        ),
+      CollectionTab.artists => LibraryArtistsTab(
+          scrollController: _artistsScrollController,
+          bottomPadding: bottomPadding,
+          onOpenArtist: (artist) => _openArtistDetail(context, artist),
+          emptyView: _buildEmptyState(context, 'No artists found.'),
+        ),
+      CollectionTab.genres => LibraryGenresTab(
+          scrollController: _genresScrollController,
+          bottomPadding: bottomPadding,
+          onOpenGenre: (genre) => _openGenreDetail(context, genre),
+          emptyView: _buildEmptyState(context, 'No genres found.'),
+        ),
       CollectionTab.downloads => const LibraryDownloadsTab(),
-      CollectionTab.folders => _buildFoldersView(context, state, bottomPadding),
+      CollectionTab.folders => LibraryFoldersTab(
+          scrollController: _foldersScrollController,
+          bottomPadding: bottomPadding,
+          onOpenFolder: (folder) => _openFolderDetail(context, folder),
+          emptyView: _buildEmptyState(context, 'No audio folders found.'),
+        ),
       CollectionTab.youtube => _buildYouTubeDiscoveryView(context, bottomPadding),
     };
   }
@@ -1388,547 +1409,6 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     );
   }
 
-  // ─── ALBUMS VIEW (GRID / LIST) ────────────────────────────────────────────
-  Widget _buildAlbumsView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
-    final albums = state.albums;
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-
-    if (albums.isEmpty) {
-      return _buildEmptyState(context, 'No albums found.');
-    }
-
-    if (state.layoutMode == ViewLayoutMode.list) {
-      return StudioAlphabeticalScroller(
-        scrollController: _albumsScrollController,
-        itemCount: albums.length,
-        itemHeight: 72.0,
-        isAlphabetical: true,
-        letterSelector: (i) => i < albums.length ? albums[i].name : '',
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: ListView.builder(
-          controller: _albumsScrollController,
-          itemExtent: 72.0,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(14, 4, 28, bottomPadding),
-          itemCount: albums.length,
-          itemBuilder: (ctx, index) {
-            final album = albums[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-                child: ListTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: SizedBox(
-                      width: 46,
-                      height: 46,
-                      child: StudioArtworkWidget(
-                        track: album.firstTrack,
-                        bytes: album.coverBytes,
-                        url: album.coverUrl,
-                        borderRadius: BorderRadius.circular(10),
-                        fallbackIcon: LucideIcons.disc,
-                        fallbackIconSize: 22,
-                      ),
-                    ),
-                  ),
-                  title: Text(album.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  subtitle: Text('${album.artist} • ${album.trackCount} tracks', style: const TextStyle(fontSize: 11)),
-                  trailing: Icon(LucideIcons.chevronRight, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                  onTap: () => _openAlbumDetail(context, album),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    // Responsive Grid View (2-6 Column Squircle) with standard Studio Scrollbar
-    return Theme(
-      data: theme.copyWith(
-        scrollbarTheme: ScrollbarThemeData(
-          thumbColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.5)),
-          radius: const Radius.circular(8),
-          thickness: const WidgetStatePropertyAll(4.5),
-        ),
-      ),
-      child: Scrollbar(
-        controller: _albumsScrollController,
-        thumbVisibility: true,
-        interactive: true,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final int crossAxisCount;
-            final double childAspectRatio;
-
-            if (width < 600) {
-              // Mobile phone portrait (< 600px): 2 columns
-              crossAxisCount = 2;
-              childAspectRatio = 0.80;
-            } else if (width < 840) {
-              // Tablet portrait / compact landscape: 3 columns
-              crossAxisCount = 3;
-              childAspectRatio = 0.82;
-            } else if (width < 1100) {
-              // Desktop standard / medium landscape: 4 columns
-              crossAxisCount = 4;
-              childAspectRatio = 0.82;
-            } else if (width < 1400) {
-              // Desktop large: 5 columns
-              crossAxisCount = 5;
-              childAspectRatio = 0.84;
-            } else {
-              // Desktop ultra-wide: 6 columns
-              crossAxisCount = 6;
-              childAspectRatio = 0.84;
-            }
-
-            return GridView.builder(
-              controller: _albumsScrollController,
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: EdgeInsets.fromLTRB(14, 8, 14, bottomPadding),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: childAspectRatio,
-              ),
-              itemCount: albums.length,
-              itemBuilder: (ctx, index) {
-                final album = albums[index];
-                return InkWell(
-                  onTap: () => _openAlbumDetail(context, album),
-                  borderRadius: BorderRadius.circular(18),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
-                            ),
-                            child: StudioArtworkWidget(
-                              track: album.firstTrack,
-                              bytes: album.coverBytes,
-                              url: album.coverUrl,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
-                              fallbackIconSize: 48,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                album.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                album.artist,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '${album.trackCount} Tracks',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  if (album.isHiRes)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                      decoration: BoxDecoration(
-                                        color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
-                                        borderRadius: BorderRadius.circular(3),
-                                      ),
-                                      child: Text(
-                                        'HI-RES',
-                                        style: TextStyle(
-                                          fontSize: 8,
-                                          fontWeight: FontWeight.w900,
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  // ─── ARTISTS VIEW (GRID / LIST) ───────────────────────────────────────────
-  Widget _buildArtistsView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
-    final artists = state.artists;
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-
-    if (artists.isEmpty) {
-      return _buildEmptyState(context, 'No artists found.');
-    }
-
-    if (state.layoutMode == ViewLayoutMode.list) {
-      return StudioAlphabeticalScroller(
-        scrollController: _artistsScrollController,
-        itemCount: artists.length,
-        itemHeight: 72.0,
-        isAlphabetical: true,
-        letterSelector: (i) => i < artists.length ? artists[i].name : '',
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: ListView.builder(
-          controller: _artistsScrollController,
-          itemExtent: 72.0,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(14, 4, 28, bottomPadding),
-          itemCount: artists.length,
-          itemBuilder: (ctx, index) {
-            final artist = artists[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-                child: ListTile(
-                  leading: ArtistAvatarWidget(
-                    artistName: artist.name,
-                    fallbackCoverBytes: artist.coverBytes,
-                    fallbackCoverUrl: artist.coverUrl,
-                    radius: 22,
-                    iconSize: 20,
-                  ),
-                  title: Text(artist.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  subtitle: Text('${artist.albumsCount} Albums • ${artist.tracksCount} Tracks', style: const TextStyle(fontSize: 11)),
-                  trailing: Icon(LucideIcons.chevronRight, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                  onTap: () => _openArtistDetail(context, artist),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    // Responsive Grid View (3-8 Column Circular Studio Artist Presentation)
-    return Theme(
-      data: theme.copyWith(
-        scrollbarTheme: ScrollbarThemeData(
-          thumbColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.5)),
-          radius: const Radius.circular(8),
-          thickness: const WidgetStatePropertyAll(4.5),
-        ),
-      ),
-      child: Scrollbar(
-        controller: _artistsScrollController,
-        thumbVisibility: true,
-        interactive: true,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final int crossAxisCount;
-            final double childAspectRatio;
-            final double avatarRadius;
-            final double iconSize;
-
-            if (width < 600) {
-              // Mobile Portrait (< 600px): 3 items per row, snug aspect ratio
-              crossAxisCount = 3;
-              childAspectRatio = 0.78;
-              avatarRadius = 40;
-              iconSize = 32;
-            } else if (width < 850) {
-              // Tablet Portrait / Compact Desktop: 4 items per row
-              crossAxisCount = 4;
-              childAspectRatio = 0.86;
-              avatarRadius = 44;
-              iconSize = 34;
-            } else if (width < 1150) {
-              // Desktop Standard / Landscape: 6 items per row
-              crossAxisCount = 6;
-              childAspectRatio = 0.90;
-              avatarRadius = 44;
-              iconSize = 34;
-            } else if (width < 1450) {
-              // Desktop Wide: 7 items per row
-              crossAxisCount = 7;
-              childAspectRatio = 0.92;
-              avatarRadius = 46;
-              iconSize = 36;
-            } else {
-              // Desktop Ultra-Wide: 8 items per row
-              crossAxisCount = 8;
-              childAspectRatio = 0.94;
-              avatarRadius = 48;
-              iconSize = 38;
-            }
-
-            return GridView.builder(
-              controller: _artistsScrollController,
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: EdgeInsets.fromLTRB(14, 12, 14, bottomPadding),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 16,
-                childAspectRatio: childAspectRatio,
-              ),
-              itemCount: artists.length,
-              itemBuilder: (ctx, index) {
-                final artist = artists[index];
-                return InkWell(
-                  onTap: () => _openArtistDetail(context, artist),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Circular Artist Avatar with Studio Shadow & Subtle Border
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.18),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ArtistAvatarWidget(
-                            artistName: artist.name,
-                            fallbackCoverBytes: artist.coverBytes,
-                            fallbackCoverUrl: artist.coverUrl,
-                            radius: avatarRadius,
-                            iconSize: iconSize,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Artist Name
-                        Text(
-                          artist.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
-                            height: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        // Album and Track Count
-                        Text(
-                          '${artist.albumsCount > 0 ? "${artist.albumsCount} Alb • " : ""}${artist.tracksCount} Tracks',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  // ─── GENRES VIEW ──────────────────────────────────────────────────────────
-  Widget _buildGenresView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
-    final genres = state.genres;
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-
-    if (genres.isEmpty) {
-      return _buildEmptyState(context, 'No genres found.');
-    }
-
-    return Theme(
-      data: theme.copyWith(
-        scrollbarTheme: ScrollbarThemeData(
-          thumbColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.5)),
-          radius: const Radius.circular(8),
-          thickness: const WidgetStatePropertyAll(4.5),
-        ),
-      ),
-      child: Scrollbar(
-        controller: _genresScrollController,
-        thumbVisibility: true,
-        interactive: true,
-        child: ListView.builder(
-          controller: _genresScrollController,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(14, 4, 14, bottomPadding),
-          itemCount: genres.length,
-          itemBuilder: (ctx, index) {
-            final genre = genres[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-                child: ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      GenreIconHelper.getGenreIcon(genre.name),
-                      color: theme.colorScheme.primary,
-                      size: 20,
-                    ),
-                  ),
-                  title: Text(genre.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  subtitle: Text('${genre.trackCount} Tracks', style: const TextStyle(fontSize: 11)),
-                  trailing: Icon(LucideIcons.chevronRight, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                  onTap: () => _openGenreDetail(context, genre),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  // ─── FOLDERS VIEW ─────────────────────────────────────────────────────────
-  Widget _buildFoldersView(BuildContext context, UnifiedLibraryState state, double bottomPadding) {
-    final folders = state.folders;
-    final theme = Theme.of(context);
-    final isSolid = ref.isSolidStyle;
-
-    if (folders.isEmpty) {
-      return _buildEmptyState(context, 'No audio folders found.');
-    }
-
-    return Theme(
-      data: theme.copyWith(
-        scrollbarTheme: ScrollbarThemeData(
-          thumbColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.5)),
-          radius: const Radius.circular(8),
-          thickness: const WidgetStatePropertyAll(4.5),
-        ),
-      ),
-      child: Scrollbar(
-        controller: _foldersScrollController,
-        thumbVisibility: true,
-        interactive: true,
-        child: ListView.builder(
-          controller: _foldersScrollController,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(14, 4, 14, bottomPadding),
-          itemCount: folders.length,
-          itemBuilder: (ctx, index) {
-            final folder = folders[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-                child: ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: StudioSurfaceTheme.tintedContainer(context, theme.colorScheme.primary, isSolid: isSolid),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(LucideIcons.folder, color: theme.colorScheme.primary, size: 20),
-                  ),
-                  title: Text(folder.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  subtitle: Text('${folder.path} • ${folder.trackCount} Tracks', style: const TextStyle(fontSize: 10.5)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        tooltip: 'Batch Edit Folder Tags',
-                        icon: Icon(
-                          LucideIcons.pencil,
-                          size: 16,
-                          color: theme.colorScheme.primary,
-                        ),
-                        onPressed: () {
-                          BatchTrackTagEditorModal.show(context, folder.tracks);
-                        },
-                      ),
-                      Icon(
-                        LucideIcons.chevronRight,
-                        size: 16,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                      ),
-                    ],
-                  ),
-                  onTap: () => _openFolderDetail(context, folder),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
 
   void _confirmClearLibrary(BuildContext context) {
     final theme = Theme.of(context);

@@ -6,7 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 enum DesktopLayoutMode {
   auto('Auto Layout', 'Responsive to desktop window width', LucideIcons.layers),
   mobile('Mobile Phone', 'Single-column with bottom dock (430px)', LucideIcons.smartphone),
-  tablet('Tablet Mode', 'Dual-pane with compact studio rail (780px)', LucideIcons.tablet),
+  tablet('Tablet Mode', 'Dual-pane with compact studio rail (950px)', LucideIcons.tablet),
   desktop('Desktop Studio', 'Full-width master layout with transport deck (1280px)', LucideIcons.monitor);
 
   final String label;

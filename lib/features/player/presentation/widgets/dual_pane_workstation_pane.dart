@@ -28,11 +28,16 @@ class DualPaneWorkstationPane extends ConsumerStatefulWidget {
   final bool isLoadingLyrics;
   final VoidCallback? onRefreshLyrics;
 
+  final WorkstationTab? activeTab;
+  final ValueChanged<WorkstationTab>? onTabChanged;
+
   const DualPaneWorkstationPane({
     super.key,
     required this.lyricsResult,
     this.isLoadingLyrics = false,
     this.onRefreshLyrics,
+    this.activeTab,
+    this.onTabChanged,
   });
 
   @override
@@ -40,7 +45,8 @@ class DualPaneWorkstationPane extends ConsumerStatefulWidget {
 }
 
 class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPane> {
-  WorkstationTab _activeTab = WorkstationTab.queue;
+  WorkstationTab _internalTab = WorkstationTab.queue;
+  WorkstationTab get _currentTab => widget.activeTab ?? _internalTab;
 
   @override
   Widget build(BuildContext context) {
@@ -83,13 +89,17 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ...WorkstationTab.values.map((tab) {
-                          final isSel = _activeTab == tab;
+                          final isSel = _currentTab == tab;
                           return Padding(
                             padding: const EdgeInsets.only(right: 6.0),
                             child: InkWell(
                               onTap: () {
                                 AppHaptics.selectionClick();
-                                setState(() => _activeTab = tab);
+                                if (widget.onTabChanged != null) {
+                                  widget.onTabChanged!(tab);
+                                } else {
+                                  setState(() => _internalTab = tab);
+                                }
                               },
                               borderRadius: BorderRadius.circular(10),
                               child: AnimatedContainer(
@@ -141,7 +151,7 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
                     ),
                   ),
                 ),
-                if (_activeTab == WorkstationTab.queue) ...[
+                if (_currentTab == WorkstationTab.queue) ...[
                   const SizedBox(width: 4),
                   // Track Count Badge
                   Container(
@@ -244,7 +254,7 @@ class _DualPaneWorkstationPaneState extends ConsumerState<DualPaneWorkstationPan
     bool isSolid,
   ) {
     final theme = Theme.of(context);
-    switch (_activeTab) {
+    switch (_currentTab) {
       case WorkstationTab.queue:
         if (playback.queue.isEmpty) {
           return Center(

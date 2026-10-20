@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../domain/playback_state.dart';
 import '../../domain/track.dart';
 import '../controllers/player_controller.dart';
@@ -124,7 +125,7 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
         color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: isDialog
             ? BorderRadius.circular(24)
-            : const BorderRadius.vertical(top: Radius.circular(28)),
+            : SimpleAsFTheme.sheetTopBorderRadius,
         border: Border.all(
           color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 1.0,

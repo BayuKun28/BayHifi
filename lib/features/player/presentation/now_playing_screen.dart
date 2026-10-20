@@ -4,16 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../app/theme/app_haptics.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../app/theme/simple_as_f_theme.dart';
-import '../../../app/theme/studio_surface_theme.dart';
 import '../../../core/widgets/meta_tracking_label.dart';
 import '../../../core/widgets/studio_artwork_lightbox.dart';
 import '../../../core/desktop/desktop_layout_controller.dart';
 import '../../pro_q_studio/presentation/widgets/auto_eq_modal_dialog.dart';
 import '../../dsp_rack/presentation/dsp_rack_screen.dart';
+import '../../dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import '../../library/domain/library_collection_models.dart';
 import '../../library/presentation/controllers/library_controller.dart';
 import '../../library/presentation/screens/album_detail_screen.dart';
@@ -36,16 +35,17 @@ import 'widgets/now_playing_queue_sheet.dart';
 import 'widgets/parallax_artwork_card.dart';
 import 'widgets/playback_speed_pitch_sheet.dart';
 import 'widgets/sleep_timer_sheet.dart';
-import 'widgets/studio_dsp_bento_capsule.dart';
 import 'widgets/synchronized_lyrics_view.dart';
 
 class NowPlayingScreen extends ConsumerStatefulWidget {
   final VoidCallback onOpenProQStudio;
+  final VoidCallback? onOpenDspRack;
   final VoidCallback? onCollapse;
 
   const NowPlayingScreen({
     super.key,
     required this.onOpenProQStudio,
+    this.onOpenDspRack,
     this.onCollapse,
   });
 
@@ -58,6 +58,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
   LyricsResult _lyricsResult = const LyricsResult.empty();
   bool _isLoadingLyrics = false;
   String? _loadedTrackId;
+  WorkstationTab _workstationTab = WorkstationTab.queue;
 
   @override
   void initState() {
@@ -372,16 +373,34 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         else
           const SizedBox(width: 48),
 
-        // Center: Bespoke Tracking Header
+        // Center: Bespoke Tracking Header (Album Name & SoLoud Engine Badge)
         Expanded(
-          child: MetaTrackingLabel(
-            (track != null && track.album.isNotEmpty)
-                ? track.album.toUpperCase()
-                : 'NOW PLAYING',
-            fontSize: 11,
-            letterSpacing: 1.4,
-            textAlign: TextAlign.center,
-            color: theme.colorScheme.onSurfaceVariant,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: MetaTrackingLabel(
+                  (track != null && track.album.isNotEmpty)
+                      ? track.album.toUpperCase()
+                      : 'NOW PLAYING',
+                  fontSize: 11,
+                  letterSpacing: 1.4,
+                  textAlign: TextAlign.center,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '• SOLOUD',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: primary.withValues(alpha: 0.85),
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -474,7 +493,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     );
   }
 
-  // ─── LANDSCAPE TOP BAR (With Streamlined Studio Actions Toolbar) ───────────
+  // ─── LANDSCAPE / TABLET TOP BAR ───────────────────────────────────────────
   Widget _buildLandscapeTopBar(
     BuildContext context,
     ThemeData theme,
@@ -483,15 +502,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     bool isFav,
     UnifiedLibraryController libraryController,
     SleepTimerState sleepTimer,
-    PlaybackState playback,
   ) {
-    final isSolid = ref.isSolidStyle;
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Left: Collapse Chevron Button
+        // Left: Back / Collapse Chevron Button
         if (widget.onCollapse != null)
-          M3EIconButton(
-            variant: M3EIconButtonVariant.standard,
+          IconButton(
             onPressed: widget.onCollapse,
             icon: Icon(
               LucideIcons.chevronDown,
@@ -499,232 +516,153 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               color: theme.colorScheme.onSurface,
             ),
             tooltip: 'Collapse to MiniPlayer',
+          )
+        else if (Navigator.canPop(context))
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              size: 22,
+              color: theme.colorScheme.onSurface,
+            ),
+            tooltip: 'Back',
+          )
+        else
+          const SizedBox(width: 48),
+
+        // Center: Bespoke Tracking Header (Album Name & SoLoud Engine Badge)
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: MetaTrackingLabel(
+                  (track != null && track.album.isNotEmpty)
+                      ? track.album.toUpperCase()
+                      : 'NOW PLAYING',
+                  fontSize: 11,
+                  letterSpacing: 1.4,
+                  textAlign: TextAlign.center,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '• SOLOUD',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: primary.withValues(alpha: 0.85),
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ],
           ),
+        ),
 
-        const SizedBox(width: 4),
-
-        // NOW PLAYING Text
+        // Right Actions: Sleep Timer Pill (if active) + Favorite + More Options Menu
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: Image.asset(
-                'assets/images/baydev_logo.png',
-                width: 13,
-                height: 13,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              'NOW PLAYING',
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.0,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(width: 8),
-
-        // Relocated Studio Actions Toolbar
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-              // 1. Open Local File
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                onPressed: _pickAndPlayFile,
-                icon: Icon(
-                  LucideIcons.folder,
-                  size: 22,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                tooltip: 'Open Audio File',
-              ),
-
-              // 2. Playback Speed & Pitch Engine
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                onPressed: () {
-                  AppHaptics.lightImpact();
-                  PlaybackSpeedPitchSheet.show(context);
-                },
-                icon: Icon(
-                  LucideIcons.gauge,
-                  size: 22,
-                  color: (playback.playbackSpeed != 1.0 || playback.pitchSemitones != 0.0)
-                      ? primary
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-                tooltip: 'Speed & Pitch (${playback.playbackSpeed.toStringAsFixed(1)}x)',
-              ),
-
-              // 3. Studio Desk & Car Docking Mode
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                onPressed: () {
-                  AppHaptics.lightImpact();
-                  StudioDeskDockingScreen.show(context);
-                },
-                icon: Icon(
-                  LucideIcons.car,
-                  size: 22,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                tooltip: 'Studio Desk & Car Mode',
-              ),
-
-              // 4. Full-Screen Pro-Q Studio Equalizer
-              M3EIconButton(
-                variant: M3EIconButtonVariant.standard,
-                onPressed: () {
-                  AppHaptics.selectionClick();
-                  widget.onOpenProQStudio();
-                },
-                icon: Icon(
-                  LucideIcons.sliders,
-                  size: 22,
-                  color: primary,
-                ),
-                tooltip: 'Pro-Q Studio Equalizer',
-              ),
-
-              // 5. Technical Audio Specs Inspector
-              if (track != null)
-                M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  onPressed: () {
-                    AppHaptics.lightImpact();
-                    AudioFileInspectorSheet.show(context, track);
-                  },
-                  icon: Icon(
-                    LucideIcons.info,
-                    size: 22,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  tooltip: 'Audio Specs Inspector',
-                ),
-
-              // 6. Sleep Timer
-              InkWell(
+            if (sleepTimer.isActive)
+              GestureDetector(
                 onTap: () {
                   AppHaptics.lightImpact();
                   SleepTimerSheet.show(context);
                 },
-                borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  margin: const EdgeInsets.only(right: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: sleepTimer.isActive
-                        ? StudioSurfaceTheme.tintedContainer(
-                            context,
-                            primary,
-                            isSolid: isSolid,
-                            translucentAlpha: 0.16,
-                            solidBlendAlpha: 0.2,
-                          )
-                        : Colors.transparent,
+                    color: SimpleAsFTheme.emeraldMint.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: SimpleAsFTheme.emeraldMint.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.timer,
-                        size: 18,
-                        color: sleepTimer.isActive
-                            ? primary
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                        size: 14,
+                        color: SimpleAsFTheme.emeraldMint,
                       ),
-                      if (sleepTimer.isActive) ...[
-                        const SizedBox(width: 3),
-                        Text(
-                          sleepTimer.formattedRemaining,
-                          style: TextStyle(
-                            fontFeatures: AppTypography.audioFigures,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            color: primary,
-                          ),
+                      const SizedBox(width: 4),
+                      Text(
+                        sleepTimer.formattedRemaining,
+                        style: TextStyle(
+                          fontFeatures: AppTypography.audioFigures,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: SimpleAsFTheme.emeraldMint,
                         ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
               ),
 
-              // 7. Favorite Button
-              if (track != null)
-                M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  onPressed: () {
-                    AppHaptics.selectionClick();
-                    libraryController.toggleFavorite(track.id);
-                  },
-                  icon: Icon(
-                    LucideIcons.heart,
-                    color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurfaceVariant,
-                    size: 22,
-                  ),
-                  tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
-                ),
-
-              // 8. Playback Options (3 Dots)
+            // Favorite Button
+            if (track != null)
               IconButton(
                 onPressed: () {
-                  AppHaptics.lightImpact();
-                  NowPlayingOptionsSheet.show(
-                    context: context,
-                    track: track,
-                    onOpenProQStudio: widget.onOpenProQStudio,
-                    onOpenSpeedPitch: () => PlaybackSpeedPitchSheet.show(context),
-                    onOpenDeskMode: () => StudioDeskDockingScreen.show(context),
-                    onOpenSleepTimer: () => SleepTimerSheet.show(context),
-                    onOpenInspector: () {
-                      if (track != null) AudioFileInspectorSheet.show(context, track);
-                    },
-                    onToggleLyrics: () => setState(() => _showLyrics = !_showLyrics),
-                    onOpenFile: _pickAndPlayFile,
-                    onOpenLightbox: () {
-                      if (track != null) {
-                        StudioArtworkLightbox.show(
-                          context,
-                          track: track,
-                          bytes: track.albumArtBytes,
-                          url: track.albumArtUrl,
-                          title: track.title,
-                          subtitle: track.artist,
-                          formatTag: track.format.name.toUpperCase(),
-                        );
-                      }
-                    },
-                    isLyricsActive: _showLyrics,
-                  );
+                  AppHaptics.selectionClick();
+                  libraryController.toggleFavorite(track.id);
                 },
                 icon: Icon(
-                  LucideIcons.moreVertical,
-                  size: 22,
-                  color: theme.colorScheme.onSurface,
+                  LucideIcons.heart,
+                  size: 20,
+                  color: isFav ? const Color(0xFFFF2D55) : theme.colorScheme.onSurfaceVariant,
                 ),
-                tooltip: 'Playback Options',
+                tooltip: isFav ? 'Remove from Favorites' : 'Add to Favorites',
               ),
-            ],
-          ),
+
+            // More Options Button
+            IconButton(
+              onPressed: () {
+                AppHaptics.lightImpact();
+                NowPlayingOptionsSheet.show(
+                  context: context,
+                  track: track,
+                  onOpenProQStudio: widget.onOpenProQStudio,
+                  onOpenSpeedPitch: () => PlaybackSpeedPitchSheet.show(context),
+                  onOpenDeskMode: () => StudioDeskDockingScreen.show(context),
+                  onOpenSleepTimer: () => SleepTimerSheet.show(context),
+                  onOpenInspector: () {
+                    if (track != null) AudioFileInspectorSheet.show(context, track);
+                  },
+                  onToggleLyrics: () => setState(() => _showLyrics = !_showLyrics),
+                  onOpenFile: _pickAndPlayFile,
+                  onOpenLightbox: () {
+                    if (track != null) {
+                      StudioArtworkLightbox.show(
+                        context,
+                        track: track,
+                        bytes: track.albumArtBytes,
+                        url: track.albumArtUrl,
+                        title: track.title,
+                        subtitle: track.artist,
+                        formatTag: track.format.name.toUpperCase(),
+                      );
+                    }
+                  },
+                  isLyricsActive: _showLyrics,
+                );
+              },
+              icon: Icon(
+                LucideIcons.moreVertical,
+                size: 22,
+                color: theme.colorScheme.onSurface,
+              ),
+              tooltip: 'Playback Options',
+            ),
+          ],
         ),
-      ),
-    ),
-  ],
-);
+      ],
+    );
   }
 
   // ─── PORTRAIT LAYOUT ──────────────────────────────────────────────────────
@@ -1063,9 +1001,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final primary = theme.colorScheme.primary;
-    final surfaceContainer = isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainerHighest;
-    final outlineBorder = isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant;
-    final subtleColor = theme.colorScheme.onSurfaceVariant;
+    final elevatedContainer = isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHigh;
+    final outlineBorder = isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant;
 
     final hasDriver = eqState.driverFr != null;
     final hasTarget = eqState.targetFr != null;
@@ -1073,6 +1010,23 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     final autoEqTooltip = hasDriver
         ? 'AutoEQ: ${eqState.driverFr!.name}${hasTarget ? ' → ${eqState.targetFr!.name}' : ''}'
         : 'AutoEQ Studio & Target Matching';
+
+    final dspState = ref.watch(dspRackControllerProvider);
+    int activeDspCount = 0;
+    if (!dspState.isBypassed) {
+      if (dspState.tubeExciterEnabled) activeDspCount++;
+      if (dspState.bassBoostEnabled) activeDspCount++;
+      if (dspState.compressorEnabled) activeDspCount++;
+      if (dspState.stereoWidthEnabled) activeDspCount++;
+      if (dspState.crossfeedEnabled) activeDspCount++;
+      if (dspState.reverbEnabled) activeDspCount++;
+      if (dspState.pitchShiftEnabled) activeDspCount++;
+      if (dspState.limiterEnabled) activeDspCount++;
+    }
+    final isDspActive = !dspState.isBypassed && activeDspCount > 0;
+    final dspTooltip = isDspActive
+        ? 'Mastering DSP Rack ($activeDspCount Active)'
+        : (dspState.isBypassed ? 'Mastering DSP Rack (Bypassed)' : 'Mastering DSP Rack (Flat)');
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -1087,13 +1041,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 AppHaptics.lightImpact();
                 AudioFileInspectorSheet.show(context, track);
               },
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(9),
               child: Container(
-                height: 30,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                height: 34,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: surfaceContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  color: elevatedContainer,
+                  borderRadius: BorderRadius.circular(9),
                   border: Border.all(color: outlineBorder, width: 1.0),
                 ),
                 child: Row(
@@ -1102,29 +1056,20 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     Text(
                       track.format.name.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
                         color: primary,
-                        letterSpacing: 0.5,
+                        letterSpacing: 0.6,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 5),
                     Text(
                       '${track.sampleRate != null ? (track.sampleRate! / 1000).toStringAsFixed(1) : '44.1'}kHz',
                       style: TextStyle(
                         fontFeatures: AppTypography.audioFigures,
-                        fontSize: 10,
-                        color: subtleColor,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '• SOLOUD',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: primary.withValues(alpha: 0.85),
-                        letterSpacing: 0.4,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -1134,21 +1079,23 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             const SizedBox(width: 8),
           ],
 
-          // 2. Pro-Q EQ Icon Button
+          // 2. Pro-Q Studio EQ (Spectrum / Frequency Curve) Icon Button
           Tooltip(
-            message: eqState.isEnabled ? 'Pro-Q Studio (Active)' : 'Pro-Q Studio (Off)',
+            message: eqState.isEnabled ? 'Pro-Q Studio Spectrum (Active)' : 'Pro-Q Studio Spectrum (Off)',
             child: InkWell(
               onTap: () {
                 AppHaptics.selectionClick();
                 widget.onOpenProQStudio();
               },
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(9),
               child: Container(
-                width: 34,
-                height: 30,
+                width: 38,
+                height: 34,
                 decoration: BoxDecoration(
-                  color: surfaceContainer,
-                  borderRadius: BorderRadius.circular(10),
+                  color: eqState.isEnabled
+                      ? primary.withValues(alpha: 0.16)
+                      : elevatedContainer,
+                  borderRadius: BorderRadius.circular(9),
                   border: Border.all(
                     color: eqState.isEnabled ? primary : outlineBorder,
                     width: 1.0,
@@ -1156,9 +1103,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 ),
                 child: Center(
                   child: Icon(
-                    LucideIcons.sliders,
-                    size: 14,
-                    color: eqState.isEnabled ? primary : subtleColor,
+                    LucideIcons.audioLines,
+                    size: 16,
+                    color: eqState.isEnabled ? primary : theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -1174,13 +1121,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 AppHaptics.selectionClick();
                 AutoEqModalDialog.show(context);
               },
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(9),
               child: Container(
-                width: 34,
-                height: 30,
+                width: 38,
+                height: 34,
                 decoration: BoxDecoration(
-                  color: surfaceContainer,
-                  borderRadius: BorderRadius.circular(10),
+                  color: isAutoActive
+                      ? primary.withValues(alpha: 0.16)
+                      : elevatedContainer,
+                  borderRadius: BorderRadius.circular(9),
                   border: Border.all(
                     color: isAutoActive ? primary : outlineBorder,
                     width: 1.0,
@@ -1189,8 +1138,50 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 child: Center(
                   child: Icon(
                     LucideIcons.sparkles,
-                    size: 14,
-                    color: isAutoActive ? primary : subtleColor,
+                    size: 16,
+                    color: isAutoActive ? primary : theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 4. Mastering DSP Rack Shortcut Icon Button
+          Tooltip(
+            message: dspTooltip,
+            child: InkWell(
+              onTap: () {
+                AppHaptics.selectionClick();
+                if (widget.onOpenDspRack != null) {
+                  widget.onOpenDspRack!();
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const DspRackScreen(),
+                    ),
+                  );
+                }
+              },
+              borderRadius: BorderRadius.circular(9),
+              child: Container(
+                width: 38,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: isDspActive
+                      ? primary.withValues(alpha: 0.16)
+                      : elevatedContainer,
+                  borderRadius: BorderRadius.circular(9),
+                  border: Border.all(
+                    color: isDspActive ? primary : outlineBorder,
+                    width: 1.0,
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    LucideIcons.slidersHorizontal,
+                    size: 16,
+                    color: isDspActive ? primary : theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -1206,13 +1197,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 AppHaptics.lightImpact();
                 setState(() => _showLyrics = !_showLyrics);
               },
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(9),
               child: Container(
-                height: 30,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                height: 34,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: surfaceContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  color: _showLyrics
+                      ? primary.withValues(alpha: 0.16)
+                      : elevatedContainer,
+                  borderRadius: BorderRadius.circular(9),
                   border: Border.all(
                     color: _showLyrics ? primary : outlineBorder,
                     width: 1.0,
@@ -1223,17 +1216,17 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   children: [
                     Icon(
                       LucideIcons.quote,
-                      size: 13,
-                      color: _showLyrics ? primary : subtleColor,
+                      size: 14,
+                      color: _showLyrics ? primary : theme.colorScheme.onSurface,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 5),
                     Text(
                       'LYRICS',
                       style: TextStyle(
-                        fontSize: 9.5,
+                        fontSize: 10,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
-                        color: _showLyrics ? primary : subtleColor,
+                        color: _showLyrics ? primary : theme.colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -1246,84 +1239,220 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     );
   }
 
-  // ─── AUDIO SPECS BANNER ───────────────────────────────────────────────────
-  Widget _buildAudioSpecsBanner(
+  // ─── TABLET STUDIO AUXILIARY ACTION BAR ──────────────────────────────────
+  Widget _buildTabletStudioAuxiliaryBar(
     BuildContext context,
     Track? track,
-    ThemeData theme,
-    Color primary,
+    EqState eqState,
   ) {
-    if (track == null) return const SizedBox.shrink();
-    final isSolid = ref.isSolidStyle;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.primary;
+    final elevatedContainer = isDark ? const Color(0xFF1E212B) : theme.colorScheme.surfaceContainerHigh;
+    final outlineBorder = isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant;
+    final subtleColor = theme.colorScheme.onSurfaceVariant;
 
-    final formatStr = track.format.name.toUpperCase();
-    final sampleRateStr = track.sampleRate != null
-        ? '${(track.sampleRate! / 1000).toStringAsFixed(1)} kHz'
-        : '44.1 kHz';
-    final bitDepthStr = track.bitDepth != null ? '${track.bitDepth}-bit' : '16-bit';
-    final isHiRes = track.isHiRes;
+    final hasDriver = eqState.driverFr != null;
+    final hasTarget = eqState.targetFr != null;
+    final isAutoActive = eqState.isAutoEqActive || hasDriver;
+    final autoEqTooltip = hasDriver
+        ? 'AutoEQ: ${eqState.driverFr!.name}${hasTarget ? ' → ${eqState.targetFr!.name}' : ''}'
+        : 'AutoEQ Studio & Target Matching';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
-      decoration: BoxDecoration(
-        color: StudioSurfaceTheme.surfaceContainerHigh(context, isSolid: isSolid, translucentAlpha: 0.4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+    // Format bitDepth or bitrate string
+    String extraSpecs = '';
+    if (track != null) {
+      if (track.bitDepth != null && track.bitDepth! > 0) {
+        extraSpecs = ' • ${track.bitDepth}bit';
+      } else if (track.bitrate != null && track.bitrate! > 0) {
+        extraSpecs = ' • ${(track.bitrate! / 1000).round()}kbps';
+      }
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ─── ROW 1: Audio Specs & Action Pills ─────────────────────────────
+        Row(
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-              decoration: BoxDecoration(
-                color: StudioSurfaceTheme.tintedContainer(
-                  context,
-                  primary,
-                  isSolid: isSolid,
-                  translucentAlpha: 0.18,
-                  solidBlendAlpha: 0.22,
+            // 1. Audio Specs Chip (Clickable for Inspector)
+            if (track != null)
+              InkWell(
+                onTap: () {
+                  AppHaptics.lightImpact();
+                  AudioFileInspectorSheet.show(context, track);
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 30,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: elevatedContainer,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: outlineBorder, width: 1.0),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        track.format.name.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: primary,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${track.sampleRate != null ? (track.sampleRate! / 1000).toStringAsFixed(1) : '44.1'}kHz$extraSpecs',
+                        style: TextStyle(
+                          fontFeatures: AppTypography.audioFigures,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 11,
+                        color: subtleColor,
+                      ),
+                    ],
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(4),
               ),
-              child: Text(
-                isHiRes ? 'HI-RES MASTER' : 'LOSSLESS AUDIO',
-                style: TextStyle(
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w900,
-                  color: primary,
-                  letterSpacing: 0.5,
+
+            const Spacer(),
+
+            // 2. Pro-Q Action Pill
+            Tooltip(
+              message: eqState.isEnabled ? 'Pro-Q Studio Spectrum (Active)' : 'Pro-Q Studio Spectrum (Off)',
+              child: InkWell(
+                onTap: () {
+                  AppHaptics.selectionClick();
+                  widget.onOpenProQStudio();
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 30,
+                  padding: const EdgeInsets.symmetric(horizontal: 9),
+                  decoration: BoxDecoration(
+                    color: eqState.isEnabled
+                        ? primary.withValues(alpha: 0.16)
+                        : elevatedContainer,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: eqState.isEnabled ? primary : outlineBorder,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.audioLines,
+                        size: 13,
+                        color: eqState.isEnabled ? primary : theme.colorScheme.onSurface,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'PRO-Q',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                          color: eqState.isEnabled ? primary : theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              '$formatStr • $bitDepthStr / $sampleRateStr • SOLOUD',
-              style: TextStyle(
-                fontFeatures: AppTypography.audioFigures,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                letterSpacing: 0.3,
-              ),
-            ),
-            if (track.genre != null && track.genre!.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              Text(
-                '• ${track.genre}',
-                style: TextStyle(
-                  fontSize: 10.5,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+
+            const SizedBox(width: 6),
+
+            // 3. AutoEQ Action Pill
+            Tooltip(
+              message: autoEqTooltip,
+              child: InkWell(
+                onTap: () {
+                  AppHaptics.selectionClick();
+                  AutoEqModalDialog.show(context);
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 30,
+                  padding: const EdgeInsets.symmetric(horizontal: 9),
+                  decoration: BoxDecoration(
+                    color: isAutoActive
+                        ? primary.withValues(alpha: 0.16)
+                        : elevatedContainer,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isAutoActive ? primary : outlineBorder,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.sparkles,
+                        size: 13,
+                        color: isAutoActive ? primary : theme.colorScheme.onSurface,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'AUTO-EQ',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                          color: isAutoActive ? primary : theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
+            ),
           ],
         ),
-      ),
+
+        const SizedBox(height: 5),
+
+        // ─── ROW 2: Subtle SoLoud Engine Branding ──────────────────────────
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: Image.asset(
+                'assets/images/baydev_logo.png',
+                width: 9,
+                height: 9,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'POWERED BY SOLOUD ENGINE',
+              style: TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+                color: primary.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
-
-
 
   // ─── LANDSCAPE / TABLET DUAL-PANE WORKSTATION LAYOUT ───────────────────────
   Widget _buildLandscapeDualPaneLayout(
@@ -1339,15 +1468,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     EqState eqState,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 12.0),
       child: Row(
         children: [
-          // LEFT PANE (42%): Playback Deck, Cover Art, Track Info, Sliders (Clean & Concise)
+          // LEFT PANE (45%): Playback Deck, Hero Squircle Artwork, Track Info, Sliders
           Expanded(
             flex: 5,
             child: Column(
               children: [
-                // 1. Top Bar with Relocated Studio Actions Toolbar
+                // 1. Top Bar with Bespoke Tracking Header & Actions
                 _buildLandscapeTopBar(
                   context,
                   theme,
@@ -1356,110 +1485,103 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   isFav,
                   libraryController,
                   sleepTimer,
-                  playback,
                 ),
 
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
 
-                // 2. Center Album Art & Info
+                // 2. Main Center Hero Artwork & Info (Dynamically Scaled & Uncluttered)
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ParallaxArtworkCard(
-                        track: track,
-                        isPlaying: playback.isPlaying,
-                        primaryColor: primary,
-                        size: 125,
-                        onSingleTap: () => _handleArtworkGesture(displaySettings.singleTapAction, track),
-                        onDoubleTap: () => _handleArtworkGesture(displaySettings.doubleTapAction, track),
-                        onLongPress: () => _handleArtworkGesture(displaySettings.longPressAction, track),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final maxArtwork = constraints.maxHeight - 56.0;
+                      final artworkSize = (maxArtwork > 140.0 ? maxArtwork : 140.0).clamp(140.0, 275.0);
+
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ParallaxArtworkCard(
+                            track: track,
+                            isPlaying: playback.isPlaying,
+                            primaryColor: primary,
+                            size: artworkSize,
+                            onSingleTap: () => _handleArtworkGesture(displaySettings.singleTapAction, track),
+                            onDoubleTap: () => _handleArtworkGesture(displaySettings.doubleTapAction, track),
+                            onLongPress: () => _handleArtworkGesture(displaySettings.longPressAction, track),
+                          ),
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Text(
                               track?.title ?? 'No Track Playing',
                               style: const TextStyle(
-                                fontSize: 15,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.2,
                               ),
+                              textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              track != null ? '${track.artist} • ${track.album}' : 'Select music from library',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(height: 3),
+                          if (track != null)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: InkWell(
+                                onTap: () => _navigateToAlbum(context, track),
+                                borderRadius: BorderRadius.circular(4),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  child: Text(
+                                    '${track.artist}${track.album.isNotEmpty ? ' • ${track.album}' : ''}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                      letterSpacing: 0.3,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
-                            _buildAudioSpecsBanner(context, track, theme, primary),
-                            const SizedBox(height: 2),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(3),
-                                  child: Image.asset(
-                                    'assets/images/baydev_logo.png',
-                                    width: 10,
-                                    height: 10,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'POWERED BY SOLOUD ENGINE',
-                                  style: TextStyle(
-                                    fontSize: 8.5,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.8,
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            // Unified Studio DSP & AutoEQ Bento Capsule
-                            const StudioDspBentoCapsule(),
-                          ],
-                        ),
-                      ),
-                    ],
+                        ],
+                      );
+                    },
                   ),
                 ),
 
                 const SizedBox(height: 4),
 
-                // 3. Customizable Time Bar
+                // 3. Customizable Time Bar (Isolated Progress Bar)
                 const _NowPlayingIsolatedProgressBar(),
 
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
 
                 // 4. Main Playback Controls Deck
                 _buildPlaybackControlsDeck(context, playback, primary, theme),
+
+                const SizedBox(height: 6),
+
+                // 5. Tablet Studio Auxiliary Action Bar (Interactive Workstation Trigger)
+                _buildTabletStudioAuxiliaryBar(context, track, eqState),
               ],
             ),
           ),
 
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
 
-          // RIGHT PANE (58%): Multi-Tab Workstation (Up Next Queue / Lyrics / DSP Rack)
+          // RIGHT PANE (55%): Multi-Tab Workstation (Up Next Queue / Lyrics / DSP Rack)
           Expanded(
-            flex: 7,
+            flex: 6,
             child: DualPaneWorkstationPane(
               lyricsResult: _lyricsResult,
               isLoadingLyrics: _isLoadingLyrics,
               onRefreshLyrics: track != null ? () => _fetchLyrics(track, forceOnline: true) : null,
+              activeTab: _workstationTab,
+              onTabChanged: (tab) => setState(() => _workstationTab = tab),
             ),
           ),
         ],

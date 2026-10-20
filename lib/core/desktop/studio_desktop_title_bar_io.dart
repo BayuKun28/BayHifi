@@ -235,7 +235,7 @@ class _DesktopLayoutSwitcherPill extends ConsumerWidget {
             ref: ref,
             mode: DesktopLayoutMode.tablet,
             icon: LucideIcons.tablet,
-            tooltip: 'Tablet Layout (780px)',
+            tooltip: 'Tablet Layout (950px)',
             isActive: activeMode == DesktopLayoutMode.tablet,
             primary: primary,
           ),

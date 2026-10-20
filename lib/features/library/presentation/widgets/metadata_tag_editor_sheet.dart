@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../../core/storage/storage_permission_dialog.dart';
 import '../../../../core/storage/storage_permission_service.dart';
 import '../../../player/domain/track.dart';
@@ -296,7 +297,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
         ),
         decoration: BoxDecoration(
           color: surfaceContainer,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: SimpleAsFTheme.sheetTopBorderRadius,
           border: Border.all(color: outline, width: 1.0),
           boxShadow: const [
             BoxShadow(

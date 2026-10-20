@@ -60,6 +60,10 @@ abstract final class SimpleAsFTheme {
   /// Small meta tags & buttons
   static final BorderRadius buttonPillRadius = BorderRadius.circular(999.0);
 
+  /// Studio modal bottom sheets top radius
+  static const Radius sheetTopRadius = Radius.circular(24.0);
+  static const BorderRadius sheetTopBorderRadius = BorderRadius.vertical(top: sheetTopRadius);
+
   // ─── Static Fallback BoxDecorations ────────────────────────────────────────
   /// Default active playing track capsule decoration
   static BoxDecoration activeTrackDecoration = BoxDecoration(

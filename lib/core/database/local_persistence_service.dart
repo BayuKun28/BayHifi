@@ -226,7 +226,11 @@ class LocalPersistenceService {
       if (await _dbFile!.exists()) {
         final content = await _dbFile!.readAsString();
         if (content.trim().isNotEmpty) {
-          _cache = jsonDecode(content) as Map<String, dynamic>;
+          if (content.length > 20000 && !kIsWeb) {
+            _cache = await compute(_decodeJsonMap, content);
+          } else {
+            _cache = jsonDecode(content) as Map<String, dynamic>;
+          }
         }
       } else {
         _cache = {};
@@ -293,7 +297,16 @@ class LocalPersistenceService {
     }
     if (_dbFile == null) return;
     try {
-      await _dbFile!.writeAsString(jsonEncode(_cache), flush: true);
+      final String raw;
+      final trackList = _cache['saved_library_tracks'];
+      final isLargePayload = (_cache.length > 50) || (trackList is List && trackList.length > 50);
+
+      if (isLargePayload && !kIsWeb) {
+        raw = await compute(_encodeJsonMap, Map<String, dynamic>.from(_cache));
+      } else {
+        raw = jsonEncode(_cache);
+      }
+      await _dbFile!.writeAsString(raw, flush: true);
     } catch (e) {
       debugPrint('[LocalPersistence] Save error: $e');
     }
@@ -1010,6 +1023,14 @@ class LocalPersistenceService {
     _writeScoped('cached_wrapped_summary', summary);
     await _save();
   }
+}
+
+Map<String, dynamic> _decodeJsonMap(String source) {
+  return jsonDecode(source) as Map<String, dynamic>;
+}
+
+String _encodeJsonMap(Map<String, dynamic> data) {
+  return jsonEncode(data);
 }
 
 

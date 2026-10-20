@@ -6,6 +6,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../../core/utils/audio_file_inspector.dart';
 import '../../../library/presentation/widgets/metadata_tag_editor_sheet.dart';
 import '../../domain/track.dart';
@@ -37,7 +38,7 @@ class AudioFileInspectorSheet extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: SimpleAsFTheme.sheetTopBorderRadius,
         border: Border.all(color: StudioSurfaceTheme.outline(context, isSolid: isSolid), width: 1.2),
         boxShadow: const [
           BoxShadow(

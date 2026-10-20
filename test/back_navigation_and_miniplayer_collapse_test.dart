@@ -161,7 +161,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(playerExpansionProvider), isTrue);
-      expect(find.text('NOW PLAYING'), findsOneWidget);
+      expect(find.text('MASTERING OPUS LINUX'), findsOneWidget);
 
       // Collapse player
       container.read(playerExpansionProvider.notifier).collapse();

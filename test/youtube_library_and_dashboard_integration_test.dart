@@ -10,6 +10,7 @@ import 'package:baydev_hifi/features/youtube_music/presentation/controllers/yout
 import 'package:baydev_hifi/features/youtube_music/presentation/youtube_discovery_screen.dart';
 
 class _MockYouTubeMusicController extends YouTubeMusicController {
+  bool fetchTrendingCalled = false;
   _MockYouTubeMusicController(YouTubeMusicState initialState, Ref ref) : super(ref) {
     state = initialState;
   }
@@ -18,7 +19,9 @@ class _MockYouTubeMusicController extends YouTubeMusicController {
   void onQueryChanged(String newQuery) {}
 
   @override
-  Future<void> fetchTrending({bool force = false}) async {}
+  Future<void> fetchTrending({bool force = false}) async {
+    fetchTrendingCalled = true;
+  }
 }
 
 void main() {
@@ -119,6 +122,48 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(YouTubeDiscoveryScreen), findsOneWidget);
+    });
+
+    testWidgets('YouTubeDiscoveryScreen renders offline resilience capsule banner when errorMessage is present', (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      late _MockYouTubeMusicController mockYtController;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            youtubeMusicControllerProvider.overrideWith(
+              (ref) {
+                mockYtController = _MockYouTubeMusicController(
+                  const YouTubeMusicState(
+                    trendingTracks: [],
+                    errorMessage: 'Failed to connect: network unreachable',
+                  ),
+                  ref,
+                );
+                return mockYtController;
+              },
+            ),
+          ],
+          child: const MaterialApp(
+            home: YouTubeDiscoveryScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify offline capsule banner is displayed
+      expect(find.text('Offline Mode • Tap to retry connection'), findsOneWidget);
+
+      // Tap Retry button in capsule banner
+      final retryFinder = find.text('Retry');
+      expect(retryFinder, findsOneWidget);
+      await tester.tap(retryFinder);
+      await tester.pumpAndSettle();
+
+      expect(mockYtController.fetchTrendingCalled, isTrue);
     });
   });
 }

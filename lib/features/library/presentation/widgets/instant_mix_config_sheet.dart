@@ -5,6 +5,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../../core/widgets/studio_artwork_widget.dart';
 import '../../../player/domain/track.dart';
 import '../../../player/presentation/controllers/player_controller.dart';
@@ -97,7 +98,7 @@ class _InstantMixConfigSheetState extends ConsumerState<InstantMixConfigSheet> {
     return Container(
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: SimpleAsFTheme.sheetTopBorderRadius,
         border: Border.all(
           color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 1.0,

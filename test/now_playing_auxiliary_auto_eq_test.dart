@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:baydev_hifi/audio_engine/soloud_controller.dart';
+import 'package:baydev_hifi/features/dsp_rack/domain/dsp_models.dart';
+import 'package:baydev_hifi/features/dsp_rack/presentation/controllers/dsp_rack_controller.dart';
 import 'package:baydev_hifi/features/player/domain/playback_state.dart';
 import 'package:baydev_hifi/features/player/domain/track.dart';
 import 'package:baydev_hifi/features/player/presentation/controllers/player_controller.dart';
@@ -27,10 +29,13 @@ void main() {
   );
 
   group('NowPlayingScreen Auxiliary Bar Unified AutoEQ Tests', () {
-    testWidgets('Auxiliary bar renders unified AutoEQ sparkles button and opens AutoEqModalDialog', (tester) async {
+    testWidgets('Auxiliary bar renders Pro-Q spectrum audioLines, AutoEQ sparkles, and DSP Rack shortcuts', (tester) async {
       tester.view.physicalSize = const Size(400, 850);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
+
+      bool proQOpened = false;
+      bool dspRackOpened = false;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -50,7 +55,8 @@ void main() {
             theme: ThemeData.dark(),
             home: Scaffold(
               body: NowPlayingScreen(
-                onOpenProQStudio: () {},
+                onOpenProQStudio: () => proQOpened = true,
+                onOpenDspRack: () => dspRackOpened = true,
               ),
             ),
           ),
@@ -64,8 +70,14 @@ void main() {
       expect(find.text('FLAC'), findsOneWidget);
       expect(find.text('96.0kHz'), findsOneWidget);
 
-      // 2. Verify Pro-Q Studio EQ button
-      expect(find.byIcon(LucideIcons.sliders), findsOneWidget);
+      // 2. Verify Pro-Q Studio EQ button uses LucideIcons.audioLines (representing spectrum/audio curves)
+      final proQButton = find.byIcon(LucideIcons.audioLines);
+      expect(proQButton, findsOneWidget);
+
+      // Tap Pro-Q Studio button and verify callback
+      await tester.tap(proQButton);
+      await tester.pump();
+      expect(proQOpened, isTrue);
 
       // 3. Verify Unified AutoEQ button (LucideIcons.sparkles)
       final autoEqButton = find.byWidgetPredicate(
@@ -73,17 +85,26 @@ void main() {
       );
       expect(autoEqButton, findsOneWidget);
 
-      // 4. Verify separate Driver (headphones) and Target (target) icons are NOT in auxiliary bar
+      // 4. Verify Mastering DSP Rack shortcut button (LucideIcons.slidersHorizontal)
+      final dspRackButton = find.byIcon(LucideIcons.slidersHorizontal);
+      expect(dspRackButton, findsOneWidget);
+
+      // Tap DSP Rack button and verify callback
+      await tester.tap(dspRackButton);
+      await tester.pump();
+      expect(dspRackOpened, isTrue);
+
+      // 5. Verify separate Driver (headphones) and Target (target) icons are NOT in auxiliary bar
       expect(find.byIcon(LucideIcons.headphones), findsNothing);
       expect(find.byIcon(LucideIcons.target), findsNothing);
 
-      // 5. Verify Tooltip message starts with AutoEQ
+      // 6. Verify Tooltip message starts with AutoEQ
       final autoEqTooltipFinder = find.byWidgetPredicate(
         (w) => w is Tooltip && (w.message?.startsWith('AutoEQ') ?? false),
       );
       expect(autoEqTooltipFinder, findsOneWidget);
 
-      // 6. Tap AutoEQ button and verify AutoEqModalDialog is displayed
+      // 7. Tap AutoEQ button and verify AutoEqModalDialog is displayed
       await tester.tap(autoEqButton);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
@@ -146,5 +167,53 @@ void main() {
       // Verify dynamic tooltip with Driver and Target names
       expect(find.byTooltip('AutoEQ: Sennheiser HD600 → Harman In-Ear 2019'), findsOneWidget);
     });
+
+    testWidgets('DSP Rack button displays active module count in tooltip when modules enabled', (tester) async {
+      tester.view.physicalSize = const Size(400, 850);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            playerControllerProvider.overrideWith((ref) {
+              final notifier = PlayerController(SoLoudController.instance);
+              notifier.state = PlaybackState(
+                currentTrack: testTrack,
+                status: PlaybackStatus.playing,
+              );
+              return notifier;
+            }),
+            dspRackControllerProvider.overrideWith((ref) {
+              final controller = DspRackController();
+              controller.state = const DspRackState(
+                isBypassed: false,
+                tubeExciterEnabled: true,
+                bassBoostEnabled: true,
+                compressorEnabled: true,
+                stereoWidthEnabled: false,
+                limiterEnabled: false,
+              );
+              return controller;
+            }),
+          ],
+          child: MaterialApp(
+            theme: ThemeData.dark(),
+            home: Scaffold(
+              body: NowPlayingScreen(
+                onOpenProQStudio: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify tooltip shows 'Mastering DSP Rack (3 Active)'
+      expect(find.byTooltip('Mastering DSP Rack (3 Active)'), findsOneWidget);
+    });
   });
 }
+

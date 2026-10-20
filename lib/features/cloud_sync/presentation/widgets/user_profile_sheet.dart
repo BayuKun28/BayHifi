@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../controllers/cloud_auth_controller.dart';
 import 'change_password_dialog.dart';
 
@@ -106,7 +107,7 @@ class _UserProfileSheetState extends ConsumerState<UserProfileSheet> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainer,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: SimpleAsFTheme.sheetTopBorderRadius,
         border: Border(
           top: BorderSide(
             color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),

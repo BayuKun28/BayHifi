@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme/app_haptics.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../domain/models/dac_peq_profile.dart';
 import '../controllers/dac_bridge_controller.dart';
 import 'save_dac_profile_dialog.dart';
@@ -149,7 +150,7 @@ class DacProfileManagerModal extends ConsumerWidget {
         color: isDark ? const Color(0xFF16181F) : colorScheme.surfaceContainer,
         borderRadius: isDialog
             ? BorderRadius.circular(20)
-            : const BorderRadius.vertical(top: Radius.circular(28)),
+            : SimpleAsFTheme.sheetTopBorderRadius,
         border: Border.all(
           color: isDark ? const Color(0xFF262936) : colorScheme.outlineVariant,
           width: 1,

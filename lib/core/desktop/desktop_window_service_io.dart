@@ -217,14 +217,14 @@ class DesktopWindowService with WindowListener {
     }
   }
 
-  /// Resize desktop window to Tablet proportion (780 x 860)
+  /// Resize desktop window to Tablet proportion (950 x 640 widescreen)
   Future<void> setTabletSize() async {
     if (!Platform.isLinux && !Platform.isWindows && !Platform.isMacOS) return;
     try {
       if (await windowManager.isMaximized()) {
         await windowManager.unmaximize();
       }
-      await windowManager.setSize(const Size(780, 860));
+      await windowManager.setSize(const Size(950, 640));
     } catch (e) {
       debugPrint('[DesktopWindowService] Error setting tablet size: $e');
     }

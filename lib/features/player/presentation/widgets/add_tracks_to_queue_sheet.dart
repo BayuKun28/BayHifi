@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_haptics.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../library/domain/instant_mix_engine.dart';
 import '../../../library/presentation/controllers/library_controller.dart';
 import '../../domain/track.dart';
@@ -177,7 +178,7 @@ class _AddTracksToQueueSheetState extends ConsumerState<AddTracksToQueueSheet> {
         color: isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainer,
         borderRadius: isDialog
             ? BorderRadius.circular(24)
-            : const BorderRadius.vertical(top: Radius.circular(28)),
+            : SimpleAsFTheme.sheetTopBorderRadius,
         border: Border.all(
           color: isDark ? const Color(0xFF262936) : theme.colorScheme.outlineVariant,
           width: 1.0,

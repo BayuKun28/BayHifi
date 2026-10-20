@@ -189,8 +189,10 @@ class _DesktopShortcutsDispatcherState extends ConsumerState<DesktopShortcutsDis
       return KeyEventResult.handled;
     }
 
-    // 15. QUESTION MARK / CTRL + SLASH: Cheatsheet Dialog
-    if (key == LogicalKeyboardKey.question || (isCtrl && key == LogicalKeyboardKey.slash)) {
+    // 15. QUESTION MARK / F1 / CTRL + SLASH / CTRL + H: Cheatsheet Dialog
+    if (key == LogicalKeyboardKey.question ||
+        key == LogicalKeyboardKey.f1 ||
+        (isCtrl && (key == LogicalKeyboardKey.slash || key == LogicalKeyboardKey.keyH))) {
       showDesktopShortcutsCheatsheet(context);
       return KeyEventResult.handled;
     }

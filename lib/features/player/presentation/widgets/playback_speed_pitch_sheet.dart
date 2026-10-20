@@ -5,6 +5,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../app/theme/studio_surface_theme.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
 import '../controllers/player_controller.dart';
 
@@ -38,7 +39,7 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: StudioSurfaceTheme.surface(context, isSolid: isSolid),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: SimpleAsFTheme.sheetTopBorderRadius,
         border: Border.all(
           color: StudioSurfaceTheme.outline(context, isSolid: isSolid),
           width: 1.0,

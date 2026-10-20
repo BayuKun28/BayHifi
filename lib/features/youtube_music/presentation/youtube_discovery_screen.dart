@@ -269,6 +269,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
             hasQuery: hasQuery,
             searchResults: searchResults,
             trendingTracks: trendingTracks,
+            errorMessage: ytState.errorMessage,
             currentPlayingId: currentPlayingId,
             ytController: ytController,
             theme: theme,
@@ -388,6 +389,7 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     required bool hasQuery,
     required List<Track> searchResults,
     required List<Track> trendingTracks,
+    required String? errorMessage,
     required String? currentPlayingId,
     required YouTubeMusicController ytController,
     required ThemeData theme,
@@ -427,25 +429,48 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     if (hasQuery) {
       if (searchResults.isEmpty) {
         return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                LucideIcons.search,
-                size: 40,
-                color: theme.dividerColor,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'No music results found for "${_searchController.text.trim()}".',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  errorMessage != null ? LucideIcons.wifiOff : LucideIcons.search,
+                  size: 40,
+                  color: theme.dividerColor,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  errorMessage != null
+                      ? 'Unable to connect to YouTube Music.\nPlease check your connection and tap retry.'
+                      : 'No music results found for "${_searchController.text.trim()}".',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  M3EButton.outlined(
+                    onPressed: () {
+                      AppHaptics.selectionClick();
+                      ytController.search(_searchController.text.trim());
+                    },
+                    icon: Icon(
+                      LucideIcons.refreshCw,
+                      size: 14,
+                      color: primary,
+                    ),
+                    label: const Text(
+                      'Retry Search',
+                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         );
       }
@@ -591,6 +616,17 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
       padding: EdgeInsets.fromLTRB(16, 6, 16, bottomPadding),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
+        if (errorMessage != null)
+          _buildOfflineCapsuleBanner(
+            context: context,
+            message: errorMessage,
+            onRetry: () {
+              AppHaptics.selectionClick();
+              ytController.fetchTrending(force: true);
+            },
+            theme: theme,
+            isSolid: isSolid,
+          ),
         // ─── SIMPLE-AS-F TWO-TONE HEADER ─────────────────────────────────────
         Padding(
           padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
@@ -684,8 +720,16 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Icon(
+                    errorMessage != null ? LucideIcons.wifiOff : LucideIcons.music,
+                    size: 36,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+                  ),
+                  const SizedBox(height: 12),
                   Text(
-                    'Search for songs or tap refresh to load global music charts.',
+                    errorMessage != null
+                        ? 'Global charts unavailable offline.\nTap retry once reconnected.'
+                        : 'Search for songs or tap refresh to load global music charts.',
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -703,9 +747,9 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
                       size: 14,
                       color: primary,
                     ),
-                    label: const Text(
-                      'Load Global Charts',
-                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                    label: Text(
+                      errorMessage != null ? 'Retry Connection' : 'Load Global Charts',
+                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -735,7 +779,90 @@ class _YouTubeDiscoveryScreenState extends ConsumerState<YouTubeDiscoveryScreen>
     );
   }
 
+  Widget _buildOfflineCapsuleBanner({
+    required BuildContext context,
+    required String message,
+    required VoidCallback onRetry,
+    required ThemeData theme,
+    required bool isSolid,
+  }) {
+    final primary = theme.colorScheme.primary;
+    final cleanMessage = message.contains('Failed to') || message.contains('Exception')
+        ? 'Offline Mode • Tap to retry connection'
+        : message;
 
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: StudioSurfaceTheme.surfaceContainer(context, isSolid: isSolid),
+        borderRadius: SimpleAsFTheme.capsuleRowRadius,
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.18),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            LucideIcons.wifiOff,
+            size: 16,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              cleanMessage,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 10),
+          InkWell(
+            onTap: onRetry,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: StudioSurfaceTheme.tintedContainer(
+                  context,
+                  primary,
+                  isSolid: isSolid,
+                  translucentAlpha: 0.14,
+                  solidBlendAlpha: 0.20,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.refreshCw,
+                    size: 12,
+                    color: primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Retry',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildYouTubeTrackTile({
     required BuildContext context,

@@ -229,6 +229,14 @@ class _NamidaExpandableMiniPlayerState
                     }
                   }
                 },
+                onVerticalDragEnd: (details) {
+                  final velocity = details.primaryVelocity ?? 0.0;
+                  if (velocity < -250.0 && !isExpanded) {
+                    _onExpand();
+                  } else if (velocity > 250.0 && isExpanded) {
+                    _onCollapse();
+                  }
+                },
                 child: Material(
                   color: Colors.transparent,
                   elevation: progress > 0.05 ? 24 : 10,

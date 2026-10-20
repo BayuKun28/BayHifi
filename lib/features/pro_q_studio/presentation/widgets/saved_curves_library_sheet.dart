@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import '../../../../app/theme/app_haptics.dart';
+import '../../../../app/theme/simple_as_f_theme.dart';
 import '../../domain/fr_curve_data.dart';
 import '../controllers/eq_controller.dart';
 
@@ -166,7 +167,7 @@ class _SavedCurvesLibrarySheetState extends ConsumerState<SavedCurvesLibraryShee
       ),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: SimpleAsFTheme.sheetTopBorderRadius,
         border: Border.all(
           color: colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),

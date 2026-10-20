@@ -549,9 +549,9 @@ class GesturesSettingsScreen extends ConsumerWidget {
       case ArtworkGestureAction.openInspector:
         return LucideIcons.info;
       case ArtworkGestureAction.openProQStudio:
-        return LucideIcons.slidersHorizontal;
+        return LucideIcons.audioLines;
       case ArtworkGestureAction.openDspRack:
-        return LucideIcons.sliders;
+        return LucideIcons.slidersHorizontal;
       case ArtworkGestureAction.openQueue:
         return LucideIcons.listMusic;
       case ArtworkGestureAction.viewFullArtwork:

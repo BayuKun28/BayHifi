@@ -49,7 +49,7 @@ void main() {
   });
 
   group('Option 4: Now Playing & Inspector SoLoud Branding Tests', () {
-    testWidgets('NowPlayingScreen displays SOLOUD in portrait auxiliary bar', (tester) async {
+    testWidgets('NowPlayingScreen displays SOLOUD in portrait top bar next to album name', (tester) async {
       tester.view.physicalSize = const Size(400, 850);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -79,7 +79,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Auxiliary format badge contains • SOLOUD
+      // Top bar header contains • SOLOUD
       expect(find.text('• SOLOUD'), findsOneWidget);
     });
 
