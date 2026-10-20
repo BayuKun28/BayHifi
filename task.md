@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 88 Fase (Fase 1–88 Selesai • 100% Passing)
+- **Total Fase**: 90 Fase (Fase 1–90 Selesai • 100% Passing)
 - **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Neutral Matte Obsidian Carbon Palette (`#0D0E12`, `#16181F`, `#1E212B`, `#252834`), Pure Solid Surfaces (100% Opaque, No Translucent Soft Tint, No Neon Glow Halo Shadows), Lucide Vector Stroke Iconography (`lucide_icons_flutter`), Responsive Workstations (Mobile / Desktop / Tablet Dual-Pane), Two-Tone Typography, Tabular Audio Figures, Zero Emojis (100% English)_
-- **Status Proyek**: _Phase 88: Library Source Filter Counter Synchronization & Cloud Account Bidirectional Sync Overhaul Complete_
+- **Status Proyek**: _Phase 90: Library & YouTube Monolith Decomposition, Scoped Storage Hardening & DSP Repaint Boundary Isolation Complete_
 
 ---
 
@@ -2392,5 +2392,29 @@ Perbaikan sinkronisasi jumlah track pada category chips tab Library saat filter 
   - [x] Jalankan seluruh test suite terkait sinkronisasi cloud (`test/cloud_sync_and_profile_ui_test.dart`, `test/library_source_filter_counter_and_sync_test.dart`, `test/user_settings_and_stats_isolation_test.dart`, `test/features/cloud_sync/change_password_test.dart`): **34/34 tests passing 100%**.
   - [x] Jalankan `flutter analyze`: **0 errors, 0 warnings!**
 
+---
 
+## Fase 90: Library & YouTube Monolith Decomposition, Scoped Storage Hardening & DSP Repaint Boundary Isolation
 
+Pembersihan technical debt, modularisasi komponen berukuran besar (monolith), pengerasan kompatibilitas Android Scoped Storage beserta siklus pembersihan cache, dan isolasi rendering visualizer audio pada DSP rack screen.
+
+- [x] **90.1 UnifiedLibraryScreen Monolith Decomposition**:
+  - [x] Ekstraksi `LibraryTracksTab` ke `lib/features/library/presentation/tabs/library_tracks_tab.dart` (mengenkapsulasi daftar lagu, alphabetical scroller, multi-selection, dan untagged quick banner).
+  - [x] Ekstraksi bottom sheet pengurutan dan filter ke `lib/features/library/presentation/widgets/library_sort_filter_sheets.dart` (`LibrarySortFilterSheets.showSortSheet` & `LibrarySortFilterSheets.showFilterSheet`).
+  - [x] Dekomposisi `UnifiedLibraryScreen` sehingga terstruktur modular dengan delegasi callback yang bersih.
+- [x] **90.2 Android Scoped Storage Hardening & Cache Pruning**:
+  - [x] Refaktorisasi `LyricImageGenerator.saveBytesToPublicGallery` di `lib/features/lyrics_share/presentation/services/lyric_image_generator.dart` menggunakan `getExternalStorageDirectories(type: StorageDirectory.pictures)` dengan fallback aman ke `getApplicationDocumentsDirectory()`, menggantikan hardcoded path `/storage/emulated/0/`.
+  - [x] Implementasi `pruneOrphanedCaches` dengan ambang batas usia 48 jam untuk menghapus cache PNG kartu lirik yang sudah tidak terpakai secara berkala di background.
+- [x] **90.3 YouTubeDiscoveryScreen Modularization**:
+  - [x] Ekstraksi `YouTubeTrackTile` ke `lib/features/youtube_music/presentation/widgets/youtube_track_tile.dart` (kartu audio streaming Opus/AAC dengan badge audio studio).
+  - [x] Ekstraksi `YouTubeOfflineBanner` ke `lib/features/youtube_music/presentation/widgets/youtube_offline_banner.dart` (banner konektivitas studio obsidian).
+  - [x] Berhasil merampingkan `youtube_discovery_screen.dart` dari 1.041 baris menjadi 770 baris kode yang modular.
+- [x] **90.4 DSP Rack Repaint Boundary Isolation**:
+  - [x] Membungkus seluruh visualizer audio frekuensi tinggi (`VuLevelMeter`, `TubeGlowIndicator`, `GainReductionMeter`, `SoundstageWidthVisualizer`) dalam `RepaintBoundary` di `lib/features/dsp_rack/presentation/dsp_rack_screen.dart` untuk mencegah repaint berlebihan pada modul DSP lainnya saat animasi berjalan pada 60 FPS.
+- [x] **90.5 Automated Testing & Quality Gate**:
+  - [x] `test/library_tracks_tab_and_sheets_test.dart`: 2/2 tests passing 100%.
+  - [x] `test/lyric_image_generator_storage_test.dart`: 3/3 tests passing 100%.
+  - [x] `test/youtube_track_tile_and_banner_test.dart`: 2/2 tests passing 100%.
+  - [x] `test/dsp_rack_repaint_boundary_test.dart`: 1/1 tests passing 100%.
+  - [x] `test/dsp_audio_engine_fusion_test.dart`: 5/5 tests passing 100%.
+  - [x] `flutter analyze lib/`: **0 errors, 0 warnings!**
