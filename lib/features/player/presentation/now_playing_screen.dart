@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -683,11 +684,15 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     final availableWidth = constraints.maxWidth;
     final isDesktopPlatform = !kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS);
 
-    // Generous squircle artwork prominence (approx 40% height)
-    final albumArtSize = (availableHeight * 0.40).clamp(230.0, availableWidth - 44.0);
+    // Generous squircle artwork prominence (approx 40% height) with responsive safeguards
+    final maxArtWidth = (availableWidth - 44.0).clamp(100.0, 480.0);
+    final minArtWidth = math.min(140.0, maxArtWidth);
+    final albumArtSize = (availableHeight * 0.40).clamp(minArtWidth, maxArtWidth);
+
+    final horizontalPadding = availableWidth < 340 ? 12.0 : 20.0;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(20.0, isDesktopPlatform ? 14.0 : 6.0, 20.0, 20.0),
+      padding: EdgeInsets.fromLTRB(horizontalPadding, isDesktopPlatform ? 14.0 : 6.0, horizontalPadding, 20.0),
       child: Column(
         children: [
           // 1. Top Bar with Tracking Label & More Menu
@@ -880,115 +885,137 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     Color primary,
     ThemeData theme,
   ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        // Shuffle
-        IconButton(
-          onPressed: () {
-            AppHaptics.selectionClick();
-            ref.read(playerControllerProvider.notifier).toggleShuffle();
-          },
-          icon: Icon(
-            LucideIcons.shuffle,
-            color: playback.isShuffle ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            size: 20,
-          ),
-          tooltip: 'Shuffle Playback',
-        ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 320;
+        final playSize = isCompact ? 54.0 : 64.0;
+        final iconPadding = isCompact ? EdgeInsets.zero : const EdgeInsets.all(8.0);
+        final iconBoxConstraints = isCompact ? const BoxConstraints(minWidth: 34, minHeight: 34) : null;
+        final iconVisualDensity = isCompact ? VisualDensity.compact : null;
 
-        // Previous
-        GestureDetector(
-          onLongPress: () {
-            AppHaptics.mediumImpact();
-            ref.read(playerControllerProvider.notifier).seekBackward();
-          },
-          child: IconButton(
-            onPressed: () {
-              AppHaptics.lightImpact();
-              ref.read(playerControllerProvider.notifier).skipPrevious();
-            },
-            icon: Icon(
-              LucideIcons.stepBack,
-              size: 26,
-              color: theme.colorScheme.onSurface,
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Shuffle
+            IconButton(
+              padding: iconPadding,
+              constraints: iconBoxConstraints,
+              visualDensity: iconVisualDensity,
+              onPressed: () {
+                AppHaptics.selectionClick();
+                ref.read(playerControllerProvider.notifier).toggleShuffle();
+              },
+              icon: Icon(
+                LucideIcons.shuffle,
+                color: playback.isShuffle ? primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                size: 20,
+              ),
+              tooltip: 'Shuffle Playback',
             ),
-            tooltip: 'Previous Track',
-          ),
-        ),
 
-        // Play/Pause Centerpiece (Solid color, zero neon glow)
-        GestureDetector(
-          onTap: () {
-            AppHaptics.mediumImpact();
-            ref.read(playerControllerProvider.notifier).togglePlayPause();
-          },
-          child: Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: primary,
+            // Previous
+            GestureDetector(
+              onLongPress: () {
+                AppHaptics.mediumImpact();
+                ref.read(playerControllerProvider.notifier).seekBackward();
+              },
+              child: IconButton(
+                padding: iconPadding,
+                constraints: iconBoxConstraints,
+                visualDensity: iconVisualDensity,
+                onPressed: () {
+                  AppHaptics.lightImpact();
+                  ref.read(playerControllerProvider.notifier).skipPrevious();
+                },
+                icon: Icon(
+                  LucideIcons.stepBack,
+                  size: isCompact ? 22 : 26,
+                  color: theme.colorScheme.onSurface,
+                ),
+                tooltip: 'Previous Track',
+              ),
             ),
-            child: Center(
-              child: playback.isLoading
-                  ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    )
-                  : Icon(
-                      playback.isPlaying
-                          ? LucideIcons.pause
-                          : LucideIcons.play,
-                      color: theme.colorScheme.onPrimary,
-                      size: 26,
-                    ),
-            ),
-          ),
-        ),
 
-        // Next
-        GestureDetector(
-          onLongPress: () {
-            AppHaptics.mediumImpact();
-            ref.read(playerControllerProvider.notifier).seekForward();
-          },
-          child: IconButton(
-            onPressed: () {
-              AppHaptics.lightImpact();
-              ref.read(playerControllerProvider.notifier).skipNext();
-            },
-            icon: Icon(
-              LucideIcons.stepForward,
-              size: 26,
-              color: theme.colorScheme.onSurface,
+            // Play/Pause Centerpiece (Solid color, zero neon glow)
+            GestureDetector(
+              onTap: () {
+                AppHaptics.mediumImpact();
+                ref.read(playerControllerProvider.notifier).togglePlayPause();
+              },
+              child: Container(
+                width: playSize,
+                height: playSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primary,
+                ),
+                child: Center(
+                  child: playback.isLoading
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                        )
+                      : Icon(
+                          playback.isPlaying
+                              ? LucideIcons.pause
+                              : LucideIcons.play,
+                          color: theme.colorScheme.onPrimary,
+                          size: isCompact ? 22 : 26,
+                        ),
+                ),
+              ),
             ),
-            tooltip: 'Next Track',
-          ),
-        ),
 
-        // Repeat
-        IconButton(
-          onPressed: () {
-            AppHaptics.selectionClick();
-            ref.read(playerControllerProvider.notifier).toggleRepeatMode();
-          },
-          icon: Icon(
-            playback.repeatMode == PlaybackRepeatMode.one
-                ? LucideIcons.repeat1
-                : LucideIcons.repeat,
-            color: playback.repeatMode != PlaybackRepeatMode.off
-                ? primary
-                : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            size: 20,
-          ),
-          tooltip: 'Repeat Mode (${playback.repeatMode.name.toUpperCase()})',
-        ),
-      ],
+            // Next
+            GestureDetector(
+              onLongPress: () {
+                AppHaptics.mediumImpact();
+                ref.read(playerControllerProvider.notifier).seekForward();
+              },
+              child: IconButton(
+                padding: iconPadding,
+                constraints: iconBoxConstraints,
+                visualDensity: iconVisualDensity,
+                onPressed: () {
+                  AppHaptics.lightImpact();
+                  ref.read(playerControllerProvider.notifier).skipNext();
+                },
+                icon: Icon(
+                  LucideIcons.stepForward,
+                  size: isCompact ? 22 : 26,
+                  color: theme.colorScheme.onSurface,
+                ),
+                tooltip: 'Next Track',
+              ),
+            ),
+
+            // Repeat
+            IconButton(
+              padding: iconPadding,
+              constraints: iconBoxConstraints,
+              visualDensity: iconVisualDensity,
+              onPressed: () {
+                AppHaptics.selectionClick();
+                ref.read(playerControllerProvider.notifier).toggleRepeatMode();
+              },
+              icon: Icon(
+                playback.repeatMode == PlaybackRepeatMode.one
+                    ? LucideIcons.repeat1
+                    : LucideIcons.repeat,
+                color: playback.repeatMode != PlaybackRepeatMode.off
+                    ? primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                size: 20,
+              ),
+              tooltip: 'Repeat Mode (${playback.repeatMode.name.toUpperCase()})',
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1028,12 +1055,14 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         ? 'Mastering DSP Rack ($activeDspCount Active)'
         : (dspState.isBypassed ? 'Mastering DSP Rack (Bypassed)' : 'Mastering DSP Rack (Flat)');
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return Center(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           // 1. Audio Specs Tag
           if (track != null) ...[
             InkWell(
@@ -1236,7 +1265,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           ),
         ],
       ),
-    );
+    ),);
   }
 
   // ─── TABLET STUDIO AUXILIARY ACTION BAR ──────────────────────────────────
@@ -1493,8 +1522,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final maxArtwork = constraints.maxHeight - 56.0;
-                      final artworkSize = (maxArtwork > 140.0 ? maxArtwork : 140.0).clamp(140.0, 275.0);
+                      final maxArtwork = math.min(constraints.maxHeight - 56.0, constraints.maxWidth - 32.0);
+                      final minArtwork = math.min(120.0, maxArtwork);
+                      final artworkSize = (maxArtwork > minArtwork ? maxArtwork : minArtwork).clamp(minArtwork, 275.0);
 
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,

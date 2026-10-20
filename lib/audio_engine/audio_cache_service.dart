@@ -19,12 +19,22 @@ class AudioCacheService extends ChangeNotifier {
   final Set<String> _cachedTrackIds = {};
   final Map<String, double> _downloadProgress = {};
   int _totalCacheBytes = 0;
+  int _maxCacheSizeBytes = 1500 * 1024 * 1024; // 1.5 GB default quota
   bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
   Set<String> get cachedTrackIds => Set.unmodifiable(_cachedTrackIds);
   int get totalCachedTracksCount => _cachedTrackIds.length;
   int get totalCacheSizeBytes => _totalCacheBytes;
+  int get maxCacheSizeBytes => _maxCacheSizeBytes;
+
+  set maxCacheSizeBytes(int bytes) {
+    if (bytes > 0 && _maxCacheSizeBytes != bytes) {
+      _maxCacheSizeBytes = bytes;
+      evictLruIfNeeded();
+      notifyListeners();
+    }
+  }
 
   @visibleForTesting
   void setDioForTesting(Dio testDio) {
@@ -92,6 +102,9 @@ class AudioCacheService extends ChangeNotifier {
     if (!isCached(trackId) || _cacheDir == null) return null;
     final file = _getCacheFile(trackId);
     if (file.existsSync() && file.lengthSync() > 0) {
+      try {
+        file.setLastModifiedSync(DateTime.now());
+      } catch (_) {}
       return file.path;
     }
     _cachedTrackIds.remove(trackId);
@@ -135,6 +148,7 @@ class AudioCacheService extends ChangeNotifier {
       }
 
       _totalCacheBytes = bytes;
+      await evictLruIfNeeded();
       notifyListeners();
     } catch (e) {
       debugPrint('[AudioCacheService] Scan cache error: $e');
@@ -275,6 +289,7 @@ class AudioCacheService extends ChangeNotifier {
         _cachedTrackIds.add(track.id);
         _totalCacheBytes += await targetFile.length();
         debugPrint('[AudioCacheService] Track cached: ${track.title} -> ${targetFile.path}');
+        await evictLruIfNeeded();
         return targetFile.path;
       }
       return null;
@@ -340,6 +355,61 @@ class AudioCacheService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('[AudioCacheService] Purge error: $e');
+    }
+  }
+
+  /// Otomatis menghapus file cache tertua jika total ukuran melebihi [maxCacheSizeBytes].
+  /// Membersihkan hingga ukuran cache turun ke 85% dari batas kuota.
+  Future<void> evictLruIfNeeded() async {
+    if (_cacheDir == null || _totalCacheBytes <= _maxCacheSizeBytes) return;
+
+    try {
+      final targetLimit = (_maxCacheSizeBytes * 0.85).toInt();
+      final entities = _cacheDir!.listSync();
+      final List<({File file, DateTime modified, int size, String trackId})> cacheEntries = [];
+
+      for (final entity in entities) {
+        if (entity is File) {
+          final p = entity.path;
+          if ((p.endsWith('.ogg') && !p.endsWith('.tmp.ogg')) || p.endsWith('.cache')) {
+            final len = entity.lengthSync();
+            if (len > 0) {
+              final fileName = entity.uri.pathSegments.last;
+              final trackId = p.endsWith('.ogg')
+                  ? fileName.substring(0, fileName.length - '.ogg'.length)
+                  : fileName.substring(0, fileName.length - '.cache'.length);
+              final stat = entity.statSync();
+              cacheEntries.add((
+                file: entity,
+                modified: stat.modified,
+                size: len,
+                trackId: trackId,
+              ));
+            }
+          }
+        }
+      }
+
+      // Urutkan dari file paling lama tidak diakses (oldest modified first)
+      cacheEntries.sort((a, b) => a.modified.compareTo(b.modified));
+
+      for (final entry in cacheEntries) {
+        if (_totalCacheBytes <= targetLimit) break;
+        try {
+          if (await entry.file.exists()) {
+            await entry.file.delete();
+            _totalCacheBytes = (_totalCacheBytes - entry.size).clamp(0, double.infinity).toInt();
+            _cachedTrackIds.remove(entry.trackId);
+            debugPrint('[AudioCacheService] LRU evicted old cache track: ${entry.trackId} (${entry.size ~/ 1024} KB)');
+          }
+        } catch (e) {
+          debugPrint('[AudioCacheService] Failed to evict file ${entry.file.path}: $e');
+        }
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('[AudioCacheService] LRU eviction error: $e');
     }
   }
 }

@@ -92,31 +92,41 @@ class SoLoudController {
       final file = File(filePath);
       AudioSource? source;
 
-      // 1. Coba load via loadFile(mode: LoadMode.memory) untuk kecepatan decode & seek optimal
-      try {
-        source = await SoLoud.instance.loadFile(
-          filePath,
-          mode: LoadMode.memory,
-        );
-      } catch (loadErr) {
-        debugPrint('[SoLoudController] loadFile(memory) failed ($loadErr). Attempting readAsBytes + loadMem fallback...');
-      }
+      // Hi-Res RAM Guard:
+      // For large audio files (>= 64MB, e.g. 24-bit/96kHz or 192kHz FLAC/WAV masters),
+      // decoding uncompressed PCM into RAM can consume 500MB-1GB+, risking Android OOM.
+      // Large files are streamed dynamically using LoadMode.disk (<15MB RAM footprint).
+      final isLargeFile = file.existsSync() && file.lengthSync() >= 64 * 1024 * 1024;
 
-      // 2. Fallback jika C++ fopen terhalang Android Scoped Storage permissions
-      if (source == null && await file.exists()) {
+      if (!isLargeFile) {
+        // 1. Coba load via loadFile(mode: LoadMode.memory) untuk kecepatan decode & seek optimal
         try {
-          final bytes = await file.readAsBytes();
-          source = await SoLoud.instance.loadMem(
+          source = await SoLoud.instance.loadFile(
             filePath,
-            bytes,
             mode: LoadMode.memory,
           );
-        } catch (memErr) {
-          debugPrint('[SoLoudController] loadMem fallback failed: $memErr');
+        } catch (loadErr) {
+          debugPrint('[SoLoudController] loadFile(memory) failed ($loadErr). Attempting readAsBytes + loadMem fallback...');
         }
+
+        // 2. Fallback jika C++ fopen terhalang Android Scoped Storage permissions
+        if (source == null && await file.exists()) {
+          try {
+            final bytes = await file.readAsBytes();
+            source = await SoLoud.instance.loadMem(
+              filePath,
+              bytes,
+              mode: LoadMode.memory,
+            );
+          } catch (memErr) {
+            debugPrint('[SoLoudController] loadMem fallback failed: $memErr');
+          }
+        }
+      } else {
+        debugPrint('[SoLoudController] Large Hi-Res audio file detected (${file.lengthSync() ~/ (1024 * 1024)}MB). Streaming via LoadMode.disk for RAM protection.');
       }
 
-      // 3. Fallback terakhir ke loadFile(mode: LoadMode.disk)
+      // 3. Fallback terakhir ke loadFile(mode: LoadMode.disk) (atau rute langsung untuk large files)
       source ??= await SoLoud.instance.loadFile(
         filePath,
         mode: LoadMode.disk,

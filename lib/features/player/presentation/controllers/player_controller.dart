@@ -36,6 +36,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
   StreamSubscription<Duration>? _posSub;
   StreamSubscription<void>? _playbackEndedSub;
   bool _isAdvancing = false;
+  bool _hasPrefetchedForCurrentTrack = false;
   PlayerPlaybackSettings _playbackSettings = const PlayerPlaybackSettings();
 
   PlayerController(this._audioEngine, [this._ref]) : super(const PlaybackState()) {
@@ -189,6 +190,15 @@ class PlayerController extends StateNotifier<PlaybackState> {
           duration: currentDur,
         );
         _syncAudioHandler();
+
+        // Proactive gapless prefetch trigger:
+        // When remaining duration is <= 8 seconds, ensure next track is pre-cached on disk
+        if (currentDur > const Duration(seconds: 15) &&
+            pos >= currentDur - const Duration(seconds: 8) &&
+            !_hasPrefetchedForCurrentTrack) {
+          _hasPrefetchedForCurrentTrack = true;
+          _prefetchNextTrackInQueue();
+        }
 
         // Safety fallback check if track has finished playing
         if (currentDur > Duration.zero &&
@@ -554,6 +564,7 @@ class PlayerController extends StateNotifier<PlaybackState> {
       currentTrack: targetTrack,
       errorMessage: null,
     );
+    _hasPrefetchedForCurrentTrack = false;
 
     // If queue doesn't contain this track, ensure queue has it
     if (!state.queue.contains(targetTrack)) {
