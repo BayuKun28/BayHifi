@@ -2457,9 +2457,27 @@ Audit menyeluruh terhadap ~104.000 baris kode Dart, perbaikan kebocoran render R
   - [x] `test/theme_persistence_test.dart`: Passed 100%.
   - [x] `test/dynamic_theme_palette_test.dart`: Passed 100%.
   - [x] `test/linux_mpris_and_tray_service_test.dart`: Passed 100%.
-  - [x] `test/advanced_playback_and_interruption_test.dart`: 19/19 tests passing 100%.
-  - [x] `test/unified_library_test.dart`: 19/19 tests passing 100%.
-  - [x] `test/library_tracks_tab_and_sheets_test.dart`: Passed 100%.
-  - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints!**
+- [x] **Phase 92 — Theme Color Unification & Scope Elevation for Seekbars, Sliders, Switches & Buttons (Completed)**:
+  - [x] **92.1 M3ETheme Scope Elevation to MaterialApp.builder (`lib/app/app.dart`)**:
+    - [x] Elevated `M3ETheme` from local `MaterialApp.home:` to `MaterialApp.builder: (context, child) => M3ETheme(data: m3eThemeData, child: child!)`.
+    - [x] Resolved root-cause issue where pushed routes (e.g. `ThemingSettingsScreen`, `VisualizerSettingsScreen`, `PlaybackEngineSettingsScreen`), modal dialogs, and bottom sheets fell outside `home:` context and reverted to default Material baseline purple (`#6750A4`) / lavender (`#E8DEF8`).
+    - [x] Guaranteed 100% inheritance of active studio palettes (`palette.primary`) across every route, dialog, and modal sheet in the application tree.
+  - [x] **92.2 Comprehensive Global Theme Hardening (`AppThemeBuilder`)**:
+    - [x] Populated explicit `primaryContainer`, `onPrimaryContainer`, `secondaryContainer`, `onSecondaryContainer`, `tertiaryContainer`, and `onTertiaryContainer` roles in both `ColorScheme.dark` / `ColorScheme.light` and `M3EColorScheme`.
+    - [x] Added studio `switchTheme` (`SwitchThemeData`) with selected track bound to `palette.primary` and unselected track bound to `surfaceContainerHighest` (`#252834`).
+    - [x] Enhanced `sliderTheme` (`SliderThemeData`) with explicit `activeTrackColor`, `inactiveTrackColor`, and `secondaryActiveTrackColor`.
+    - [x] Added button theme delegates (`filledButtonTheme`, `elevatedButtonTheme`, `outlinedButtonTheme`, `textButtonTheme`) bound to `palette.primary` and studio typography.
+  - [x] **92.3 Sub-Screen & Preview Slider Verification (`ThemingSettingsScreen`)**:
+    - [x] Verified `M3ESlider(value: 0.65)` in `ThemingSettingsScreen` live preview card now renders with active track and thumb matching Emerald Green Simple as F*** (`#10B981`) and unplayed track in studio charcoal (`#252834`).
+    - [x] Ensured switches across all settings sub-screens (`theming_settings_screen.dart`, `playback_engine_settings_screen.dart`, `visualizer_settings_screen.dart`, `audio_hardware_settings_screen.dart`, `docking_settings_screen.dart`) dynamically reflect active theme state without purple fallback.
+  - [x] **92.4 Deterministic Quality Gate & Regression Tests (`test/theme_navigator_pushed_routes_test.dart`)**:
+    - [x] Added automated widget test verifying pushed route inheritance of `M3ESlider`, `M3ESwitch`, and `M3EButton` colors without purple fallback.
+    - [x] Verified theme switching dynamically cascades to pushed sub-screens without rebuilding glitches.
+    - [x] `flutter test test/theme_navigator_pushed_routes_test.dart`: 3/3 tests passed.
+    - [x] `flutter test test/m3_expressive_enhancements_test.dart`: 4/4 tests passed.
+    - [x] `flutter test test/dynamic_theme_palette_test.dart`: 3/3 tests passed.
+    - [x] `flutter test test/theme_persistence_test.dart`: 3/3 tests passed.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints!**
+
 
 

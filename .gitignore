@@ -72,4 +72,5 @@ app.*.map.json
 # Docker Local Data & Host Secrets
 docker_data/
 .env
+devtools_options.yaml
 

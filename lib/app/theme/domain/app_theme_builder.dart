@@ -63,13 +63,30 @@ class AppThemeBuilder {
         ? const Color(0xFF0C0E12)
         : const Color(0xFFFFFFFF);
 
+    final primaryContainer = isDark
+        ? surfaceContainerHigh
+        : Color.alphaBlend(palette.primary.withValues(alpha: 0.12), surfaceContainer);
+    final secondaryContainer = isDark
+        ? surfaceContainerHighest
+        : Color.alphaBlend(palette.secondary.withValues(alpha: 0.10), surfaceContainer);
+    final tertiaryContainer = isDark
+        ? surfaceContainerHigh
+        : Color.alphaBlend(palette.accent.withValues(alpha: 0.10), surfaceContainer);
+
     final colorScheme = isDark
         ? ColorScheme.dark(
             primary: palette.primary,
             onPrimary: onPrimary,
+            primaryContainer: primaryContainer,
+            onPrimaryContainer: palette.primary,
             secondary: palette.secondary,
             onSecondary: onSecondary,
+            secondaryContainer: secondaryContainer,
+            onSecondaryContainer: textPrimary,
             tertiary: palette.accent,
+            onTertiary: onSecondary,
+            tertiaryContainer: tertiaryContainer,
+            onTertiaryContainer: palette.accent,
             surface: surface,
             onSurface: textPrimary,
             onSurfaceVariant: textSecondary,
@@ -85,9 +102,16 @@ class AppThemeBuilder {
         : ColorScheme.light(
             primary: palette.primary,
             onPrimary: onPrimary,
+            primaryContainer: primaryContainer,
+            onPrimaryContainer: palette.primary,
             secondary: palette.secondary,
             onSecondary: onSecondary,
+            secondaryContainer: secondaryContainer,
+            onSecondaryContainer: textPrimary,
             tertiary: palette.accent,
+            onTertiary: onSecondary,
+            tertiaryContainer: tertiaryContainer,
+            onTertiaryContainer: palette.accent,
             surface: surface,
             onSurface: textPrimary,
             onSurfaceVariant: textSecondary,
@@ -122,13 +146,67 @@ class AppThemeBuilder {
         ),
         iconTheme: IconThemeData(color: textPrimary),
       ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return onPrimary;
+          }
+          return textSecondary;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return palette.primary;
+          }
+          return surfaceContainerHighest;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.transparent;
+          }
+          return outline;
+        }),
+      ),
       sliderTheme: SliderThemeData(
         activeTrackColor: palette.primary,
-        inactiveTrackColor: palette.primary.withValues(alpha: 0.20),
+        inactiveTrackColor: isDark ? surfaceContainerHighest : palette.primary.withValues(alpha: 0.20),
         thumbColor: palette.primary,
         overlayColor: palette.primary.withValues(alpha: 0.15),
+        secondaryActiveTrackColor: palette.primary.withValues(alpha: 0.40),
         trackHeight: 3,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: palette.primary,
+          foregroundColor: onPrimary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: surfaceContainerHigh,
+          foregroundColor: textPrimary,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          side: BorderSide(color: outlineVariant, width: 1.0),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: textPrimary,
+          side: BorderSide(color: outlineVariant, width: 1.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: palette.primary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surfaceContainer,
@@ -210,15 +288,30 @@ class AppThemeBuilder {
         ? const Color(0xFF0C0E12)
         : const Color(0xFFFFFFFF);
 
+    final primaryContainer = isDark
+        ? surfaceContainerHigh
+        : Color.alphaBlend(palette.primary.withValues(alpha: 0.12), surfaceContainer);
+    final secondaryContainer = surfaceContainerHighest;
+    final tertiaryContainer = isDark
+        ? surfaceContainerHigh
+        : Color.alphaBlend(palette.accent.withValues(alpha: 0.10), surfaceContainer);
+
     final scheme = M3EColorScheme.fromSeed(
       palette.primary,
       brightness: isDark ? Brightness.dark : Brightness.light,
     ).copyWith(
       primary: palette.primary,
       onPrimary: onPrimary,
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: palette.primary,
       secondary: palette.secondary,
       onSecondary: onSecondary,
+      secondaryContainer: secondaryContainer,
+      onSecondaryContainer: textPrimary,
       tertiary: palette.accent,
+      onTertiary: onSecondary,
+      tertiaryContainer: tertiaryContainer,
+      onTertiaryContainer: palette.accent,
       surface: surface,
       onSurface: textPrimary,
       onSurfaceVariant: textSecondary,

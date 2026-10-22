@@ -105,11 +105,13 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> with WidgetsBindi
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      home: Theme(
-        data: themeData,
-        child: M3ETheme(
+      builder: (context, child) {
+        return M3ETheme(
           data: m3eThemeData,
-          child: DesktopShortcutsDispatcher(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+      home: DesktopShortcutsDispatcher(
             onSearchRequested: () => setState(() => _selectedNavIndex = 2),
             child: DesktopDragDropZone(
               child: StudioWallpaperBackdrop(
@@ -350,8 +352,6 @@ class _BaydevHiFiAppState extends ConsumerState<BaydevHiFiApp> with WidgetsBindi
             ),
           ),
         ),
-      ),
-    ),
-  );
-}
-}
+      );
+    }
+  }
