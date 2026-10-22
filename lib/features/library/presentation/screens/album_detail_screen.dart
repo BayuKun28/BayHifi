@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' show ImageFilter, FontFeature;
 
 import 'package:flutter/material.dart';
@@ -64,6 +65,7 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _artistPhotoUrl = ArtistMetadataService.instance.getCachedArtistImagePathSync(widget.album.artist);
     _fetchArtistPhoto();
   }
 
@@ -71,13 +73,14 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
   void didUpdateWidget(covariant AlbumDetailScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.album.artist != widget.album.artist) {
+      _artistPhotoUrl = ArtistMetadataService.instance.getCachedArtistImagePathSync(widget.album.artist);
       _fetchArtistPhoto();
     }
   }
 
   Future<void> _fetchArtistPhoto() async {
     final url = await ArtistMetadataService.instance.getArtistImageUrl(widget.album.artist);
-    if (mounted) {
+    if (mounted && url != _artistPhotoUrl) {
       setState(() {
         _artistPhotoUrl = url;
       });
@@ -112,6 +115,8 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
       orElse: () => ArtistModel(
         name: artistName,
         tracks: widget.album.tracks.where((t) => t.artist.toLowerCase() == artistName.toLowerCase()).toList(),
+        coverBytes: widget.album.coverBytes,
+        coverUrl: widget.album.coverUrl,
       ),
     );
 
@@ -215,11 +220,21 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
                             imageFilter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
                             child: Transform.scale(
                               scale: 1.15,
-                              child: Image.network(
-                                _artistPhotoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                              ),
+                              child: (_artistPhotoUrl!.startsWith('http://') || _artistPhotoUrl!.startsWith('https://'))
+                                  ? Image.network(
+                                      _artistPhotoUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                                    )
+                                  : Image.file(
+                                      File(
+                                        _artistPhotoUrl!.startsWith('file://')
+                                            ? Uri.parse(_artistPhotoUrl!).toFilePath()
+                                            : _artistPhotoUrl!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                                    ),
                             ),
                           ),
                         )

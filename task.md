@@ -2479,5 +2479,25 @@ Audit menyeluruh terhadap ~104.000 baris kode Dart, perbaikan kebocoran render R
     - [x] `flutter test test/theme_persistence_test.dart`: 3/3 tests passed.
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints!**
 
-
-
+- [x] **Phase 93 — Artist Image Disk Caching, Instant Frame-1 Loading & Zero-Flicker Architecture (Completed)**:
+  - [x] **93.1 Local Disk File Cache Engine (`ArtistMetadataService`)**:
+    - [x] Added persistent disk caching for artist covers at `${appDocDir}/artist_covers/art_${hash}.jpg` via `saveArtistCoverBytes` and `_downloadAndSaveImage`.
+    - [x] Implemented synchronous Frame-1 cache resolution (`getCachedArtistImagePathSync`) checking memory cache and persistent file presence, eliminating internet re-fetching and network traffic on app restarts or memory pressure.
+    - [x] Integrated in-flight request de-duplication (`_inFlightRequests`) to prevent duplicate HTTP queries when multiple widgets query the same artist concurrently.
+    - [x] Updated `StorageCacheManager` to factor `artist_covers` into cache statistics and purge disk files on `clearArtworkCache()`.
+  - [x] **93.2 Instant 0ms Frame-1 Avatar Rendering (`ArtistAvatarWidget`)**:
+    - [x] Synchronously initialized `_imageSource` and `_isLoading = false` in `initState()` when disk cached image exists, completely eliminating spinner flicker on Frame 1.
+    - [x] Rendered local disk images via `FileImage(File(filePath))` instead of re-downloading over `NetworkImage`.
+    - [x] Suppressed loading spinners on Frame 1 whenever fallback album artwork bytes or URLs are available.
+  - [x] **93.3 Zero-Flicker Ambient Backdrops (`ArtistDetailScreen` & `AlbumDetailScreen`)**:
+    - [x] Synchronously populated `_artistPhotoUrl` from `getCachedArtistImagePathSync` in `initState()` and `didUpdateWidget()`, ensuring `hasArtistPhoto` is `true` on Frame 1 and eliminating backdrop pop-in.
+    - [x] Supported seamless local file image rendering (`Image.file`) alongside network fallbacks (`Image.network`).
+  - [x] **93.4 Seamless On-Demand Track-to-Artist Navigation**:
+    - [x] Updated `_navigateToArtist` across `NowPlayingScreen`, `StudioTrackActionSheet`, and `AlbumDetailScreen` to pass fallback album artwork (`track.albumArtBytes`, `track.albumArtUrl`) when constructing on-demand `ArtistModel` instances.
+  - [x] **93.5 Deterministic Unit & Widget Test Suite (`test/artist_image_disk_cache_test.dart`)**:
+    - [x] Added 6 comprehensive automated tests validating disk file persistence, synchronous cache hits, cache purging, in-flight de-duplication, and Frame-1 zero-spinner rendering.
+    - [x] `flutter test test/artist_image_disk_cache_test.dart`: 6/6 tests passed.
+    - [x] `flutter test test/genre_and_metadata_features_test.dart`: 8/8 tests passed.
+    - [x] `flutter test test/artwork_lightbox_and_gesture_test.dart`: 7/7 tests passed.
+    - [x] `flutter test test/storage_backup_and_indexer_test.dart`: 15/15 tests passed.
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints!**

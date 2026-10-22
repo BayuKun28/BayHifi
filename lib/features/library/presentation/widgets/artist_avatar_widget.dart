@@ -33,28 +33,46 @@ class ArtistAvatarWidget extends StatefulWidget {
 }
 
 class _ArtistAvatarWidgetState extends State<ArtistAvatarWidget> {
-  String? _onlineImageUrl;
+  String? _imageSource;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchAvatar();
+    _initAvatarState();
   }
 
   @override
   void didUpdateWidget(covariant ArtistAvatarWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.artistName != widget.artistName) {
-      _fetchAvatar();
+      _initAvatarState();
     }
   }
 
+  void _initAvatarState() {
+    // 1. Synchronously resolve cached image file for 0ms Frame-1 instant display
+    final cachedPath = ArtistMetadataService.instance.getCachedArtistImagePathSync(widget.artistName);
+    if (cachedPath != null) {
+      _imageSource = cachedPath;
+      _isLoading = false;
+      return;
+    }
+
+    // 2. If no cached artist photo, check if we have fallback album artwork
+    final hasFallbackCover = (widget.fallbackCoverBytes != null && widget.fallbackCoverBytes!.isNotEmpty) ||
+        (widget.fallbackCoverUrl != null && widget.fallbackCoverUrl!.isNotEmpty);
+    _isLoading = !hasFallbackCover;
+
+    // 3. Asynchronously fetch/download in background
+    _fetchAvatar();
+  }
+
   Future<void> _fetchAvatar() async {
-    final url = await ArtistMetadataService.instance.getArtistImageUrl(widget.artistName);
+    final pathOrUrl = await ArtistMetadataService.instance.getArtistImageUrl(widget.artistName);
     if (mounted) {
       setState(() {
-        _onlineImageUrl = url;
+        _imageSource = pathOrUrl;
         _isLoading = false;
       });
     }
@@ -67,12 +85,29 @@ class _ArtistAvatarWidgetState extends State<ArtistAvatarWidget> {
 
     Widget avatar;
 
-    if (_onlineImageUrl != null && _onlineImageUrl!.isNotEmpty) {
-      avatar = CircleAvatar(
-        radius: widget.radius,
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        backgroundImage: NetworkImage(_onlineImageUrl!),
-      );
+    if (_imageSource != null && _imageSource!.isNotEmpty) {
+      final isRemote = _imageSource!.startsWith('http://') || _imageSource!.startsWith('https://');
+      if (isRemote) {
+        avatar = CircleAvatar(
+          radius: widget.radius,
+          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+          backgroundImage: NetworkImage(_imageSource!),
+        );
+      } else {
+        final filePath = _imageSource!.startsWith('file://')
+            ? Uri.parse(_imageSource!).toFilePath()
+            : _imageSource!;
+        final file = File(filePath);
+        if (file.existsSync()) {
+          avatar = CircleAvatar(
+            radius: widget.radius,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+            backgroundImage: FileImage(file),
+          );
+        } else {
+          avatar = _buildFallbackIcon(primary);
+        }
+      }
     } else if (widget.fallbackCoverBytes != null && widget.fallbackCoverBytes!.isNotEmpty) {
       avatar = CircleAvatar(
         radius: widget.radius,
@@ -116,7 +151,7 @@ class _ArtistAvatarWidgetState extends State<ArtistAvatarWidget> {
             StudioArtworkLightbox.show(
               context,
               bytes: widget.fallbackCoverBytes,
-              url: _onlineImageUrl ?? widget.fallbackCoverUrl,
+              url: _imageSource ?? widget.fallbackCoverUrl,
               title: widget.artistName,
               subtitle: 'Artist Discography',
               formatTag: 'ARTIST PROFILE',

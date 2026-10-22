@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../../core/database/local_persistence_service.dart';
+import 'artist_metadata_service.dart';
 
 /// Comprehensive snapshot of Baydev HiFi storage usage & cache breakdown
 class StorageUsageSummary {
@@ -55,10 +56,14 @@ class StorageCacheManager {
     try {
       final appDocDir = await getApplicationDocumentsDirectory();
 
-      // 1. Artwork Cache
+      // 1. Artwork Cache & Artist Covers
       final artworkDir = Directory('${appDocDir.path}/artwork_cache');
       if (await artworkDir.exists()) {
         artworkBytes += await _getDirectorySize(artworkDir);
+      }
+      final artistCoversDir = Directory('${appDocDir.path}/artist_covers');
+      if (await artistCoversDir.exists()) {
+        artworkBytes += await _getDirectorySize(artistCoversDir);
       }
 
       // 2. Lyrics Cache
@@ -111,6 +116,12 @@ class StorageCacheManager {
       if (await artworkDir.exists()) {
         await artworkDir.delete(recursive: true);
       }
+
+      final artistCoversDir = Directory('${appDocDir.path}/artist_covers');
+      if (await artistCoversDir.exists()) {
+        await artistCoversDir.delete(recursive: true);
+      }
+      ArtistMetadataService.instance.clearMemoryCache();
 
       try {
         final tempDir = await getTemporaryDirectory();

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' show ImageFilter, FontFeature;
 
 import 'package:flutter/material.dart';
@@ -63,6 +64,7 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _artistPhotoUrl = ArtistMetadataService.instance.getCachedArtistImagePathSync(widget.artist.name);
     _fetchArtistPhoto();
   }
 
@@ -70,13 +72,14 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
   void didUpdateWidget(covariant ArtistDetailScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.artist.name != widget.artist.name) {
+      _artistPhotoUrl = ArtistMetadataService.instance.getCachedArtistImagePathSync(widget.artist.name);
       _fetchArtistPhoto();
     }
   }
 
   Future<void> _fetchArtistPhoto() async {
     final url = await ArtistMetadataService.instance.getArtistImageUrl(widget.artist.name);
-    if (mounted) {
+    if (mounted && url != _artistPhotoUrl) {
       setState(() {
         _artistPhotoUrl = url;
       });
@@ -245,11 +248,21 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
                             imageFilter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
                             child: Transform.scale(
                               scale: 1.15,
-                              child: Image.network(
-                                _artistPhotoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                              ),
+                              child: (_artistPhotoUrl!.startsWith('http://') || _artistPhotoUrl!.startsWith('https://'))
+                                  ? Image.network(
+                                      _artistPhotoUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                                    )
+                                  : Image.file(
+                                      File(
+                                        _artistPhotoUrl!.startsWith('file://')
+                                            ? Uri.parse(_artistPhotoUrl!).toFilePath()
+                                            : _artistPhotoUrl!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                                    ),
                             ),
                           ),
                         )

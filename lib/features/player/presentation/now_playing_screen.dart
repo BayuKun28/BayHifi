@@ -132,6 +132,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       orElse: () => ArtistModel(
         name: track.artist,
         tracks: [track],
+        coverBytes: track.albumArtBytes,
+        coverUrl: track.albumArtUrl,
       ),
     );
 
