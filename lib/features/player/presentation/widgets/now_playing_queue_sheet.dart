@@ -115,8 +115,28 @@ class _NowPlayingQueueSheetState extends ConsumerState<NowPlayingQueueSheet> {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final playback = ref.watch(playerControllerProvider);
     final controller = ref.read(playerControllerProvider.notifier);
+    final queue =
+        ref.watch(playerControllerProvider.select((s) => s.queue));
+    final queueIndex =
+        ref.watch(playerControllerProvider.select((s) => s.queueIndex));
+    final isShuffle =
+        ref.watch(playerControllerProvider.select((s) => s.isShuffle));
+    final repeatMode =
+        ref.watch(playerControllerProvider.select((s) => s.repeatMode));
+    final status =
+        ref.watch(playerControllerProvider.select((s) => s.status));
+    final currentTrack =
+        ref.watch(playerControllerProvider.select((s) => s.currentTrack));
+
+    final playback = PlaybackState(
+      queue: queue,
+      queueIndex: queueIndex,
+      isShuffle: isShuffle,
+      repeatMode: repeatMode,
+      status: status,
+      currentTrack: currentTrack,
+    );
     final isDialog = widget.isDialog;
 
     return Container(

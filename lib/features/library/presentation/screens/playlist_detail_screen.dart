@@ -101,7 +101,10 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
     final libraryState = ref.watch(unifiedLibraryProvider);
-    final playbackState = ref.watch(playerControllerProvider);
+    final activeTrackId =
+        ref.watch(playerControllerProvider.select((s) => s.currentTrack?.id));
+    final isPlaying =
+        ref.watch(playerControllerProvider.select((s) => s.isPlaying));
 
     // Resolve active playlist and track list
     PlaylistModel? currentPlaylist;
@@ -628,7 +631,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final track = tracks[index];
-                      final isTrackPlaying = playbackState.currentTrack?.id == track.id && playbackState.isPlaying;
+                      final isTrackPlaying = activeTrackId == track.id && isPlaying;
                       return TrackTile(
                         track: track,
                         isPlaying: isTrackPlaying,

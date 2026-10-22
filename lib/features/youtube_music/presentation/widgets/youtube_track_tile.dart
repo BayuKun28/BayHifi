@@ -40,9 +40,11 @@ class YouTubeTrackTile extends ConsumerWidget {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
-    final playback = ref.watch(playerControllerProvider);
-    final isCurrent = playback.currentTrack?.id == track.id;
-    final isBuffering = isCurrent && playback.isLoading;
+    final isCurrent = ref.watch(
+        playerControllerProvider.select((s) => s.currentTrack?.id == track.id));
+    final isLoading =
+        ref.watch(playerControllerProvider.select((s) => s.isLoading));
+    final isBuffering = isCurrent && isLoading;
     final isTileActive = isPlaying || isBuffering;
 
     return Padding(

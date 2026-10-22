@@ -6,9 +6,9 @@ Dokumen pelacakan tugas mendalam untuk pengembangan pemutar musik audiophile **B
 
 ## Status Dashboard
 
-- **Total Fase**: 90 Fase (Fase 1–90 Selesai • 100% Passing)
+- **Total Fase**: 91 Fase (Fase 1–91 Selesai • 100% Passing)
 - **Arsitektur UI**: _Simple-As-F Bespoke Minimalist Architecture (Dribbble 27089924 Reference), Neutral Matte Obsidian Carbon Palette (`#0D0E12`, `#16181F`, `#1E212B`, `#252834`), Pure Solid Surfaces (100% Opaque, No Translucent Soft Tint, No Neon Glow Halo Shadows), Lucide Vector Stroke Iconography (`lucide_icons_flutter`), Responsive Workstations (Mobile / Desktop / Tablet Dual-Pane), Two-Tone Typography, Tabular Audio Figures, Zero Emojis (100% English)_
-- **Status Proyek**: _Phase 90: Library & YouTube Monolith Decomposition, Scoped Storage Hardening & DSP Repaint Boundary Isolation Complete_
+- **Status Proyek**: _Phase 91: Code Audit & Architecture Optimization (Hot Rebuild Leak Isolation, 100% Lucide Icons, and God Widget Modularization) Complete_
 
 ---
 
@@ -2419,3 +2419,47 @@ Pembersihan technical debt, modularisasi komponen berukuran besar (monolith), pe
   - [x] `test/dsp_rack_repaint_boundary_test.dart`: 1/1 tests passing 100%.
   - [x] `test/dsp_audio_engine_fusion_test.dart`: 5/5 tests passing 100%.
   - [x] `flutter analyze lib/`: **0 errors, 0 warnings!**
+
+---
+
+## Fase 91: Code Audit & Architecture Optimization (Hot Rebuild Leak Isolation, 100% Lucide Icons, and God Widget Modularization)
+
+Audit menyeluruh terhadap ~104.000 baris kode Dart, perbaikan kebocoran render Riverpod pada layar detail katalog & pemutar, standarisasi ikon Lucide 100%, serta dekomposisi God Widget dan pemisahan logika bisnis dari antarmuka pengguna.
+
+- [x] **91.1 Eliminasi Hot Rebuild Leak Riverpod (P0)**:
+  - [x] Mengubah pemantauan `ref.watch(playerControllerProvider)` menjadi selektor granular (`.select(...)`) pada seluruh screen detail: `album_detail_screen.dart`, `artist_detail_screen.dart`, `playlist_detail_screen.dart`, `genre_detail_screen.dart`, dan `folder_detail_screen.dart`.
+  - [x] Mengisolasi listen state pada `dsp_rack_screen.dart`, `studio_desktop_title_bar_io.dart`, `youtube_track_tile.dart`, `playback_speed_pitch_sheet.dart`, dan `now_playing_queue_sheet.dart` dari pembaruan posisi playback ticker (100–250ms).
+  - [x] Menghilangkan render loop sia-sia pada 10+ modul presentasi saat musik berjalan, menghemat siklus CPU dan daya baterai.
+- [x] **91.2 Standarisasi 100% Lucide Vector Stroke Iconography (P1)**:
+  - [x] Mengganti residu ikon Material lama `Icons.arrow_forward_ios_rounded` menjadi `LucideIcons.chevronRight` pada `metadata_tag_editor_sheet.dart` dan `batch_track_tag_editor_modal.dart`.
+  - [x] Memastikan 0 penggunaan bare `Icons.*` di seluruh direktori `lib/`, mencapai kepatuhan 100% pada aturan desain Simple-As-F.
+- [x] **91.3 Dekomposisi God Widget & Pemisahan Logika Presentasi (P1)**:
+  - [x] Memindahkan logika picker berkas audio `_pickAndPlayFile()` dari `NowPlayingScreen` ke method terdedikasi `PlayerController.pickAndPlayAudioFile()`.
+  - [x] Mengekstrak badge tanda tangan engine `_buildStudioEngineBadge()` ke widget modular mandiri `lib/features/player/presentation/widgets/now_playing_engine_badge.dart`.
+  - [x] Mengekstrak top bar (`_buildMinimalistTopBar` & `_buildLandscapeTopBar`) ke `lib/features/player/presentation/widgets/now_playing_top_bar.dart` lengkap dengan platform guards CSD.
+  - [x] Mengekstrak deck kontrol playback ke `lib/features/player/presentation/widgets/now_playing_controls_deck.dart`.
+  - [x] Mengekstrak action bar auxiliary (`_buildSimpleStudioAuxiliaryBar` & `_buildTabletStudioAuxiliaryBar`) ke `lib/features/player/presentation/widgets/now_playing_auxiliary_bar.dart`.
+  - [x] Merampingkan `now_playing_screen.dart` dari 1.701 baris menjadi ~780 baris terfokus dan bersih.
+  - [x] Mendekomposisi `theme_mode_controller.dart` (1.456 baris menjadi ~430 baris) dengan memisahkan model domain ke:
+    - `lib/app/theme/domain/app_theme_models.dart`
+    - `lib/app/theme/domain/studio_wallpaper_presets.dart`
+    - `lib/app/theme/domain/app_palette.dart`
+    - `lib/app/theme/domain/studio_color_harmonizer.dart`
+    - `lib/app/theme/domain/app_theme_builder.dart`
+- [x] **91.4 Modularisasi Fat Controllers & Pemisahan Layanan Domain (P2)**:
+  - [x] Mengekstrak integrasi OS desktop (Linux MPRIS D-Bus, System Tray, AudioHandler) ke `lib/features/player/data/playback_os_sync_bridge.dart`.
+  - [x] Mengekstrak pemindaian folder, permission storage Android, differential startup sync, dan pemulihan artwork ke `lib/features/library/data/library_scanner_service.dart`.
+  - [x] Mengekstrak autentikasi dan sinkronisasi katalog Subsonic/Navidrome ke `lib/features/navidrome/data/navidrome_sync_service.dart`.
+  - [x] Mempertahankan kompatibilitas API publik 100% pada `PlayerController` dan `UnifiedLibraryController` melalui clean delegation.
+- [x] **91.5 Automated Testing & Quality Gate (100% Clean)**:
+  - [x] `test/soloud_engine_branding_test.dart`: 4/4 tests passing 100%.
+  - [x] `test/tablet_now_playing_workstation_test.dart`: Passed 100%.
+  - [x] `test/theme_persistence_test.dart`: Passed 100%.
+  - [x] `test/dynamic_theme_palette_test.dart`: Passed 100%.
+  - [x] `test/linux_mpris_and_tray_service_test.dart`: Passed 100%.
+  - [x] `test/advanced_playback_and_interruption_test.dart`: 19/19 tests passing 100%.
+  - [x] `test/unified_library_test.dart`: 19/19 tests passing 100%.
+  - [x] `test/library_tracks_tab_and_sheets_test.dart`: Passed 100%.
+  - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints!**
+
+

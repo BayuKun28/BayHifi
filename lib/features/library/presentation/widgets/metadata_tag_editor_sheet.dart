@@ -534,7 +534,7 @@ class _MetadataTagEditorSheetState extends ConsumerState<MetadataTagEditorSheet>
                                 ),
                               ),
                               const Icon(
-                                Icons.arrow_forward_ios_rounded,
+                                LucideIcons.chevronRight,
                                 size: 14,
                                 color: StudioCategoryColors.warmTubeAmber,
                               ),

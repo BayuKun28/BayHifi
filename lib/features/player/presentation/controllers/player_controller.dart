@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
@@ -8,10 +9,8 @@ import '../../../../audio_engine/audio_cache_service.dart';
 import '../../../../audio_engine/soloud_controller.dart';
 import '../../../../core/audio_engine/audio_interruption_manager.dart';
 import '../../../../core/audio_engine/replay_gain_service.dart';
-import '../../../../core/audio_service/baydev_audio_handler.dart';
 import '../../../../core/database/local_persistence_service.dart';
-import '../../../../core/desktop/desktop_tray_service.dart';
-import '../../../../core/desktop/linux_mpris_service.dart';
+import '../../data/playback_os_sync_bridge.dart';
 import '../../../settings/domain/player_playback_settings.dart';
 import '../../../settings/presentation/controllers/playback_settings_controller.dart';
 import '../../domain/playback_state.dart';
@@ -89,76 +88,21 @@ class PlayerController extends StateNotifier<PlaybackState> {
   }
 
   void _initAudioServiceCallbacks() {
-    try {
-      final handler = BaydevAudioHandler.instance;
-      handler.onPlayCallback = () => resume();
-      handler.onPauseCallback = () => pause();
-      handler.onSkipNextCallback = () => skipNext();
-      handler.onSkipPreviousCallback = () => skipPrevious();
-      handler.onSeekCallback = (pos) async => seek(pos);
-      handler.onStopCallback = () => stop();
-
-      if (!kIsWeb && Platform.isLinux) {
-        final mpris = LinuxMprisService.instance;
-        mpris.onPlay = () => resume();
-        mpris.onPause = () => pause();
-        mpris.onPlayPause = () => togglePlayPause();
-        mpris.onNext = () => skipNext();
-        mpris.onPrevious = () => skipPrevious();
-        mpris.onStop = () => stop();
-        mpris.onRaise = () => DesktopTrayService.instance.toggleWindowVisibility();
-        mpris.onSeek = (pos) => seek(pos);
-        mpris.onSetVolume = (vol) => setVolume(vol);
-      }
-
-      if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
-        final tray = DesktopTrayService.instance;
-        tray.onPlay = () => resume();
-        tray.onPause = () => pause();
-        tray.onPlayPause = () => togglePlayPause();
-        tray.onNext = () => skipNext();
-        tray.onPrevious = () => skipPrevious();
-        tray.onToggleMute = () => toggleMute();
-        tray.onSetVolume = (vol) => setVolume(vol);
-        tray.onQuit = () => stop();
-      }
-    } catch (e) {
-      debugPrint('[PlayerController] AudioHandler callback init error: $e');
-    }
+    PlaybackOsSyncBridge.registerCallbacks(
+      onResume: resume,
+      onPause: pause,
+      onTogglePlayPause: togglePlayPause,
+      onSkipNext: skipNext,
+      onSkipPrevious: skipPrevious,
+      onSeek: (pos) async => seek(pos),
+      onStop: stop,
+      onToggleMute: toggleMute,
+      onSetVolume: setVolume,
+    );
   }
 
   void _syncAudioHandler() {
-    try {
-      BaydevAudioHandler.instance.syncPlaybackState(
-        currentTrack: state.currentTrack,
-        isPlaying: state.isPlaying,
-        position: state.position,
-        duration: state.duration,
-        currentQueue: state.queue,
-        currentQueueIndex: state.queueIndex,
-      );
-
-      if (!kIsWeb && Platform.isLinux) {
-        LinuxMprisService.instance.updateTrack(state.currentTrack, state.duration);
-        LinuxMprisService.instance.updatePlaybackState(
-          isPlaying: state.isPlaying,
-          position: state.position,
-          duration: state.duration,
-          volume: state.volume,
-        );
-      }
-
-      if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
-        DesktopTrayService.instance.updatePlaybackState(
-          currentTrack: state.currentTrack,
-          isPlaying: state.isPlaying,
-          volume: state.volume,
-          isMuted: state.isMuted,
-        );
-      }
-    } catch (e) {
-      debugPrint('[PlayerController] Error syncing audio handler: $e');
-    }
+    PlaybackOsSyncBridge.syncPlaybackState(state);
   }
 
   void _initListener() {
@@ -526,6 +470,48 @@ class PlayerController extends StateNotifier<PlaybackState> {
         currentTrack: targetTrack,
         position: Duration.zero,
       );
+    }
+  }
+
+  /// Prompts user to pick an audio file and immediately plays it
+  Future<void> pickAndPlayAudioFile() async {
+    final files = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'flac', 'wav', 'ogg', 'opus', 'aac', 'm4a', 'dsd', 'dsf', 'dff'],
+    );
+
+    if (files.isNotEmpty && files.first.path != null) {
+      final file = files.first;
+      final ext = file.extension?.toLowerCase() ?? '';
+
+      AudioFormat format = AudioFormat.unknown;
+      if (ext == 'flac') {
+        format = AudioFormat.flac;
+      } else if (ext == 'mp3') {
+        format = AudioFormat.mp3;
+      } else if (ext == 'wav') {
+        format = AudioFormat.wav;
+      } else if (ext == 'opus') {
+        format = AudioFormat.opus;
+      } else if (ext == 'ogg') {
+        format = AudioFormat.ogg;
+      } else if (ext == 'dsd' || ext == 'dsf' || ext == 'dff') {
+        format = AudioFormat.dsd;
+      }
+
+      final track = Track(
+        id: file.path!,
+        title: file.name.replaceAll('.$ext', ''),
+        artist: 'Local Audio',
+        album: 'Offline Storage',
+        duration: Duration.zero,
+        filePath: file.path,
+        format: format,
+        sampleRate: format == AudioFormat.flac ? 96000 : (format == AudioFormat.dsd ? 2822400 : 44100),
+        bitDepth: format == AudioFormat.flac ? 24 : 16,
+      );
+
+      await playTrack(track);
     }
   }
 

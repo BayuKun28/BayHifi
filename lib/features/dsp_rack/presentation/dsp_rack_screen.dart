@@ -48,8 +48,8 @@ class _DspRackScreenState extends ConsumerState<DspRackScreen> {
   Widget build(BuildContext context) {
     final dspState = ref.watch(dspRackControllerProvider);
     final controller = ref.read(dspRackControllerProvider.notifier);
-    final playerState = ref.watch(playerControllerProvider);
-    final currentTrack = playerState.currentTrack;
+    final currentTrack =
+        ref.watch(playerControllerProvider.select((s) => s.currentTrack));
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;

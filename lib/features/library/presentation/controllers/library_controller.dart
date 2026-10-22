@@ -1,14 +1,14 @@
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../../player/domain/track.dart';
 import '../../../navidrome/data/subsonic_client.dart';
+import '../../../navidrome/data/navidrome_sync_service.dart';
 import '../../../navidrome/domain/subsonic_models.dart';
 import '../../../../core/database/local_persistence_service.dart';
 import '../../../../core/storage/storage_permission_service.dart';
 import '../../../settings/data/backup_restore_service.dart';
+import '../../data/library_scanner_service.dart';
 import '../../data/local_audio_scanner.dart';
 import '../../data/metadata_tagger_service.dart';
 import '../../data/online_metadata_service.dart';
@@ -431,6 +431,8 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     SubsonicClient? subsonicClient,
     MetadataTaggerService? tagger,
     OnlineMetadataService? onlineTagger,
+    LibraryScannerService? scannerService,
+    NavidromeSyncService? navidromeSyncService,
     List<Track>? initialTracks,
     List<PlaylistModel>? initialCustomPlaylists,
     List<SmartPlaylist>? initialSmartPlaylists,
@@ -438,6 +440,8 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
         _subsonicClient = subsonicClient ?? SubsonicClient(),
         _tagger = tagger ?? const MetadataTaggerService(),
         _onlineTagger = onlineTagger ?? OnlineMetadataService(),
+        _scannerService = scannerService ?? LibraryScannerService(scanner: scanner ?? const LocalAudioScanner()),
+        _navidromeSyncService = navidromeSyncService ?? NavidromeSyncService(client: subsonicClient ?? SubsonicClient()),
         super(UnifiedLibraryState(
           tracks: initialTracks ?? _loadSavedTracks(),
           customPlaylists: initialCustomPlaylists ?? _loadSavedCustomPlaylists(),
@@ -469,11 +473,15 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   final SubsonicClient _subsonicClient;
   final MetadataTaggerService _tagger;
   final OnlineMetadataService _onlineTagger;
+  final LibraryScannerService _scannerService;
+  final NavidromeSyncService _navidromeSyncService;
 
   LocalAudioScanner get scanner => _scanner;
   SubsonicClient get subsonicClient => _subsonicClient;
   MetadataTaggerService get tagger => _tagger;
   OnlineMetadataService get onlineTagger => _onlineTagger;
+  LibraryScannerService get scannerService => _scannerService;
+  NavidromeSyncService get navidromeSyncService => _navidromeSyncService;
 
   static List<SmartPlaylist> _loadSavedSmartPlaylists() {
     try {
@@ -684,99 +692,19 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
 
   /// Check and request storage & notification permissions (Android audio & external storage access)
   Future<bool> ensureStoragePermissions() async {
-    if (kIsWeb || !Platform.isAndroid) return true;
-    try {
-      // Step 1: Request READ_EXTERNAL_STORAGE — works on all Android versions (≤ API 32)
-      // On Android 13+ this may return 'restricted' but won't block.
-      PermissionStatus storageStatus = await Permission.storage.request();
-
-      // Step 2: Request READ_MEDIA_AUDIO — Android 13+ (API 33+) granular media permission
-      // On Android ≤ 12 this is a no-op (returns granted or restricted silently).
-      PermissionStatus audioStatus = PermissionStatus.granted;
-      try {
-        audioStatus = await Permission.audio.request();
-      } catch (_) {}
-
-      // If either standard storage permission is granted, proceed.
-      if (storageStatus.isGranted || audioStatus.isGranted) {
-        return true;
-      }
-
-      // Step 3: Handle permanently denied — open App Settings so user can manually grant.
-      if (storageStatus.isPermanentlyDenied || audioStatus.isPermanentlyDenied) {
-        debugPrint('[UnifiedLibraryController] Storage permission permanently denied. Opening app settings.');
-        await openAppSettings();
-        // Re-check after settings return
-        final recheckStorage = await Permission.storage.status;
-        final recheckAudio = await Permission.audio.status;
-        if (recheckStorage.isGranted || recheckAudio.isGranted) return true;
-      }
-
-      // Step 4: Android 11+ (API 30+) — MANAGE_EXTERNAL_STORAGE for SD card / custom paths.
-      // Only attempt on Android 11+ to avoid crashes on Android 10 (API 29).
-      try {
-        final manageStatus = await Permission.manageExternalStorage.status;
-        if (manageStatus.isGranted) return true;
-        final res = await Permission.manageExternalStorage.request();
-        if (res.isGranted) return true;
-      } catch (_) {
-        // Not supported on this Android version (< API 30), ignore silently.
-      }
-
-      // Step 5: Notification permission for media controls (Android 13+)
-      try {
-        await Permission.notification.request();
-      } catch (_) {}
-
-      return storageStatus.isGranted || audioStatus.isGranted;
-    } catch (e) {
-      debugPrint('[UnifiedLibraryController] Permission request notice: $e');
-      // Return true to not block the user on permission errors — OS will handle it.
-      return true;
-    }
-  }
-
-  Future<bool> _checkManageStorageGranted() async {
-    try {
-      return await Permission.manageExternalStorage.isGranted;
-    } catch (_) {
-      return false;
-    }
+    return _scannerService.ensureStoragePermissions();
   }
 
   /// Open directory picker to select and scan user's custom music folder
   Future<void> pickAndScanDirectory() async {
     try {
-      await ensureStoragePermissions();
-
-      final selectedDirectory = await FilePicker.getDirectoryPath(
-        dialogTitle: 'Select Music Folder to Scan',
-      );
-
-      if (selectedDirectory == null || selectedDirectory.isEmpty) {
-        return;
-      }
-
       state = state.copyWith(
         isScanning: true,
         statusMessage: 'Scanning audio folder...',
       );
 
-      // Save folder to persisted music folders list
-      final currentFolders = LocalPersistenceService.instance.getMusicFolders();
-      if (!currentFolders.contains(selectedDirectory)) {
-        final updatedFolders = [...currentFolders, selectedDirectory];
-        await LocalPersistenceService.instance.saveMusicFolders(updatedFolders);
-      }
-
-      final existingMap = <String, Track>{
-        for (final t in state.tracks)
-          if (t.filePath != null && t.filePath!.isNotEmpty) t.filePath!: t,
-      };
-
-      final scanned = await _scanner.scanDirectory(
-        Directory(selectedDirectory),
-        existingTracksByPath: existingMap,
+      final result = await _scannerService.pickAndScanDirectory(
+        currentTracks: state.tracks,
         onProgress: (count, folder) {
           state = state.copyWith(
             statusMessage: 'Scanning: $folder ($count tracks found)...',
@@ -784,40 +712,18 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
         },
       );
 
-      // Merge scanned tracks with existing tracks (avoiding duplicate filePath)
-      final existingTrackPaths = state.tracks.map((t) => t.filePath).whereType<String>().toSet();
-      final newTracks = scanned
-          .where((t) => t.filePath == null || !existingTrackPaths.contains(t.filePath))
-          .toList();
-
-      final updatedList = [...state.tracks, ...newTracks];
-      await _persistTracks(updatedList);
-
-      final folderName = selectedDirectory.split(Platform.pathSeparator).last;
-      final isExternalSd = selectedDirectory.startsWith('/storage/') &&
-          !selectedDirectory.startsWith('/storage/emulated/0');
-
-      String statusMsg;
-      if (newTracks.isNotEmpty) {
-        statusMsg = 'Added ${newTracks.length} tracks from $folderName.';
-      } else if (scanned.isEmpty) {
-        final hasManagePermission = await _checkManageStorageGranted();
-        if (isExternalSd && !hasManagePermission) {
-          statusMsg = 'No files found in $folderName. Please grant "All files access" in Android Settings for SD card access.';
-        } else {
-          statusMsg = 'No audio files found in $folderName (FLAC, WAV, MP3, OPUS, OGG, M4A, DSD).';
-        }
-      } else {
-        statusMsg = 'All ${scanned.length} tracks in $folderName are already in your library.';
+      if (result == null) {
+        state = state.copyWith(isScanning: false);
+        return;
       }
 
       state = state.copyWith(
-        tracks: updatedList,
+        tracks: result.allTracks,
         isScanning: false,
         selectedFilter: LibrarySourceFilter.all,
         searchQuery: '',
         isSearching: false,
-        statusMessage: statusMsg,
+        statusMessage: result.statusMessage,
       );
     } catch (e) {
       state = state.copyWith(
@@ -830,67 +736,27 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   /// Open file picker to choose specific audio files
   Future<void> pickAudioFiles() async {
     try {
-      await ensureStoragePermissions();
-
-      final pickedFiles = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: const [
-          'flac',
-          'wav',
-          'mp3',
-          'opus',
-          'ogg',
-          'alac',
-          'dsf',
-          'dff',
-          'm4a',
-          'aac',
-          'aiff',
-          'aif',
-          'wma',
-          'ape',
-          'mp4',
-          'webm'
-        ],
-      );
-
-      if (pickedFiles.isEmpty) {
-        return;
-      }
-
       state = state.copyWith(
         isScanning: true,
         statusMessage: 'Importing selected audio files...',
       );
 
-      final files = pickedFiles
-          .map((f) => f.path)
-          .whereType<String>()
-          .where((p) => p.isNotEmpty)
-          .map((p) => File(p))
-          .toList();
+      final result = await _scannerService.pickAudioFiles(
+        currentTracks: state.tracks,
+      );
 
-      final parsed = await _scanner.parseFiles(files);
-
-      final existingTrackPaths = state.tracks.map((t) => t.filePath).whereType<String>().toSet();
-      final newTracks = parsed
-          .where((t) => t.filePath == null || !existingTrackPaths.contains(t.filePath))
-          .toList();
-
-      final updatedList = [...state.tracks, ...newTracks];
-      await _persistTracks(updatedList);
+      if (result == null) {
+        state = state.copyWith(isScanning: false);
+        return;
+      }
 
       state = state.copyWith(
-        tracks: updatedList,
+        tracks: result.allTracks,
         isScanning: false,
         selectedFilter: LibrarySourceFilter.all,
         searchQuery: '',
         isSearching: false,
-        statusMessage: newTracks.isNotEmpty
-            ? 'Added ${newTracks.length} audio files to library.'
-            : (parsed.isEmpty
-                ? 'Could not parse selected audio files.'
-                : 'Selected files are already in your library.'),
+        statusMessage: result.statusMessage,
       );
     } catch (e) {
       state = state.copyWith(
@@ -1002,22 +868,15 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
       return;
     }
 
-    await ensureStoragePermissions();
-
     state = state.copyWith(
       isScanning: true,
       statusMessage: 'Rescanning ${savedFolders.length} music folders...',
     );
 
     try {
-      final existingMap = <String, Track>{
-        for (final t in state.tracks)
-          if (t.filePath != null && t.filePath!.isNotEmpty) t.filePath!: t,
-      };
-
-      final scanned = await _scanner.scanPaths(
-        savedFolders,
-        existingTracksByPath: existingMap,
+      final combined = await _scannerService.rescanSavedFolders(
+        currentTracks: state.tracks,
+        savedFolders: savedFolders,
         onProgress: (count, path) {
           state = state.copyWith(
             statusMessage: 'Scanning $path ($count tracks found)...',
@@ -1025,19 +884,13 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
         },
       );
 
-      // Keep any remote Navidrome tracks
-      final existingCloud = state.tracks.where((t) => t.remoteUrl != null).toList();
-      final combined = [...scanned, ...existingCloud];
-
-      await _persistTracks(combined);
-
       state = state.copyWith(
         tracks: combined,
         isScanning: false,
         selectedFilter: LibrarySourceFilter.all,
         searchQuery: '',
         isSearching: false,
-        statusMessage: 'Rescan complete. Found ${scanned.length} local audio tracks.',
+        statusMessage: 'Rescan complete. Found ${combined.length} local audio tracks.',
       );
     } catch (e) {
       state = state.copyWith(
@@ -1069,36 +922,12 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
 
   /// Silent background sync on startup: only parses new or modified files
   Future<void> syncNewTracksOnStartup() async {
-    final autoScan = LocalPersistenceService.instance.getSetting<bool>('auto_scan_on_startup', true) ?? true;
-    if (!autoScan) return;
-
-    final savedFolders = LocalPersistenceService.instance.getMusicFolders();
-    if (savedFolders.isEmpty) return;
-
     try {
-      final existingMap = <String, Track>{
-        for (final t in state.tracks)
-          if (t.filePath != null && t.filePath!.isNotEmpty) t.filePath!: t,
-      };
-
-      final scanned = await _scanner.scanPaths(
-        savedFolders,
-        existingTracksByPath: existingMap,
+      final updated = await _scannerService.syncNewTracksOnStartup(
+        currentTracks: state.tracks,
       );
-
-      if (scanned.isEmpty && state.tracks.isNotEmpty) return;
-
-      final existingPaths = state.tracks.map((t) => t.filePath).whereType<String>().toSet();
-      final scannedPaths = scanned.map((t) => t.filePath).whereType<String>().toSet();
-
-      final hasChanges = scanned.length != state.tracks.where((t) => t.filePath != null).length ||
-          !setEquals(existingPaths, scannedPaths);
-
-      if (hasChanges) {
-        final existingCloud = state.tracks.where((t) => t.remoteUrl != null).toList();
-        final combined = [...scanned, ...existingCloud];
-        await _persistTracks(combined);
-        state = state.copyWith(tracks: combined);
+      if (updated != null) {
+        state = state.copyWith(tracks: updated);
       }
     } catch (e) {
       debugPrint('[UnifiedLibraryController] Background startup sync notice: $e');
@@ -1107,33 +936,15 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
 
   /// Memulihkan album artwork yang hilang di latar belakang
   Future<void> recoverMissingArtwork() async {
-    final needsRecovery = state.tracks.where(
-      (t) => (t.albumArtBytes == null || t.albumArtBytes!.isEmpty) &&
-             (t.albumArtUrl == null || t.albumArtUrl!.isEmpty) &&
-             t.filePath != null && t.filePath!.isNotEmpty,
-    ).toList();
-
-    if (needsRecovery.isEmpty) return;
-
-    bool hasAnyUpdated = false;
-    final updatedList = List<Track>.from(state.tracks);
-
-    for (int i = 0; i < updatedList.length; i++) {
-      final t = updatedList[i];
-      if ((t.albumArtBytes == null || t.albumArtBytes!.isEmpty) &&
-          (t.albumArtUrl == null || t.albumArtUrl!.isEmpty) &&
-          t.filePath != null && t.filePath!.isNotEmpty) {
-        final updated = await LocalAudioScanner.extractAndCacheCoverArt(t);
-        if (updated.albumArtUrl != null || updated.albumArtBytes != null) {
-          updatedList[i] = updated;
-          hasAnyUpdated = true;
-        }
+    try {
+      final updated = await _scannerService.recoverMissingArtwork(
+        currentTracks: state.tracks,
+      );
+      if (updated != null) {
+        state = state.copyWith(tracks: updated);
       }
-    }
-
-    if (hasAnyUpdated) {
-      await _persistTracks(updatedList);
-      state = state.copyWith(tracks: updatedList);
+    } catch (e) {
+      debugPrint('[UnifiedLibraryController] Artwork recovery notice: $e');
     }
   }
 
@@ -1199,7 +1010,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     );
 
     try {
-      final isOnline = await _subsonicClient.ping(config);
+      final isOnline = await _navidromeSyncService.connect(config);
 
       if (isOnline) {
         state = state.copyWith(
@@ -1210,7 +1021,6 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
           clearStatusMessage: isSilent,
         );
 
-        await LocalPersistenceService.instance.saveSetting('navidrome_config', config.toMap());
         await syncNavidromeLibrary(isSilent: isSilent);
         return true;
       } else {
@@ -1236,19 +1046,9 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     if (state.navidromeConnectionStatus == NavidromeConnectionStatus.connected || state.isConnectingNavidrome) {
       return;
     }
-    try {
-      final configMap = LocalPersistenceService.instance.getSetting<Map<String, dynamic>>('navidrome_config');
-      if (configMap != null) {
-        final config = SubsonicServerConfig.fromMap(configMap);
-        if (config.serverUrl.isNotEmpty && config.username.isNotEmpty) {
-          await connectNavidrome(config, isSilent: isSilent);
-        }
-      }
-    } catch (e) {
-      debugPrint('[UnifiedLibraryController] Error restoring Navidrome session: $e');
-      state = state.copyWith(
-        statusMessage: 'Failed to restore Navidrome session: $e',
-      );
+    final config = _navidromeSyncService.getSavedConfig();
+    if (config != null) {
+      await connectNavidrome(config, isSilent: isSilent);
     }
   }
 
@@ -1264,8 +1064,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     );
 
     try {
-      final songs = await _subsonicClient.fetchAllSongs(config);
-      final cloudTracks = songs.map((s) => s.toTrack(config)).toList();
+      final cloudTracks = await _navidromeSyncService.fetchRemoteTracks(config);
 
       final existingLocal = state.tracks.where((t) => t.filePath != null).toList();
       final combined = [...existingLocal, ...cloudTracks];
@@ -1287,7 +1086,7 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
   /// Disconnect Navidrome
   void disconnectNavidrome() {
     final existingLocal = state.tracks.where((t) => t.filePath != null).toList();
-    LocalPersistenceService.instance.removeSetting('navidrome_config');
+    _navidromeSyncService.disconnect();
     state = state.copyWith(
       tracks: existingLocal,
       navidromeConnectionStatus: NavidromeConnectionStatus.disconnected,

@@ -431,7 +431,7 @@ class _BatchTrackTagEditorModalState extends ConsumerState<BatchTrackTagEditorMo
                                       ),
                                     ),
                                     const Icon(
-                                      Icons.arrow_forward_ios_rounded,
+                                      LucideIcons.chevronRight,
                                       size: 14,
                                       color: StudioCategoryColors.warmTubeAmber,
                                     ),

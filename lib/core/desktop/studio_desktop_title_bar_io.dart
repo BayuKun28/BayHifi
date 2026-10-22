@@ -32,8 +32,8 @@ class StudioDesktopTitleBar extends ConsumerWidget implements PreferredSizeWidge
     }
 
     final theme = Theme.of(context);
-    final playback = ref.watch(playerControllerProvider);
-    final currentTrack = playback.currentTrack;
+    final currentTrack =
+        ref.watch(playerControllerProvider.select((s) => s.currentTrack));
 
     return Container(
       height: height,

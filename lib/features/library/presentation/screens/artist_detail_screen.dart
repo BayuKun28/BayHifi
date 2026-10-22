@@ -110,10 +110,12 @@ class _ArtistDetailScreenState extends ConsumerState<ArtistDetailScreen> {
     final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
     final libraryState = ref.watch(unifiedLibraryProvider);
-    final playback = ref.watch(playerControllerProvider);
-    final currentPlayingTrack = playback.currentTrack;
-    final isPlaying = playback.isPlaying;
-    final isLoading = playback.isLoading;
+    final currentPlayingTrack =
+        ref.watch(playerControllerProvider.select((s) => s.currentTrack));
+    final isPlaying =
+        ref.watch(playerControllerProvider.select((s) => s.isPlaying));
+    final isLoading =
+        ref.watch(playerControllerProvider.select((s) => s.isLoading));
 
     final isCurrentArtistActive = currentPlayingTrack != null &&
         widget.artist.tracks.any((t) => t.id == currentPlayingTrack.id);

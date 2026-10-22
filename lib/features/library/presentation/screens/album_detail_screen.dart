@@ -127,10 +127,12 @@ class _AlbumDetailScreenState extends ConsumerState<AlbumDetailScreen> {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
-    final playback = ref.watch(playerControllerProvider);
-    final currentPlayingTrack = playback.currentTrack;
-    final isPlaying = playback.isPlaying;
-    final isLoading = playback.isLoading;
+    final currentPlayingTrack =
+        ref.watch(playerControllerProvider.select((s) => s.currentTrack));
+    final isPlaying =
+        ref.watch(playerControllerProvider.select((s) => s.isPlaying));
+    final isLoading =
+        ref.watch(playerControllerProvider.select((s) => s.isLoading));
     final isCurrentAlbumActive = currentPlayingTrack != null &&
         widget.album.tracks.any((t) => t.id == currentPlayingTrack.id);
     final isCurrentAlbumBuffering = isLoading && isCurrentAlbumActive;

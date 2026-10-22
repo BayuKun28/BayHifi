@@ -27,14 +27,16 @@ class PlaybackSpeedPitchSheet extends ConsumerWidget {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final isSolid = ref.isSolidStyle;
-    final playback = ref.watch(playerControllerProvider);
     final settingsNotifier = ref.read(playbackSettingsProvider.notifier);
     final playerNotifier = ref.read(playerControllerProvider.notifier);
-
-    final speed = playback.playbackSpeed;
-    final pitch = playback.pitchSemitones;
-    final cents = playback.pitchFineCents;
-    final isLinked = playback.linkSpeedAndPitch;
+    final speed =
+        ref.watch(playerControllerProvider.select((s) => s.playbackSpeed));
+    final pitch =
+        ref.watch(playerControllerProvider.select((s) => s.pitchSemitones));
+    final cents =
+        ref.watch(playerControllerProvider.select((s) => s.pitchFineCents));
+    final isLinked =
+        ref.watch(playerControllerProvider.select((s) => s.linkSpeedAndPitch));
 
     return Container(
       decoration: BoxDecoration(
