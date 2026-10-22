@@ -2501,3 +2501,27 @@ Audit menyeluruh terhadap ~104.000 baris kode Dart, perbaikan kebocoran render R
     - [x] `flutter test test/artwork_lightbox_and_gesture_test.dart`: 7/7 tests passed.
     - [x] `flutter test test/storage_backup_and_indexer_test.dart`: 15/15 tests passed.
     - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints!**
+
+- [x] **Phase 94 — Online Tracks & Playlist Cleanup Engine (YouTube & Spotify Orphan Resolution) (Completed)**:
+  - [x] **94.1 Unified Track Remote Source Identification (`Track.isRemote`)**:
+    - [x] Added `bool get isRemote` in `lib/features/player/domain/track.dart` to reliably detect online/streaming tracks (YouTube `yt_`, Spotify `spotify_`, Subsonic `subsonic_`, or remote HTTP streams) while strictly distinguishing them from local files.
+  - [x] **94.2 Smart Playlist Deletion with Online Track Purging (`UnifiedLibraryController.deletePlaylist`)**:
+    - [x] Enhanced `deletePlaylist(playlistId, {bool removeOnlineTracks = false})` with smart preservation logic: removes exclusive online tracks from library and audio cache while strictly preserving tracks favorited by the user or present in any other custom playlist. Local user files are 100% safeguarded.
+  - [x] **94.3 Per-Track and Batch Library Removal (`removeTrackFromLibrary` & `removeTracksBatch`)**:
+    - [x] Implemented `removeTrackFromLibrary(trackId)` for single track deletion, removing track from `tracks`, custom playlists, and favorites, plus purging disk audio cache via `AudioCacheService.instance.deleteCachedTrack`.
+    - [x] Implemented `removeTracksBatch(trackIds)` for high-performance multi-track deletion across library, custom playlists, favorites, and cache.
+    - [x] Implemented `removeTrackFromPlaylist(playlistId, trackId)` to allow removing tracks from a specific playlist without deleting them from the library.
+  - [x] **94.4 Playlist Action Sheet Enhanced Confirmation Dialog (`StudioPlaylistActionSheet`)**:
+    - [x] Integrated a Studio-styled checkbox (`Also remove N online tracks from library`) with explanation (`Tracks saved in other playlists or favorites will be safely kept.`) in `_confirmDelete` whenever a deleted playlist contains online tracks.
+  - [x] **94.5 Track Action Sheet & Playlist Context Menus (`StudioTrackActionSheet` & `TrackTile`)**:
+    - [x] Added `playlistId` context passing from `PlaylistDetailScreen` through `TrackTile` to `StudioTrackActionSheet`.
+    - [x] Added contextual "Remove from Playlist" (`LucideIcons.listMinus`, `#FF453A`) and "Remove from Library" (`LucideIcons.trash2`, `#FF453A`) with confirmation modal for online tracks.
+  - [x] **94.6 Multi-Selection Batch Actions Bar Integration (`LibraryBatchActionsBar` & `UnifiedLibraryScreen`)**:
+    - [x] Added `onDeleteSelected` with `LucideIcons.trash2` (`#FF453A`) in `LibraryBatchActionsBar`.
+    - [x] Wired batch deletion confirmation modal in `UnifiedLibraryScreen` with safe remote vs local track counts.
+  - [x] **94.7 Deterministic Unit & Widget Test Suite (`test/online_tracks_and_playlist_cleanup_test.dart`)**:
+    - [x] Created 9 comprehensive automated unit and widget tests covering `Track.isRemote`, `deletePlaylist` (with/without online track cleanup), favorites preservation, single/batch removal, and UI action sheet rendering.
+    - [x] `flutter test test/online_tracks_and_playlist_cleanup_test.dart`: 9/9 tests passed (100%).
+    - [x] `flutter test test/unified_library_test.dart`: 19/19 tests passed (100%).
+    - [x] `flutter analyze`: **0 errors, 0 warnings, 0 hints!**
+

@@ -73,6 +73,14 @@ class Track {
 
   String? get streamUrl => remoteUrl;
 
+  /// Whether the track is a remote or streaming source (e.g. YouTube, Spotify, Subsonic/Navidrome, HTTP stream)
+  bool get isRemote =>
+      (filePath == null || filePath!.isEmpty || filePath!.startsWith('http://') || filePath!.startsWith('https://')) &&
+      ((remoteUrl != null && remoteUrl!.isNotEmpty) ||
+          id.startsWith('yt_') ||
+          id.startsWith('spotify_') ||
+          id.startsWith('subsonic_'));
+
   bool get isHiRes =>
       (bitDepth != null && bitDepth! >= 24) ||
       (sampleRate != null && sampleRate! >= 88200) ||

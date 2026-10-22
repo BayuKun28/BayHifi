@@ -635,6 +635,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                       return TrackTile(
                         track: track,
                         isPlaying: isTrackPlaying,
+                        playlistId: currentPlaylist?.id,
                         onTap: () {
                           ref.read(playerControllerProvider.notifier).setQueue(tracks, initialIndex: index);
                         },

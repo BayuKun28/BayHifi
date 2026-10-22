@@ -16,6 +16,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
   final VoidCallback onSelectAll;
   final VoidCallback onDeselectAll;
   final VoidCallback onClose;
+  final VoidCallback? onDeleteSelected;
 
   const LibraryBatchActionsBar({
     super.key,
@@ -28,6 +29,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
     required this.onSelectAll,
     required this.onDeselectAll,
     required this.onClose,
+    this.onDeleteSelected,
   });
 
   @override
@@ -151,6 +153,19 @@ class LibraryBatchActionsBar extends ConsumerWidget {
                 primary: primary,
                 isActive: isAllSelected,
               ),
+              if (onDeleteSelected != null) ...[
+                const SizedBox(width: 3),
+                _buildActionButton(
+                  context: context,
+                  isSolid: isSolid,
+                  icon: LucideIcons.trash2,
+                  tooltip: 'Remove Selected',
+                  onTap: onDeleteSelected!,
+                  theme: theme,
+                  primary: primary,
+                  iconColor: const Color(0xFFFF453A),
+                ),
+              ],
             ],
           ),
         ],
@@ -167,6 +182,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
     required ThemeData theme,
     required Color primary,
     bool isActive = false,
+    Color? iconColor,
   }) {
     return M3EIconButton(
       variant: M3EIconButtonVariant.standard,
@@ -177,7 +193,7 @@ class LibraryBatchActionsBar extends ConsumerWidget {
       icon: Icon(
         icon,
         size: 20,
-        color: isActive ? primary : theme.colorScheme.onSurface,
+        color: iconColor ?? (isActive ? primary : theme.colorScheme.onSurface),
       ),
       tooltip: tooltip,
     );

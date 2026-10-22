@@ -74,6 +74,59 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
     LibrarySortFilterSheets.showAddToPlaylistSheet(context, ref, tracks);
   }
 
+  void _confirmBatchRemoveTracks(BuildContext context, WidgetRef ref, List<Track> selected) {
+    final remoteCount = selected.where((t) => t.isRemote).length;
+    final totalCount = selected.length;
+    final isSolid = ref.isSolidStyle;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid),
+              width: 1.0,
+            ),
+          ),
+          title: const Text(
+            'REMOVE TRACKS?',
+            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, letterSpacing: 0.6),
+          ),
+          content: Text(
+            remoteCount == totalCount
+                ? 'Remove $totalCount online track${totalCount == 1 ? '' : 's'} from your library and delete cached audio?'
+                : 'Remove $totalCount track${totalCount == 1 ? '' : 's'} from library list? ($remoteCount online, ${totalCount - remoteCount} local)\n\nLocal audio files will not be deleted from disk.',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: Theme.of(dialogCtx).colorScheme.onSurface.withValues(alpha: 0.8),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFFF453A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                ref.read(unifiedLibraryProvider.notifier).removeTracksBatch(selected.map((t) => t.id));
+                ref.read(librarySelectionProvider.notifier).clear();
+                Navigator.of(dialogCtx).pop();
+              },
+              child: const Text('Remove', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // ─── DEDICATED SCREEN NAVIGATION (SPOTIFY & NAMIDA GRADE) ─────────────────
   void _openAlbumDetail(BuildContext context, AlbumModel album) {
     AppHaptics.selectionClick();
@@ -652,6 +705,12 @@ class _UnifiedLibraryScreenState extends ConsumerState<UnifiedLibraryScreen> {
                 onSelectAll: () => ref.read(librarySelectionProvider.notifier).selectAll(libraryState.filteredTracks),
                 onDeselectAll: () => ref.read(librarySelectionProvider.notifier).deselectAll(),
                 onClose: () => ref.read(librarySelectionProvider.notifier).clear(),
+                onDeleteSelected: () {
+                  final selected = libraryState.tracks.where((t) => selectionState.isSelected(t.id)).toList();
+                  if (selected.isNotEmpty) {
+                    _confirmBatchRemoveTracks(context, ref, selected);
+                  }
+                },
               ),
             )
           : null,

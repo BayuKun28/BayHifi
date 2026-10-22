@@ -13,6 +13,7 @@ import '../../data/local_audio_scanner.dart';
 import '../../data/metadata_tagger_service.dart';
 import '../../data/online_metadata_service.dart';
 import '../../../cloud_sync/data/cloud_sync_service.dart';
+import '../../../../audio_engine/audio_cache_service.dart';
 import '../../domain/library_collection_models.dart';
 import '../../domain/smart_playlist_models.dart';
 import '../../domain/smart_playlist_evaluator.dart';
@@ -1226,13 +1227,155 @@ class UnifiedLibraryController extends StateNotifier<UnifiedLibraryState> {
     );
   }
 
-  /// Delete a custom playlist
-  void deletePlaylist(String playlistId) {
-    final updated = state.customPlaylists.where((p) => p.id != playlistId).toList();
+  /// Delete a custom playlist with optional removal of exclusive online tracks
+  void deletePlaylist(String playlistId, {bool removeOnlineTracks = false}) {
+    final playlistIndex = state.customPlaylists.indexWhere((p) => p.id == playlistId);
+    if (playlistIndex < 0) return;
+    final targetPlaylist = state.customPlaylists[playlistIndex];
+
+    final updatedPlaylists = state.customPlaylists.where((p) => p.id != playlistId).toList();
+    _persistCustomPlaylists(updatedPlaylists);
+
+    List<Track> updatedTracks = state.tracks;
+    int removedCount = 0;
+
+    if (removeOnlineTracks && targetPlaylist.tracks.isNotEmpty) {
+      // Find candidate online tracks from the deleted playlist
+      final candidateOnlineTrackIds = targetPlaylist.tracks
+          .where((t) => t.isRemote)
+          .map((t) => t.id)
+          .toSet();
+
+      // Find tracks that MUST be preserved:
+      // 1. In user's favorites
+      // 2. In any other custom playlists
+      final preservedTrackIds = <String>{
+        ...state.favoriteTrackIds,
+        for (final p in updatedPlaylists) ...p.tracks.map((t) => t.id),
+      };
+
+      final trackIdsToRemove = candidateOnlineTrackIds.difference(preservedTrackIds);
+
+      if (trackIdsToRemove.isNotEmpty) {
+        // Purge audio cache for removed tracks in background
+        for (final id in trackIdsToRemove) {
+          AudioCacheService.instance.deleteCachedTrack(id).ignore();
+        }
+
+        updatedTracks = state.tracks
+            .where((t) => !trackIdsToRemove.contains(t.id))
+            .toList();
+        _persistTracks(updatedTracks);
+        removedCount = trackIdsToRemove.length;
+      }
+    }
+
+    state = state.copyWith(
+      customPlaylists: updatedPlaylists,
+      tracks: updatedTracks,
+      statusMessage: removedCount > 0
+          ? 'Playlist deleted and $removedCount online track${removedCount == 1 ? '' : 's'} removed from library.'
+          : 'Playlist deleted.',
+    );
+  }
+
+  /// Removes a track from library, custom playlists, and purges cached audio if remote
+  void removeTrackFromLibrary(String trackId) {
+    final trackIndex = state.tracks.indexWhere((t) => t.id == trackId);
+    if (trackIndex < 0) return;
+    final track = state.tracks[trackIndex];
+
+    final updatedTracks = state.tracks.where((t) => t.id != trackId).toList();
+    _persistTracks(updatedTracks);
+
+    // Also remove from any custom playlists
+    final updatedPlaylists = state.customPlaylists.map((p) {
+      if (p.tracks.any((t) => t.id == trackId)) {
+        return p.copyWith(tracks: p.tracks.where((t) => t.id != trackId).toList());
+      }
+      return p;
+    }).toList();
+    _persistCustomPlaylists(updatedPlaylists);
+
+    // Also remove from favorites if present
+    Set<String> updatedFavorites = state.favoriteTrackIds;
+    if (state.favoriteTrackIds.contains(trackId)) {
+      updatedFavorites = Set<String>.from(state.favoriteTrackIds)..remove(trackId);
+      LocalPersistenceService.instance.saveFavoriteTrackIds(updatedFavorites);
+    }
+
+    // Purge cached audio if remote
+    if (track.isRemote) {
+      AudioCacheService.instance.deleteCachedTrack(trackId).ignore();
+    }
+
+    state = state.copyWith(
+      tracks: updatedTracks,
+      customPlaylists: updatedPlaylists,
+      favoriteTrackIds: updatedFavorites,
+      statusMessage: 'Removed "${track.title}" from library.',
+    );
+  }
+
+  /// Batch remove multiple tracks from library, custom playlists, and cache
+  void removeTracksBatch(Iterable<String> trackIds) {
+    final idSet = trackIds.toSet();
+    if (idSet.isEmpty) return;
+
+    final tracksToRemove = state.tracks.where((t) => idSet.contains(t.id)).toList();
+    if (tracksToRemove.isEmpty) return;
+
+    final updatedTracks = state.tracks.where((t) => !idSet.contains(t.id)).toList();
+    _persistTracks(updatedTracks);
+
+    final updatedPlaylists = state.customPlaylists.map((p) {
+      if (p.tracks.any((t) => idSet.contains(t.id))) {
+        return p.copyWith(tracks: p.tracks.where((t) => !idSet.contains(t.id)).toList());
+      }
+      return p;
+    }).toList();
+    _persistCustomPlaylists(updatedPlaylists);
+
+    Set<String> updatedFavorites = state.favoriteTrackIds;
+    final favsToRemove = state.favoriteTrackIds.intersection(idSet);
+    if (favsToRemove.isNotEmpty) {
+      updatedFavorites = Set<String>.from(state.favoriteTrackIds)..removeAll(favsToRemove);
+      LocalPersistenceService.instance.saveFavoriteTrackIds(updatedFavorites);
+    }
+
+    for (final track in tracksToRemove) {
+      if (track.isRemote) {
+        AudioCacheService.instance.deleteCachedTrack(track.id).ignore();
+      }
+    }
+
+    final count = tracksToRemove.length;
+    state = state.copyWith(
+      tracks: updatedTracks,
+      customPlaylists: updatedPlaylists,
+      favoriteTrackIds: updatedFavorites,
+      statusMessage: 'Removed $count track${count == 1 ? '' : 's'} from library.',
+    );
+  }
+
+  /// Removes a track from a specific custom playlist without removing it from library
+  void removeTrackFromPlaylist(String playlistId, String trackId) {
+    String? trackTitle;
+    final updated = state.customPlaylists.map((p) {
+      if (p.id == playlistId) {
+        final found = p.tracks.where((t) => t.id == trackId).firstOrNull;
+        if (found != null) trackTitle = found.title;
+        return p.copyWith(tracks: p.tracks.where((t) => t.id != trackId).toList());
+      }
+      return p;
+    }).toList();
+
     _persistCustomPlaylists(updated);
     state = state.copyWith(
       customPlaylists: updated,
-      statusMessage: 'Playlist deleted.',
+      statusMessage: trackTitle != null
+          ? 'Removed "$trackTitle" from playlist.'
+          : 'Track removed from playlist.',
     );
   }
 

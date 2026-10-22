@@ -24,6 +24,7 @@ class TrackTile extends ConsumerWidget {
   final bool isMultiSelecting;
   final bool isSelected;
   final VoidCallback? onLongPress;
+  final String? playlistId;
 
   const TrackTile({
     super.key,
@@ -36,6 +37,7 @@ class TrackTile extends ConsumerWidget {
     this.isMultiSelecting = false,
     this.isSelected = false,
     this.onLongPress,
+    this.playlistId,
   });
 
   String _formatDuration(Duration d) {
@@ -335,7 +337,7 @@ class TrackTile extends ConsumerWidget {
                         size: 19,
                       ),
                       tooltip: 'Track Options',
-                      onPressed: () => StudioTrackActionSheet.show(context, track),
+                      onPressed: () => StudioTrackActionSheet.show(context, track, playlistId: playlistId),
                     ),
                   ],
                 ),

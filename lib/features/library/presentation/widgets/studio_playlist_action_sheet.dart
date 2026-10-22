@@ -92,6 +92,12 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
   }
 
   void _confirmDelete(BuildContext context) {
+    final hasRemoteTracks = playlist != null && playlist!.tracks.any((t) => t.isRemote);
+    final remoteTracksCount = hasRemoteTracks
+        ? playlist!.tracks.where((t) => t.isRemote).length
+        : 0;
+    bool deleteOnlineTracks = true;
+
     showDialog(
       context: context,
       builder: (dialogCtx) => Consumer(
@@ -112,12 +118,86 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
               smartPlaylist != null ? 'DELETE SMART PLAYLIST?' : 'DELETE PLAYLIST?',
               style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, letterSpacing: 0.6),
             ),
-            content: Text(
-              'Are you sure you want to delete "$_name"?',
-              style: TextStyle(
-                fontSize: 12.5,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-              ),
+            content: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Are you sure you want to delete "$_name"?',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    if (hasRemoteTracks) ...[
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () => setState(() => deleteOnlineTracks = !deleteOnlineTracks),
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E212B),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: deleteOnlineTracks
+                                  ? const Color(0xFFFF453A).withValues(alpha: 0.4)
+                                  : StudioSurfaceTheme.outline(ctx, isSolid: isSolid),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: Checkbox(
+                                    value: deleteOnlineTracks,
+                                    activeColor: const Color(0xFFFF453A),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                    onChanged: (val) {
+                                      setState(() => deleteOnlineTracks = val ?? false);
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Also remove $remoteTracksCount online track${remoteTracksCount == 1 ? '' : 's'}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Tracks saved in other playlists or favorites will be safely kept.',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
             actions: [
               TextButton(
@@ -133,7 +213,10 @@ class StudioPlaylistActionSheet extends ConsumerWidget {
                   if (smartPlaylist != null) {
                     ref.read(unifiedLibraryProvider.notifier).deleteSmartPlaylist(smartPlaylist!.id);
                   } else if (playlist != null) {
-                    ref.read(unifiedLibraryProvider.notifier).deletePlaylist(playlist!.id);
+                    ref.read(unifiedLibraryProvider.notifier).deletePlaylist(
+                          playlist!.id,
+                          removeOnlineTracks: hasRemoteTracks && deleteOnlineTracks,
+                        );
                   }
                   Navigator.of(ctx).pop();
                   onDeleted?.call();

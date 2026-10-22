@@ -22,14 +22,16 @@ import '../../../download_manager/presentation/controllers/download_controller.d
 /// Unified Material 3 Expressive Studio Track Action Bottom Sheet (Spotify & Namida Grade)
 class StudioTrackActionSheet extends ConsumerWidget {
   final Track track;
+  final String? playlistId;
 
   const StudioTrackActionSheet({
     super.key,
     required this.track,
+    this.playlistId,
   });
 
   /// Opens the unified track action bottom sheet
-  static Future<void> show(BuildContext context, Track track) {
+  static Future<void> show(BuildContext context, Track track, {String? playlistId}) {
     AppHaptics.lightImpact();
     return showModalBottomSheet(
       context: context,
@@ -38,7 +40,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => StudioTrackActionSheet(track: track),
+      builder: (_) => StudioTrackActionSheet(track: track, playlistId: playlistId),
     );
   }
 
@@ -142,6 +144,54 @@ class StudioTrackActionSheet extends ConsumerWidget {
     );
   }
 
+  void _confirmRemoveFromLibrary(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        final theme = Theme.of(dialogCtx);
+        final isSolid = ref.isSolidStyle;
+        return AlertDialog(
+          backgroundColor: StudioSurfaceTheme.surface(dialogCtx, isSolid: isSolid),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: StudioSurfaceTheme.outline(dialogCtx, isSolid: isSolid),
+              width: 1.0,
+            ),
+          ),
+          title: const Text(
+            'REMOVE TRACK?',
+            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, letterSpacing: 0.6),
+          ),
+          content: Text(
+            'Remove "${track.title}" by ${track.artist} from your library and delete its cached audio?',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFFF453A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                ref.read(unifiedLibraryProvider.notifier).removeTrackFromLibrary(track.id);
+                Navigator.of(dialogCtx).pop();
+              },
+              child: const Text('Remove', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -149,9 +199,7 @@ class StudioTrackActionSheet extends ConsumerWidget {
     final isSolid = ref.isSolidStyle;
     final libraryState = ref.watch(unifiedLibraryProvider);
     final isFav = libraryState.favoriteTrackIds.contains(track.id);
-    final isRemote = (track.filePath?.startsWith('http') ?? false) ||
-        track.id.startsWith('subsonic_') ||
-        (track.streamUrl?.isNotEmpty ?? false);
+    final isRemote = track.isRemote;
     final isCached = isRemote && AudioCacheService.instance.isCached(track.id);
 
     final dspController = ref.watch(dspRackControllerProvider.notifier);
@@ -527,6 +575,58 @@ class StudioTrackActionSheet extends ConsumerWidget {
                   AudioFileInspectorSheet.show(context, track);
                 },
               ),
+
+              if (playlistId != null || isRemote) ...[
+                const Divider(height: 12),
+                if (playlistId != null)
+                  ListTile(
+                    leading: const Icon(
+                      LucideIcons.listMinus,
+                      size: 20,
+                      color: Color(0xFFFF453A),
+                    ),
+                    title: const Text(
+                      'Remove from Playlist',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFFF453A),
+                      ),
+                    ),
+                    onTap: () {
+                      AppHaptics.selectionClick();
+                      ref.read(unifiedLibraryProvider.notifier).removeTrackFromPlaylist(playlistId!, track.id);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                if (isRemote)
+                  ListTile(
+                    leading: const Icon(
+                      LucideIcons.trash2,
+                      size: 20,
+                      color: Color(0xFFFF453A),
+                    ),
+                    title: const Text(
+                      'Remove from Library',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFFF453A),
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Delete online track and purge cached audio',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _confirmRemoveFromLibrary(context, ref);
+                    },
+                  ),
+              ],
             ],
           ),
         ),
