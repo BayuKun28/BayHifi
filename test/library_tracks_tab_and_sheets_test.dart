@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:baydev_hifi/features/library/domain/library_collection_models.dart';
 import 'package:baydev_hifi/features/library/presentation/controllers/library_controller.dart';
 import 'package:baydev_hifi/features/library/presentation/tabs/library_tracks_tab.dart';
@@ -35,8 +34,6 @@ void main() {
     final scrollController = ScrollController();
     addTearDown(() => scrollController.dispose());
 
-    Track? playlistTrack;
-
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -52,7 +49,7 @@ void main() {
             body: LibraryTracksTab(
               scrollController: scrollController,
               bottomPadding: 0,
-              onAddToPlaylist: (t) => playlistTrack = t,
+              onAddToPlaylist: (_) {},
             ),
           ),
         ),

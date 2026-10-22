@@ -49,7 +49,7 @@ void main() {
   });
 
   group('Option 4: Now Playing & Inspector SoLoud Branding Tests', () {
-    testWidgets('NowPlayingScreen displays SOLOUD in portrait top bar next to album name', (tester) async {
+    testWidgets('NowPlayingScreen displays BAYHIFI and SOLOUD ENGINE badge below artwork in portrait mode', (tester) async {
       tester.view.physicalSize = const Size(400, 850);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -79,11 +79,21 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Top bar header contains • SOLOUD
-      expect(find.text('• SOLOUD'), findsOneWidget);
+      // Top bar header is clean without • SOLOUD clutter
+      expect(find.text('• SOLOUD'), findsNothing);
+
+      // Studio Brand Badge below artwork contains BayHIFI and POWERED BY SOLOUD ENGINE
+      expect(find.text('BayHIFI'), findsOneWidget);
+      expect(find.text('POWERED BY SOLOUD ENGINE'), findsOneWidget);
+
+      // Tapping badge triggers AudioFileInspectorSheet
+      await tester.tap(find.text('BayHIFI'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(AudioFileInspectorSheet), findsOneWidget);
     });
 
-    testWidgets('NowPlayingScreen displays POWERED BY SOLOUD ENGINE in landscape deck', (tester) async {
+    testWidgets('NowPlayingScreen displays BAYHIFI and POWERED BY SOLOUD ENGINE below artwork in landscape mode', (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -113,7 +123,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Desktop specs deck contains POWERED BY SOLOUD ENGINE
+      // Landscape artwork pane contains BayHIFI and POWERED BY SOLOUD ENGINE
+      expect(find.text('BayHIFI'), findsOneWidget);
       expect(find.text('POWERED BY SOLOUD ENGINE'), findsOneWidget);
     });
 

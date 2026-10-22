@@ -374,34 +374,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         else
           const SizedBox(width: 48),
 
-        // Center: Bespoke Tracking Header (Album Name & SoLoud Engine Badge)
+        // Center: Bespoke Tracking Header (Album Name)
         Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: MetaTrackingLabel(
-                  (track != null && track.album.isNotEmpty)
-                      ? track.album.toUpperCase()
-                      : 'NOW PLAYING',
-                  fontSize: 11,
-                  letterSpacing: 1.4,
-                  textAlign: TextAlign.center,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '• SOLOUD',
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  color: primary.withValues(alpha: 0.85),
-                  letterSpacing: 0.4,
-                ),
-              ),
-            ],
+          child: MetaTrackingLabel(
+            (track != null && track.album.isNotEmpty)
+                ? track.album.toUpperCase()
+                : 'NOW PLAYING',
+            fontSize: 11,
+            letterSpacing: 1.4,
+            textAlign: TextAlign.center,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
 
@@ -531,34 +513,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         else
           const SizedBox(width: 48),
 
-        // Center: Bespoke Tracking Header (Album Name & SoLoud Engine Badge)
+        // Center: Bespoke Tracking Header (Album Name)
         Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: MetaTrackingLabel(
-                  (track != null && track.album.isNotEmpty)
-                      ? track.album.toUpperCase()
-                      : 'NOW PLAYING',
-                  fontSize: 11,
-                  letterSpacing: 1.4,
-                  textAlign: TextAlign.center,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '• SOLOUD',
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  color: primary.withValues(alpha: 0.85),
-                  letterSpacing: 0.4,
-                ),
-              ),
-            ],
+          child: MetaTrackingLabel(
+            (track != null && track.album.isNotEmpty)
+                ? track.album.toUpperCase()
+                : 'NOW PLAYING',
+            fontSize: 11,
+            letterSpacing: 1.4,
+            textAlign: TextAlign.center,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
 
@@ -708,7 +672,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
 
           const SizedBox(height: 12),
 
-          // 2. Main Center: Lyrics View (if toggled) OR Hero Squircle Album Art
+          // 2. Main Center: Lyrics View (if toggled) OR Hero Squircle Album Art with Studio Engine Badge
           Expanded(
             child: _showLyrics
                 ? SynchronizedLyricsView(
@@ -718,16 +682,31 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     onRefresh: track != null ? () => _fetchLyrics(track, forceOnline: true) : null,
                     trackId: track?.id,
                   )
-                : Center(
-                    child: ParallaxArtworkCard(
-                      track: track,
-                      isPlaying: playback.isPlaying,
-                      primaryColor: primary,
-                      size: albumArtSize,
-                      onSingleTap: () => _handleArtworkGesture(displaySettings.singleTapAction, track),
-                      onDoubleTap: () => _handleArtworkGesture(displaySettings.doubleTapAction, track),
-                      onLongPress: () => _handleArtworkGesture(displaySettings.longPressAction, track),
-                    ),
+                : LayoutBuilder(
+                    builder: (context, box) {
+                      final badgeHeight = 25.0;
+                      final spacing = 10.0;
+                      final maxArtAllowed = box.maxHeight - badgeHeight - spacing;
+                      final effectiveArtSize = math.min(albumArtSize, math.max(120.0, maxArtAllowed));
+
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ParallaxArtworkCard(
+                            track: track,
+                            isPlaying: playback.isPlaying,
+                            primaryColor: primary,
+                            size: effectiveArtSize,
+                            onSingleTap: () => _handleArtworkGesture(displaySettings.singleTapAction, track),
+                            onDoubleTap: () => _handleArtworkGesture(displaySettings.doubleTapAction, track),
+                            onLongPress: () => _handleArtworkGesture(displaySettings.longPressAction, track),
+                          ),
+                          const SizedBox(height: 10),
+                          _buildStudioEngineBadge(context, track, primary, theme),
+                        ],
+                      );
+                    },
                   ),
           ),
 
@@ -874,6 +853,110 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
           // 6. Minimalist Studio Auxiliary Bottom Row
           _buildSimpleStudioAuxiliaryBar(context, track, eqState),
         ],
+      ),
+    );
+  }
+
+  // ─── STUDIO ENGINE BRAND BADGE ───────────────────────────────────────────
+  Widget _buildStudioEngineBadge(
+    BuildContext context,
+    Track? track,
+    Color primary,
+    ThemeData theme,
+  ) {
+    final isDark = theme.brightness == Brightness.dark;
+    final containerBg = isDark ? const Color(0xFF16181F) : theme.colorScheme.surfaceContainerHigh;
+    final outlineColor = isDark ? const Color(0xFF2E3242) : theme.colorScheme.outlineVariant.withValues(alpha: 0.5);
+
+    return Tooltip(
+      message: 'BayHiFi Audio Engine • Powered by SoLoud C++ • Tap for Audio File Inspector',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: track != null
+              ? () {
+                  AppHaptics.lightImpact();
+                  AudioFileInspectorSheet.show(context, track);
+                }
+              : null,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            height: 25,
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
+            decoration: BoxDecoration(
+              color: containerBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: outlineColor,
+                width: 0.8,
+              ),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // App Logo with resilient fallback
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(3.5),
+                    ),
+                    padding: const EdgeInsets.all(1.5),
+                    child: Image.asset(
+                      'assets/images/baydev_logo.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => Icon(
+                        LucideIcons.audioWaveform,
+                        size: 9,
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+
+                  // App Brand Name
+                  Text(
+                    'BayHIFI',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.1,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+
+                  // Subtle Studio Separator
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Text(
+                      '│',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w300,
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ),
+
+                  // SoLoud Engine Pedigree
+                  Text(
+                    'POWERED BY SOLOUD ENGINE',
+                    style: TextStyle(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1298,12 +1381,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       }
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
       children: [
-        // ─── ROW 1: Audio Specs & Action Pills ─────────────────────────────
-        Row(
-          children: [
             // 1. Audio Specs Chip (Clickable for Inspector)
             if (track != null)
               InkWell(
@@ -1449,37 +1528,6 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
               ),
             ),
           ],
-        ),
-
-        const SizedBox(height: 5),
-
-        // ─── ROW 2: Subtle SoLoud Engine Branding ──────────────────────────
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: Image.asset(
-                'assets/images/baydev_logo.png',
-                width: 9,
-                height: 9,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'POWERED BY SOLOUD ENGINE',
-              style: TextStyle(
-                fontSize: 8.5,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
-                color: primary.withValues(alpha: 0.75),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -1522,9 +1570,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final maxArtwork = math.min(constraints.maxHeight - 56.0, constraints.maxWidth - 32.0);
-                      final minArtwork = math.min(120.0, maxArtwork);
-                      final artworkSize = (maxArtwork > minArtwork ? maxArtwork : minArtwork).clamp(minArtwork, 275.0);
+                      final maxArtwork = math.min(constraints.maxHeight - 88.0, constraints.maxWidth - 32.0);
+                      final minArtwork = math.min(100.0, maxArtwork);
+                      final artworkSize = (maxArtwork > minArtwork ? maxArtwork : minArtwork).clamp(minArtwork, 260.0);
 
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -1538,7 +1586,9 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                             onDoubleTap: () => _handleArtworkGesture(displaySettings.doubleTapAction, track),
                             onLongPress: () => _handleArtworkGesture(displaySettings.longPressAction, track),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 8),
+                          _buildStudioEngineBadge(context, track, primary, theme),
+                          const SizedBox(height: 8),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             child: Text(

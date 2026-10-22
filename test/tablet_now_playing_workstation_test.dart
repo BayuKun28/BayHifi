@@ -77,12 +77,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // 1. Verify Top Bar in Tablet Landscape Mode
-    // Top bar has clean minimalist layout: Collapse, Album + SOLOUD, Sleep timer, Heart, More
+    // Top bar has clean minimalist layout: Collapse, Album, Sleep timer, Heart, More
     expect(find.byIcon(LucideIcons.chevronDown), findsOneWidget);
     expect(find.text('THE WALL'), findsOneWidget);
-    expect(find.text('• SOLOUD'), findsOneWidget);
     expect(find.byIcon(LucideIcons.heart), findsOneWidget);
     expect(find.byIcon(LucideIcons.moreVertical), findsOneWidget);
+
+    // Verify Studio Brand Badge below artwork
+    expect(find.text('BayHIFI'), findsOneWidget);
+    expect(find.text('POWERED BY SOLOUD ENGINE'), findsOneWidget);
 
     // Verify removed redundant icons are NOT present in the top bar
     expect(find.byIcon(LucideIcons.folderOpen), findsNothing);
